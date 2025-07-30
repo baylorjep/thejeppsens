@@ -29,6 +29,8 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   font-family: 'Inter', sans-serif;
+  /* Optimize for smooth animations */
+  will-change: auto;
 }
 
 body {
@@ -64,26 +66,31 @@ h1, h2, h3, h4, h5, h6 {
   background: rgb(var(--primary-gray));
 }
 
-/* Smooth transitions */
+/* Smooth transitions - optimized for performance */
 * {
-  transition: all 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
-/* Custom animations */
+/* Custom animations - optimized for performance */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.1); }
-  50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
+  0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); }
+  50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.15); }
 }
 
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Optimize page transitions */
+.page-transition {
+  will-change: opacity, transform;
 }

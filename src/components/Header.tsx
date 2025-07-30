@@ -24,8 +24,9 @@ export default function Header() {
 
   return (
     <motion.header 
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className="relative z-20 bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,8 +35,9 @@ export default function Header() {
           <Link href="/">
             <motion.div 
               className="flex items-center space-x-2 cursor-pointer"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
             >
               <div className="relative">
                 <Heart className="h-8 w-8 text-gray-800" />
@@ -60,7 +62,8 @@ export default function Header() {
                       ? 'text-gray-900 border-b-2 border-gray-900' 
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
-                  whileHover={{ y: -2 }}
+                  whileHover={{ y: -1 }}
+                  transition={{ duration: 0.2 }}
                 >
                   {item.label}
                 </motion.span>
@@ -92,6 +95,7 @@ export default function Header() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
               className="md:hidden border-t border-gray-200"
             >
               <nav className="py-4 space-y-2">
@@ -104,7 +108,8 @@ export default function Header() {
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      whileHover={{ x: 4 }}
+                      whileHover={{ x: 2 }}
+                      transition={{ duration: 0.2 }}
                     >
                       {item.label}
                     </motion.div>

@@ -13,11 +13,18 @@ interface Team {
   wins: number;
 }
 
+interface Matchup {
+  id: number;
+  team1: Team;
+  team2: Team;
+  winner: Team | null;
+  completed: boolean;
+}
+
 interface BracketRound {
   round: number;
   name: string;
-  teams: Team[];
-  matchups: number[][]; // Array of [team1Id, team2Id] pairs
+  matchups: Matchup[];
 }
 
 export default function BracketBuilder() {
@@ -25,10 +32,8 @@ export default function BracketBuilder() {
   const [newTeam, setNewTeam] = useState('');
   const [bracketSize, setBracketSize] = useState<4 | 8 | 16>(8);
   const [bracketRounds, setBracketRounds] = useState<BracketRound[]>([]);
-  const [currentRound, setCurrentRound] = useState(0);
   const [winner, setWinner] = useState<Team | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [selectedMatchup, setSelectedMatchup] = useState<number | null>(null);
 
   const addTeam = () => {
     if (newTeam.trim() && teams.length < bracketSize) {
@@ -55,24 +60,27 @@ export default function BracketBuilder() {
     const sortedTeams = [...teams].sort((a, b) => a.seed - b.seed);
     
     // Create matchups for first round (1v8, 2v7, 3v6, 4v5 for 8-team bracket)
-    const matchups: number[][] = [];
+    const matchups: Matchup[] = [];
     for (let i = 0; i < sortedTeams.length / 2; i++) {
-      matchups.push([sortedTeams[i].id, sortedTeams[sortedTeams.length - 1 - i].id]);
+      matchups.push({
+        id: i,
+        team1: sortedTeams[i],
+        team2: sortedTeams[sortedTeams.length - 1 - i],
+        winner: null,
+        completed: false
+      });
     }
     
     // Create first round
     const firstRound: BracketRound = {
       round: 1,
       name: getRoundName(1, bracketSize),
-      teams: sortedTeams,
       matchups
     };
 
     setBracketRounds([firstRound]);
-    setCurrentRound(1);
     setWinner(null);
     setShowConfetti(false);
-    setSelectedMatchup(null);
   };
 
   const getRoundName = (round: number, size: number): string => {
@@ -85,107 +93,92 @@ export default function BracketBuilder() {
     }
   };
 
-  const selectWinner = (teamId: number) => {
-    if (currentRound === 0) return;
-
-    const currentRoundData = bracketRounds[currentRound - 1];
-    
-    // Find the matchup this team is in
-    const matchup = currentRoundData.matchups.find(m => m.includes(teamId));
-    if (!matchup) return;
-    
-    // Get the other team in the matchup
-    const otherTeamId = matchup.find(id => id !== teamId);
-    if (!otherTeamId) return;
-    
-    const updatedTeams = currentRoundData.teams.map(team => {
-      if (team.id === teamId) {
-        return { ...team, wins: team.wins + 1 };
-      } else if (team.id === otherTeamId) {
-        return { ...team, eliminated: true };
-      }
-      return team;
-    });
-
+  const selectWinner = (roundIndex: number, matchupIndex: number, winningTeam: Team) => {
     const updatedRounds = [...bracketRounds];
-    updatedRounds[currentRound - 1] = {
-      ...currentRoundData,
-      teams: updatedTeams
-    };
-
-    // Check if round is complete
-    const remainingTeams = updatedTeams.filter(team => !team.eliminated);
+    const currentRound = updatedRounds[roundIndex];
     
-    if (remainingTeams.length === 1) {
-      // We have a winner!
-      setWinner(remainingTeams[0]);
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
-      return;
-    }
+    // Mark the matchup as completed with the winner
+    currentRound.matchups[matchupIndex].winner = winningTeam;
+    currentRound.matchups[matchupIndex].completed = true;
 
-    // Create next round
-    if (remainingTeams.length >= 2) {
-      const nextMatchups: number[][] = [];
-      for (let i = 0; i < remainingTeams.length; i += 2) {
-        if (i + 1 < remainingTeams.length) {
-          nextMatchups.push([remainingTeams[i].id, remainingTeams[i + 1].id]);
+    // Check if current round is complete
+    const allMatchupsComplete = currentRound.matchups.every(matchup => matchup.completed);
+    
+    if (allMatchupsComplete) {
+      // Get all winners from this round
+      const winners = currentRound.matchups.map(matchup => matchup.winner!);
+      
+      // Check if we have a champion (only one winner left)
+      if (winners.length === 1) {
+        setWinner(winners[0]);
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+        return;
+      }
+      
+      // Create next round with winners
+      const nextMatchups: Matchup[] = [];
+      for (let i = 0; i < winners.length; i += 2) {
+        if (i + 1 < winners.length) {
+          nextMatchups.push({
+            id: i / 2,
+            team1: winners[i],
+            team2: winners[i + 1],
+            winner: null,
+            completed: false
+          });
         }
       }
 
       const nextRound: BracketRound = {
-        round: currentRound + 1,
-        name: getRoundName(currentRound + 1, bracketSize),
-        teams: remainingTeams,
+        round: currentRound.round + 1,
+        name: getRoundName(currentRound.round + 1, bracketSize),
         matchups: nextMatchups
       };
+      
       updatedRounds.push(nextRound);
-      setCurrentRound(currentRound + 1);
     }
 
     setBracketRounds(updatedRounds);
-    setSelectedMatchup(null); // Clear selection after making a choice
   };
 
   const resetBracket = () => {
     setBracketRounds([]);
-    setCurrentRound(0);
     setWinner(null);
     setShowConfetti(false);
-    setSelectedMatchup(null);
   };
 
-  const renderMatchup = (team1: Team, team2: Team, matchupIndex: number, roundIndex: number) => {
-    const isCurrentRound = roundIndex === currentRound - 1;
-    const isSelected = selectedMatchup === matchupIndex;
+  const renderMatchup = (matchup: Matchup, roundIndex: number, matchupIndex: number) => {
+    const isCurrentRound = roundIndex === bracketRounds.length - 1;
+    const isCompleted = matchup.completed;
 
     return (
       <motion.div
-        key={`${team1.id}-${team2.id}`}
+        key={matchup.id}
         className={`relative mb-4 ${
-          isCurrentRound ? 'cursor-pointer' : ''
+          isCurrentRound && !isCompleted ? 'cursor-pointer' : ''
         }`}
-        onClick={() => isCurrentRound && setSelectedMatchup(matchupIndex)}
       >
         {/* Team 1 */}
         <motion.div
           className={`p-3 rounded-lg border-2 transition-all ${
-            team1.eliminated
+            isCompleted && matchup.winner?.id !== matchup.team1.id
               ? 'border-gray-200 bg-gray-50 text-gray-400'
-              : team1.wins > 0
+              : isCompleted && matchup.winner?.id === matchup.team1.id
               ? 'border-green-400 bg-green-50'
-              : isCurrentRound && isSelected
-              ? 'border-gray-400 bg-gray-50'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
-          whileHover={isCurrentRound ? { scale: 1.02 } : {}}
+          whileHover={isCurrentRound && !isCompleted ? { scale: 1.02 } : {}}
+          onClick={() => isCurrentRound && !isCompleted && selectWinner(roundIndex, matchupIndex, matchup.team1)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-bold text-gray-500">#{team1.seed}</span>
-              <span className="font-medium">{team1.name}</span>
+              <span className="text-sm font-bold text-gray-500">#{matchup.team1.seed}</span>
+              <span className="font-medium">{matchup.team1.name}</span>
             </div>
-            {team1.wins > 0 && <Trophy className="h-4 w-4 text-green-500" />}
+            {isCompleted && matchup.winner?.id === matchup.team1.id && (
+              <Trophy className="h-4 w-4 text-green-500" />
+            )}
           </div>
         </motion.div>
 
@@ -195,46 +188,25 @@ export default function BracketBuilder() {
         {/* Team 2 */}
         <motion.div
           className={`p-3 rounded-lg border-2 transition-all ${
-            team2.eliminated
+            isCompleted && matchup.winner?.id !== matchup.team2.id
               ? 'border-gray-200 bg-gray-50 text-gray-400'
-              : team2.wins > 0
+              : isCompleted && matchup.winner?.id === matchup.team2.id
               ? 'border-green-400 bg-green-50'
-              : isCurrentRound && isSelected
-              ? 'border-gray-400 bg-gray-50'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
-          whileHover={isCurrentRound ? { scale: 1.02 } : {}}
+          whileHover={isCurrentRound && !isCompleted ? { scale: 1.02 } : {}}
+          onClick={() => isCurrentRound && !isCompleted && selectWinner(roundIndex, matchupIndex, matchup.team2)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-bold text-gray-500">#{team2.seed}</span>
-              <span className="font-medium">{team2.name}</span>
+              <span className="text-sm font-bold text-gray-500">#{matchup.team2.seed}</span>
+              <span className="font-medium">{matchup.team2.name}</span>
             </div>
-            {team2.wins > 0 && <Trophy className="h-4 w-4 text-green-500" />}
+            {isCompleted && matchup.winner?.id === matchup.team2.id && (
+              <Trophy className="h-4 w-4 text-green-500" />
+            )}
           </div>
         </motion.div>
-
-        {/* Winner Selection Buttons */}
-        {isCurrentRound && isSelected && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex space-x-2 mt-2"
-          >
-            <button
-              onClick={() => selectWinner(team1.id)}
-              className="flex-1 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
-            >
-              {team1.name} Wins
-            </button>
-            <button
-              onClick={() => selectWinner(team2.id)}
-              className="flex-1 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
-            >
-              {team2.name} Wins
-            </button>
-          </motion.div>
-        )}
       </motion.div>
     );
   };
@@ -251,14 +223,9 @@ export default function BracketBuilder() {
           {round.name}
         </h3>
         <div className="space-y-2">
-          {round.matchups.map((matchup, index) => {
-            const team1 = round.teams.find(t => t.id === matchup[0]);
-            const team2 = round.teams.find(t => t.id === matchup[1]);
-            if (team1 && team2) {
-              return renderMatchup(team1, team2, index, roundIndex);
-            }
-            return null;
-          })}
+          {round.matchups.map((matchup, index) => 
+            renderMatchup(matchup, roundIndex, index)
+          )}
         </div>
       </motion.div>
     );
