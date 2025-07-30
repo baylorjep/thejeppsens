@@ -152,7 +152,7 @@ export default function MoviePicker() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+    <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -161,7 +161,7 @@ export default function MoviePicker() {
           className="text-center mb-12"
         >
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            <Film className="inline-block h-8 w-8 text-purple-500 mr-3" />
+            <Film className="inline-block h-8 w-8 text-gray-700 mr-3" />
             Movie Magic
           </h2>
           <p className="text-xl text-gray-600">Let&apos;s find the perfect movie for tonight!</p>
@@ -176,7 +176,7 @@ export default function MoviePicker() {
             className="space-y-6"
           >
             {/* Add New Movie */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-purple-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Add Your Favorites</h3>
               <div className="flex gap-2">
                 <input
@@ -189,7 +189,7 @@ export default function MoviePicker() {
                 />
                 <button
                   onClick={addMovie}
-                  className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   Add
                 </button>
@@ -197,7 +197,7 @@ export default function MoviePicker() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-pink-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Filters</h3>
               
               {/* Genres */}
@@ -214,7 +214,7 @@ export default function MoviePicker() {
                       )}
                       className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                         selectedGenres.includes(genre)
-                          ? 'bg-purple-500 text-white'
+                          ? 'bg-gray-700 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -256,7 +256,7 @@ export default function MoviePicker() {
             </div>
 
             {/* Movie List */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Your Movies ({movies.length})</h3>
               <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
                 {movies.map(movie => (
@@ -302,7 +302,7 @@ export default function MoviePicker() {
               className={`relative px-8 py-4 rounded-full text-xl font-bold text-white shadow-lg transition-all ${
                 isSpinning 
                   ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 hover:scale-105'
+                  : 'bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 hover:scale-105'
               }`}
               whileHover={!isSpinning ? { scale: 1.05 } : {}}
               whileTap={!isSpinning ? { scale: 0.95 } : {}}
@@ -324,7 +324,7 @@ export default function MoviePicker() {
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                  className="bg-white rounded-2xl p-6 shadow-xl border border-purple-200 text-center max-w-sm w-full cursor-pointer"
+                  className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 text-center max-w-sm w-full cursor-pointer"
                   onClick={() => openMovieModal(selectedMovie)}
                 >
                   <img 
@@ -332,7 +332,7 @@ export default function MoviePicker() {
                     alt={selectedMovie.title}
                     className="w-full h-64 object-cover rounded-lg mb-4"
                   />
-                  <Sparkles className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                  <Sparkles className="h-8 w-8 text-gray-700 mx-auto mb-2" />
                   <h3 className="text-xl font-bold text-gray-800 mb-2">
                     {selectedMovie.title}
                   </h3>
@@ -348,7 +348,7 @@ export default function MoviePicker() {
                   </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {selectedMovie.genre.slice(0, 3).map(genre => (
-                      <span key={genre} className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
+                      <span key={genre} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
                         {genre}
                       </span>
                     ))}
@@ -422,8 +422,8 @@ export default function MoviePicker() {
                   <div>
                     <span className="text-gray-600 block mb-2">Genres</span>
                     <div className="flex flex-wrap gap-2">
-                      {selectedMovie.genre.map(genre => (
-                        <span key={genre} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                                             {selectedMovie.genre.map(genre => (
+                         <span key={genre} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                           {genre}
                         </span>
                       ))}
@@ -431,7 +431,7 @@ export default function MoviePicker() {
                   </div>
                   
                   {selectedMovie.trailer && (
-                    <button className="w-full flex items-center justify-center gap-2 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors">
+                                         <button className="w-full flex items-center justify-center gap-2 bg-gray-700 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors">
                       <Play className="h-5 w-5" />
                       Watch Trailer
                     </button>

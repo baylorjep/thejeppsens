@@ -102,7 +102,7 @@ export default function RestaurantPicker() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-pink-50 to-purple-50">
+    <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -111,7 +111,7 @@ export default function RestaurantPicker() {
           className="text-center mb-12"
         >
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            <Utensils className="inline-block h-8 w-8 text-pink-500 mr-3" />
+            <Utensils className="inline-block h-8 w-8 text-gray-700 mr-3" />
             Restaurant Roulette
           </h2>
           <p className="text-xl text-gray-600">Can&apos;t decide where to eat? Let fate choose for you!</p>
@@ -126,7 +126,7 @@ export default function RestaurantPicker() {
             className="space-y-6"
           >
             {/* Add New Restaurant */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-pink-100">
+                          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Add Your Favorites</h3>
               <div className="flex gap-2">
                 <input
@@ -139,7 +139,7 @@ export default function RestaurantPicker() {
                 />
                 <button
                   onClick={addRestaurant}
-                  className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   Add
                 </button>
@@ -147,7 +147,7 @@ export default function RestaurantPicker() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-purple-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Filters</h3>
               
               {/* Tags */}
@@ -164,7 +164,7 @@ export default function RestaurantPicker() {
                       )}
                       className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                         selectedTags.includes(tag)
-                          ? 'bg-pink-500 text-white'
+                          ? 'bg-gray-700 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -206,7 +206,7 @@ export default function RestaurantPicker() {
             </div>
 
             {/* Restaurant List */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Your Restaurants ({restaurants.length})</h3>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {restaurants.map(restaurant => (
@@ -236,7 +236,7 @@ export default function RestaurantPicker() {
               className={`relative px-8 py-4 rounded-full text-xl font-bold text-white shadow-lg transition-all ${
                 isSpinning 
                   ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 hover:scale-105'
+                  : 'bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 hover:scale-105'
               }`}
               whileHover={!isSpinning ? { scale: 1.05 } : {}}
               whileTap={!isSpinning ? { scale: 0.95 } : {}}
@@ -258,9 +258,9 @@ export default function RestaurantPicker() {
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                  className="bg-white rounded-2xl p-8 shadow-xl border border-pink-200 text-center max-w-sm w-full"
+                  className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 text-center max-w-sm w-full"
                 >
-                  <Sparkles className="h-12 w-12 text-pink-500 mx-auto mb-4" />
+                  <Sparkles className="h-12 w-12 text-gray-700 mx-auto mb-4" />
                   <h3 className="text-2xl font-bold text-gray-800 mb-2">
                     {selectedRestaurant.name}
                   </h3>
@@ -275,7 +275,7 @@ export default function RestaurantPicker() {
                   {selectedRestaurant.tags.length > 0 && (
                     <div className="flex flex-wrap justify-center gap-2">
                       {selectedRestaurant.tags.map(tag => (
-                        <span key={tag} className="px-2 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">
+                        <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                           {tag}
                         </span>
                       ))}

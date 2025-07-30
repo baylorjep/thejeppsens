@@ -9,13 +9,13 @@
   --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 248, 250, 252;
   
-  /* Custom Jeppsens color palette */
-  --primary-pink: 236, 72, 153;
-  --primary-purple: 147, 51, 234;
-  --accent-orange: 251, 146, 60;
-  --accent-teal: 20, 184, 166;
-  --soft-gray: 241, 245, 249;
-  --warm-beige: 254, 252, 232;
+  /* Modern minimalist color palette */
+  --primary-gray: 17, 24, 39;
+  --secondary-gray: 75, 85, 99;
+  --accent-gray: 156, 163, 175;
+  --light-gray: 243, 244, 246;
+  --white: 255, 255, 255;
+  --subtle-accent: 59, 130, 246;
 }
 
 * {
@@ -52,16 +52,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(var(--soft-gray));
+  background: rgb(var(--light-gray));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--primary-pink));
+  background: rgb(var(--secondary-gray));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--primary-purple));
+  background: rgb(var(--primary-gray));
 }
 
 /* Smooth transitions */
@@ -76,8 +76,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
-  50% { box-shadow: 0 0 30px rgba(236, 72, 153, 0.6); }
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.1); }
+  50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
 }
 
 .animate-float {

@@ -69,7 +69,7 @@ export default function Keep4Cut4() {
   const selectedCount = choices.filter(c => c.selected).length;
 
   return (
-    <section className="py-20 bg-gradient-to-br from-teal-50 to-blue-50">
+    <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -78,7 +78,7 @@ export default function Keep4Cut4() {
           className="text-center mb-12"
         >
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            <Grid className="inline-block h-8 w-8 text-teal-500 mr-3" />
+            <Grid className="inline-block h-8 w-8 text-gray-700 mr-3" />
             Keep 4 / Cut 4
           </h2>
           <p className="text-xl text-gray-600">Choose your top 4 from 8 options!</p>
@@ -93,7 +93,7 @@ export default function Keep4Cut4() {
             className="space-y-6"
           >
             {/* Add Choices */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-teal-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Add Your Options ({choices.length}/8)
               </h3>
@@ -110,7 +110,7 @@ export default function Keep4Cut4() {
                 <button
                   onClick={addChoice}
                   disabled={choices.length >= 8 || gameComplete}
-                  className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors disabled:bg-gray-300"
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-300"
                 >
                   Add
                 </button>
@@ -134,16 +134,16 @@ export default function Keep4Cut4() {
             </div>
 
             {/* Game Status */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Game Status</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Selected:</span>
-                  <span className="font-bold text-teal-600">{selectedCount}/4</span>
+                  <span className="font-bold text-gray-700">{selectedCount}/4</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <motion.div
-                    className="bg-gradient-to-r from-teal-500 to-blue-500 h-2 rounded-full"
+                    className="bg-gradient-to-r from-gray-700 to-gray-800 h-2 rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${(selectedCount / 4) * 100}%` }}
                     transition={{ duration: 0.5 }}
@@ -159,7 +159,7 @@ export default function Keep4Cut4() {
 
             {/* Reset Button */}
             {choices.length > 0 && (
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-purple-100">
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
                 <button
                   onClick={resetGame}
                   className="w-full py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
@@ -198,9 +198,9 @@ export default function Keep4Cut4() {
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         choice.eliminated
                           ? 'border-gray-200 bg-gray-50'
-                          : choice.selected
-                          ? 'border-teal-400 bg-teal-50'
-                          : 'border-gray-200 bg-white hover:border-teal-300 hover:bg-teal-50'
+                          :                         choice.selected
+                        ? 'border-gray-400 bg-gray-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                       }`}
                       onClick={() => toggleChoice(choice.id)}
                     >
@@ -219,7 +219,7 @@ export default function Keep4Cut4() {
                           animate={{ scale: 1 }}
                           className="absolute top-2 right-2"
                         >
-                          <Heart className="h-6 w-6 text-teal-500 fill-current" />
+                          <Heart className="h-6 w-6 text-gray-700 fill-current" />
                         </motion.div>
                       )}
                       
@@ -243,10 +243,10 @@ export default function Keep4Cut4() {
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl p-6 border-2 border-teal-200"
+                      className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200"
                     >
                       <div className="text-center mb-4">
-                        <Sparkles className="h-8 w-8 text-teal-500 mx-auto mb-2" />
+                        <Sparkles className="h-8 w-8 text-gray-700 mx-auto mb-2" />
                         <h3 className="text-xl font-bold text-gray-800">Your Final 4!</h3>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -256,9 +256,9 @@ export default function Keep4Cut4() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="bg-white rounded-lg p-3 border border-teal-200 text-center"
+                            className="bg-white rounded-lg p-3 border border-gray-200 text-center"
                           >
-                            <span className="font-medium text-teal-700">{choice.name}</span>
+                                                          <span className="font-medium text-gray-700">{choice.name}</span>
                           </motion.div>
                         ))}
                       </div>
@@ -268,8 +268,8 @@ export default function Keep4Cut4() {
 
                 {/* Instructions */}
                 {!gameComplete && choices.length === 8 && (
-                  <div className="text-center py-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-blue-700">
+                                  <div className="text-center py-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-gray-700">
                       Click on 4 options to keep them. The rest will be eliminated!
                     </p>
                   </div>

@@ -89,15 +89,20 @@ export default function BracketBuilder() {
     if (currentRound === 0) return;
 
     const currentRoundData = bracketRounds[currentRound - 1];
+    
+    // Find the matchup this team is in
+    const matchup = currentRoundData.matchups.find(m => m.includes(teamId));
+    if (!matchup) return;
+    
+    // Get the other team in the matchup
+    const otherTeamId = matchup.find(id => id !== teamId);
+    if (!otherTeamId) return;
+    
     const updatedTeams = currentRoundData.teams.map(team => {
       if (team.id === teamId) {
         return { ...team, wins: team.wins + 1 };
-      } else {
-        // Find the matchup this team is in
-        const matchup = currentRoundData.matchups.find(m => m.includes(team.id));
-        if (matchup && matchup.includes(teamId)) {
-          return { ...team, eliminated: true };
-        }
+      } else if (team.id === otherTeamId) {
+        return { ...team, eliminated: true };
       }
       return team;
     });
@@ -139,6 +144,7 @@ export default function BracketBuilder() {
     }
 
     setBracketRounds(updatedRounds);
+    setSelectedMatchup(null); // Clear selection after making a choice
   };
 
   const resetBracket = () => {
@@ -169,7 +175,7 @@ export default function BracketBuilder() {
               : team1.wins > 0
               ? 'border-green-400 bg-green-50'
               : isCurrentRound && isSelected
-              ? 'border-pink-400 bg-pink-50'
+              ? 'border-gray-400 bg-gray-50'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
           whileHover={isCurrentRound ? { scale: 1.02 } : {}}
@@ -194,7 +200,7 @@ export default function BracketBuilder() {
               : team2.wins > 0
               ? 'border-green-400 bg-green-50'
               : isCurrentRound && isSelected
-              ? 'border-pink-400 bg-pink-50'
+              ? 'border-gray-400 bg-gray-50'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
           whileHover={isCurrentRound ? { scale: 1.02 } : {}}
@@ -259,7 +265,7 @@ export default function BracketBuilder() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-orange-50 to-pink-50">
+    <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -268,7 +274,7 @@ export default function BracketBuilder() {
           className="text-center mb-12"
         >
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            <Trophy className="inline-block h-8 w-8 text-orange-500 mr-3" />
+            <Trophy className="inline-block h-8 w-8 text-gray-700 mr-3" />
             March Madness Bracket
           </h2>
           <p className="text-xl text-gray-600">Create your own tournament bracket!</p>
@@ -283,7 +289,7 @@ export default function BracketBuilder() {
             className="space-y-6"
           >
             {/* Bracket Size Selection */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-orange-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Tournament Size</h3>
               <div className="grid grid-cols-3 gap-3">
                 {[4, 8, 16].map(size => (
@@ -292,7 +298,7 @@ export default function BracketBuilder() {
                     onClick={() => setBracketSize(size as 4 | 8 | 16)}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       bracketSize === size
-                        ? 'border-orange-500 bg-orange-50 text-orange-700'
+                        ? 'border-gray-700 bg-gray-50 text-gray-700'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -304,7 +310,7 @@ export default function BracketBuilder() {
             </div>
 
             {/* Add Teams */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-pink-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Add Teams ({teams.length}/{bracketSize})
               </h3>
@@ -321,7 +327,7 @@ export default function BracketBuilder() {
                 <button
                   onClick={addTeam}
                   disabled={teams.length >= bracketSize}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-300"
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-300"
                 >
                   Add
                 </button>
@@ -347,13 +353,13 @@ export default function BracketBuilder() {
             </div>
 
             {/* Generate Button */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-purple-100">
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
               <button
                 onClick={generateBracket}
                 disabled={teams.length !== bracketSize}
                 className={`w-full py-4 rounded-lg text-xl font-bold text-white transition-all ${
                   teams.length === bracketSize
-                    ? 'bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700'
+                    ? 'bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900'
                     : 'bg-gray-300 cursor-not-allowed'
                 }`}
               >
@@ -401,9 +407,9 @@ export default function BracketBuilder() {
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="text-center py-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200"
+                      className="text-center py-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200"
                     >
-                      <Sparkles className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+                      <Sparkles className="h-12 w-12 text-gray-700 mx-auto mb-4" />
                       <h3 className="text-2xl font-bold text-gray-800 mb-2">🏆 Champion! 🏆</h3>
                       <p className="text-xl text-gray-700">#{winner.seed} {winner.name}</p>
                     </motion.div>

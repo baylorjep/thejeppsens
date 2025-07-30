@@ -63,7 +63,7 @@ export default function Homepage() {
                 transition={{ delay: 0.2 }}
               >
                 Welcome to{' '}
-                <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-gray-800">
                   thejeppsens.com
                 </span>
               </motion.h1>
@@ -74,7 +74,7 @@ export default function Homepage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                Your favorite little corner of the internet ✨
+                Modern decision tools for couples ✨
               </motion.p>
               
               <motion.p 
@@ -83,7 +83,7 @@ export default function Homepage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                A cozy space for us to plan date nights, make decisions together, and create memories. 
+                A clean, simple space for us to plan date nights, make decisions together, and create memories. 
                 From restaurant roulette to movie magic, we&apos;ve got everything we need for our adventures.
               </motion.p>
             </div>
@@ -95,18 +95,18 @@ export default function Homepage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-pink-100">
-                <Heart className="h-8 w-8 text-pink-500 mx-auto mb-2" />
+              <div className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200">
+                <Heart className="h-8 w-8 text-gray-700 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-gray-800">∞</div>
                 <div className="text-sm text-gray-600">Adventures</div>
               </div>
-              <div className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-purple-100">
-                <Camera className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+              <div className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200">
+                <Camera className="h-8 w-8 text-gray-700 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-gray-800">100+</div>
                 <div className="text-sm text-gray-600">Memories</div>
               </div>
-              <div className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-orange-100">
-                <Sparkles className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+              <div className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200">
+                <Sparkles className="h-8 w-8 text-gray-700 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-gray-800">5</div>
                 <div className="text-sm text-gray-600">Tools</div>
               </div>
@@ -153,7 +153,7 @@ export default function Homepage() {
                   onClick={() => setCurrentPhotoIndex(index)}
                   className={`w-3 h-3 rounded-full transition-all duration-300 ${
                     index === currentPhotoIndex 
-                      ? 'bg-pink-500 scale-125' 
+                      ? 'bg-gray-700 scale-125' 
                       : 'bg-gray-300 hover:bg-gray-400'
                   }`}
                 />
