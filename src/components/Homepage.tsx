@@ -50,9 +50,9 @@ export default function Homepage() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Welcome Text */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="space-y-6"
           >
             <div className="space-y-4">
@@ -115,9 +115,9 @@ export default function Homepage() {
 
           {/* Photo Carousel */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="relative"
           >
             <div className="relative h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">

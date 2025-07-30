@@ -25,9 +25,11 @@ export default function RootLayout({
             <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-gray-300 to-gray-200 rounded-full opacity-10 blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
           </div>
           
-          {/* Main content */}
+          {/* Main content with smooth transitions */}
           <div className="relative z-10">
-            {children}
+            <div className="transition-all duration-300 ease-in-out">
+              {children}
+            </div>
           </div>
         </div>
       </body>

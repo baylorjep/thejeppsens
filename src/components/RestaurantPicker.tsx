@@ -105,9 +105,10 @@ export default function RestaurantPicker() {
     <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="text-center mb-12"
         >
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
@@ -120,9 +121,10 @@ export default function RestaurantPicker() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Restaurant List & Controls */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="space-y-6"
           >
             {/* Add New Restaurant */}
@@ -224,9 +226,10 @@ export default function RestaurantPicker() {
 
           {/* Spinner & Result */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 10 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="flex flex-col items-center justify-center space-y-6"
           >
             {/* Spin Button */}
