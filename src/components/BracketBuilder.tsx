@@ -116,30 +116,51 @@ export default function BracketBuilder() {
         return;
       }
       
-      // Create next round with winners
-      const nextMatchups: Matchup[] = [];
-      for (let i = 0; i < winners.length; i += 2) {
-        if (i + 1 < winners.length) {
-          nextMatchups.push({
-            id: i / 2,
-            team1: winners[i],
-            team2: winners[i + 1],
-            winner: null,
-            completed: false
-          });
-        }
-      }
-
-      const nextRound: BracketRound = {
-        round: currentRound.round + 1,
-        name: getRoundName(currentRound.round + 1, bracketSize),
-        matchups: nextMatchups
-      };
-      
-      updatedRounds.push(nextRound);
+      // Don't auto-create the next round - let user manually advance
+      // The next round will be created when user clicks "Advance to Next Round"
     }
 
     setBracketRounds(updatedRounds);
+  };
+
+  const advanceToNextRound = () => {
+    const currentRound = bracketRounds[bracketRounds.length - 1];
+    const winners = currentRound.matchups.map(matchup => matchup.winner!);
+    
+    // Create next round with winners
+    const nextMatchups: Matchup[] = [];
+    for (let i = 0; i < winners.length; i += 2) {
+      if (i + 1 < winners.length) {
+        nextMatchups.push({
+          id: i / 2,
+          team1: winners[i],
+          team2: winners[i + 1],
+          winner: null,
+          completed: false
+        });
+      }
+    }
+
+    const nextRound: BracketRound = {
+      round: currentRound.round + 1,
+      name: getRoundName(currentRound.round + 1, bracketSize),
+      matchups: nextMatchups
+    };
+    
+    setBracketRounds([...bracketRounds, nextRound]);
+  };
+
+  const isCurrentRoundComplete = () => {
+    if (bracketRounds.length === 0) return false;
+    const currentRound = bracketRounds[bracketRounds.length - 1];
+    return currentRound.matchups.every(matchup => matchup.completed);
+  };
+
+  const canAdvanceToNextRound = () => {
+    if (bracketRounds.length === 0) return false;
+    const currentRound = bracketRounds[bracketRounds.length - 1];
+    const winners = currentRound.matchups.map(matchup => matchup.winner!);
+    return winners.length > 1; // Can advance if there are multiple winners
   };
 
   const resetBracket = () => {
@@ -370,6 +391,18 @@ export default function BracketBuilder() {
                     )}
                   </div>
                 ))}
+                
+                {/* Advance to Next Round Button */}
+                {isCurrentRoundComplete() && canAdvanceToNextRound() && (
+                  <div className="flex flex-col items-center justify-center">
+                    <button
+                      onClick={advanceToNextRound}
+                      className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                    >
+                      Advance to Next Round
+                    </button>
+                  </div>
+                )}
                 
                 {/* Winner Display */}
                 <AnimatePresence>
