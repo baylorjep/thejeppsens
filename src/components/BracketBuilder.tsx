@@ -254,7 +254,7 @@ export default function BracketBuilder() {
 
   return (
     <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" key={`bracket-${bracketRounds.length}-${winner?.id || 'none'}`}>
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
