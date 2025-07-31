@@ -217,11 +217,11 @@ export default function BracketBuilder() {
           <p className="text-xl text-gray-600">Create your own tournament bracket!</p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Setup Panel */}
-          <div className="space-y-6">
+        {/* Setup Panel - Horizontal Layout */}
+        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 mb-8">
+          <div className="grid md:grid-cols-3 gap-6">
             {/* Bracket Size Selection */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+            <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">Tournament Size</h3>
               <div className="grid grid-cols-3 gap-3">
                 {[4, 8, 16].map(size => (
@@ -242,7 +242,7 @@ export default function BracketBuilder() {
             </div>
 
             {/* Add Teams */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+            <div>
               <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Add Teams ({teams.length}/{bracketSize})
               </h3>
@@ -264,7 +264,7 @@ export default function BracketBuilder() {
                   Add
                 </button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-32 overflow-y-auto">
                 {teams.map((team) => (
                   <div key={team.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-2">
@@ -283,7 +283,7 @@ export default function BracketBuilder() {
             </div>
 
             {/* Generate Button */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+            <div className="flex flex-col justify-center">
               <button
                 onClick={generateBracket}
                 disabled={teams.length !== bracketSize}
@@ -307,36 +307,36 @@ export default function BracketBuilder() {
               )}
             </div>
           </div>
+        </div>
 
-          {/* Bracket Display */}
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 overflow-x-auto">
-            {bracketRounds.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <p>Add teams and generate your bracket to get started!</p>
-              </div>
-            ) : (
-              <div className="flex space-x-8 min-w-max">
-                {bracketRounds.map((round, index) => (
-                  <div key={round.round} className="flex flex-col">
-                    {renderBracketRound(round, index)}
-                    {index < bracketRounds.length - 1 && (
-                      <ChevronRight className="h-6 w-6 text-gray-400 mx-auto my-4" />
-                    )}
-                  </div>
-                ))}
-                
-                {/* Winner Display */}
-                {winner && (
-                  <div className="text-center py-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200">
-                    <Sparkles className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">🏆 Champion! 🏆</h3>
-                    <p className="text-xl text-gray-700">#{winner.seed} {winner.name}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        {/* Bracket Display - Full Width */}
+        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 overflow-x-auto">
+          {bracketRounds.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <p>Add teams and generate your bracket to get started!</p>
+            </div>
+          ) : (
+            <div className="flex space-x-8 min-w-max">
+              {bracketRounds.map((round, index) => (
+                <div key={round.round} className="flex flex-col">
+                  {renderBracketRound(round, index)}
+                  {index < bracketRounds.length - 1 && (
+                    <ChevronRight className="h-6 w-6 text-gray-400 mx-auto my-4" />
+                  )}
+                </div>
+              ))}
+              
+              {/* Winner Display */}
+              {winner && (
+                <div className="text-center py-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200">
+                  <Sparkles className="h-12 w-12 text-gray-700 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">🏆 Champion! 🏆</h3>
+                  <p className="text-xl text-gray-700">#{winner.seed} {winner.name}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Confetti */}
