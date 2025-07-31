@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Trophy, Users, RotateCcw, ChevronRight, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Trophy, Users, RotateCcw, Sparkles } from 'lucide-react';
 import Confetti from 'react-confetti';
 
 interface Team {
@@ -31,6 +31,17 @@ export default function BracketBuilder() {
   const [bracketRounds, setBracketRounds] = useState<BracketRound[]>([]);
   const [winner, setWinner] = useState<Team | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateScreenSize = () => {
+      setScreenSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
 
   const addTeam = () => {
     if (newTeam.trim() && teams.length < bracketSize) {
@@ -135,15 +146,58 @@ export default function BracketBuilder() {
     setShowConfetti(false);
   };
 
+  // Calculate responsive sizing based on bracket size and screen size
+  const getResponsiveSizing = () => {
+    const isMobile = screenSize.width < 768;
+    const isTablet = screenSize.width < 1024;
+    
+    // Base sizes that scale with bracket size - more aggressive scaling
+    const baseSizes = {
+      4: { teamWidth: 'w-48', teamHeight: 'h-20', textSize: 'text-lg', seedSize: 'text-base' },
+      8: { teamWidth: 'w-36', teamHeight: 'h-14', textSize: 'text-sm', seedSize: 'text-xs' },
+      16: { teamWidth: 'w-24', teamHeight: 'h-10', textSize: 'text-xs', seedSize: 'text-xs' }
+    };
+
+    const sizes = baseSizes[bracketSize];
+
+    // Scale down for smaller screens
+    if (isMobile) {
+      return {
+        teamWidth: 'w-20',
+        teamHeight: 'h-8',
+        textSize: 'text-xs',
+        seedSize: 'text-xs',
+        gap: 'gap-1',
+        containerHeight: 'h-[60vh]'
+      };
+    } else if (isTablet) {
+      return {
+        teamWidth: sizes.teamWidth.replace('w-48', 'w-32').replace('w-36', 'w-28').replace('w-24', 'w-20'),
+        teamHeight: sizes.teamHeight.replace('h-20', 'h-12').replace('h-14', 'h-10').replace('h-10', 'h-8'),
+        textSize: sizes.textSize.replace('text-lg', 'text-sm').replace('text-sm', 'text-xs').replace('text-xs', 'text-xs'),
+        seedSize: sizes.seedSize.replace('text-base', 'text-xs').replace('text-sm', 'text-xs').replace('text-xs', 'text-xs'),
+        gap: 'gap-2',
+        containerHeight: 'h-[70vh]'
+      };
+    }
+
+    return {
+      ...sizes,
+      gap: 'gap-3',
+      containerHeight: 'h-[75vh]'
+    };
+  };
+
   const renderMatchup = (matchup: Matchup, roundIndex: number, matchupIndex: number) => {
     const isCurrentRound = roundIndex === bracketRounds.length - 1;
     const isCompleted = matchup.completed;
+    const sizing = getResponsiveSizing();
 
     return (
-      <div key={matchup.id} className="relative mb-4">
+      <div key={matchup.id} className={`relative ${sizing.gap} flex flex-col`}>
         {/* Team 1 */}
         <div
-          className={`p-3 rounded-lg border-2 transition-all ${
+          className={`${sizing.teamWidth} ${sizing.teamHeight} p-2 rounded-lg border-2 transition-all ${
             isCompleted && matchup.winner?.id !== matchup.team1.id
               ? 'border-gray-200 bg-gray-50 text-gray-400'
               : isCompleted && matchup.winner?.id === matchup.team1.id
@@ -152,23 +206,23 @@ export default function BracketBuilder() {
           } ${isCurrentRound && !isCompleted ? 'cursor-pointer' : ''}`}
           onClick={() => isCurrentRound && !isCompleted && selectWinner(roundIndex, matchupIndex, matchup.team1)}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-bold text-gray-500">#{matchup.team1.seed}</span>
-              <span className="font-medium">{matchup.team1.name}</span>
+          <div className="flex items-center justify-between h-full">
+            <div className="flex items-center space-x-1">
+              <span className={`font-bold text-gray-500 ${sizing.seedSize}`}>#{matchup.team1.seed}</span>
+              <span className={`font-medium truncate ${sizing.textSize}`}>{matchup.team1.name}</span>
             </div>
             {isCompleted && matchup.winner?.id === matchup.team1.id && (
-              <Trophy className="h-4 w-4 text-green-500" />
+              <Trophy className="h-3 w-3 text-green-500 flex-shrink-0" />
             )}
           </div>
         </div>
 
         {/* VS */}
-        <div className="text-center text-xs text-gray-400 my-1">vs</div>
+        <div className={`text-center text-gray-400 ${sizing.textSize} my-1`}>vs</div>
 
         {/* Team 2 */}
         <div
-          className={`p-3 rounded-lg border-2 transition-all ${
+          className={`${sizing.teamWidth} ${sizing.teamHeight} p-2 rounded-lg border-2 transition-all ${
             isCompleted && matchup.winner?.id !== matchup.team2.id
               ? 'border-gray-200 bg-gray-50 text-gray-400'
               : isCompleted && matchup.winner?.id === matchup.team2.id
@@ -177,13 +231,13 @@ export default function BracketBuilder() {
           } ${isCurrentRound && !isCompleted ? 'cursor-pointer' : ''}`}
           onClick={() => isCurrentRound && !isCompleted && selectWinner(roundIndex, matchupIndex, matchup.team2)}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-bold text-gray-500">#{matchup.team2.seed}</span>
-              <span className="font-medium">{matchup.team2.name}</span>
+          <div className="flex items-center justify-between h-full">
+            <div className="flex items-center space-x-1">
+              <span className={`font-bold text-gray-500 ${sizing.seedSize}`}>#{matchup.team2.seed}</span>
+              <span className={`font-medium truncate ${sizing.textSize}`}>{matchup.team2.name}</span>
             </div>
             {isCompleted && matchup.winner?.id === matchup.team2.id && (
-              <Trophy className="h-4 w-4 text-green-500" />
+              <Trophy className="h-3 w-3 text-green-500 flex-shrink-0" />
             )}
           </div>
         </div>
@@ -192,24 +246,74 @@ export default function BracketBuilder() {
   };
 
   const renderBracketRound = (round: BracketRound, roundIndex: number) => {
-    return (
-      <div key={round.round} className="flex flex-col">
-        <h3 className="text-lg font-semibold text-gray-700 text-center mb-4">
-          {round.name}
-        </h3>
-        <div className="space-y-2">
-          {round.matchups.map((matchup, index) => 
-            renderMatchup(matchup, roundIndex, index)
-          )}
+    const totalRounds = Math.ceil(Math.log2(bracketSize));
+    const sizing = getResponsiveSizing();
+    
+    // Calculate positioning based on round
+    const roundProgress = roundIndex / (totalRounds - 1); // 0 = first round, 1 = final round
+    
+    // For 4-corners layout, we need to position matchups in corners for first round
+    if (roundIndex === 0) {
+      // First round: distribute matchups to 4 corners
+      const matchupsPerCorner = Math.ceil(round.matchups.length / 4);
+      
+      return (
+        <div key={round.round} className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-2 p-2">
+          {/* Top Left Corner */}
+          <div className="flex flex-col items-start justify-start space-y-1">
+            {round.matchups.slice(0, matchupsPerCorner).map((matchup, index) => 
+              renderMatchup(matchup, roundIndex, index)
+            )}
+          </div>
+          
+          {/* Top Right Corner */}
+          <div className="flex flex-col items-end justify-start space-y-1">
+            {round.matchups.slice(matchupsPerCorner, matchupsPerCorner * 2).map((matchup, index) => 
+              renderMatchup(matchup, roundIndex, index + matchupsPerCorner)
+            )}
+          </div>
+          
+          {/* Bottom Left Corner */}
+          <div className="flex flex-col items-start justify-end space-y-1">
+            {round.matchups.slice(matchupsPerCorner * 2, matchupsPerCorner * 3).map((matchup, index) => 
+              renderMatchup(matchup, roundIndex, index + matchupsPerCorner * 2)
+            )}
+          </div>
+          
+          {/* Bottom Right Corner */}
+          <div className="flex flex-col items-end justify-end space-y-1">
+            {round.matchups.slice(matchupsPerCorner * 3).map((matchup, index) => 
+              renderMatchup(matchup, roundIndex, index + matchupsPerCorner * 3)
+            )}
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      // Later rounds: converge toward center
+      const centerOffset = roundProgress * 0.3; // Move 30% toward center
+      
+      return (
+        <div key={round.round} className="absolute inset-0 flex items-center justify-center">
+          <div 
+            className="flex flex-col items-center space-y-1"
+            style={{
+              transform: `scale(${1 - centerOffset * 0.3})`,
+              opacity: 1 - centerOffset * 0.2
+            }}
+          >
+            {round.matchups.map((matchup, index) => 
+              renderMatchup(matchup, roundIndex, index)
+            )}
+          </div>
+        </div>
+      );
+    }
   };
 
   return (
     <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
             <Trophy className="inline-block h-8 w-8 text-gray-700 mr-3" />
             March Madness Bracket
@@ -217,25 +321,25 @@ export default function BracketBuilder() {
           <p className="text-xl text-gray-600">Create your own tournament bracket!</p>
         </div>
 
-        {/* Setup Panel - Horizontal Layout */}
-        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 mb-8">
-          <div className="grid md:grid-cols-3 gap-6">
+        {/* Setup Panel - Compact Horizontal Layout */}
+        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200 mb-6">
+          <div className="grid md:grid-cols-3 gap-4">
             {/* Bracket Size Selection */}
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Tournament Size</h3>
-              <div className="grid grid-cols-3 gap-3">
+              <h3 className="text-sm font-semibold mb-2 text-gray-800">Tournament Size</h3>
+              <div className="grid grid-cols-3 gap-2">
                 {[4, 8, 16].map(size => (
                   <button
                     key={size}
                     onClick={() => setBracketSize(size as 4 | 8 | 16)}
-                    className={`p-4 rounded-lg border-2 transition-all ${
+                    className={`p-2 rounded-lg border-2 transition-all ${
                       bracketSize === size
                         ? 'border-gray-700 bg-gray-50 text-gray-700'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="text-2xl font-bold">{size}</div>
-                    <div className="text-sm">Teams</div>
+                    <div className="text-lg font-bold">{size}</div>
+                    <div className="text-xs">Teams</div>
                   </button>
                 ))}
               </div>
@@ -243,33 +347,33 @@ export default function BracketBuilder() {
 
             {/* Add Teams */}
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">
+              <h3 className="text-sm font-semibold mb-2 text-gray-800">
                 Add Teams ({teams.length}/{bracketSize})
               </h3>
-              <div className="flex gap-2 mb-4">
+              <div className="flex gap-2 mb-2">
                 <input
                   type="text"
                   value={newTeam}
                   onChange={(e) => setNewTeam(e.target.value)}
                   placeholder="Team name..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   onKeyPress={(e) => e.key === 'Enter' && addTeam()}
                   disabled={teams.length >= bracketSize}
                 />
                 <button
                   onClick={addTeam}
                   disabled={teams.length >= bracketSize}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-300"
+                  className="px-3 py-1 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-300"
                 >
                   Add
                 </button>
               </div>
-              <div className="space-y-2 max-h-32 overflow-y-auto">
+              <div className="space-y-1 max-h-20 overflow-y-auto">
                 {teams.map((team) => (
-                  <div key={team.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-bold text-gray-500">#{team.seed}</span>
-                      <span className="font-medium">{team.name}</span>
+                  <div key={team.id} className="flex items-center justify-between p-1 bg-gray-50 rounded text-xs">
+                    <div className="flex items-center space-x-1">
+                      <span className="font-bold text-gray-500">#{team.seed}</span>
+                      <span className="font-medium truncate">{team.name}</span>
                     </div>
                     <button
                       onClick={() => removeTeam(team.id)}
@@ -287,7 +391,7 @@ export default function BracketBuilder() {
               <button
                 onClick={generateBracket}
                 disabled={teams.length !== bracketSize}
-                className={`w-full py-4 rounded-lg text-xl font-bold text-white transition-all ${
+                className={`w-full py-3 rounded-lg text-lg font-bold text-white transition-all ${
                   teams.length === bracketSize
                     ? 'bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900'
                     : 'bg-gray-300 cursor-not-allowed'
@@ -299,40 +403,39 @@ export default function BracketBuilder() {
               {bracketRounds.length > 0 && (
                 <button
                   onClick={resetBracket}
-                  className="w-full mt-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                  className="w-full mt-2 py-1 text-sm rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
                 >
-                  <RotateCcw className="inline-block h-4 w-4 mr-2" />
-                  Reset Bracket
+                  <RotateCcw className="inline-block h-3 w-3 mr-1" />
+                  Reset
                 </button>
               )}
             </div>
           </div>
         </div>
 
-        {/* Bracket Display - Full Width */}
-        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 overflow-x-auto">
+        {/* Bracket Display - Full Screen */}
+        <div className={`bg-white rounded-xl shadow-lg border border-gray-200 ${getResponsiveSizing().containerHeight} relative overflow-hidden`}>
           {bracketRounds.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <p>Add teams and generate your bracket to get started!</p>
+            <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+              <div className="text-center">
+                <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                <p>Add teams and generate your bracket to get started!</p>
+              </div>
             </div>
           ) : (
-            <div className="flex space-x-8 min-w-max">
-              {bracketRounds.map((round, index) => (
-                <div key={round.round} className="flex flex-col">
-                  {renderBracketRound(round, index)}
-                  {index < bracketRounds.length - 1 && (
-                    <ChevronRight className="h-6 w-6 text-gray-400 mx-auto my-4" />
-                  )}
-                </div>
-              ))}
+            <div className="relative w-full h-full">
+              {bracketRounds.map((round, index) => 
+                renderBracketRound(round, index)
+              )}
               
-              {/* Winner Display */}
+              {/* Winner Display - Center */}
               {winner && (
-                <div className="text-center py-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200">
-                  <Sparkles className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">🏆 Champion! 🏆</h3>
-                  <p className="text-xl text-gray-700">#{winner.seed} {winner.name}</p>
+                <div className="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-sm">
+                  <div className="text-center py-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 px-8">
+                    <Sparkles className="h-12 w-12 text-gray-700 mx-auto mb-4" />
+                    <h3 className="text-2xl font-bold text-gray-800 mb-2">🏆 Champion! 🏆</h3>
+                    <p className="text-xl text-gray-700">#{winner.seed} {winner.name}</p>
+                  </div>
                 </div>
               )}
             </div>
