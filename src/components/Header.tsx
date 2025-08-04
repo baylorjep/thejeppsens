@@ -14,7 +14,8 @@ export default function Header() {
     { name: 'Restaurants', href: '/restaurants' },
     { name: 'Movies', href: '/movies' },
     { name: 'Bracket', href: '/bracket' },
-    { name: 'Keep 4', href: '/keep4' }
+    { name: 'Keep 4', href: '/keep4' },
+    { name: 'Budget', href: '/budget' }
   ];
 
   return (
