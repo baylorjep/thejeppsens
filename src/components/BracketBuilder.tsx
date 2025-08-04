@@ -10,25 +10,20 @@ interface Team {
   seed: number;
 }
 
-interface Matchup {
-  id: number;
-  team1: Team;
-  team2: Team;
-  winner: Team | null;
-  completed: boolean;
-}
-
-interface BracketRound {
+interface BracketSlot {
+  id: string;
   round: number;
-  name: string;
-  matchups: Matchup[];
+  position: number;
+  team: Team | null;
+  isWinner: boolean;
+  isPlayable: boolean;
 }
 
 export default function BracketBuilder() {
   const [bracketSize, setBracketSize] = useState<4 | 8 | 16>(8);
   const [teams, setTeams] = useState<Team[]>([]);
   const [newTeam, setNewTeam] = useState('');
-  const [bracketRounds, setBracketRounds] = useState<BracketRound[]>([]);
+  const [bracketSlots, setBracketSlots] = useState<BracketSlot[]>([]);
   const [winner, setWinner] = useState<Team | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
@@ -43,6 +38,35 @@ export default function BracketBuilder() {
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
+  // Generate bracket template whenever bracket size changes
+  useEffect(() => {
+    generateBracketTemplate();
+  }, [bracketSize]);
+
+  const generateBracketTemplate = () => {
+    const slots: BracketSlot[] = [];
+    const totalRounds = Math.ceil(Math.log2(bracketSize));
+    
+    // Generate all possible slots for the bracket
+    for (let round = 1; round <= totalRounds; round++) {
+      const teamsInRound = bracketSize / Math.pow(2, round - 1);
+      for (let position = 0; position < teamsInRound; position++) {
+        slots.push({
+          id: `${round}-${position}`,
+          round,
+          position,
+          team: null,
+          isWinner: false,
+          isPlayable: false
+        });
+      }
+    }
+    
+    setBracketSlots(slots);
+    setWinner(null);
+    setShowConfetti(false);
+  };
+
   const addTeam = () => {
     if (newTeam.trim() && teams.length < bracketSize) {
       const newTeamObj: Team = {
@@ -50,100 +74,104 @@ export default function BracketBuilder() {
         name: newTeam.trim(),
         seed: teams.length + 1
       };
-      setTeams([...teams, newTeamObj]);
+      const updatedTeams = [...teams, newTeamObj];
+      setTeams(updatedTeams);
       setNewTeam('');
+      
+      // If this is the last team, populate the first round
+      if (updatedTeams.length === bracketSize) {
+        populateFirstRound(updatedTeams);
+      }
     }
+  };
+
+  const populateFirstRound = (teamList: Team[]) => {
+    const updatedSlots = [...bracketSlots];
+    
+    // Populate first round with teams in proper seeding order
+    const firstRoundSlots = updatedSlots.filter(slot => slot.round === 1);
+    const totalFirstRoundSlots = firstRoundSlots.length;
+    
+    firstRoundSlots.forEach((slot, index) => {
+      const teamIndex = index < totalFirstRoundSlots / 2 
+        ? index 
+        : totalFirstRoundSlots - 1 - (index - totalFirstRoundSlots / 2);
+      
+      if (teamList[teamIndex]) {
+        slot.team = teamList[teamIndex];
+        slot.isPlayable = true;
+      }
+    });
+    
+    setBracketSlots(updatedSlots);
   };
 
   const removeTeam = (id: number) => {
-    setTeams(teams.filter(team => team.id !== id).map((team, index) => ({ ...team, seed: index + 1 })));
-  };
-
-  const generateBracket = () => {
-    if (teams.length !== bracketSize) return;
-
-    // Create first round matchups with proper seeding
-    const firstRoundMatchups: Matchup[] = [];
-    for (let i = 0; i < teams.length / 2; i++) {
-      firstRoundMatchups.push({
-        id: i,
-        team1: teams[i],
-        team2: teams[teams.length - 1 - i],
-        winner: null,
-        completed: false
-      });
+    const updatedTeams = teams.filter(team => team.id !== id).map((team, index) => ({ ...team, seed: index + 1 }));
+    setTeams(updatedTeams);
+    
+    // Clear bracket if not enough teams
+    if (updatedTeams.length < bracketSize) {
+      const updatedSlots = bracketSlots.map(slot => ({
+        ...slot,
+        team: null,
+        isWinner: false,
+        isPlayable: false
+      }));
+      setBracketSlots(updatedSlots);
+    } else if (updatedTeams.length === bracketSize) {
+      // Repopulate first round with updated teams
+      populateFirstRound(updatedTeams);
     }
-
-    const firstRound: BracketRound = {
-      round: 1,
-      name: getRoundName(1, bracketSize),
-      matchups: firstRoundMatchups
-    };
-
-    setBracketRounds([firstRound]);
-    setWinner(null);
-    setShowConfetti(false);
   };
 
-  const getRoundName = (round: number, size: number): string => {
-    if (size === 4) return round === 1 ? 'Semifinals' : 'Championship';
-    if (size === 8) return round === 1 ? 'Quarterfinals' : round === 2 ? 'Semifinals' : 'Championship';
-    return round === 1 ? 'Round of 16' : round === 2 ? 'Quarterfinals' : round === 3 ? 'Semifinals' : 'Championship';
-  };
+  const selectWinner = (slotId: string) => {
+    const slot = bracketSlots.find(s => s.id === slotId);
+    if (!slot || !slot.isPlayable || !slot.team) return;
 
-  const selectWinner = (roundIndex: number, matchupIndex: number, winningTeam: Team) => {
-    const updatedRounds = [...bracketRounds];
-    const currentRound = updatedRounds[roundIndex];
+    const updatedSlots = [...bracketSlots];
+    const currentSlot = updatedSlots.find(s => s.id === slotId)!;
     
-    // Mark the matchup as completed with the winner
-    currentRound.matchups[matchupIndex].winner = winningTeam;
-    currentRound.matchups[matchupIndex].completed = true;
-
-    // Check if current round is complete
-    const allMatchupsComplete = currentRound.matchups.every(matchup => matchup.completed);
+    // Mark this slot as winner
+    currentSlot.isWinner = true;
+    currentSlot.isPlayable = false;
     
-    if (allMatchupsComplete) {
-      // Get all winners from this round
-      const winners = currentRound.matchups.map(matchup => matchup.winner!);
+    // Find the next round slot and advance the team
+    const nextRound = currentSlot.round + 1;
+    const nextPosition = Math.floor(currentSlot.position / 2);
+    const nextSlotId = `${nextRound}-${nextPosition}`;
+    const nextSlot = updatedSlots.find(s => s.id === nextSlotId);
+    
+    if (nextSlot) {
+      nextSlot.team = currentSlot.team;
       
-      // Check if we have a champion (only one winner left)
-      if (winners.length === 1) {
-        setWinner(winners[0]);
+      // Check if both teams in the matchup are ready
+      const otherPosition = currentSlot.position % 2 === 0 ? currentSlot.position + 1 : currentSlot.position - 1;
+      const otherSlotId = `${currentSlot.round}-${otherPosition}`;
+      const otherSlot = updatedSlots.find(s => s.id === otherSlotId);
+      
+      if (otherSlot && otherSlot.team) {
+        // Both teams are set, make the next round slot playable
+        nextSlot.isPlayable = true;
+      }
+      
+      // Check if we have a champion
+      if (nextRound > Math.ceil(Math.log2(bracketSize))) {
+        setWinner(currentSlot.team);
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
-        return;
       }
-      
-      // Create next round with winners
-      const nextMatchups: Matchup[] = [];
-      for (let i = 0; i < winners.length; i += 2) {
-        if (i + 1 < winners.length) {
-          nextMatchups.push({
-            id: i / 2,
-            team1: winners[i],
-            team2: winners[i + 1],
-            winner: null,
-            completed: false
-          });
-        }
-      }
-
-      const nextRound: BracketRound = {
-        round: currentRound.round + 1,
-        name: getRoundName(currentRound.round + 1, bracketSize),
-        matchups: nextMatchups
-      };
-      
-      updatedRounds.push(nextRound);
     }
-
-    setBracketRounds(updatedRounds);
+    
+    setBracketSlots(updatedSlots);
   };
 
   const resetBracket = () => {
-    setBracketRounds([]);
+    setTeams([]);
+    setBracketSlots([]);
     setWinner(null);
     setShowConfetti(false);
+    generateBracketTemplate();
   };
 
   // Calculate responsive sizing based on bracket size and screen size
@@ -151,7 +179,7 @@ export default function BracketBuilder() {
     const isMobile = screenSize.width < 768;
     const isTablet = screenSize.width < 1024;
     
-    // Base sizes that scale with bracket size - more aggressive scaling
+    // Base sizes that scale with bracket size
     const baseSizes = {
       4: { teamWidth: 'w-48', teamHeight: 'h-20', textSize: 'text-lg', seedSize: 'text-base' },
       8: { teamWidth: 'w-36', teamHeight: 'h-14', textSize: 'text-sm', seedSize: 'text-xs' },
@@ -188,125 +216,303 @@ export default function BracketBuilder() {
     };
   };
 
-  const renderMatchup = (matchup: Matchup, roundIndex: number, matchupIndex: number) => {
-    const isCurrentRound = roundIndex === bracketRounds.length - 1;
-    const isCompleted = matchup.completed;
+  const renderBracketSlot = (slot: BracketSlot) => {
     const sizing = getResponsiveSizing();
-
+    const isFirstRound = slot.round === 1;
+    const isFinalRound = slot.round === Math.ceil(Math.log2(bracketSize));
+    
     return (
-      <div key={matchup.id} className={`relative ${sizing.gap} flex flex-col`}>
-        {/* Team 1 */}
-        <div
-          className={`${sizing.teamWidth} ${sizing.teamHeight} p-2 rounded-lg border-2 transition-all ${
-            isCompleted && matchup.winner?.id !== matchup.team1.id
-              ? 'border-gray-200 bg-gray-50 text-gray-400'
-              : isCompleted && matchup.winner?.id === matchup.team1.id
+      <div
+        key={slot.id}
+        className={`${sizing.teamWidth} ${sizing.teamHeight} p-2 rounded-lg border-2 transition-all ${
+          slot.team
+            ? slot.isWinner
               ? 'border-green-400 bg-green-50'
-              : 'border-gray-200 bg-white hover:border-gray-300'
-          } ${isCurrentRound && !isCompleted ? 'cursor-pointer' : ''}`}
-          onClick={() => isCurrentRound && !isCompleted && selectWinner(roundIndex, matchupIndex, matchup.team1)}
-        >
-          <div className="flex items-center justify-between h-full">
-            <div className="flex items-center space-x-1">
-              <span className={`font-bold text-gray-500 ${sizing.seedSize}`}>#{matchup.team1.seed}</span>
-              <span className={`font-medium truncate ${sizing.textSize}`}>{matchup.team1.name}</span>
-            </div>
-            {isCompleted && matchup.winner?.id === matchup.team1.id && (
-              <Trophy className="h-3 w-3 text-green-500 flex-shrink-0" />
+              : slot.isPlayable
+              ? 'border-blue-300 bg-blue-50 cursor-pointer hover:border-blue-400'
+              : 'border-gray-200 bg-white'
+            : 'border-gray-200 bg-gray-50'
+        }`}
+        onClick={() => slot.isPlayable && selectWinner(slot.id)}
+      >
+        <div className="flex items-center justify-between h-full">
+          <div className="flex items-center space-x-1">
+            {slot.team && (
+              <>
+                <span className={`font-bold text-gray-500 ${sizing.seedSize}`}>#{slot.team.seed}</span>
+                <span className={`font-medium truncate ${sizing.textSize}`}>{slot.team.name}</span>
+              </>
+            )}
+            {!slot.team && (
+              <span className={`text-gray-400 ${sizing.textSize}`}>
+                {isFirstRound ? `Seed ${slot.position + 1}` : 'TBD'}
+              </span>
             )}
           </div>
-        </div>
-
-        {/* VS */}
-        <div className={`text-center text-gray-400 ${sizing.textSize} my-1`}>vs</div>
-
-        {/* Team 2 */}
-        <div
-          className={`${sizing.teamWidth} ${sizing.teamHeight} p-2 rounded-lg border-2 transition-all ${
-            isCompleted && matchup.winner?.id !== matchup.team2.id
-              ? 'border-gray-200 bg-gray-50 text-gray-400'
-              : isCompleted && matchup.winner?.id === matchup.team2.id
-              ? 'border-green-400 bg-green-50'
-              : 'border-gray-200 bg-white hover:border-gray-300'
-          } ${isCurrentRound && !isCompleted ? 'cursor-pointer' : ''}`}
-          onClick={() => isCurrentRound && !isCompleted && selectWinner(roundIndex, matchupIndex, matchup.team2)}
-        >
-          <div className="flex items-center justify-between h-full">
-            <div className="flex items-center space-x-1">
-              <span className={`font-bold text-gray-500 ${sizing.seedSize}`}>#{matchup.team2.seed}</span>
-              <span className={`font-medium truncate ${sizing.textSize}`}>{matchup.team2.name}</span>
-            </div>
-            {isCompleted && matchup.winner?.id === matchup.team2.id && (
-              <Trophy className="h-3 w-3 text-green-500 flex-shrink-0" />
-            )}
-          </div>
+          {slot.isWinner && slot.team && (
+            <Trophy className="h-3 w-3 text-green-500 flex-shrink-0" />
+          )}
         </div>
       </div>
     );
   };
 
-  const renderBracketRound = (round: BracketRound, roundIndex: number) => {
+  const renderBracket = () => {
     const totalRounds = Math.ceil(Math.log2(bracketSize));
     const sizing = getResponsiveSizing();
     
-    // Calculate positioning based on round
-    const roundProgress = roundIndex / (totalRounds - 1); // 0 = first round, 1 = final round
+    return (
+      <div className="relative w-full h-full">
+        {/* Bracket Lines Background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <svg className="w-full h-full" style={{ position: 'absolute', top: 0, left: 0 }}>
+            {/* Draw connecting lines for bracket progression */}
+            {bracketSlots.map(slot => {
+              if (slot.round < totalRounds) {
+                const nextRound = slot.round + 1;
+                const nextPosition = Math.floor(slot.position / 2);
+                const nextSlotId = `${nextRound}-${nextPosition}`;
+                const nextSlot = bracketSlots.find(s => s.id === nextSlotId);
+                
+                if (nextSlot) {
+                  // Calculate positions for connecting lines
+                  const currentPos = getSlotPosition(slot);
+                  const nextPos = getSlotPosition(nextSlot);
+                  
+                  return (
+                    <line
+                      key={`line-${slot.id}-${nextSlotId}`}
+                      x1={currentPos.x}
+                      y1={currentPos.y}
+                      x2={nextPos.x}
+                      y2={nextPos.y}
+                      stroke="#d1d5db"
+                      strokeWidth="2"
+                      strokeDasharray="5,5"
+                    />
+                  );
+                }
+              }
+              return null;
+            })}
+          </svg>
+        </div>
+        
+        {/* Bracket Slots - 4 Quadrant Layout */}
+        <div className="relative z-10 w-full h-full">
+          {Array.from({ length: totalRounds }, (_, roundIndex) => {
+            const round = roundIndex + 1;
+            const roundSlots = bracketSlots.filter(slot => slot.round === round);
+            const isFirstRound = round === 1;
+            const isFinalRound = round === totalRounds;
+            
+            if (isFirstRound) {
+              // First round: 4 quadrants in corners
+              const slotsPerRegion = roundSlots.length / 4;
+              
+              return (
+                <div key={round} className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-8 p-6">
+                  {/* WEST Region (Top Left) */}
+                  <div className="flex flex-col items-start justify-start space-y-2">
+                    <div className="text-xs font-bold text-gray-600 mb-2">WEST</div>
+                    {roundSlots.slice(0, slotsPerRegion).map(slot => renderBracketSlot(slot))}
+                  </div>
+                  
+                  {/* SOUTH Region (Top Right) */}
+                  <div className="flex flex-col items-end justify-start space-y-2">
+                    <div className="text-xs font-bold text-gray-600 mb-2 text-right">SOUTH</div>
+                    {roundSlots.slice(slotsPerRegion, slotsPerRegion * 2).map(slot => renderBracketSlot(slot))}
+                  </div>
+                  
+                  {/* EAST Region (Bottom Left) */}
+                  <div className="flex flex-col items-start justify-end space-y-2">
+                    <div className="text-xs font-bold text-gray-600 mb-2">EAST</div>
+                    {roundSlots.slice(slotsPerRegion * 2, slotsPerRegion * 3).map(slot => renderBracketSlot(slot))}
+                  </div>
+                  
+                  {/* MIDWEST Region (Bottom Right) */}
+                  <div className="flex flex-col items-end justify-end space-y-2">
+                    <div className="text-xs font-bold text-gray-600 mb-2 text-right">MIDWEST</div>
+                    {roundSlots.slice(slotsPerRegion * 3).map(slot => renderBracketSlot(slot))}
+                  </div>
+                </div>
+              );
+            } else if (isFinalRound) {
+              // Final round: championship in center
+              return (
+                <div key={round} className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-700 mb-4">CHAMPIONSHIP</div>
+                    <div className="flex flex-col items-center space-y-3">
+                      {roundSlots.map(slot => renderBracketSlot(slot))}
+                    </div>
+                  </div>
+                </div>
+              );
+            } else {
+              // Middle rounds: maintain regional positioning and converge
+              if (bracketSize === 8) {
+                // 8-team bracket: Round 2 is semifinals (left vs right)
+                if (round === 2) {
+                  return (
+                    <div key={round} className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-sm font-bold text-gray-700 mb-4">SEMIFINALS</div>
+                        <div className="flex flex-col items-center space-y-2">
+                          {roundSlots.map(slot => renderBracketSlot(slot))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              } else if (bracketSize === 16) {
+                // 16-team bracket: Round 2 is regional finals, Round 3 is semifinals
+                if (round === 2) {
+                  // Regional finals - maintain 4-quadrant layout but closer to center
+                  const slotsPerRegion = 1;
+                  
+                  return (
+                    <div key={round} className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-8 p-6">
+                      {/* WEST Regional Final - closer to center */}
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="text-xs font-bold text-gray-600 mb-2">WEST FINAL</div>
+                        {roundSlots.slice(0, slotsPerRegion).map(slot => renderBracketSlot(slot))}
+                      </div>
+                      
+                      {/* SOUTH Regional Final - closer to center */}
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="text-xs font-bold text-gray-600 mb-2">SOUTH FINAL</div>
+                        {roundSlots.slice(slotsPerRegion, slotsPerRegion * 2).map(slot => renderBracketSlot(slot))}
+                      </div>
+                      
+                      {/* EAST Regional Final - closer to center */}
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="text-xs font-bold text-gray-600 mb-2">EAST FINAL</div>
+                        {roundSlots.slice(slotsPerRegion * 2, slotsPerRegion * 3).map(slot => renderBracketSlot(slot))}
+                      </div>
+                      
+                      {/* MIDWEST Regional Final - closer to center */}
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="text-xs font-bold text-gray-600 mb-2">MIDWEST FINAL</div>
+                        {roundSlots.slice(slotsPerRegion * 3).map(slot => renderBracketSlot(slot))}
+                      </div>
+                    </div>
+                  );
+                } else if (round === 3) {
+                  // Semifinals - left vs right, even closer to center
+                  return (
+                    <div key={round} className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-sm font-bold text-gray-700 mb-4">FINAL FOUR</div>
+                        <div className="flex flex-col items-center space-y-2">
+                          {roundSlots.map(slot => renderBracketSlot(slot))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              }
+              
+              // Fallback: center positioning for any other middle rounds
+              return (
+                <div key={round} className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-sm font-bold text-gray-700 mb-4">ROUND {round}</div>
+                    <div className="flex flex-col items-center space-y-2">
+                      {roundSlots.map(slot => renderBracketSlot(slot))}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Helper function to calculate slot positions for connecting lines
+  const getSlotPosition = (slot: BracketSlot) => {
+    const totalRounds = Math.ceil(Math.log2(bracketSize));
+    const round = slot.round;
+    const position = slot.position;
     
-    // For 4-corners layout, we need to position matchups in corners for first round
-    if (roundIndex === 0) {
-      // First round: distribute matchups to 4 corners
-      const matchupsPerCorner = Math.ceil(round.matchups.length / 4);
+    // Calculate position based on round and slot position
+    const containerWidth = 800; // Approximate container width
+    const containerHeight = 600; // Approximate container height
+    
+    if (round === 1) {
+      // First round: 4 quadrants
+      const slotsPerRegion = bracketSize / 4;
+      const regionIndex = Math.floor(position / slotsPerRegion);
+      const regionPosition = position % slotsPerRegion;
       
-      return (
-        <div key={round.round} className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-2 p-2">
-          {/* Top Left Corner */}
-          <div className="flex flex-col items-start justify-start space-y-1">
-            {round.matchups.slice(0, matchupsPerCorner).map((matchup, index) => 
-              renderMatchup(matchup, roundIndex, index)
-            )}
-          </div>
-          
-          {/* Top Right Corner */}
-          <div className="flex flex-col items-end justify-start space-y-1">
-            {round.matchups.slice(matchupsPerCorner, matchupsPerCorner * 2).map((matchup, index) => 
-              renderMatchup(matchup, roundIndex, index + matchupsPerCorner)
-            )}
-          </div>
-          
-          {/* Bottom Left Corner */}
-          <div className="flex flex-col items-start justify-end space-y-1">
-            {round.matchups.slice(matchupsPerCorner * 2, matchupsPerCorner * 3).map((matchup, index) => 
-              renderMatchup(matchup, roundIndex, index + matchupsPerCorner * 2)
-            )}
-          </div>
-          
-          {/* Bottom Right Corner */}
-          <div className="flex flex-col items-end justify-end space-y-1">
-            {round.matchups.slice(matchupsPerCorner * 3).map((matchup, index) => 
-              renderMatchup(matchup, roundIndex, index + matchupsPerCorner * 3)
-            )}
-          </div>
-        </div>
-      );
+      let x, y;
+      switch (regionIndex) {
+        case 0: // WEST (top left)
+          x = containerWidth * 0.2;
+          y = containerHeight * (0.2 + regionPosition * 0.15);
+          break;
+        case 1: // SOUTH (top right)
+          x = containerWidth * 0.8;
+          y = containerHeight * (0.2 + regionPosition * 0.15);
+          break;
+        case 2: // EAST (bottom left)
+          x = containerWidth * 0.2;
+          y = containerHeight * (0.6 + regionPosition * 0.15);
+          break;
+        case 3: // MIDWEST (bottom right)
+          x = containerWidth * 0.8;
+          y = containerHeight * (0.6 + regionPosition * 0.15);
+          break;
+        default:
+          x = containerWidth * 0.5;
+          y = containerHeight * 0.5;
+      }
+      return { x, y };
+    } else if (round === totalRounds) {
+      // Final round: center
+      return {
+        x: containerWidth * 0.5,
+        y: containerHeight * 0.5
+      };
     } else {
-      // Later rounds: converge toward center
-      const centerOffset = roundProgress * 0.3; // Move 30% toward center
+      // Middle rounds: converge toward center
+      const progress = (round - 1) / (totalRounds - 1);
+      const centerX = containerWidth * 0.5;
+      const centerY = containerHeight * 0.5;
       
-      return (
-        <div key={round.round} className="absolute inset-0 flex items-center justify-center">
-          <div 
-            className="flex flex-col items-center space-y-1"
-            style={{
-              transform: `scale(${1 - centerOffset * 0.3})`,
-              opacity: 1 - centerOffset * 0.2
-            }}
-          >
-            {round.matchups.map((matchup, index) => 
-              renderMatchup(matchup, roundIndex, index)
-            )}
-          </div>
-        </div>
-      );
+      // Calculate base position based on which region this slot came from
+      const baseRegion = Math.floor(position * Math.pow(2, round - 1) / bracketSize);
+      let baseX, baseY;
+      
+      switch (baseRegion) {
+        case 0: // WEST
+          baseX = containerWidth * 0.2;
+          baseY = containerHeight * 0.4;
+          break;
+        case 1: // SOUTH
+          baseX = containerWidth * 0.8;
+          baseY = containerHeight * 0.4;
+          break;
+        case 2: // EAST
+          baseX = containerWidth * 0.2;
+          baseY = containerHeight * 0.6;
+          break;
+        case 3: // MIDWEST
+          baseX = containerWidth * 0.8;
+          baseY = containerHeight * 0.6;
+          break;
+        default:
+          baseX = centerX;
+          baseY = centerY;
+      }
+      
+      // Interpolate between base position and center
+      return {
+        x: baseX + (centerX - baseX) * progress,
+        y: baseY + (centerY - baseY) * progress
+      };
     }
   };
 
@@ -318,7 +524,7 @@ export default function BracketBuilder() {
             <Trophy className="inline-block h-8 w-8 text-gray-700 mr-3" />
             March Madness Bracket
           </h2>
-          <p className="text-xl text-gray-600">Create your own tournament bracket!</p>
+          <p className="text-xl text-gray-600">Create our own tournament bracket!</p>
         </div>
 
         {/* Setup Panel - Compact Horizontal Layout */}
@@ -386,61 +592,47 @@ export default function BracketBuilder() {
               </div>
             </div>
 
-            {/* Generate Button */}
+            {/* Reset Button */}
             <div className="flex flex-col justify-center">
               <button
-                onClick={generateBracket}
-                disabled={teams.length !== bracketSize}
-                className={`w-full py-3 rounded-lg text-lg font-bold text-white transition-all ${
-                  teams.length === bracketSize
-                    ? 'bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900'
-                    : 'bg-gray-300 cursor-not-allowed'
-                }`}
+                onClick={resetBracket}
+                className="w-full py-3 rounded-lg text-lg font-bold text-gray-600 hover:bg-gray-100 transition-colors border-2 border-gray-200"
               >
-                Generate Bracket
+                <RotateCcw className="inline-block h-4 w-4 mr-2" />
+                Reset Bracket
               </button>
-              
-              {bracketRounds.length > 0 && (
-                <button
-                  onClick={resetBracket}
-                  className="w-full mt-2 py-1 text-sm rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-                >
-                  <RotateCcw className="inline-block h-3 w-3 mr-1" />
-                  Reset
-                </button>
-              )}
             </div>
           </div>
         </div>
 
         {/* Bracket Display - Full Screen */}
         <div className={`bg-white rounded-xl shadow-lg border border-gray-200 ${getResponsiveSizing().containerHeight} relative overflow-hidden`}>
-          {bracketRounds.length === 0 ? (
+          {bracketSlots.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center text-gray-500">
               <div className="text-center">
                 <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <p>Add teams and generate your bracket to get started!</p>
+                <p>Select a tournament size to get started!</p>
               </div>
             </div>
           ) : (
-            <div className="relative w-full h-full">
-              {bracketRounds.map((round, index) => 
-                renderBracketRound(round, index)
-              )}
-              
-              {/* Winner Display - Center */}
-              {winner && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-sm">
-                  <div className="text-center py-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 px-8">
-                    <Sparkles className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">🏆 Champion! 🏆</h3>
-                    <p className="text-xl text-gray-700">#{winner.seed} {winner.name}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            renderBracket()
           )}
         </div>
+
+        {/* Winner Display - Dead Center */}
+        {winner && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm z-10">
+            <div className="text-center py-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 px-12 shadow-2xl">
+              <Sparkles className="h-16 w-16 text-gray-700 mx-auto mb-6" />
+              <h3 className="text-4xl font-bold text-gray-800 mb-4">🏆 Champion! 🏆</h3>
+              <div className="bg-white rounded-xl p-6 border border-gray-200 mb-4">
+                <p className="text-3xl font-bold text-gray-700">#{winner.seed}</p>
+                <p className="text-2xl font-semibold text-gray-800">{winner.name}</p>
+              </div>
+              <p className="text-lg text-gray-600">Tournament Complete!</p>
+            </div>
+          </div>
+        )}
 
         {/* Confetti */}
         {showConfetti && (

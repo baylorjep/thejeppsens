@@ -1,22 +1,22 @@
 # The Jeppsens 🏠
 
-Your favorite little corner of the internet - a beautiful and fun React-based web app for couples to enjoy together.
+Our little corner of the internet - a beautiful and fun React-based web app for Baylor and Isabel to enjoy together.
 
 ## ✨ Features
 
 ### 🏠 Homepage
 - Beautiful landing page with rotating photo carousel
-- Welcoming design with "Your favorite little corner of the internet" branding
+- Welcoming design with "Our little corner of the internet" branding
 - Responsive layout optimized for mobile and desktop
 
-### 🍽️ Restaurant Roulette
-- Add your favorite restaurants with custom tags
+### 🍽️ Restaurant Picker
+- Add our favorite restaurants with custom tags
 - Filter by price range (cheap, moderate, fancy)
 - Filter by distance (close, medium, far)
 - Spin animation to randomly select a restaurant
 - Beautiful result display with restaurant details
 
-### 🎬 Movie Magic
+### 🎬 Movie Picker
 - Add movies with genre tags and metadata
 - Filter by genre, type (live action/animated), and duration
 - Movie modal with detailed information
@@ -30,10 +30,10 @@ Your favorite little corner of the internet - a beautiful and fun React-based we
 - Perfect for ranking competitions and decision-making
 
 ### 🎯 Keep 4 / Cut 4
-- Choose your top 4 from 8 options
+- Choose our top 4 from 8 options
 - Elegant grid interface with selection indicators
 - Smooth transitions and visual feedback
-- "Your Final 4" summary display
+- "Our Final 4" summary display
 - Great for narrowing down choices together
 
 ## 🚀 Getting Started

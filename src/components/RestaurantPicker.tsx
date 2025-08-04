@@ -56,7 +56,7 @@ export default function RestaurantPicker() {
     }
 
     if (filteredRestaurants.length === 0) {
-      alert('No restaurants match your selected tags!');
+      alert('No restaurants match our selected tags!');
       return;
     }
 
@@ -179,7 +179,7 @@ export default function RestaurantPicker() {
             ) : (
               <div className="text-center py-8">
                 <Sparkles className="h-16 w-16 text-gray-700 mx-auto mb-6" />
-                <h3 className="text-3xl font-bold text-gray-800 mb-4">You&apos;re going to...</h3>
+                <h3 className="text-3xl font-bold text-gray-800 mb-4">We&apos;re going to...</h3>
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
                   <h4 className="text-2xl font-bold text-gray-800 mb-2">{result?.name}</h4>
                   {result?.tags && result.tags.length > 0 && (

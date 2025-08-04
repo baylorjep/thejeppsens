@@ -29,11 +29,11 @@ export default function Homepage() {
             Welcome to thejeppsens.com
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Modern decision tools for couples ✨
+            Our little corner of the internet ✨
           </p>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            A clean, simple space for making decisions together. From restaurant picks to movie nights, 
-            we&apos;ve got you covered with tools that make choosing fun and easy.
+            A clean, simple space for us to make decisions together. From restaurant picks to movie nights, 
+            we&apos;ve got everything we need to make choosing fun and easy.
           </p>
         </div>
 
@@ -65,14 +65,14 @@ export default function Homepage() {
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <div className="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">
             <Heart className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">Decision Tools</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Our Tools</h3>
             <p className="text-gray-600">Restaurant pickers, movie selectors, and more</p>
           </div>
           
           <div className="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">
             <Users className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">Couple Focused</h3>
-            <p className="text-gray-600">Built specifically for couples making choices together</p>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Just For Us</h3>
+            <p className="text-gray-600">Built specifically for us to make choices together</p>
           </div>
           
           <div className="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">

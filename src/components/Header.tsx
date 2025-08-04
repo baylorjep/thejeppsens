@@ -24,7 +24,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="text-2xl font-bold text-gray-800">The Jeppsens</div>
-            <div className="text-sm text-gray-500 hidden sm:block">Decision tools for couples</div>
+            <div className="text-sm text-gray-500 hidden sm:block">Our little corner of the internet</div>
           </Link>
 
           {/* Desktop Navigation */}

@@ -64,7 +64,7 @@ export default function MoviePicker() {
     }
 
     if (filteredMovies.length === 0) {
-      alert('No movies match your selected criteria!');
+      alert('No movies match our selected criteria!');
       return;
     }
 
@@ -176,7 +176,7 @@ export default function MoviePicker() {
 
             {/* Movie List */}
             <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Your Movies ({movies.length})</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Our Movies ({movies.length})</h3>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {movies.map((movie) => (
                   <div key={movie.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -226,7 +226,7 @@ export default function MoviePicker() {
             ) : (
               <div className="text-center py-8">
                 <Sparkles className="h-16 w-16 text-gray-700 mx-auto mb-6" />
-                <h3 className="text-3xl font-bold text-gray-800 mb-4">You&apos;re watching...</h3>
+                <h3 className="text-3xl font-bold text-gray-800 mb-4">We&apos;re watching...</h3>
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
                   <h4 className="text-2xl font-bold text-gray-800 mb-2">{result?.name}</h4>
                   <div className="flex flex-wrap justify-center gap-2 mt-3">

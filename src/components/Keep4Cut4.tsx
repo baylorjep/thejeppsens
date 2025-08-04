@@ -74,7 +74,7 @@ export default function Keep4Cut4() {
             <Heart className="inline-block h-8 w-8 text-gray-700 mr-3" />
             Keep 4 / Cut 4
           </h2>
-          <p className="text-xl text-gray-600">Choose your top 4 from 8 options!</p>
+          <p className="text-xl text-gray-600">Choose our top 4 from 8 options!</p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -167,7 +167,7 @@ export default function Keep4Cut4() {
             ) : (
               <div>
                 <h3 className="text-lg font-semibold mb-4 text-gray-800 text-center">
-                  {gameComplete ? 'Your Final 4!' : 'Select Your Top 4'}
+                  {gameComplete ? 'Our Final 4!' : 'Select Our Top 4'}
                 </h3>
                 
                 {gameComplete ? (
@@ -206,7 +206,7 @@ export default function Keep4Cut4() {
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-semibold text-gray-700 mb-2">How to play:</h4>
                   <p className="text-sm text-gray-600">
-                    Click on 4 choices you want to keep. The other 4 will be eliminated. 
+                    Click on 4 choices we want to keep. The other 4 will be eliminated. 
                     Choose wisely!
                   </p>
                 </div>

@@ -12,11 +12,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-6">
             <h3 className="text-2xl font-bold mb-2">The Jeppsens</h3>
-            <p className="text-gray-300">Decision tools for couples</p>
+            <p className="text-gray-300">Our little corner of the internet</p>
           </div>
           <div className="text-sm text-gray-400">
-            <p>Built for modern couples making decisions together</p>
-            <p className="mt-2">© 2024 The Jeppsens. All rights reserved.</p>
+            <p>Built for us to make decisions together</p>
+            <p className="mt-2">© 2024 Baylor & Isabel Jeppsen. All rights reserved.</p>
           </div>
         </div>
       </footer>

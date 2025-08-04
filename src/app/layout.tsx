@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "The Jeppsens - Decision tools for couples",
-  description: "A modern space for couples to make decisions together - featuring restaurant pickers, movie selectors, bracket builders, and choice tools.",
-  keywords: "couple, relationship, date night, restaurant picker, movie picker, bracket builder",
-  authors: [{ name: "The Jeppsens" }],
+  title: "The Jeppsens - Our little corner of the internet",
+  description: "A personal space for Baylor and Isabel to make decisions together - featuring restaurant pickers, movie selectors, bracket builders, and choice tools.",
+  keywords: "personal, relationship, date night, restaurant picker, movie picker, bracket builder",
+  authors: [{ name: "Baylor & Isabel Jeppsen" }],
   viewport: "width=device-width, initial-scale=1",
   themeColor: "#111827",
 };
