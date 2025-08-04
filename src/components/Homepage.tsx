@@ -32,12 +32,6 @@ export default function Homepage() {
       src: "/photos/dipvertical.JPG",
       alt: "Baylor and Isabel doing a dip",
       caption: "Dance moves"
-    },
-    {
-      id: 4,
-      src: "/photos/templevertical.heic",
-      alt: "Baylor and Isabel at the temple",
-      caption: "Temple memories"
     }
   ];
 
