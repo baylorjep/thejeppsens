@@ -13,13 +13,22 @@ export default function BudgetPage() {
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-      setShowSignIn(false);
-    }, 2000);
+    // Only allow specific credentials for demo
+    if (email === 'test@test.com' && password === 'test') {
+      setIsLoading(true);
+      
+      // Simulate loading
+      setTimeout(() => {
+        setIsLoading(false);
+        setShowSignIn(false);
+      }, 2000);
+    } else {
+      // Show error for wrong credentials
+      alert('Invalid credentials. Please use test@test.com / test');
+      setEmail('');
+      setPassword('');
+    }
   };
 
   return (
@@ -36,6 +45,11 @@ export default function BudgetPage() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Budget Tracker</h2>
               <p className="text-gray-600">Sign in to access your financial dashboard</p>
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <strong>Demo:</strong> test@test.com / test
+                </p>
+              </div>
             </div>
 
             <form onSubmit={handleSignIn} className="space-y-6">
