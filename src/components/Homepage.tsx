@@ -154,15 +154,15 @@ export default function Homepage() {
             </p>
           </a>
           
-          <a href="/bracket" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
+          <a href="/budget" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-green-200 transition-colors">
               <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">Bracket</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">Budget</h3>
             <p className="text-gray-600 leading-relaxed">
-              Create tournament brackets and compete to find the ultimate winner
+              Track your finances and plan your future together with our budget tools
             </p>
           </a>
         </div>
@@ -170,23 +170,23 @@ export default function Homepage() {
         {/* Call to Action */}
         <div className="text-center">
           <h2 className="text-4xl font-bold text-gray-800 mb-6">
-            Ready to make some decisions?
+            Want to play some games?
           </h2>
           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            Click on any card above to start exploring our tools and making choices together
+            Check out our mini games for some fun decision-making challenges
           </p>
           <div className="flex justify-center space-x-6">
+            <a
+              href="/bracket"
+              className="px-8 py-4 bg-gray-700 hover:bg-gray-800 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
+            >
+              Tournament Bracket
+            </a>
             <a
               href="/keep4"
               className="px-8 py-4 bg-gray-700 hover:bg-gray-800 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
             >
               Keep 4 Game
-            </a>
-            <a
-              href="/budget"
-              className="px-8 py-4 bg-gray-700 hover:bg-gray-800 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
-            >
-              Budget Tracker
             </a>
           </div>
         </div>
