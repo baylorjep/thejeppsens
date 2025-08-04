@@ -26,17 +26,6 @@ export default function BracketBuilder() {
   const [bracketSlots, setBracketSlots] = useState<BracketSlot[]>([]);
   const [winner, setWinner] = useState<Team | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const updateScreenSize = () => {
-      setScreenSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-    
-    updateScreenSize();
-    window.addEventListener('resize', updateScreenSize);
-    return () => window.removeEventListener('resize', updateScreenSize);
-  }, []);
 
   // Generate bracket template whenever bracket size changes
   const generateBracketTemplate = useCallback(() => {
@@ -150,7 +139,7 @@ export default function BracketBuilder() {
       const otherSlotId = `${currentSlot.round}-${otherPosition}`;
       const otherSlot = updatedSlots.find(s => s.id === otherSlotId);
       
-      if (otherSlot && otherSlot.team) {
+      if (otherSlot && otherSlot.team && otherSlot.isWinner) {
         // Both teams are set, make the next round slot playable
         nextSlot.isPlayable = true;
       }
@@ -174,82 +163,41 @@ export default function BracketBuilder() {
     generateBracketTemplate();
   };
 
-  // Calculate responsive sizing based on bracket size and screen size
-  const getResponsiveSizing = () => {
-    const isMobile = screenSize.width < 768;
-    const isTablet = screenSize.width < 1024;
-    
-    // Base sizes that scale with bracket size
-    const baseSizes = {
-      4: { teamWidth: 'w-48', teamHeight: 'h-20', textSize: 'text-lg', seedSize: 'text-base' },
-      8: { teamWidth: 'w-36', teamHeight: 'h-14', textSize: 'text-sm', seedSize: 'text-xs' },
-      16: { teamWidth: 'w-24', teamHeight: 'h-10', textSize: 'text-xs', seedSize: 'text-xs' }
-    };
-
-    const sizes = baseSizes[bracketSize];
-
-    // Scale down for smaller screens
-    if (isMobile) {
-      return {
-        teamWidth: 'w-20',
-        teamHeight: 'h-8',
-        textSize: 'text-xs',
-        seedSize: 'text-xs',
-        gap: 'gap-1',
-        containerHeight: 'h-[60vh]'
-      };
-    } else if (isTablet) {
-      return {
-        teamWidth: sizes.teamWidth.replace('w-48', 'w-32').replace('w-36', 'w-28').replace('w-24', 'w-20'),
-        teamHeight: sizes.teamHeight.replace('h-20', 'h-12').replace('h-14', 'h-10').replace('h-10', 'h-8'),
-        textSize: sizes.textSize.replace('text-lg', 'text-sm').replace('text-sm', 'text-xs').replace('text-xs', 'text-xs'),
-        seedSize: sizes.seedSize.replace('text-base', 'text-xs').replace('text-sm', 'text-xs').replace('text-xs', 'text-xs'),
-        gap: 'gap-2',
-        containerHeight: 'h-[70vh]'
-      };
-    }
-
-    return {
-      ...sizes,
-      gap: 'gap-3',
-      containerHeight: 'h-[75vh]'
-    };
-  };
-
   const renderBracketSlot = (slot: BracketSlot) => {
-    const sizing = getResponsiveSizing();
     const isFirstRound = slot.round === 1;
     
     return (
       <div
         key={slot.id}
-        className={`${sizing.teamWidth} ${sizing.teamHeight} p-2 rounded-lg border-2 transition-all ${
+        className={`p-3 rounded-lg border-2 transition-all cursor-pointer ${
           slot.team
             ? slot.isWinner
-              ? 'border-green-400 bg-green-50'
+              ? 'border-green-400 bg-green-50 shadow-md'
               : slot.isPlayable
-              ? 'border-blue-300 bg-blue-50 cursor-pointer hover:border-blue-400'
+              ? 'border-blue-300 bg-blue-50 hover:border-blue-400 hover:shadow-md'
               : 'border-gray-200 bg-white'
             : 'border-gray-200 bg-gray-50'
         }`}
         onClick={() => slot.isPlayable && selectWinner(slot.id)}
       >
-        <div className="flex items-center justify-between h-full">
-          <div className="flex items-center space-x-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
             {slot.team && (
               <>
-                <span className={`font-bold text-gray-500 ${sizing.seedSize}`}>#{slot.team.seed}</span>
-                <span className={`font-medium truncate ${sizing.textSize}`}>{slot.team.name}</span>
+                <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  #{slot.team.seed}
+                </span>
+                <span className="font-medium text-gray-800">{slot.team.name}</span>
               </>
             )}
             {!slot.team && (
-              <span className={`text-gray-400 ${sizing.textSize}`}>
+              <span className="text-gray-400 text-sm">
                 {isFirstRound ? `Seed ${slot.position + 1}` : 'TBD'}
               </span>
             )}
           </div>
           {slot.isWinner && slot.team && (
-            <Trophy className="h-3 w-3 text-green-500 flex-shrink-0" />
+            <Trophy className="h-4 w-4 text-green-500" />
           )}
         </div>
       </div>
@@ -260,258 +208,28 @@ export default function BracketBuilder() {
     const totalRounds = Math.ceil(Math.log2(bracketSize));
     
     return (
-      <div className="relative w-full h-full">
-        {/* Bracket Lines Background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <svg className="w-full h-full" style={{ position: 'absolute', top: 0, left: 0 }}>
-            {/* Draw connecting lines for bracket progression */}
-            {bracketSlots.map(slot => {
-              if (slot.round < totalRounds) {
-                const nextRound = slot.round + 1;
-                const nextPosition = Math.floor(slot.position / 2);
-                const nextSlotId = `${nextRound}-${nextPosition}`;
-                const nextSlot = bracketSlots.find(s => s.id === nextSlotId);
-                
-                if (nextSlot) {
-                  // Calculate positions for connecting lines
-                  const currentPos = getSlotPosition(slot);
-                  const nextPos = getSlotPosition(nextSlot);
-                  
-                  return (
-                    <line
-                      key={`line-${slot.id}-${nextSlotId}`}
-                      x1={currentPos.x}
-                      y1={currentPos.y}
-                      x2={nextPos.x}
-                      y2={nextPos.y}
-                      stroke="#d1d5db"
-                      strokeWidth="2"
-                      strokeDasharray="5,5"
-                    />
-                  );
-                }
-              }
-              return null;
-            })}
-          </svg>
-        </div>
-        
-        {/* Bracket Slots - 4 Quadrant Layout */}
-        <div className="relative z-10 w-full h-full">
-          {Array.from({ length: totalRounds }, (_, roundIndex) => {
-            const round = roundIndex + 1;
-            const roundSlots = bracketSlots.filter(slot => slot.round === round);
-            const isFirstRound = round === 1;
-            const isFinalRound = round === totalRounds;
-            
-            if (isFirstRound) {
-              // First round: 4 quadrants in corners
-              const slotsPerRegion = roundSlots.length / 4;
-              
-              return (
-                <div key={round} className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-8 p-6">
-                  {/* WEST Region (Top Left) */}
-                  <div className="flex flex-col items-start justify-start space-y-2">
-                    <div className="text-xs font-bold text-gray-600 mb-2">WEST</div>
-                    {roundSlots.slice(0, slotsPerRegion).map(slot => renderBracketSlot(slot))}
-                  </div>
-                  
-                  {/* SOUTH Region (Top Right) */}
-                  <div className="flex flex-col items-end justify-start space-y-2">
-                    <div className="text-xs font-bold text-gray-600 mb-2 text-right">SOUTH</div>
-                    {roundSlots.slice(slotsPerRegion, slotsPerRegion * 2).map(slot => renderBracketSlot(slot))}
-                  </div>
-                  
-                  {/* EAST Region (Bottom Left) */}
-                  <div className="flex flex-col items-start justify-end space-y-2">
-                    <div className="text-xs font-bold text-gray-600 mb-2">EAST</div>
-                    {roundSlots.slice(slotsPerRegion * 2, slotsPerRegion * 3).map(slot => renderBracketSlot(slot))}
-                  </div>
-                  
-                  {/* MIDWEST Region (Bottom Right) */}
-                  <div className="flex flex-col items-end justify-end space-y-2">
-                    <div className="text-xs font-bold text-gray-600 mb-2 text-right">MIDWEST</div>
-                    {roundSlots.slice(slotsPerRegion * 3).map(slot => renderBracketSlot(slot))}
-                  </div>
-                </div>
-              );
-            } else if (isFinalRound) {
-              // Final round: championship in center
-              return (
-                <div key={round} className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-gray-700 mb-4">CHAMPIONSHIP</div>
-                    <div className="flex flex-col items-center space-y-3">
-                      {roundSlots.map(slot => renderBracketSlot(slot))}
-                    </div>
-                  </div>
-                </div>
-              );
-            } else {
-              // Middle rounds: maintain regional positioning and converge
-              if (bracketSize === 8) {
-                // 8-team bracket: Round 2 is semifinals (left vs right)
-                if (round === 2) {
-                  return (
-                    <div key={round} className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-sm font-bold text-gray-700 mb-4">SEMIFINALS</div>
-                        <div className="flex flex-col items-center space-y-2">
-                          {roundSlots.map(slot => renderBracketSlot(slot))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-              } else if (bracketSize === 16) {
-                // 16-team bracket: Round 2 is regional finals, Round 3 is semifinals
-                if (round === 2) {
-                  // Regional finals - maintain 4-quadrant layout but closer to center
-                  const slotsPerRegion = 1;
-                  
-                  return (
-                    <div key={round} className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-8 p-6">
-                      {/* WEST Regional Final - closer to center */}
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <div className="text-xs font-bold text-gray-600 mb-2">WEST FINAL</div>
-                        {roundSlots.slice(0, slotsPerRegion).map(slot => renderBracketSlot(slot))}
-                      </div>
-                      
-                      {/* SOUTH Regional Final - closer to center */}
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <div className="text-xs font-bold text-gray-600 mb-2">SOUTH FINAL</div>
-                        {roundSlots.slice(slotsPerRegion, slotsPerRegion * 2).map(slot => renderBracketSlot(slot))}
-                      </div>
-                      
-                      {/* EAST Regional Final - closer to center */}
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <div className="text-xs font-bold text-gray-600 mb-2">EAST FINAL</div>
-                        {roundSlots.slice(slotsPerRegion * 2, slotsPerRegion * 3).map(slot => renderBracketSlot(slot))}
-                      </div>
-                      
-                      {/* MIDWEST Regional Final - closer to center */}
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <div className="text-xs font-bold text-gray-600 mb-2">MIDWEST FINAL</div>
-                        {roundSlots.slice(slotsPerRegion * 3).map(slot => renderBracketSlot(slot))}
-                      </div>
-                    </div>
-                  );
-                } else if (round === 3) {
-                  // Semifinals - left vs right, even closer to center
-                  return (
-                    <div key={round} className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-sm font-bold text-gray-700 mb-4">FINAL FOUR</div>
-                        <div className="flex flex-col items-center space-y-2">
-                          {roundSlots.map(slot => renderBracketSlot(slot))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-              }
-              
-              // Fallback: center positioning for any other middle rounds
-              return (
-                <div key={round} className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-sm font-bold text-gray-700 mb-4">ROUND {round}</div>
-                    <div className="flex flex-col items-center space-y-2">
-                      {roundSlots.map(slot => renderBracketSlot(slot))}
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-          })}
-        </div>
+      <div className="flex justify-center space-x-8 p-8">
+        {Array.from({ length: totalRounds }, (_, roundIndex) => {
+          const round = roundIndex + 1;
+          const roundSlots = bracketSlots.filter(slot => slot.round === round);
+          
+          return (
+            <div key={round} className="flex flex-col space-y-4">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {round === 1 ? 'First Round' : 
+                   round === 2 ? 'Quarterfinals' :
+                   round === 3 ? 'Semifinals' : 'Championship'}
+                </h3>
+              </div>
+              <div className="flex flex-col space-y-2">
+                {roundSlots.map(slot => renderBracketSlot(slot))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
-  };
-
-  // Helper function to calculate slot positions for connecting lines
-  const getSlotPosition = (slot: BracketSlot) => {
-    const totalRounds = Math.ceil(Math.log2(bracketSize));
-    const round = slot.round;
-    const position = slot.position;
-    
-    // Calculate position based on round and slot position
-    const containerWidth = 800; // Approximate container width
-    const containerHeight = 600; // Approximate container height
-    
-    if (round === 1) {
-      // First round: 4 quadrants
-      const slotsPerRegion = bracketSize / 4;
-      const regionIndex = Math.floor(position / slotsPerRegion);
-      const regionPosition = position % slotsPerRegion;
-      
-      let x, y;
-      switch (regionIndex) {
-        case 0: // WEST (top left)
-          x = containerWidth * 0.2;
-          y = containerHeight * (0.2 + regionPosition * 0.15);
-          break;
-        case 1: // SOUTH (top right)
-          x = containerWidth * 0.8;
-          y = containerHeight * (0.2 + regionPosition * 0.15);
-          break;
-        case 2: // EAST (bottom left)
-          x = containerWidth * 0.2;
-          y = containerHeight * (0.6 + regionPosition * 0.15);
-          break;
-        case 3: // MIDWEST (bottom right)
-          x = containerWidth * 0.8;
-          y = containerHeight * (0.6 + regionPosition * 0.15);
-          break;
-        default:
-          x = containerWidth * 0.5;
-          y = containerHeight * 0.5;
-      }
-      return { x, y };
-    } else if (round === totalRounds) {
-      // Final round: center
-      return {
-        x: containerWidth * 0.5,
-        y: containerHeight * 0.5
-      };
-    } else {
-      // Middle rounds: converge toward center
-      const progress = (round - 1) / (totalRounds - 1);
-      const centerX = containerWidth * 0.5;
-      const centerY = containerHeight * 0.5;
-      
-      // Calculate base position based on which region this slot came from
-      const baseRegion = Math.floor(position * Math.pow(2, round - 1) / bracketSize);
-      let baseX, baseY;
-      
-      switch (baseRegion) {
-        case 0: // WEST
-          baseX = containerWidth * 0.2;
-          baseY = containerHeight * 0.4;
-          break;
-        case 1: // SOUTH
-          baseX = containerWidth * 0.8;
-          baseY = containerHeight * 0.4;
-          break;
-        case 2: // EAST
-          baseX = containerWidth * 0.2;
-          baseY = containerHeight * 0.6;
-          break;
-        case 3: // MIDWEST
-          baseX = containerWidth * 0.8;
-          baseY = containerHeight * 0.6;
-          break;
-        default:
-          baseX = centerX;
-          baseY = centerY;
-      }
-      
-      // Interpolate between base position and center
-      return {
-        x: baseX + (centerX - baseX) * progress,
-        y: baseY + (centerY - baseY) * progress
-      };
-    }
   };
 
   return (
@@ -520,30 +238,30 @@ export default function BracketBuilder() {
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
             <Trophy className="inline-block h-8 w-8 text-gray-700 mr-3" />
-            March Madness Bracket
+            Tournament Bracket
           </h2>
           <p className="text-xl text-gray-600">Create our own tournament bracket!</p>
         </div>
 
-        {/* Setup Panel - Compact Horizontal Layout */}
-        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200 mb-6">
-          <div className="grid md:grid-cols-3 gap-4">
+        {/* Setup Panel */}
+        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 mb-8">
+          <div className="grid md:grid-cols-3 gap-6">
             {/* Bracket Size Selection */}
             <div>
-              <h3 className="text-sm font-semibold mb-2 text-gray-800">Tournament Size</h3>
-              <div className="grid grid-cols-3 gap-2">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Tournament Size</h3>
+              <div className="grid grid-cols-3 gap-3">
                 {[4, 8, 16].map(size => (
                   <button
                     key={size}
                     onClick={() => setBracketSize(size as 4 | 8 | 16)}
-                    className={`p-2 rounded-lg border-2 transition-all ${
+                    className={`p-4 rounded-lg border-2 transition-all ${
                       bracketSize === size
                         ? 'border-gray-700 bg-gray-50 text-gray-700'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="text-lg font-bold">{size}</div>
-                    <div className="text-xs">Teams</div>
+                    <div className="text-xl font-bold">{size}</div>
+                    <div className="text-sm">Teams</div>
                   </button>
                 ))}
               </div>
@@ -551,33 +269,33 @@ export default function BracketBuilder() {
 
             {/* Add Teams */}
             <div>
-              <h3 className="text-sm font-semibold mb-2 text-gray-800">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 Add Teams ({teams.length}/{bracketSize})
               </h3>
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2 mb-4">
                 <input
                   type="text"
                   value={newTeam}
                   onChange={(e) => setNewTeam(e.target.value)}
                   placeholder="Team name..."
-                  className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                   onKeyPress={(e) => e.key === 'Enter' && addTeam()}
                   disabled={teams.length >= bracketSize}
                 />
                 <button
                   onClick={addTeam}
                   disabled={teams.length >= bracketSize}
-                  className="px-3 py-1 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-300"
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-300"
                 >
                   Add
                 </button>
               </div>
-              <div className="space-y-1 max-h-20 overflow-y-auto">
+              <div className="space-y-2 max-h-32 overflow-y-auto">
                 {teams.map((team) => (
-                  <div key={team.id} className="flex items-center justify-between p-1 bg-gray-50 rounded text-xs">
-                    <div className="flex items-center space-x-1">
+                  <div key={team.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                    <div className="flex items-center space-x-2">
                       <span className="font-bold text-gray-500">#{team.seed}</span>
-                      <span className="font-medium truncate">{team.name}</span>
+                      <span className="font-medium">{team.name}</span>
                     </div>
                     <button
                       onClick={() => removeTeam(team.id)}
@@ -594,32 +312,30 @@ export default function BracketBuilder() {
             <div className="flex flex-col justify-center">
               <button
                 onClick={resetBracket}
-                className="w-full py-3 rounded-lg text-lg font-bold text-gray-600 hover:bg-gray-100 transition-colors border-2 border-gray-200"
+                className="w-full py-4 rounded-lg text-lg font-bold text-gray-600 hover:bg-gray-100 transition-colors border-2 border-gray-200"
               >
-                <RotateCcw className="inline-block h-4 w-4 mr-2" />
+                <RotateCcw className="inline-block h-5 w-5 mr-2" />
                 Reset Bracket
               </button>
             </div>
           </div>
         </div>
 
-        {/* Bracket Display - Full Screen */}
-        <div className={`bg-white rounded-xl shadow-lg border border-gray-200 ${getResponsiveSizing().containerHeight} relative overflow-hidden`}>
+        {/* Bracket Display */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-x-auto">
           {bracketSlots.length === 0 ? (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <p>Select a tournament size to get started!</p>
-              </div>
+            <div className="text-center py-16">
+              <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <p>Select a tournament size to get started!</p>
             </div>
           ) : (
             renderBracket()
           )}
         </div>
 
-        {/* Winner Display - Dead Center */}
+        {/* Winner Display */}
         {winner && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm z-10">
+          <div className="fixed inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm z-10">
             <div className="text-center py-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 px-12 shadow-2xl">
               <Sparkles className="h-16 w-16 text-gray-700 mx-auto mb-6" />
               <h3 className="text-4xl font-bold text-gray-800 mb-4">🏆 Champion! 🏆</h3>
