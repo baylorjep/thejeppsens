@@ -130,41 +130,41 @@ export default function Homepage() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-20">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl">
+          <a href="/restaurants" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-200 transition-colors">
               <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">Decision Tools</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">Food</h3>
             <p className="text-gray-600 leading-relaxed">
-              Restaurant pickers, movie selectors, and bracket builders to help us make choices together
+              Can't decide where to eat? Let us help you pick a restaurant together
             </p>
-          </div>
+          </a>
           
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl">
+          <a href="/movies" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-purple-200 transition-colors">
               <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M6 4h12M4 16h16M4 12h16" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">Built For Us</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">Movies</h3>
             <p className="text-gray-600 leading-relaxed">
-              Designed specifically for our needs and preferences, making decision-making effortless
+              Find the perfect movie to watch together with our smart picker
             </p>
-          </div>
+          </a>
           
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl">
+          <a href="/bracket" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-green-200 transition-colors">
               <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">Fast & Simple</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">Bracket</h3>
             <p className="text-gray-600 leading-relaxed">
-              Clean interface with smooth animations that makes every interaction feel natural
+              Create tournament brackets and compete to find the ultimate winner
             </p>
-          </div>
+          </a>
         </div>
 
         {/* Call to Action */}
@@ -173,20 +173,20 @@ export default function Homepage() {
             Ready to make some decisions?
           </h2>
           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            Explore our tools and start making choices together with a modern, intuitive experience
+            Click on any card above to start exploring our tools and making choices together
           </p>
           <div className="flex justify-center space-x-6">
             <a
-              href="/restaurants"
+              href="/keep4"
               className="px-8 py-4 bg-gray-700 hover:bg-gray-800 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
             >
-              Pick a Restaurant
+              Keep 4 Game
             </a>
             <a
-              href="/movies"
+              href="/budget"
               className="px-8 py-4 bg-gray-700 hover:bg-gray-800 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
             >
-              Choose a Movie
+              Budget Tracker
             </a>
           </div>
         </div>
