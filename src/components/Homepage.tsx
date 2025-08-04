@@ -61,58 +61,78 @@ export default function Homepage() {
 
         {/* Photo Carousel */}
         <div className="relative max-w-2xl mx-auto mb-16">
-          <div className={`relative bg-gray-200 rounded-2xl overflow-hidden ${
-            isCurrentPhotoVertical() ? 'h-96' : 'h-80'
-          }`}>
-            <img
-              src={photos[currentPhotoIndex].src}
-              alt={photos[currentPhotoIndex].alt}
-              className={`w-full h-full object-cover ${
-                isCurrentPhotoVertical() ? 'object-contain' : 'object-cover'
-              }`}
-              onError={(e) => {
-                // Fallback to a placeholder if photo doesn't load
-                const target = e.target as HTMLImageElement;
-                target.src = `https://via.placeholder.com/800x600/e5e7eb/9ca3af?text=Add+Your+Photo+${currentPhotoIndex + 1}`;
-              }}
-            />
-            
-            {/* Navigation Arrows */}
-            <button
-              onClick={prevPhoto}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={nextPhoto}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-            
-            {/* Caption */}
-            {photos[currentPhotoIndex].caption && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                <p className="text-white text-center font-medium">
-                  {photos[currentPhotoIndex].caption}
+          {photos.length > 0 ? (
+            <>
+              <div className={`relative bg-gray-200 rounded-2xl overflow-hidden ${
+                isCurrentPhotoVertical() ? 'h-96' : 'h-80'
+              }`}>
+                <img
+                  src={photos[currentPhotoIndex].src}
+                  alt={photos[currentPhotoIndex].alt}
+                  className={`w-full h-full object-cover ${
+                    isCurrentPhotoVertical() ? 'object-contain' : 'object-cover'
+                  }`}
+                  onError={(e) => {
+                    // Fallback to a placeholder if photo doesn't load
+                    const target = e.target as HTMLImageElement;
+                    target.src = `https://via.placeholder.com/800x600/e5e7eb/9ca3af?text=Add+Your+Photo`;
+                  }}
+                />
+                
+                {/* Navigation Arrows */}
+                {photos.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevPhoto}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                    <button
+                      onClick={nextPhoto}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all"
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </button>
+                  </>
+                )}
+                
+                {/* Caption */}
+                {photos[currentPhotoIndex].caption && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <p className="text-white text-center font-medium">
+                      {photos[currentPhotoIndex].caption}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Photo Indicators */}
+              {photos.length > 1 && (
+                <div className="flex justify-center space-x-2 mt-4">
+                  {photos.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentPhotoIndex(index)}
+                      className={`w-3 h-3 rounded-full transition-colors ${
+                        index === currentPhotoIndex ? 'bg-gray-700' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="relative h-80 bg-gray-200 rounded-2xl overflow-hidden flex items-center justify-center">
+              <div className="text-center">
+                <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-2">Add a photo of you and Isabel</p>
+                <p className="text-sm text-gray-500">
+                  Copy a photo to <code>public/photos/</code> and update the code
                 </p>
               </div>
-            )}
-          </div>
-          
-          {/* Photo Indicators */}
-          <div className="flex justify-center space-x-2 mt-4">
-            {photos.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentPhotoIndex(index)}
-                className={`w-3 h-3 rounded-full transition-colors ${
-                  index === currentPhotoIndex ? 'bg-gray-700' : 'bg-gray-300'
-                }`}
-              />
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Stats */}
