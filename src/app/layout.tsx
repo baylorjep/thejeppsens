@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "The Jeppsens - Our little corner of the internet",
+  title: "The Jeppsens",
   description: "A personal space for Baylor and Isabel to make decisions together - featuring restaurant pickers, movie selectors, bracket builders, and choice tools.",
   keywords: "personal, relationship, date night, restaurant picker, movie picker, bracket builder",
   authors: [{ name: "Baylor & Isabel Jeppsen" }],

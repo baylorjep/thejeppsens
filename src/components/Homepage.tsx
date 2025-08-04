@@ -18,8 +18,7 @@ export default function Homepage() {
     {
       id: 1,
       src: "/photos/temple.JPG",
-      alt: "Baylor and Isabel at the temple",
-      caption: "Our little corner of the internet"
+      alt: "Baylor and Isabel at the temple"
     }
   ];
 
@@ -48,15 +47,8 @@ export default function Homepage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-gray-800 mb-6">
-            Welcome to thejeppsens.com
+            The Jeppsens
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Our little corner of the internet ✨
-          </p>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            A clean, simple space for us to make decisions together. From restaurant picks to movie nights, 
-            we&apos;ve got everything we need to make choosing fun and easy.
-          </p>
         </div>
 
         {/* Photo Carousel */}
@@ -95,15 +87,6 @@ export default function Homepage() {
                       <ChevronRight className="h-6 w-6" />
                     </button>
                   </>
-                )}
-                
-                {/* Caption */}
-                {photos[currentPhotoIndex].caption && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <p className="text-white text-center font-medium">
-                      {photos[currentPhotoIndex].caption}
-                    </p>
-                  </div>
                 )}
               </div>
               
