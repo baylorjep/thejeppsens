@@ -46,7 +46,7 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-gray-800">The Jeppsens</div>
+            <div className="text-2xl font-bold text-gray-800">JEP</div>
           </Link>
 
           {/* Desktop Navigation */}

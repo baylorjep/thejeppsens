@@ -49,7 +49,7 @@ export default function Homepage() {
         {/* Hero Section */}
         <div className="text-center mb-20">
           <h1 className="text-6xl font-bold text-gray-800 mb-6 tracking-tight">
-            The Jeppsens
+            JEP
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Our digital space for making decisions together
