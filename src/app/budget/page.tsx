@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Header from '@/components/Header';
-import { DollarSign, Lock, Eye, EyeOff, TrendingUp, PieChart, Calendar } from 'lucide-react';
+import { DollarSign, Lock, Eye, EyeOff, TrendingUp, PieChart, Calendar, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function BudgetPage() {
   const [showSignIn, setShowSignIn] = useState(true);
@@ -10,6 +11,11 @@ export default function BudgetPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleClose = () => {
+    router.push('/');
+  };
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +44,15 @@ export default function BudgetPage() {
       {showSignIn ? (
         // Sign In Modal
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            {/* Close Button */}
+            <button
+              onClick={handleClose}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
             <div className="text-center mb-8">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <DollarSign className="h-8 w-8 text-blue-600" />
