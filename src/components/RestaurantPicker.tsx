@@ -10,7 +10,58 @@ interface Restaurant {
 }
 
 export default function RestaurantPicker() {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([
+    {
+      id: 1,
+      name: "Chipotle",
+      tags: ["cheap", "mexican", "within 5 miles"]
+    },
+    {
+      id: 2,
+      name: "Chick-fil-A",
+      tags: ["cheap", "american", "within 5 miles"]
+    },
+    {
+      id: 3,
+      name: "Panda Express",
+      tags: ["cheap", "asian", "within 5 miles"]
+    },
+    {
+      id: 4,
+      name: "Subway",
+      tags: ["cheap", "american", "within 5 miles"]
+    },
+    {
+      id: 5,
+      name: "McDonald's",
+      tags: ["cheap", "american", "within 5 miles"]
+    },
+    {
+      id: 6,
+      name: "Taco Bell",
+      tags: ["cheap", "mexican", "within 5 miles"]
+    },
+    {
+      id: 7,
+      name: "Wendy's",
+      tags: ["cheap", "american", "within 5 miles"]
+    },
+    {
+      id: 8,
+      name: "Burger King",
+      tags: ["cheap", "american", "within 5 miles"]
+    },
+    {
+      id: 9,
+      name: "Pizza Hut",
+      tags: ["cheap", "pizza", "within 5 miles"]
+    },
+    {
+      id: 10,
+      name: "Domino's",
+      tags: ["cheap", "pizza", "within 5 miles"]
+    }
+  ]);
   const [newRestaurant, setNewRestaurant] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [result, setResult] = useState<Restaurant | null>(null);

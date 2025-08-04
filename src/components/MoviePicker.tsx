@@ -14,7 +14,113 @@ interface Movie {
 }
 
 export default function MoviePicker() {
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([
+    {
+      id: 1,
+      name: "The Shawshank Redemption",
+      genre: "drama",
+      length: "long (>120 min)",
+      type: "live-action"
+    },
+    {
+      id: 2,
+      name: "The Godfather",
+      genre: "drama",
+      length: "long (>120 min)",
+      type: "live-action"
+    },
+    {
+      id: 3,
+      name: "Pulp Fiction",
+      genre: "crime",
+      length: "long (>120 min)",
+      type: "live-action"
+    },
+    {
+      id: 4,
+      name: "The Dark Knight",
+      genre: "action",
+      length: "long (>120 min)",
+      type: "live-action"
+    },
+    {
+      id: 5,
+      name: "Fight Club",
+      genre: "drama",
+      length: "medium (90-120 min)",
+      type: "live-action"
+    },
+    {
+      id: 6,
+      name: "Inception",
+      genre: "sci-fi",
+      length: "long (>120 min)",
+      type: "live-action"
+    },
+    {
+      id: 7,
+      name: "The Matrix",
+      genre: "sci-fi",
+      length: "medium (90-120 min)",
+      type: "live-action"
+    },
+    {
+      id: 8,
+      name: "Goodfellas",
+      genre: "crime",
+      length: "long (>120 min)",
+      type: "live-action"
+    },
+    {
+      id: 9,
+      name: "The Silence of the Lambs",
+      genre: "thriller",
+      length: "medium (90-120 min)",
+      type: "live-action"
+    },
+    {
+      id: 10,
+      name: "Interstellar",
+      genre: "sci-fi",
+      length: "long (>120 min)",
+      type: "live-action"
+    },
+    {
+      id: 11,
+      name: "The Lion King",
+      genre: "drama",
+      length: "medium (90-120 min)",
+      type: "animated"
+    },
+    {
+      id: 12,
+      name: "Toy Story",
+      genre: "comedy",
+      length: "short (<90 min)",
+      type: "animated"
+    },
+    {
+      id: 13,
+      name: "Finding Nemo",
+      genre: "comedy",
+      length: "medium (90-120 min)",
+      type: "animated"
+    },
+    {
+      id: 14,
+      name: "Up",
+      genre: "comedy",
+      length: "short (<90 min)",
+      type: "animated"
+    },
+    {
+      id: 15,
+      name: "The Incredibles",
+      genre: "action",
+      length: "medium (90-120 min)",
+      type: "animated"
+    }
+  ]);
   const [newMovie, setNewMovie] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
   const [selectedLength, setSelectedLength] = useState('');
@@ -23,7 +129,7 @@ export default function MoviePicker() {
   const [showResult, setShowResult] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const genres = ['action', 'comedy', 'drama', 'horror', 'romance', 'sci-fi', 'thriller', 'documentary'];
+  const genres = ['action', 'comedy', 'drama', 'horror', 'romance', 'sci-fi', 'thriller', 'documentary', 'crime'];
   const lengths = ['short (<90 min)', 'medium (90-120 min)', 'long (>120 min)'];
 
   const addMovie = () => {
