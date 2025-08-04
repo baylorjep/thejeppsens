@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Trophy, Users, RotateCcw, ChevronRight, Sparkles } from 'lucide-react';
+import { Trophy, Users, RotateCcw, Sparkles } from 'lucide-react';
 import Confetti from 'react-confetti';
 
 interface Team {
@@ -39,10 +39,6 @@ export default function BracketBuilder() {
   }, []);
 
   // Generate bracket template whenever bracket size changes
-  useEffect(() => {
-    generateBracketTemplate();
-  }, [bracketSize, generateBracketTemplate]);
-
   const generateBracketTemplate = useCallback(() => {
     const slots: BracketSlot[] = [];
     const totalRounds = Math.ceil(Math.log2(bracketSize));
@@ -66,6 +62,10 @@ export default function BracketBuilder() {
     setWinner(null);
     setShowConfetti(false);
   }, [bracketSize]);
+
+  useEffect(() => {
+    generateBracketTemplate();
+  }, [bracketSize, generateBracketTemplate]);
 
   const addTeam = () => {
     if (newTeam.trim() && teams.length < bracketSize) {
