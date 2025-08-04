@@ -19,19 +19,7 @@ export default function Homepage() {
       id: 1,
       src: "/photos/party.JPG",
       alt: "Baylor and Isabel at a party",
-      caption: "Party time together"
-    },
-    {
-      id: 2,
-      src: "/photos/temple.JPG", 
-      alt: "Baylor and Isabel at the temple",
-      caption: "Temple adventures"
-    },
-    {
-      id: 3,
-      src: "/photos/dipvertical.JPG",
-      alt: "Baylor and Isabel doing a dip",
-      caption: "Dance moves"
+      caption: "Our little corner of the internet"
     }
   ];
 
