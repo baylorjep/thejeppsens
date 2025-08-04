@@ -17,8 +17,8 @@ export default function Homepage() {
   const photos: Photo[] = [
     {
       id: 1,
-      src: "/photos/party.JPG",
-      alt: "Baylor and Isabel at a party",
+      src: "/photos/temple.JPG",
+      alt: "Baylor and Isabel at the temple",
       caption: "Our little corner of the internet"
     }
   ];
