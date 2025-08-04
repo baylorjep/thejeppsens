@@ -1,17 +1,44 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Heart, Users, Star, Camera } from 'lucide-react';
+import { Heart, Users, Star, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
+
+interface Photo {
+  id: number;
+  src: string;
+  alt: string;
+  caption?: string;
+}
 
 export default function Homepage() {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   
-  // Sample photos - replace with your actual photos
-  const photos = [
-    '/api/placeholder/400/300',
-    '/api/placeholder/400/300',
-    '/api/placeholder/400/300',
-    '/api/placeholder/400/300'
+  // Your photos - add your actual photos to the public/photos folder
+  const photos: Photo[] = [
+    {
+      id: 1,
+      src: "/photos/party.JPG",
+      alt: "Baylor and Isabel at a party",
+      caption: "Party time together"
+    },
+    {
+      id: 2,
+      src: "/photos/temple.JPG", 
+      alt: "Baylor and Isabel at the temple",
+      caption: "Temple adventures"
+    },
+    {
+      id: 3,
+      src: "/photos/dipvertical.JPG",
+      alt: "Baylor and Isabel doing a dip",
+      caption: "Dance moves"
+    },
+    {
+      id: 4,
+      src: "/photos/templevertical.heic",
+      alt: "Baylor and Isabel at the temple",
+      caption: "Temple memories"
+    }
   ];
 
   useEffect(() => {
@@ -20,6 +47,19 @@ export default function Homepage() {
     }, 5000);
     return () => clearInterval(interval);
   }, [photos.length]);
+
+  const nextPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
+  };
+
+  const prevPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
+  };
+
+  // Check if current photo is vertical based on filename
+  const isCurrentPhotoVertical = () => {
+    return photos[currentPhotoIndex].src.toLowerCase().includes('vertical');
+  };
 
   return (
     <section className="py-20">
@@ -39,12 +79,44 @@ export default function Homepage() {
 
         {/* Photo Carousel */}
         <div className="relative max-w-2xl mx-auto mb-16">
-          <div className="relative h-80 bg-gray-200 rounded-2xl overflow-hidden">
+          <div className={`relative bg-gray-200 rounded-2xl overflow-hidden ${
+            isCurrentPhotoVertical() ? 'h-96' : 'h-80'
+          }`}>
             <img
-              src={photos[currentPhotoIndex]}
-              alt="Couple photo"
-              className="w-full h-full object-cover"
+              src={photos[currentPhotoIndex].src}
+              alt={photos[currentPhotoIndex].alt}
+              className={`w-full h-full object-cover ${
+                isCurrentPhotoVertical() ? 'object-contain' : 'object-cover'
+              }`}
+              onError={(e) => {
+                // Fallback to a placeholder if photo doesn't load
+                const target = e.target as HTMLImageElement;
+                target.src = `https://via.placeholder.com/800x600/e5e7eb/9ca3af?text=Add+Your+Photo+${currentPhotoIndex + 1}`;
+              }}
             />
+            
+            {/* Navigation Arrows */}
+            <button
+              onClick={prevPhoto}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={nextPhoto}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+            
+            {/* Caption */}
+            {photos[currentPhotoIndex].caption && (
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                <p className="text-white text-center font-medium">
+                  {photos[currentPhotoIndex].caption}
+                </p>
+              </div>
+            )}
           </div>
           
           {/* Photo Indicators */}
