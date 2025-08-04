@@ -110,7 +110,7 @@ export default function BudgetPage() {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-500">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">
                   Sign up
                 </a>
@@ -183,7 +183,7 @@ export default function BudgetPage() {
               <Lock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-2xl font-bold text-gray-800 mb-2">Full Budget Features Coming Soon</h3>
               <p className="text-gray-600 mb-6">
-                We're building advanced financial planning tools including expense tracking, 
+                We&apos;re building advanced financial planning tools including expense tracking, 
                 goal setting, and automated insights to help you manage your finances together.
               </p>
               <div className="flex justify-center space-x-4">

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Trophy, Users, RotateCcw, Sparkles } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Trophy, Users, RotateCcw, ChevronRight, Sparkles } from 'lucide-react';
 import Confetti from 'react-confetti';
 
 interface Team {
@@ -41,9 +41,9 @@ export default function BracketBuilder() {
   // Generate bracket template whenever bracket size changes
   useEffect(() => {
     generateBracketTemplate();
-  }, [bracketSize]);
+  }, [bracketSize, generateBracketTemplate]);
 
-  const generateBracketTemplate = () => {
+  const generateBracketTemplate = useCallback(() => {
     const slots: BracketSlot[] = [];
     const totalRounds = Math.ceil(Math.log2(bracketSize));
     
@@ -65,7 +65,7 @@ export default function BracketBuilder() {
     setBracketSlots(slots);
     setWinner(null);
     setShowConfetti(false);
-  };
+  }, [bracketSize]);
 
   const addTeam = () => {
     if (newTeam.trim() && teams.length < bracketSize) {
@@ -219,7 +219,6 @@ export default function BracketBuilder() {
   const renderBracketSlot = (slot: BracketSlot) => {
     const sizing = getResponsiveSizing();
     const isFirstRound = slot.round === 1;
-    const isFinalRound = slot.round === Math.ceil(Math.log2(bracketSize));
     
     return (
       <div
@@ -259,7 +258,6 @@ export default function BracketBuilder() {
 
   const renderBracket = () => {
     const totalRounds = Math.ceil(Math.log2(bracketSize));
-    const sizing = getResponsiveSizing();
     
     return (
       <div className="relative w-full h-full">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Heart, Users, Star, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Photo {
@@ -58,10 +59,11 @@ export default function Homepage() {
               <div className={`relative bg-gray-200 rounded-2xl overflow-hidden ${
                 isCurrentPhotoVertical() ? 'h-96' : 'h-80'
               }`}>
-                <img
+                <Image
                   src={photos[currentPhotoIndex].src}
                   alt={photos[currentPhotoIndex].alt}
-                  className={`w-full h-full object-cover ${
+                  fill
+                  className={`object-cover ${
                     isCurrentPhotoVertical() ? 'object-contain' : 'object-cover'
                   }`}
                   onError={(e) => {
