@@ -20,8 +20,11 @@ export default function BudgetPage() {
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Only allow specific credentials for demo
-    if (email === 'test@test.com' && password === 'test') {
+    // Allow either Baylor or Isabel's email with password "jeppsen"
+    const validEmails = ['baylorjeppsen@gmail.com', 'isabel.harker@yahoo.com'];
+    const validPassword = 'jeppsen';
+    
+    if (validEmails.includes(email) && password === validPassword) {
       setIsLoading(true);
       
       // Simulate loading
