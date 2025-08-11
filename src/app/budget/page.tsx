@@ -161,7 +161,7 @@ export default function BudgetPage() {
               </div>
               <div className="w-full h-[800px]">
                 <iframe 
-                  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vROYeBRucMwPaBApTXyxHdqk4mKe2IYEf23TYO_ZHJGdgx9KE73rMUxOBxUW7h5iXxSNk28q1BDb-bH/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false"
+                  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vROYeBRucMwPaBApTXyxHdqk4mKe2IYEf23TYO_ZHJGdgx9KE73rMUxOBxUW7h5iXxSNk28q1BDb-bH/pubhtml?widget=true&amp;headers=false"
                   className="w-full h-full border-0"
                   title="Budget Tracker"
                 />
