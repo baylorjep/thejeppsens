@@ -153,73 +153,29 @@ export default function BudgetPage() {
               <p className="text-xl text-gray-600">Track your spending and plan your future together</p>
             </div>
 
-            {/* Demo Content */}
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Monthly Budget</h3>
-                  <TrendingUp className="h-6 w-6 text-green-500" />
-                </div>
-                <div className="text-3xl font-bold text-gray-800 mb-2">$3,240</div>
-                <div className="text-sm text-gray-600">Remaining this month</div>
-                <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
-                </div>
+            {/* Embedded Google Sheets Budget */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800">Monthly Budget Tracker</h3>
+                <p className="text-sm text-gray-600">Real-time updates from your Google Sheets</p>
               </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Spending Categories</h3>
-                  <PieChart className="h-6 w-6 text-blue-500" />
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Dining Out</span>
-                    <span className="text-sm font-medium text-gray-800">$420</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Entertainment</span>
-                    <span className="text-sm font-medium text-gray-800">$180</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Shopping</span>
-                    <span className="text-sm font-medium text-gray-800">$320</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Savings Goal</h3>
-                  <Calendar className="h-6 w-6 text-purple-500" />
-                </div>
-                <div className="text-3xl font-bold text-gray-800 mb-2">$12,450</div>
-                <div className="text-sm text-gray-600">Saved this year</div>
-                <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-purple-500 h-2 rounded-full" style={{ width: '78%' }}></div>
-                </div>
+              <div className="w-full h-[800px]">
+                <iframe 
+                  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vROYeBRucMwPaBApTXyxHdqk4mKe2IYEf23TYO_ZHJGdgx9KE73rMUxOBxUW7h5iXxSNk28q1BDb-bH/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false"
+                  className="w-full h-full border-0"
+                  title="Budget Tracker"
+                />
               </div>
             </div>
 
-            {/* Coming Soon Message */}
-            <div className="text-center bg-white rounded-xl p-8 shadow-lg border border-gray-200">
-              <Lock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">Full Budget Features Coming Soon</h3>
-              <p className="text-gray-600 mb-6">
-                We&apos;re building advanced financial planning tools including expense tracking, 
-                goal setting, and automated insights to help you manage your finances together.
-              </p>
-              <div className="flex justify-center space-x-4">
-                <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Get Notified
-                </button>
-                <button 
-                  onClick={() => setShowSignIn(true)}
-                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  Sign Out
-                </button>
-              </div>
+            {/* Sign Out Button */}
+            <div className="text-center mt-8">
+              <button 
+                onClick={() => setShowSignIn(true)}
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Sign Out
+              </button>
             </div>
           </div>
         </div>
