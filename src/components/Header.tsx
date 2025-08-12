@@ -14,7 +14,8 @@ export default function Header() {
     { name: 'Home', href: '/' },
     { name: 'Food', href: '/restaurants' },
     { name: 'Movies', href: '/movies' },
-    { name: 'Budget', href: '/budget' }
+    { name: 'Budget', href: '/budget' },
+    { name: 'Travel', href: '/travel' }
   ];
 
   const miniGames = [

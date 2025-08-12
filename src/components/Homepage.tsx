@@ -125,7 +125,7 @@ export default function Homepage() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           <a href="/restaurants" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-200 transition-colors">
               <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,6 +159,18 @@ export default function Homepage() {
             <h3 className="text-2xl font-bold text-gray-800 mb-3">Budget</h3>
             <p className="text-gray-600 leading-relaxed">
               Track your finances and plan your future together with our budget tools
+            </p>
+          </a>
+
+          <a href="/travel" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
+            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-orange-200 transition-colors">
+              <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">Travel</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Explore our interactive world map and track our adventures together
             </p>
           </a>
         </div>
