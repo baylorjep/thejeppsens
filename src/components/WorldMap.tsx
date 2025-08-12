@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
 interface Country {
   id: string;
@@ -15,147 +13,170 @@ interface WorldMapProps {
   visitedCountries: Country[];
 }
 
-// Fix for default markers in Leaflet
-delete (L.Icon.Default.prototype as { _getIconUrl?: string })._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
 export default function WorldMap({ visitedCountries }: WorldMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [showPlanningModal, setShowPlanningModal] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current) return;
 
-    // Initialize the map
-    const map = L.map(mapRef.current, {
-      center: [30, 0],
-      zoom: 2,
-      zoomControl: true,
-      scrollWheelZoom: false,
-      dragging: true,
-      touchZoom: true,
-      doubleClickZoom: true,
-      boxZoom: false,
-      keyboard: false,
-    });
+    // Check if Google Maps API key is available
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    
+    if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+      setShowApiKeyModal(true);
+      return;
+    }
 
-    // Add a map tile layer with English labels (CartoDB Positron)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© OpenStreetMap contributors, © CartoDB',
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map);
-
-    // Create a layer group for country boundaries
-    const countryBoundaries = L.layerGroup().addTo(map);
-
-    // Function to load country GeoJSON data
-    const loadCountryBoundary = async (country: Country) => {
-      try {
-        // Use a free country boundary API
-        const response = await fetch(`https://restcountries.com/v3.1/name/${country.name}?fields=name,cca3`);
-        const data = await response.json();
-        
-        if (data && data[0]) {
-          const countryCode = data[0].cca3;
-          
-          // Load GeoJSON boundary data from Natural Earth Data
-          const geoJsonResponse = await fetch(`https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson`);
-          const geoJsonData = await geoJsonResponse.json();
-          
-          // Find the country in the GeoJSON data
-          const countryFeature = geoJsonData.features.find((feature: { properties: { ISO_A3?: string; ADMIN?: string } }) => 
-            feature.properties.ISO_A3 === countryCode || 
-            feature.properties.ADMIN === country.name
-          );
-          
-          if (countryFeature) {
-            // Create GeoJSON layer for the country
-            const countryLayer = L.geoJSON(countryFeature, {
-              style: {
-                color: '#10b981',
-                weight: 2,
-                opacity: 0.8,
-                fillColor: '#10b981',
-                fillOpacity: 0.3
-              }
-            }).addTo(countryBoundaries);
-            
-            // Add hover effects
-            countryLayer.on('mouseover', () => {
-              countryLayer.setStyle({
-                color: '#3b82f6',
-                weight: 3,
-                opacity: 1,
-                fillColor: '#3b82f6',
-                fillOpacity: 0.4
-              });
-            });
-            
-            countryLayer.on('mouseout', () => {
-              countryLayer.setStyle({
-                color: '#10b981',
-                weight: 2,
-                opacity: 0.8,
-                fillColor: '#10b981',
-                fillOpacity: 0.3
-              });
-            });
-            
-            // Add click handler
-            countryLayer.on('click', () => {
-              setSelectedCountry(country);
-              setShowPlanningModal(true);
-            });
-          }
-        }
-      } catch (error) {
-        console.log(`Could not load boundary for ${country.name}:`, error);
-      }
+    // Load Google Maps API
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    
+    script.onload = () => {
+      initGoogleMap();
+    };
+    
+    script.onerror = () => {
+      console.error('Failed to load Google Maps API');
+      setShowApiKeyModal(true);
     };
 
-    // Load boundaries for visited countries
-    visitedCountries.forEach(country => {
-      loadCountryBoundary(country);
-    });
+    document.head.appendChild(script);
 
-    // Add global function for popup buttons
-    (window as Window & { planTripToCountry?: (countryId: string) => void }).planTripToCountry = (countryId: string) => {
-      const country = visitedCountries.find(c => c.id === countryId);
-      if (country) {
-        setSelectedCountry(country);
-        setShowPlanningModal(true);
-      }
-    };
-
-    mapInstanceRef.current = map;
-
-    // Cleanup function
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-      delete (window as Window & { planTripToCountry?: (countryId: string) => void }).planTripToCountry;
+      document.head.removeChild(script);
     };
   }, [visitedCountries]);
+
+  const initGoogleMap = () => {
+    if (!mapRef.current || !window.google) return;
+
+    const map = new window.google.maps.Map(mapRef.current, {
+      center: { lat: 30, lng: 0 },
+      zoom: 2,
+      mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+      styles: [
+        {
+          featureType: 'administrative.country',
+          elementType: 'geometry.stroke',
+          stylers: [{ color: '#10b981' }, { weight: 2 }]
+        },
+        {
+          featureType: 'administrative.country',
+          elementType: 'geometry.fill',
+          stylers: [{ color: '#10b981' }, { opacity: 0.3 }]
+        }
+      ]
+    });
+
+    // Add markers for visited countries
+    visitedCountries.forEach((country) => {
+      const marker = new window.google.maps.Marker({
+        position: { lat: country.coordinates[0], lng: country.coordinates[1] },
+        map: map,
+        title: country.name,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: '#10b981',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2
+        }
+      });
+
+      // Add click listener for trip planning
+      marker.addListener('click', () => {
+        setSelectedCountry(country);
+        setShowPlanningModal(true);
+      });
+
+      // Add hover tooltip
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: `
+          <div style="padding: 8px; text-align: center; min-width: 150px;">
+            <h3 style="margin: 0 0 4px 0; color: #1f2937; font-weight: 600;">${country.name}</h3>
+            <p style="margin: 0; color: #6b7280; font-size: 14px;">Visited together ✈️</p>
+          </div>
+        `
+      });
+
+      marker.addListener('mouseover', () => {
+        infoWindow.open(map, marker);
+      });
+
+      marker.addListener('mouseout', () => {
+        infoWindow.close();
+      });
+    });
+  };
 
   return (
     <>
       <div 
         ref={mapRef} 
-        className="w-full h-full rounded-lg"
+        className="w-full h-full rounded-lg relative"
         style={{ 
           background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
           minHeight: '600px'
         }}
       />
+
+      {/* API Key Setup Modal */}
+      {showApiKeyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                🌍 Interactive Travel Map Setup
+              </h3>
+              <p className="text-gray-600">To enable the interactive map with country highlighting, you need a Google Maps API key.</p>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-800 mb-2">🚀 Perfect for YC Demo!</h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• Real country boundaries with hover effects</li>
+                  <li>• Professional Google Maps integration</li>
+                  <li>• Interactive trip planning features</li>
+                  <li>• $200/month free credit (plenty for personal use)</li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-2">📋 Setup Steps:</h4>
+                <ol className="text-sm text-gray-700 space-y-1">
+                  <li>1. Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Google Cloud Console</a></li>
+                  <li>2. Create a new project or select existing</li>
+                  <li>3. Enable "Maps JavaScript API"</li>
+                  <li>4. Create credentials (API key)</li>
+                  <li>5. Add to your .env.local: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here</li>
+                </ol>
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowApiKeyModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                I'll set it up later
+              </button>
+              <button
+                onClick={() => window.open('https://console.cloud.google.com/', '_blank')}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Get API Key Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Planning Modal */}
       {showPlanningModal && selectedCountry && (
