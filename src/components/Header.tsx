@@ -11,7 +11,6 @@ export default function Header() {
   const pathname = usePathname();
 
   const navigation = [
-    { name: 'Home', href: '/' },
     { name: 'Food', href: '/restaurants' },
     { name: 'Movies', href: '/movies' },
     { name: 'Budget', href: '/budget' },

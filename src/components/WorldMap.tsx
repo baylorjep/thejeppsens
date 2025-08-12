@@ -15,11 +15,6 @@ interface WorldMapProps {
   visitedCountries: Country[];
 }
 
-// Extend the marker type to include our custom property
-interface ExtendedMarker extends L.Marker {
-  highlightLayer?: L.Circle;
-}
-
 // Fix for default markers in Leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: string })._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -33,6 +28,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
   const mapInstanceRef = useRef<L.Map | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [showPlanningModal, setShowPlanningModal] = useState(false);
+  const [countryLayers, setCountryLayers] = useState<Map<string, L.GeoJSON>>(new Map());
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -57,130 +53,83 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
       maxZoom: 19,
     }).addTo(map);
 
-    // Add markers for visited countries
-    visitedCountries.forEach((country) => {
-      const marker = L.marker(country.coordinates, {
-        icon: L.divIcon({
-          className: 'custom-marker',
-          html: `
-            <div style="
-              width: 20px;
-              height: 20px;
-              background-color: #10b981;
-              border: 3px solid #ffffff;
-              border-radius: 50%;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-              cursor: pointer;
-              transition: all 0.2s ease;
-            "></div>
-          `,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
-        }),
-      }).addTo(map) as ExtendedMarker;
+    // Create a layer group for country boundaries
+    const countryBoundaries = L.layerGroup().addTo(map);
+    const layersMap = new Map<string, L.GeoJSON>();
 
-      // Add hover tooltip
-      marker.bindTooltip(country.name, {
-        permanent: false,
-        direction: 'top',
-        className: 'custom-tooltip',
-        offset: [0, -10]
-      });
-
-      // Add popup with country information and planning option
-      marker.bindPopup(`
-        <div style="text-align: center; padding: 8px; min-width: 200px;">
-          <h3 style="margin: 0 0 8px 0; color: #1f2937; font-weight: 600;">${country.name}</h3>
-          <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 14px;">Visited together ✈️</p>
-          <button 
-            onclick="window.planTripToCountry('${country.id}')"
-            style="
-              background-color: #3b82f6;
-              color: white;
-              border: none;
-              padding: 8px 16px;
-              border-radius: 6px;
-              cursor: pointer;
-              font-size: 14px;
-              transition: background-color 0.2s;
-            "
-            onmouseover="this.style.backgroundColor='#2563eb'"
-            onmouseout="this.style.backgroundColor='#3b82f6'"
-          >
-            Plan Next Trip
-          </button>
-        </div>
-      `);
-
-      // Add hover effects with country highlighting
-      marker.on('mouseover', () => {
-        // Update marker appearance
-        marker.setIcon(L.divIcon({
-          className: 'custom-marker-hover',
-          html: `
-            <div style="
-              width: 24px;
-              height: 24px;
-              background-color: #3b82f6;
-              border: 3px solid #ffffff;
-              border-radius: 50%;
-              box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-              cursor: pointer;
-              transition: all 0.2s ease;
-            "></div>
-          `,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
-        }));
+    // Function to load country GeoJSON data
+    const loadCountryBoundary = async (country: Country) => {
+      try {
+        // Use a free country boundary API
+        const response = await fetch(`https://restcountries.com/v3.1/name/${country.name}?fields=name,cca3`);
+        const data = await response.json();
         
-        // Highlight the country by adding a semi-transparent overlay
-        // This is a simplified approach - for full country boundaries you'd need GeoJSON data
-        const highlightLayer = L.circle(country.coordinates, {
-          radius: 800000, // Larger radius to cover more of the country
-          color: '#3b82f6',
-          weight: 3,
-          opacity: 0.8,
-          fillColor: '#3b82f6',
-          fillOpacity: 0.15
-        }).addTo(map);
-        
-        // Store reference to remove later
-        marker.highlightLayer = highlightLayer;
-      });
-
-      marker.on('mouseout', () => {
-        // Reset marker appearance
-        marker.setIcon(L.divIcon({
-          className: 'custom-marker',
-          html: `
-            <div style="
-              width: 20px;
-              height: 20px;
-              background-color: #10b981;
-              border: 3px solid #ffffff;
-              border-radius: 50%;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-              cursor: pointer;
-              transition: all 0.2s ease;
-            "></div>
-          `,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
-        }));
-        
-        // Remove highlight layer
-        if (marker.highlightLayer) {
-          map.removeLayer(marker.highlightLayer);
-          marker.highlightLayer = undefined;
+        if (data && data[0]) {
+          const countryCode = data[0].cca3;
+          
+          // Load GeoJSON boundary data from Natural Earth Data
+          const geoJsonResponse = await fetch(`https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson`);
+          const geoJsonData = await geoJsonResponse.json();
+          
+          // Find the country in the GeoJSON data
+          const countryFeature = geoJsonData.features.find((feature: any) => 
+            feature.properties.ISO_A3 === countryCode || 
+            feature.properties.ADMIN === country.name
+          );
+          
+          if (countryFeature) {
+            // Create GeoJSON layer for the country
+            const countryLayer = L.geoJSON(countryFeature, {
+              style: {
+                color: '#10b981',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#10b981',
+                fillOpacity: 0.3
+              }
+            }).addTo(countryBoundaries);
+            
+            layersMap.set(country.id, countryLayer);
+            
+            // Add hover effects
+            countryLayer.on('mouseover', () => {
+              countryLayer.setStyle({
+                color: '#3b82f6',
+                weight: 3,
+                opacity: 1,
+                fillColor: '#3b82f6',
+                fillOpacity: 0.4
+              });
+            });
+            
+            countryLayer.on('mouseout', () => {
+              countryLayer.setStyle({
+                color: '#10b981',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#10b981',
+                fillOpacity: 0.3
+              });
+            });
+            
+            // Add click handler
+            countryLayer.on('click', () => {
+              setSelectedCountry(country);
+              setShowPlanningModal(true);
+            });
+          }
         }
-      });
+      } catch (error) {
+        console.log(`Could not load boundary for ${country.name}:`, error);
+      }
+    };
 
-      // Add click handler for planning trips
-      marker.on('click', () => {
-        setSelectedCountry(country);
-        setShowPlanningModal(true);
-      });
+    // Load boundaries for visited countries
+    visitedCountries.forEach(country => {
+      loadCountryBoundary(country);
     });
+
+    setCountryLayers(layersMap);
 
     // Add global function for popup buttons
     (window as Window & { planTripToCountry?: (countryId: string) => void }).planTripToCountry = (countryId: string) => {
