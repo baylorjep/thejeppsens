@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useState } from 'react';
 
 interface Country {
   id: string;
@@ -14,205 +14,69 @@ interface WorldMapProps {
 }
 
 export default function WorldMap({ visitedCountries }: WorldMapProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [showPlanningModal, setShowPlanningModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const initGoogleMap = useCallback(() => {
-    try {
-      if (!mapRef.current) {
-        console.error('Map ref not available');
-        setError('Map container not found');
-        setIsLoading(false);
-        return;
-      }
-
-      if (!window.google || !window.google.maps) {
-        console.error('Google Maps API not loaded');
-        setError('Google Maps failed to load');
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('Initializing Google Maps...');
-
-      // Create the map using the standard API
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: { lat: 30, lng: 0 },
-        zoom: 2,
-        mapTypeId: window.google.maps.MapTypeId.ROADMAP,
-        styles: [
-          {
-            featureType: 'administrative.country',
-            elementType: 'geometry.stroke',
-            stylers: [{ color: '#10b981' }, { weight: 2 }]
-          },
-          {
-            featureType: 'administrative.country',
-            elementType: 'geometry.fill',
-            stylers: [{ color: '#10b981' }, { opacity: 0.3 }]
-          }
-        ]
-      });
-
-      console.log('Map created successfully');
-
-      // Add markers for visited countries
-      visitedCountries.forEach((country) => {
-        try {
-          const marker = new window.google.maps.Marker({
-            position: { lat: country.coordinates[0], lng: country.coordinates[1] },
-            map: map,
-            title: country.name,
-            icon: {
-              path: window.google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: '#10b981',
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 2
-            }
-          });
-
-          // Add click listener for trip planning
-          marker.addListener('click', () => {
-            setSelectedCountry(country);
-            setShowPlanningModal(true);
-          });
-
-          // Add hover tooltip
-          const infoWindow = new window.google.maps.InfoWindow({
-            content: `
-              <div style="padding: 8px; text-align: center; min-width: 150px;">
-                <h3 style="margin: 0 0 4px 0; color: #1f2937; font-weight: 600;">${country.name}</h3>
-                <p style="margin: 0; color: #6b7280; font-size: 14px;">Visited together ✈️</p>
-              </div>
-            `
-          });
-
-          marker.addListener('mouseover', () => {
-            infoWindow.open(map, marker);
-          });
-
-          marker.addListener('mouseout', () => {
-            infoWindow.close();
-          });
-        } catch (markerError) {
-          console.error('Error creating marker for', country.name, markerError);
-        }
-      });
-
-      setIsLoading(false);
-      console.log('Google Maps initialization complete');
-    } catch (error) {
-      console.error('Error initializing Google Maps:', error);
-      setError('Failed to initialize map');
-      setIsLoading(false);
-    }
-  }, [visitedCountries]);
-
-  useEffect(() => {
-    try {
-      if (!mapRef.current) return;
-
-      // Check if Google Maps API key is available
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-      
-      console.log('API Key check:', {
-        hasKey: !!apiKey,
-        keyLength: apiKey?.length,
-        keyStart: apiKey?.substring(0, 10) + '...',
-        isDefault: apiKey === 'YOUR_API_KEY_HERE'
-      });
-      
-      if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
-        console.error('Google Maps API key not found');
-        setError('API key not configured');
-        setIsLoading(false);
-        return;
-      }
-
-      // Check if script is already loaded
-      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-      if (existingScript) {
-        console.log('Google Maps script already loaded');
-        if (window.google && window.google.maps) {
-          initGoogleMap();
-        } else {
-          // Wait for script to load
-          existingScript.addEventListener('load', initGoogleMap);
-        }
-        return;
-      }
-
-      // Load the standard Google Maps API
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      
-      script.onload = () => {
-        console.log('Google Maps API loaded successfully');
-        initGoogleMap();
-      };
-      
-      script.onerror = () => {
-        console.error('Failed to load Google Maps API');
-        setError('Failed to load Google Maps');
-        setIsLoading(false);
-      };
-
-      document.head.appendChild(script);
-
-      return () => {
-        if (document.head.contains(script)) {
-          document.head.removeChild(script);
-        }
-      };
-    } catch (error) {
-      console.error('Error in useEffect:', error);
-      setError('Unexpected error occurred');
-      setIsLoading(false);
-    }
-  }, [initGoogleMap]);
-
-  if (error) {
-    return (
-      <div className="w-full h-full rounded-lg flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-red-500 text-lg font-semibold mb-2">Map Error</div>
-          <div className="text-gray-600 mb-4">{error}</div>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Reload Page
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
-      <div 
-        ref={mapRef} 
-        className="w-full h-full rounded-lg relative"
-        style={{ 
-          background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-          minHeight: '600px'
-        }}
-      >
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading map...</p>
-            </div>
+      <div className="w-full h-full rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 p-8">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">🌍 Our Travel Map</h2>
+          <p className="text-gray-600 mb-6">
+            Countries we&apos;ve visited together: {visitedCountries.length}
+          </p>
+        </div>
+
+        {/* Simple Map Display */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {visitedCountries.map((country) => (
+              <div
+                key={country.id}
+                onClick={() => {
+                  setSelectedCountry(country);
+                  setShowPlanningModal(true);
+                }}
+                className="bg-green-100 border-2 border-green-300 rounded-lg p-4 text-center cursor-pointer hover:bg-green-200 transition-colors"
+              >
+                <div className="text-2xl mb-2">📍</div>
+                <div className="font-semibold text-green-800 text-sm">{country.name}</div>
+                <div className="text-xs text-green-600 mt-1">Visited</div>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
+
+        {/* Travel Statistics */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="text-3xl font-bold text-blue-600 mb-2">{visitedCountries.length}</div>
+            <div className="text-gray-600">Countries Visited</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="text-3xl font-bold text-green-600 mb-2">16</div>
+            <div className="text-gray-600">Total Countries</div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="text-3xl font-bold text-purple-600 mb-2">4</div>
+            <div className="text-gray-600">Continents</div>
+          </div>
+        </div>
+
+        {/* Memory Cards */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">✨ Travel Memories</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {visitedCountries.slice(0, 6).map((country) => (
+              <div key={country.id} className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200">
+                <div className="font-semibold text-gray-800 mb-2">{country.name}</div>
+                <div className="text-sm text-gray-600">
+                  Amazing memories from our time in {country.name} ✈️
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Planning Modal */}
