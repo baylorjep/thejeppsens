@@ -7,15 +7,7 @@
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 248, 250, 252;
-  
-  /* Modern minimalist color palette */
-  --primary-gray: 17, 24, 39;
-  --secondary-gray: 75, 85, 99;
-  --accent-gray: 156, 163, 175;
-  --light-gray: 243, 244, 246;
-  --white: 255, 255, 255;
-  --subtle-accent: 59, 130, 246;
+  --background-end-rgb: 255, 255, 255;
 }
 
 * {
@@ -35,12 +27,7 @@ body {
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
 }
 
@@ -54,21 +41,35 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(var(--light-gray));
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--secondary-gray));
+  background: #c1c1c1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--primary-gray));
+  background: #a8a8a8;
 }
 
-/* Smooth transitions - optimized for performance */
+/* Smooth transitions */
 * {
-  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-white text-black px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors border border-gray-200;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white rounded-xl shadow-lg border border-gray-100 p-6;
 }
 
 /* Custom animations - optimized for performance */
