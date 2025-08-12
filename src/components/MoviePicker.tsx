@@ -153,7 +153,7 @@ export default function MoviePicker() {
         trailer: newMovie.trailer || undefined,
       };
       setMovies([...movies, movie]);
-      setNewMovie({ title: '', genre: 'action', length: '90-120 min', type: 'live-action', poster: '', trailer: '' });
+      setNewMovie({ id: '', title: '', genre: 'action', length: '90-120 min', type: 'live-action', poster: '', trailer: '' });
     }
   };
 

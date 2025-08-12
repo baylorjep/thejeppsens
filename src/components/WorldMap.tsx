@@ -52,7 +52,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         document.head.removeChild(script);
       }
     };
-  }, [visitedCountries]);
+  }, [visitedCountries, initGoogleMap]);
 
   const initGoogleMap = () => {
     if (!mapRef.current || !window.google) return;
