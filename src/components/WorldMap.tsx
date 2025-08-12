@@ -17,7 +17,7 @@ interface WorldMapProps {
 
 // Extend the marker type to include our custom property
 interface ExtendedMarker extends L.Marker {
-  highlightLayer?: L.GeoJSON;
+  highlightLayer?: L.Circle;
 }
 
 // Fix for default markers in Leaflet
@@ -145,7 +145,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         }).addTo(map);
         
         // Store reference to remove later
-        marker.highlightLayer = highlightLayer as any;
+        marker.highlightLayer = highlightLayer;
       });
 
       marker.on('mouseout', () => {
