@@ -80,8 +80,8 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
       `);
 
       // Add hover effects
-      marker.on('mouseover', function() {
-        this.setIcon(L.divIcon({
+      marker.on('mouseover', () => {
+        marker.setIcon(L.divIcon({
           className: 'custom-marker-hover',
           html: `
             <div style="
@@ -100,8 +100,8 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         }));
       });
 
-      marker.on('mouseout', function() {
-        this.setIcon(L.divIcon({
+      marker.on('mouseout', () => {
+        marker.setIcon(L.divIcon({
           className: 'custom-marker',
           html: `
             <div style="
