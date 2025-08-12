@@ -17,7 +17,7 @@ interface WorldMapProps {
 
 // Extend the marker type to include our custom property
 interface ExtendedMarker extends L.Marker {
-  highlightCircle?: L.Circle;
+  highlightLayer?: L.GeoJSON;
 }
 
 // Fix for default markers in Leaflet
@@ -133,18 +133,19 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           iconAnchor: [12, 12],
         }));
         
-        // Add a simple circle highlight around the marker
-        const highlightCircle = L.circle(country.coordinates, {
-          radius: 500000, // 500km radius
+        // Highlight the country by adding a semi-transparent overlay
+        // This is a simplified approach - for full country boundaries you'd need GeoJSON data
+        const highlightLayer = L.circle(country.coordinates, {
+          radius: 800000, // Larger radius to cover more of the country
           color: '#3b82f6',
-          weight: 2,
+          weight: 3,
           opacity: 0.8,
           fillColor: '#3b82f6',
-          fillOpacity: 0.1
+          fillOpacity: 0.15
         }).addTo(map);
         
         // Store reference to remove later
-        marker.highlightCircle = highlightCircle;
+        marker.highlightLayer = highlightLayer as any;
       });
 
       marker.on('mouseout', () => {
@@ -167,10 +168,10 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           iconAnchor: [10, 10],
         }));
         
-        // Remove highlight circle
-        if (marker.highlightCircle) {
-          map.removeLayer(marker.highlightCircle);
-          marker.highlightCircle = undefined;
+        // Remove highlight layer
+        if (marker.highlightLayer) {
+          map.removeLayer(marker.highlightLayer);
+          marker.highlightLayer = undefined;
         }
       });
 
