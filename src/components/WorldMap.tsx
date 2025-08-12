@@ -15,6 +15,11 @@ interface WorldMapProps {
   visitedCountries: Country[];
 }
 
+// Extend the marker type to include our custom property
+interface ExtendedMarker extends L.Marker {
+  highlightCircle?: L.Circle;
+}
+
 // Fix for default markers in Leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: string })._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -28,7 +33,6 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
   const mapInstanceRef = useRef<L.Map | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [showPlanningModal, setShowPlanningModal] = useState(false);
-  const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -53,17 +57,6 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
       maxZoom: 19,
     }).addTo(map);
 
-    // Add country boundary highlighting layer
-    const highlightLayer = L.geoJSON(null, {
-      style: {
-        color: '#3b82f6',
-        weight: 3,
-        opacity: 0.8,
-        fillColor: '#3b82f6',
-        fillOpacity: 0.1
-      }
-    }).addTo(map);
-
     // Add markers for visited countries
     visitedCountries.forEach((country) => {
       const marker = L.marker(country.coordinates, {
@@ -84,7 +77,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           iconSize: [20, 20],
           iconAnchor: [10, 10],
         }),
-      }).addTo(map);
+      }).addTo(map) as ExtendedMarker;
 
       // Add hover tooltip
       marker.bindTooltip(country.name, {
@@ -139,9 +132,6 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           iconSize: [24, 24],
           iconAnchor: [12, 12],
         }));
-
-        // Highlight country boundary (simplified approach)
-        setHoveredCountry(country.id);
         
         // Add a simple circle highlight around the marker
         const highlightCircle = L.circle(country.coordinates, {
@@ -154,7 +144,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         }).addTo(map);
         
         // Store reference to remove later
-        (marker as any).highlightCircle = highlightCircle;
+        marker.highlightCircle = highlightCircle;
       });
 
       marker.on('mouseout', () => {
@@ -176,14 +166,11 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           iconSize: [20, 20],
           iconAnchor: [10, 10],
         }));
-
-        // Remove country highlighting
-        setHoveredCountry(null);
         
         // Remove highlight circle
-        if ((marker as any).highlightCircle) {
-          map.removeLayer((marker as any).highlightCircle);
-          (marker as any).highlightCircle = null;
+        if (marker.highlightCircle) {
+          map.removeLayer(marker.highlightCircle);
+          marker.highlightCircle = undefined;
         }
       });
 
