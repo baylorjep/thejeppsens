@@ -165,7 +165,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
                 onClick={() => setShowApiKeyModal(false)}
                 className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
               >
-                I'll set it up later
+                I&apos;ll set it up later
               </button>
               <button
                 onClick={() => window.open('https://console.cloud.google.com/', '_blank')}
