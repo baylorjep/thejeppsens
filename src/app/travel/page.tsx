@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { MapPin, Plane, Heart } from 'lucide-react';
 import dynamic from 'next/dynamic';
