@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface Country {
   id: string;
@@ -50,9 +50,9 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
     return () => {
       document.head.removeChild(script);
     };
-  }, [visitedCountries]);
+  }, [visitedCountries, initGoogleMap]);
 
-  const initGoogleMap = () => {
+  const initGoogleMap = useCallback(() => {
     if (!mapRef.current || !window.google) return;
 
     const map = new window.google.maps.Map(mapRef.current, {
@@ -113,7 +113,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         infoWindow.close();
       });
     });
-  };
+  }, [visitedCountries]);
 
   return (
     <>
@@ -153,7 +153,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
                 <ol className="text-sm text-gray-700 space-y-1">
                   <li>1. Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Google Cloud Console</a></li>
                   <li>2. Create a new project or select existing</li>
-                  <li>3. Enable "Maps JavaScript API"</li>
+                  <li>3. Enable &quot;Maps JavaScript API&quot;</li>
                   <li>4. Create credentials (API key)</li>
                   <li>5. Add to your .env.local: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here</li>
                 </ol>
