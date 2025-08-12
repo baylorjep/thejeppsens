@@ -28,6 +28,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
   const mapInstanceRef = useRef<L.Map | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [showPlanningModal, setShowPlanningModal] = useState(false);
+  const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -45,10 +46,22 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
       keyboard: false,
     });
 
-    // Add a beautiful tile layer (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 18,
+    // Add a map tile layer with English labels (CartoDB Positron)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap contributors, © CartoDB',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Add country boundary highlighting layer
+    const highlightLayer = L.geoJSON(null, {
+      style: {
+        color: '#3b82f6',
+        weight: 3,
+        opacity: 0.8,
+        fillColor: '#3b82f6',
+        fillOpacity: 0.1
+      }
     }).addTo(map);
 
     // Add markers for visited countries
@@ -106,8 +119,9 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         </div>
       `);
 
-      // Add hover effects
+      // Add hover effects with country highlighting
       marker.on('mouseover', () => {
+        // Update marker appearance
         marker.setIcon(L.divIcon({
           className: 'custom-marker-hover',
           html: `
@@ -125,9 +139,26 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           iconSize: [24, 24],
           iconAnchor: [12, 12],
         }));
+
+        // Highlight country boundary (simplified approach)
+        setHoveredCountry(country.id);
+        
+        // Add a simple circle highlight around the marker
+        const highlightCircle = L.circle(country.coordinates, {
+          radius: 500000, // 500km radius
+          color: '#3b82f6',
+          weight: 2,
+          opacity: 0.8,
+          fillColor: '#3b82f6',
+          fillOpacity: 0.1
+        }).addTo(map);
+        
+        // Store reference to remove later
+        (marker as any).highlightCircle = highlightCircle;
       });
 
       marker.on('mouseout', () => {
+        // Reset marker appearance
         marker.setIcon(L.divIcon({
           className: 'custom-marker',
           html: `
@@ -145,6 +176,15 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           iconSize: [20, 20],
           iconAnchor: [10, 10],
         }));
+
+        // Remove country highlighting
+        setHoveredCountry(null);
+        
+        // Remove highlight circle
+        if ((marker as any).highlightCircle) {
+          map.removeLayer((marker as any).highlightCircle);
+          (marker as any).highlightCircle = null;
+        }
       });
 
       // Add click handler for planning trips
