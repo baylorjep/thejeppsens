@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Header from '@/components/Header';
-import { DollarSign, Lock, Eye, EyeOff, TrendingUp, PieChart, Calendar, X } from 'lucide-react';
+import { DollarSign, Eye, EyeOff, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function BudgetPage() {

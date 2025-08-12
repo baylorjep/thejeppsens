@@ -72,7 +72,7 @@ export default function TravelPage() {
               <Plane className="inline-block h-8 w-8 text-blue-600 mr-3" />
               Our Travel Map
             </h1>
-            <p className="text-xl text-gray-600">Explore the world we've discovered together</p>
+            <p className="text-xl text-gray-600">Explore the world we&apos;ve discovered together</p>
           </div>
 
           {/* Stats */}
@@ -170,7 +170,7 @@ export default function TravelPage() {
                     </div>
                     <p className="text-gray-600 text-sm">
                       Amazing memories made in {country?.name} together. 
-                      Can't wait to explore more of this beautiful country!
+                      Can&apos;t wait to explore more of this beautiful country!
                     </p>
                   </div>
                 );
