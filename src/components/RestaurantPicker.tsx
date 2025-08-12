@@ -96,7 +96,14 @@ export default function RestaurantPicker() {
       tags: ["cheap", "pizza", "within 5 miles"]
     }
   ]);
-  const [newRestaurant, setNewRestaurant] = useState<Restaurant>({ name: '', cuisine: 'american', price: '$$', distance: 'within 5 miles', tags: [] });
+  const [newRestaurant, setNewRestaurant] = useState<Restaurant>({ 
+    id: '', 
+    name: '', 
+    cuisine: 'american', 
+    price: '$$', 
+    distance: 'within 5 miles', 
+    tags: [] 
+  });
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [result, setResult] = useState<Restaurant | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -115,7 +122,14 @@ export default function RestaurantPicker() {
         tags: newRestaurant.tags,
       };
       setRestaurants([...restaurants, restaurant]);
-      setNewRestaurant({ name: '', cuisine: 'american', price: '$$', distance: 'within 5 miles', tags: [] });
+      setNewRestaurant({ 
+        id: '', 
+        name: '', 
+        cuisine: 'american', 
+        price: '$$', 
+        distance: 'within 5 miles', 
+        tags: [] 
+      });
     }
   };
 
