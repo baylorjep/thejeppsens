@@ -121,7 +121,6 @@ export default function TravelPage() {
                     style={getCountryStyle(country)}
                     onMouseEnter={() => setHoveredCountry(country.id)}
                     onMouseLeave={() => setHoveredCountry(null)}
-                    title={country.name}
                   />
                 ))}
                 
