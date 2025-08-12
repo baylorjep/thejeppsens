@@ -87,7 +87,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           <h3 style="margin: 0 0 8px 0; color: #1f2937; font-weight: 600;">${country.name}</h3>
           <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 14px;">Visited together ✈️</p>
           <button 
-            onclick="window.planTripToCountry('${country.id}', '${country.name}')"
+            onclick="window.planTripToCountry('${country.id}')"
             style="
               background-color: #3b82f6;
               color: white;
@@ -155,7 +155,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
     });
 
     // Add global function for popup buttons
-    (window as any).planTripToCountry = (countryId: string, countryName: string) => {
+    (window as Window & { planTripToCountry?: (countryId: string) => void }).planTripToCountry = (countryId: string) => {
       const country = visitedCountries.find(c => c.id === countryId);
       if (country) {
         setSelectedCountry(country);
@@ -171,7 +171,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
-      delete (window as any).planTripToCountry;
+      delete (window as Window & { planTripToCountry?: (countryId: string) => void }).planTripToCountry;
     };
   }, [visitedCountries]);
 
