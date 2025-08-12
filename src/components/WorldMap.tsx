@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Country {
   id: string;
@@ -30,9 +30,9 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
       return;
     }
 
-    // Load Google Maps API
+    // Load the newer Google Maps API
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=console.debug&libraries=maps,marker&v=beta`;
     script.async = true;
     script.defer = true;
     
@@ -48,17 +48,20 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
     document.head.appendChild(script);
 
     return () => {
-      document.head.removeChild(script);
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
     };
-  }, [visitedCountries, initGoogleMap]);
+  }, [visitedCountries]);
 
-  const initGoogleMap = useCallback(() => {
+  const initGoogleMap = () => {
     if (!mapRef.current || !window.google) return;
 
+    // Create the map using the newer API
     const map = new window.google.maps.Map(mapRef.current, {
       center: { lat: 30, lng: 0 },
       zoom: 2,
-      mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+      mapId: 'DEMO_MAP_ID',
       styles: [
         {
           featureType: 'administrative.country',
@@ -75,18 +78,11 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
 
     // Add markers for visited countries
     visitedCountries.forEach((country) => {
-      const marker = new window.google.maps.Marker({
+      const marker = new window.google.maps.marker.AdvancedMarkerElement({
         position: { lat: country.coordinates[0], lng: country.coordinates[1] },
         map: map,
         title: country.name,
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#10b981',
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 2
-        }
+        content: createMarkerContent(country.name)
       });
 
       // Add click listener for trip planning
@@ -94,32 +90,31 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         setSelectedCountry(country);
         setShowPlanningModal(true);
       });
-
-      // Add hover tooltip
-      const infoWindow = new window.google.maps.InfoWindow({
-        content: `
-          <div style="padding: 8px; text-align: center; min-width: 150px;">
-            <h3 style="margin: 0 0 4px 0; color: #1f2937; font-weight: 600;">${country.name}</h3>
-            <p style="margin: 0; color: #6b7280; font-size: 14px;">Visited together ✈️</p>
-          </div>
-        `
-      });
-
-      marker.addListener('mouseover', () => {
-        infoWindow.open(map, marker);
-      });
-
-      marker.addListener('mouseout', () => {
-        infoWindow.close();
-      });
     });
-  }, [visitedCountries]);
+  };
+
+  const createMarkerContent = (countryName: string) => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div style="
+        width: 16px;
+        height: 16px;
+        background-color: #10b981;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      " title="${countryName}"></div>
+    `;
+    return div;
+  };
 
   return (
     <>
       <div 
         ref={mapRef} 
-        className="w-full h-full rounded-lg relative"
+        className="w-full h-full rounded-lg"
         style={{ 
           background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
           minHeight: '600px'

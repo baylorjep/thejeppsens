@@ -121,7 +121,15 @@ export default function MoviePicker() {
       type: "animated"
     }
   ]);
-  const [newMovie, setNewMovie] = useState<Movie>({ title: '', genre: 'action', length: '90-120 min', type: 'live-action', poster: '', trailer: '' });
+  const [newMovie, setNewMovie] = useState<Movie>({ 
+    id: '', 
+    title: '', 
+    genre: 'action', 
+    length: '90-120 min', 
+    type: 'live-action', 
+    poster: '', 
+    trailer: '' 
+  });
   const [selectedGenre, setSelectedGenre] = useState('');
   const [selectedLength, setSelectedLength] = useState('');
   const [selectedType, setSelectedType] = useState<'animated' | 'live-action' | ''>('');

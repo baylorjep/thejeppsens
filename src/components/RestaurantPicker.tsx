@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Utensils, Shuffle, Plus } from 'lucide-react';
+import { Utensils, Shuffle } from 'lucide-react';
 import Confetti from 'react-confetti';
 
 interface Restaurant {
