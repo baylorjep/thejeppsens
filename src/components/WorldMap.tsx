@@ -89,7 +89,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
     if (!mapRef.current) return;
 
     // Check if Google Maps API key is available
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyDLfWedY5hD7EZDIj0p8pGIkUANxE4Lfao';
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     
     console.log('API Key check:', {
       hasKey: !!apiKey,
