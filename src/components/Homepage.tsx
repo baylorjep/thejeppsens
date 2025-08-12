@@ -48,27 +48,16 @@ export default function Homepage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="text-center mb-20">
-          <h1 className="text-6xl font-bold text-white mb-6 tracking-tight">
-            Decisions, not dilemmas
+          <h1 className="text-6xl font-bold text-gray-800 mb-6 tracking-tight">
+            Jeppsen.Life
           </h1>
-          <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
-            Make choices together instantly. Enjoy unlimited restaurant picks, movie selections, and fun games. Save hours on decision-making.
-          </p>
-          <div className="flex justify-center space-x-4">
-            <a href="/restaurants" className="btn-primary">
-              Start deciding
-            </a>
-            <a href="/bracket" className="btn-secondary">
-              Play games
-            </a>
-          </div>
         </div>
 
         {/* Photo Section */}
         <div className="relative max-w-4xl mx-auto mb-20">
           {photos.length > 0 ? (
             <>
-              <div className={`relative bg-white/10 backdrop-blur-sm rounded-3xl overflow-hidden shadow-2xl border border-white/20 ${
+              <div className={`relative bg-gray-100 rounded-3xl overflow-hidden shadow-2xl ${
                 isCurrentPhotoVertical() ? 'h-96' : 'h-80'
               }`}>
                 <Image
@@ -111,7 +100,7 @@ export default function Homepage() {
                       key={index}
                       onClick={() => setCurrentPhotoIndex(index)}
                       className={`w-3 h-3 rounded-full transition-colors ${
-                        index === currentPhotoIndex ? 'bg-white' : 'bg-white/30'
+                        index === currentPhotoIndex ? 'bg-gray-700' : 'bg-gray-300'
                       }`}
                     />
                   ))}
@@ -119,16 +108,16 @@ export default function Homepage() {
               )}
             </>
           ) : (
-            <div className="relative h-80 bg-white/10 backdrop-blur-sm rounded-3xl overflow-hidden flex items-center justify-center border border-white/20">
+            <div className="relative h-80 bg-gray-100 rounded-3xl overflow-hidden flex items-center justify-center">
               <div className="text-center">
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <p className="text-white mb-2">Add a photo of you and Isabel</p>
-                <p className="text-sm text-white/70">
-                  Copy a photo to <code className="bg-white/20 px-2 py-1 rounded">public/photos/</code> and update the code
+                <p className="text-gray-600 mb-2">Add a photo of you and Isabel</p>
+                <p className="text-sm text-gray-500">
+                  Copy a photo to <code className="bg-gray-200 px-2 py-1 rounded">public/photos/</code> and update the code
                 </p>
               </div>
             </div>
@@ -137,8 +126,8 @@ export default function Homepage() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-20">
-          <a href="/restaurants" className="card hover:shadow-xl transform hover:scale-105 transition-all">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+          <a href="/restaurants" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-200 transition-colors">
               <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
               </svg>
@@ -149,8 +138,8 @@ export default function Homepage() {
             </p>
           </a>
 
-          <a href="/movies" className="card hover:shadow-xl transform hover:scale-105 transition-all">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+          <a href="/movies" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-purple-200 transition-colors">
               <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M6 4h12M4 16h16M4 12h16" />
               </svg>
@@ -161,8 +150,8 @@ export default function Homepage() {
             </p>
           </a>
 
-          <a href="/budget" className="card hover:shadow-xl transform hover:scale-105 transition-all">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+          <a href="/budget" className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-gray-300 transition-all group shadow-lg hover:shadow-xl transform hover:scale-105">
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-green-200 transition-colors">
               <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
@@ -176,22 +165,22 @@ export default function Homepage() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to play some games?
+          <h2 className="text-4xl font-bold text-gray-800 mb-6">
+            Want to play some games?
           </h2>
-          <p className="text-xl text-white/90 mb-12 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
             Check out our mini games for some fun decision-making challenges
           </p>
           <div className="flex justify-center space-x-6">
             <a
               href="/bracket"
-              className="btn-primary"
+              className="px-8 py-4 bg-gray-700 hover:bg-gray-800 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
             >
               Tournament Bracket
             </a>
             <a
               href="/keep4"
-              className="btn-secondary"
+              className="px-8 py-4 bg-gray-700 hover:bg-gray-800 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
             >
               Keep 4 Game
             </a>

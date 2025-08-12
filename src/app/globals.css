@@ -7,7 +7,15 @@
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
+  --background-end-rgb: 248, 250, 252;
+  
+  /* Modern minimalist color palette */
+  --primary-gray: 17, 24, 39;
+  --secondary-gray: 75, 85, 99;
+  --accent-gray: 156, 163, 175;
+  --light-gray: 243, 244, 246;
+  --white: 255, 255, 255;
+  --subtle-accent: 59, 130, 246;
 }
 
 * {
@@ -27,8 +35,14 @@ body {
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -41,21 +55,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: rgb(var(--light-gray));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: rgb(var(--secondary-gray));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: rgb(var(--primary-gray));
 }
 
-/* Smooth transitions */
+/* Smooth transitions - optimized for performance */
 * {
-  transition: all 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
 /* Custom button styles */
