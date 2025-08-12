@@ -1,398 +1,227 @@
 'use client';
 
-import { useState } from 'react';
-import { Film, Sparkles, X, Play } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, MapPin, Star, Film, Shuffle } from 'lucide-react';
 
-interface Movie {
-  id: number;
+interface Place {
+  place_id: string;
   name: string;
-  genre: string;
-  length: string;
-  type: 'animated' | 'live-action';
-  poster?: string;
-  trailer?: string;
+  rating?: number;
+  vicinity: string;
+  types: string[];
+  photos?: any[];
 }
 
 export default function MoviePicker() {
-  const [movies, setMovies] = useState<Movie[]>([
-    {
-      id: 1,
-      name: "The Shawshank Redemption",
-      genre: "drama",
-      length: "long (>120 min)",
-      type: "live-action"
-    },
-    {
-      id: 2,
-      name: "The Godfather",
-      genre: "drama",
-      length: "long (>120 min)",
-      type: "live-action"
-    },
-    {
-      id: 3,
-      name: "Pulp Fiction",
-      genre: "crime",
-      length: "long (>120 min)",
-      type: "live-action"
-    },
-    {
-      id: 4,
-      name: "The Dark Knight",
-      genre: "action",
-      length: "long (>120 min)",
-      type: "live-action"
-    },
-    {
-      id: 5,
-      name: "Fight Club",
-      genre: "drama",
-      length: "medium (90-120 min)",
-      type: "live-action"
-    },
-    {
-      id: 6,
-      name: "Inception",
-      genre: "sci-fi",
-      length: "long (>120 min)",
-      type: "live-action"
-    },
-    {
-      id: 7,
-      name: "The Matrix",
-      genre: "sci-fi",
-      length: "medium (90-120 min)",
-      type: "live-action"
-    },
-    {
-      id: 8,
-      name: "Goodfellas",
-      genre: "crime",
-      length: "long (>120 min)",
-      type: "live-action"
-    },
-    {
-      id: 9,
-      name: "The Silence of the Lambs",
-      genre: "thriller",
-      length: "medium (90-120 min)",
-      type: "live-action"
-    },
-    {
-      id: 10,
-      name: "Interstellar",
-      genre: "sci-fi",
-      length: "long (>120 min)",
-      type: "live-action"
-    },
-    {
-      id: 11,
-      name: "The Lion King",
-      genre: "drama",
-      length: "medium (90-120 min)",
-      type: "animated"
-    },
-    {
-      id: 12,
-      name: "Toy Story",
-      genre: "comedy",
-      length: "short (<90 min)",
-      type: "animated"
-    },
-    {
-      id: 13,
-      name: "Finding Nemo",
-      genre: "comedy",
-      length: "medium (90-120 min)",
-      type: "animated"
-    },
-    {
-      id: 14,
-      name: "Up",
-      genre: "comedy",
-      length: "short (<90 min)",
-      type: "animated"
-    },
-    {
-      id: 15,
-      name: "The Incredibles",
-      genre: "action",
-      length: "medium (90-120 min)",
-      type: "animated"
-    }
-  ]);
-  const [newMovie, setNewMovie] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('');
-  const [selectedLength, setSelectedLength] = useState('');
-  const [selectedType, setSelectedType] = useState<'animated' | 'live-action' | ''>('');
-  const [result, setResult] = useState<Movie | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [venues, setVenues] = useState<Place[]>([]);
+  const [selectedVenue, setSelectedVenue] = useState<Place | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [location, setLocation] = useState('Salt Lake City, UT');
 
-  const genres = ['action', 'comedy', 'drama', 'horror', 'romance', 'sci-fi', 'thriller', 'documentary', 'crime'];
-  const lengths = ['short (<90 min)', 'medium (90-120 min)', 'long (>120 min)'];
+  // Load Google Places API
+  useEffect(() => {
+    const loadPlacesAPI = () => {
+      if (!window.google || !window.google.maps) {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+    };
 
-  const addMovie = () => {
-    if (newMovie.trim()) {
-      const movie: Movie = {
-        id: Date.now(),
-        name: newMovie.trim(),
-        genre: selectedGenre,
-        length: selectedLength,
-        type: selectedType as 'animated' | 'live-action'
-      };
-      setMovies([...movies, movie]);
-      setNewMovie('');
-      setSelectedGenre('');
-      setSelectedLength('');
-      setSelectedType('');
-    }
-  };
+    loadPlacesAPI();
+  }, []);
 
-  const removeMovie = (id: number) => {
-    setMovies(movies.filter(m => m.id !== id));
-  };
-
-  const pickRandom = () => {
-    if (movies.length === 0) return;
-
-    let filteredMovies = movies;
-    
-    // Filter by selected criteria
-    if (selectedGenre) {
-      filteredMovies = filteredMovies.filter(movie => movie.genre === selectedGenre);
-    }
-    if (selectedLength) {
-      filteredMovies = filteredMovies.filter(movie => movie.length === selectedLength);
-    }
-    if (selectedType) {
-      filteredMovies = filteredMovies.filter(movie => movie.type === selectedType);
-    }
-
-    if (filteredMovies.length === 0) {
-      alert('No movies match our selected criteria!');
+  const searchVenues = async () => {
+    if (!window.google || !window.google.maps) {
+      alert('Google Places API not loaded yet. Please try again in a moment.');
       return;
     }
 
-    const randomIndex = Math.floor(Math.random() * filteredMovies.length);
-    const picked = filteredMovies[randomIndex];
-    setResult(picked);
-    setShowResult(true);
+    setIsLoading(true);
+    try {
+      const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+      
+      const request = {
+        query: searchQuery || 'movie theater cinema entertainment',
+        location: new window.google.maps.LatLng(40.7608, -111.8910), // Salt Lake City coordinates
+        radius: 10000, // 10km radius
+        type: 'movie_theater'
+      };
+
+      service.textSearch(request, (results, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+          setVenues(results.slice(0, 15)); // Limit to 15 results
+        } else {
+          console.error('Places API error:', status);
+          // Fallback to default venues
+          setVenues([
+            {
+              place_id: '1',
+              name: 'Megaplex Theatres at The Gateway',
+              rating: 4.3,
+              vicinity: '165 S Rio Grande St, Salt Lake City',
+              types: ['movie_theater', 'entertainment']
+            },
+            {
+              place_id: '2',
+              name: 'Cinemark Sugarhouse',
+              rating: 4.1,
+              vicinity: '1100 E 2100 S, Salt Lake City',
+              types: ['movie_theater', 'entertainment']
+            },
+            {
+              place_id: '3',
+              name: 'Broadway Centre Cinemas',
+              rating: 4.5,
+              vicinity: '111 E 300 S, Salt Lake City',
+              types: ['movie_theater', 'entertainment']
+            }
+          ]);
+        }
+        setIsLoading(false);
+      });
+    } catch (error) {
+      console.error('Error searching venues:', error);
+      setIsLoading(false);
+    }
   };
 
-  const resetResult = () => {
-    setShowResult(false);
-    setResult(null);
+  const pickRandomVenue = () => {
+    if (venues.length === 0) {
+      searchVenues();
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * venues.length);
+    setSelectedVenue(venues[randomIndex]);
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            <Film className="inline-block h-8 w-8 text-gray-700 mr-3" />
-            Movie Picker
-          </h2>
-          <p className="text-xl text-gray-600">Can&apos;t decide what to watch? Let us help!</p>
-        </div>
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          🎬 What Should We Watch?
+        </h1>
+        <p className="text-gray-600 text-lg">
+          Let's find a great place to catch a movie!
+        </p>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Input Panel */}
-          <div className="space-y-6">
-            {/* Add Movie */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Add Movies</h3>
-              <div className="flex gap-2 mb-4">
-                <input
-                  type="text"
-                  value={newMovie}
-                  onChange={(e) => setNewMovie(e.target.value)}
-                  placeholder="Movie name..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  onKeyPress={(e) => e.key === 'Enter' && addMovie()}
-                />
-                <button
-                  onClick={addMovie}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  Add
-                </button>
-              </div>
-
-              {/* Filters */}
-              <div className="space-y-4">
-                {/* Genre */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Genre (optional)</h4>
-                  <select
-                    value={selectedGenre}
-                    onChange={(e) => setSelectedGenre(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  >
-                    <option value="">Any Genre</option>
-                    {genres.map(genre => (
-                      <option key={genre} value={genre}>{genre.charAt(0).toUpperCase() + genre.slice(1)}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Length */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Length (optional)</h4>
-                  <select
-                    value={selectedLength}
-                    onChange={(e) => setSelectedLength(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                  >
-                    <option value="">Any Length</option>
-                    {lengths.map(length => (
-                      <option key={length} value={length}>{length}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Type */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Type (optional)</h4>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedType(selectedType === 'animated' ? '' : 'animated')}
-                      className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-                        selectedType === 'animated'
-                          ? 'bg-gray-700 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      Animated
-                    </button>
-                    <button
-                      onClick={() => setSelectedType(selectedType === 'live-action' ? '' : 'live-action')}
-                      className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-                        selectedType === 'live-action'
-                          ? 'bg-gray-700 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      Live Action
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Movie List */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Our Movies ({movies.length})</h3>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {movies.map((movie) => (
-                  <div key={movie.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <div className="font-medium">{movie.name}</div>
-                      <div className="text-sm text-gray-600">
-                        {movie.genre && <span className="mr-2">{movie.genre}</span>}
-                        {movie.length && <span className="mr-2">{movie.length}</span>}
-                        {movie.type && <span>{movie.type}</span>}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => removeMovie(movie.id)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Pick Button */}
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-              <button
-                onClick={pickRandom}
-                disabled={movies.length === 0}
-                className={`w-full py-4 rounded-lg text-xl font-bold text-white transition-all ${
-                  movies.length > 0
-                    ? 'bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900'
-                    : 'bg-gray-300 cursor-not-allowed'
-                }`}
-              >
-                <Sparkles className="inline-block h-6 w-6 mr-2" />
-                Pick a Movie!
-              </button>
+      {/* Search Section */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div className="flex flex-col md:flex-row gap-4 mb-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              What kind of entertainment?
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Movie theater, cinema, entertainment, etc."
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
           </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Location
+            </label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="City, State"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={searchVenues}
+          disabled={isLoading}
+          className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+        >
+          {isLoading ? 'Searching...' : 'Search Venues'}
+        </button>
+      </div>
 
-          {/* Result Panel */}
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-            {!showResult ? (
-              <div className="text-center py-12 text-gray-500">
-                <Film className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <p>Add some movies and click the button to get started!</p>
+      {/* Random Picker */}
+      <div className="text-center mb-8">
+        <button
+          onClick={pickRandomVenue}
+          disabled={isLoading}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 px-8 rounded-xl text-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50"
+        >
+          <Shuffle className="inline-block mr-2 h-6 w-6" />
+          Pick Random Venue
+        </button>
+      </div>
+
+      {/* Results */}
+      {venues.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Found {venues.length} Venues
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {venues.map((venue) => (
+              <div
+                key={venue.place_id}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setSelectedVenue(venue)}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <Film className="h-5 w-5 text-purple-600 mt-1" />
+                  {venue.rating && (
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
+                      <span className="text-sm text-gray-700">{venue.rating}</span>
+                    </div>
+                  )}
+                </div>
+                <h3 className="font-semibold text-gray-800 mb-2">{venue.name}</h3>
+                <p className="text-sm text-gray-600">{venue.vicinity}</p>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <Sparkles className="h-16 w-16 text-gray-700 mx-auto mb-6" />
-                <h3 className="text-3xl font-bold text-gray-800 mb-4">We&apos;re watching...</h3>
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
-                  <h4 className="text-2xl font-bold text-gray-800 mb-2">{result?.name}</h4>
-                  <div className="flex flex-wrap justify-center gap-2 mt-3">
-                    {result?.genre && (
-                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                        {result.genre}
-                      </span>
-                    )}
-                    {result?.length && (
-                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                        {result.length}
-                      </span>
-                    )}
-                    {result?.type && (
-                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                        {result.type}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex justify-center space-x-4 mt-6">
-                  <button
-                    onClick={() => setShowModal(true)}
-                    className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center"
-                  >
-                    <Play className="h-4 w-4 mr-2" />
-                    Watch Trailer
-                  </button>
-                  <button
-                    onClick={resetResult}
-                    className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
-                  >
-                    Pick Again
-                  </button>
-                </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Selected Venue */}
+      {selectedVenue && (
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-lg p-8 text-center">
+          <div className="text-6xl mb-4">🎬</div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            Let's go to {selectedVenue.name}!
+          </h2>
+          <div className="bg-white rounded-lg p-6 max-w-md mx-auto">
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              {selectedVenue.name}
+            </h3>
+            <p className="text-gray-600 mb-4">{selectedVenue.vicinity}</p>
+            {selectedVenue.rating && (
+              <div className="flex items-center justify-center">
+                <Star className="h-5 w-5 text-yellow-400 fill-current mr-2" />
+                <span className="text-gray-700 font-medium">{selectedVenue.rating} stars</span>
               </div>
             )}
           </div>
+          <button
+            onClick={() => setSelectedVenue(null)}
+            className="mt-6 bg-gray-600 text-white py-2 px-6 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            Pick Another
+          </button>
         </div>
-
-        {/* Trailer Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 max-w-2xl w-full">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-800">Movie Trailer</h3>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-              <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Trailer placeholder for {result?.name}</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
+      )}
+    </div>
   );
 } 
