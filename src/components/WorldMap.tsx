@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface Country {
   id: string;
@@ -19,42 +19,24 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
   const [showPlanningModal, setShowPlanningModal] = useState(false);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
-  useEffect(() => {
-    if (!mapRef.current) return;
+  const createMarkerContent = useCallback((countryName: string) => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div style="
+        width: 16px;
+        height: 16px;
+        background-color: #10b981;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      " title="${countryName}"></div>
+    `;
+    return div;
+  }, []);
 
-    // Check if Google Maps API key is available
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    
-    if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
-      setShowApiKeyModal(true);
-      return;
-    }
-
-    // Load the newer Google Maps API
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=console.debug&libraries=maps,marker&v=beta`;
-    script.async = true;
-    script.defer = true;
-    
-    script.onload = () => {
-      initGoogleMap();
-    };
-    
-    script.onerror = () => {
-      console.error('Failed to load Google Maps API');
-      setShowApiKeyModal(true);
-    };
-
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, [visitedCountries, initGoogleMap]);
-
-  const initGoogleMap = () => {
+  const initGoogleMap = useCallback(() => {
     if (!mapRef.current || !window.google) return;
 
     // Create the map using the newer API
@@ -91,24 +73,42 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
         setShowPlanningModal(true);
       });
     });
-  };
+  }, [visitedCountries, createMarkerContent]);
 
-  const createMarkerContent = (countryName: string) => {
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <div style="
-        width: 16px;
-        height: 16px;
-        background-color: #10b981;
-        border: 3px solid #ffffff;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        cursor: pointer;
-        transition: all 0.2s ease;
-      " title="${countryName}"></div>
-    `;
-    return div;
-  };
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    // Check if Google Maps API key is available
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    
+    if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+      setShowApiKeyModal(true);
+      return;
+    }
+
+    // Load the newer Google Maps API
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=console.debug&libraries=maps,marker&v=beta`;
+    script.async = true;
+    script.defer = true;
+    
+    script.onload = () => {
+      initGoogleMap();
+    };
+    
+    script.onerror = () => {
+      console.error('Failed to load Google Maps API');
+      setShowApiKeyModal(true);
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, [initGoogleMap]);
 
   return (
     <>
