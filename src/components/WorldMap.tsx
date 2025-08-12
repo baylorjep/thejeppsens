@@ -28,7 +28,6 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
   const mapInstanceRef = useRef<L.Map | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [showPlanningModal, setShowPlanningModal] = useState(false);
-  const [countryLayers, setCountryLayers] = useState<Map<string, L.GeoJSON>>(new Map());
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -55,7 +54,6 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
 
     // Create a layer group for country boundaries
     const countryBoundaries = L.layerGroup().addTo(map);
-    const layersMap = new Map<string, L.GeoJSON>();
 
     // Function to load country GeoJSON data
     const loadCountryBoundary = async (country: Country) => {
@@ -72,7 +70,7 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
           const geoJsonData = await geoJsonResponse.json();
           
           // Find the country in the GeoJSON data
-          const countryFeature = geoJsonData.features.find((feature: any) => 
+          const countryFeature = geoJsonData.features.find((feature: { properties: { ISO_A3?: string; ADMIN?: string } }) => 
             feature.properties.ISO_A3 === countryCode || 
             feature.properties.ADMIN === country.name
           );
@@ -88,8 +86,6 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
                 fillOpacity: 0.3
               }
             }).addTo(countryBoundaries);
-            
-            layersMap.set(country.id, countryLayer);
             
             // Add hover effects
             countryLayer.on('mouseover', () => {
@@ -128,8 +124,6 @@ export default function WorldMap({ visitedCountries }: WorldMapProps) {
     visitedCountries.forEach(country => {
       loadCountryBoundary(country);
     });
-
-    setCountryLayers(layersMap);
 
     // Add global function for popup buttons
     (window as Window & { planTripToCountry?: (countryId: string) => void }).planTripToCountry = (countryId: string) => {
