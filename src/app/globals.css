@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -43,10 +43,6 @@ body {
     rgb(var(--background-start-rgb));
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
 }
 
 /* Custom scrollbar */
@@ -113,6 +109,11 @@ h1, h2, h3, h4, h5, h6 {
   50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.15); }
 }
 
+@keyframes vinyl-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.333%); }
+}
+
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
@@ -124,4 +125,12 @@ h1, h2, h3, h4, h5, h6 {
 /* Optimize page transitions */
 .page-transition {
   will-change: opacity, transform;
+}
+
+.vinyl-marquee {
+  animation: vinyl-marquee 28s linear infinite;
+}
+
+.vinyl-marquee:hover {
+  animation-play-state: paused;
 }

@@ -13,6 +13,7 @@ export default function Header() {
   const navigation = [
     { name: 'Food', href: '/restaurants' },
     { name: 'Movies', href: '/movies' },
+    { name: 'Vinyl', href: '/vinyl' },
     { name: 'Budget', href: '/budget' },
     { name: 'Travel', href: '/travel' }
   ];
@@ -41,12 +42,12 @@ export default function Header() {
   }, [isMiniGamesOpen]);
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white/95 border-b border-gray-200 sticky top-0 z-50 backdrop-blur">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-gray-800">Jeppsen.Life</div>
+            <div className="text-lg font-semibold tracking-tight text-gray-900">Baylor & Isabel</div>
           </Link>
 
           {/* Desktop Navigation */}
