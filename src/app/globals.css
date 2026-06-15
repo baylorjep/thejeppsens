@@ -133,7 +133,7 @@ body {
 }
 
 .vinyl-marquee {
-  animation: vinyl-marquee 28s linear infinite;
+  animation: vinyl-marquee 52s linear infinite;
 }
 
 .vinyl-marquee:hover {
