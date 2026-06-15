@@ -13,6 +13,10 @@ type FormState = {
   title: string;
   artist: string;
   releaseYear: string;
+  originalReleaseYear: string;
+  recordingYears: string;
+  pressingYear: string;
+  pressingNotes: string;
   label: string;
   catalogNumber: string;
   format: string;
@@ -39,6 +43,10 @@ const emptyForm: FormState = {
   title: "",
   artist: "",
   releaseYear: "",
+  originalReleaseYear: "",
+  recordingYears: "",
+  pressingYear: "",
+  pressingNotes: "",
   label: "",
   catalogNumber: "",
   format: "LP",
@@ -66,6 +74,10 @@ function recordToForm(record: VinylRecord): FormState {
     title: record.title,
     artist: record.artist,
     releaseYear: record.releaseYear?.toString() ?? "",
+    originalReleaseYear: record.originalReleaseYear?.toString() ?? "",
+    recordingYears: record.recordingYears ?? "",
+    pressingYear: record.pressingYear?.toString() ?? "",
+    pressingNotes: record.pressingNotes ?? "",
     label: record.label ?? "",
     catalogNumber: record.catalogNumber ?? "",
     format: record.format ?? "LP",
@@ -191,6 +203,10 @@ export default function VinylManager() {
       title,
       artist,
       releaseYear: form.releaseYear ? Number(form.releaseYear) : undefined,
+      originalReleaseYear: form.originalReleaseYear ? Number(form.originalReleaseYear) : undefined,
+      recordingYears: form.recordingYears.trim() || undefined,
+      pressingYear: form.pressingYear ? Number(form.pressingYear) : undefined,
+      pressingNotes: form.pressingNotes.trim() || undefined,
       label: form.label.trim() || undefined,
       catalogNumber: form.catalogNumber.trim() || undefined,
       format: form.format.trim() || undefined,
@@ -352,6 +368,21 @@ export default function VinylManager() {
           </label>
 
           <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Original release year</span>
+            <input value={form.originalReleaseYear} onChange={(event) => updateForm("originalReleaseYear", event.target.value)} className={inputClassName()} inputMode="numeric" placeholder="1960" />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Recording years</span>
+            <input value={form.recordingYears} onChange={(event) => updateForm("recordingYears", event.target.value)} className={inputClassName()} placeholder="1944-1945, late 1940s-1950s" />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Pressing year</span>
+            <input value={form.pressingYear} onChange={(event) => updateForm("pressingYear", event.target.value)} className={inputClassName()} inputMode="numeric" placeholder="1974" />
+          </label>
+
+          <label className="block">
             <span className="mb-2 block text-sm font-medium text-gray-700">Format</span>
             <input value={form.format} onChange={(event) => updateForm("format", event.target.value)} className={inputClassName()} placeholder="LP, soundtrack, picture disc..." />
           </label>
@@ -413,6 +444,16 @@ export default function VinylManager() {
           <label className="block sm:col-span-2">
             <span className="mb-2 block text-sm font-medium text-gray-700">Source</span>
             <input value={form.source} onChange={(event) => updateForm("source", event.target.value)} className={inputClassName()} placeholder="Gift, record store, thrifted, wishlist..." />
+          </label>
+
+          <label className="block sm:col-span-2">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Pressing notes</span>
+            <textarea
+              value={form.pressingNotes}
+              onChange={(event) => updateForm("pressingNotes", event.target.value)}
+              className={`${inputClassName()} min-h-24`}
+              placeholder="Italian reissue, expanded 2-LP edition, archival pressing..."
+            />
           </label>
 
           <label className="block">

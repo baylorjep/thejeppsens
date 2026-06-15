@@ -3,6 +3,10 @@ export type VinylRecord = {
   title: string;
   artist: string;
   releaseYear?: number;
+  originalReleaseYear?: number;
+  recordingYears?: string;
+  pressingYear?: number;
+  pressingNotes?: string;
   label?: string;
   catalogNumber?: string;
   format?: string;

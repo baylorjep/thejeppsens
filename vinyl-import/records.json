@@ -130,8 +130,11 @@
   },
   {
     "id": "ray-charles-live-in-concert-the-complete-performance",
-    "title": "Live in Concert: The Complete Performance",
+    "title": "Ray Charles Live In Concert: The Complete Performance",
     "artist": "Ray Charles",
+    "releaseYear": 2026,
+    "originalReleaseYear": 1965,
+    "recordingYears": "1964",
     "genres": [
       "Soul",
       "Rhythm and Blues",
@@ -155,9 +158,11 @@
     "frontCoverPath": "../../Album covers/IMG_4589.JPG",
     "backCoverPath": "../../Album covers/IMG_4590.JPG",
     "favorite": false,
-    "label": "Atlantic Records",
+    "label": "Tangerine Records",
     "format": "2xLP",
-    "discCount": 2
+    "discCount": 2,
+    "pressingYear": 2026,
+    "pressingNotes": "Expanded 2-LP 2026 vinyl edition; first vinyl release of the complete performance."
   },
   {
     "id": "chet-baker-in-japan-1987-fukui-vol-2",
@@ -253,6 +258,9 @@
     "id": "louis-armstrong-satchmos-golden-favorites",
     "title": "Satchmo's Golden Favorites",
     "artist": "Louis Armstrong",
+    "releaseYear": 1960,
+    "originalReleaseYear": 1960,
+    "recordingYears": "Late 1940s–1950s",
     "genres": [
       "Jazz",
       "Vocal Jazz",
@@ -277,7 +285,9 @@
     "frontCoverPath": "../../Album covers/IMG_4597.JPG",
     "backCoverPath": "../../Album covers/IMG_4598.jpg",
     "favorite": false,
-    "label": "Coronet Records",
+    "label": "Coral Records",
+    "catalogNumber": "COPS 7005",
+    "pressingNotes": "Italian MCA/Coral licensed reissue, likely a 1970s pressing.",
     "format": "LP",
     "discCount": 1
   },
@@ -316,8 +326,9 @@
   },
   {
     "id": "engelbert-humperdinck-live-in-concert-all-of-me-and-a-little-bit-more",
-    "title": "Live in Concert: All of Me and a Little Bit More",
+    "title": "Engelbert Humperdinck: Live in Concert and All of Me",
     "artist": "Engelbert Humperdinck",
+    "releaseYear": 1981,
     "genres": [
       "Traditional Pop",
       "Vocal",
@@ -342,14 +353,16 @@
     "frontCoverPath": "../../Album covers/IMG_4601.jpg",
     "backCoverPath": "../../Album covers/IMG_4602.jpg",
     "favorite": false,
-    "label": "Parrot Records",
-    "format": "LP",
-    "discCount": 1
+    "label": "Epic Records",
+    "format": "2xLP",
+    "discCount": 2
   },
   {
     "id": "harry-james-and-his-orchestra-1943-46-live",
-    "title": "1943-46 Live",
+    "title": "The Uncollected: Harry James and His Orchestra 1943-1946",
     "artist": "Harry James and His Orchestra",
+    "releaseYear": 1979,
+    "recordingYears": "1943-1946",
     "genres": [
       "Big Band",
       "Swing",
@@ -373,15 +386,17 @@
     "frontCoverPath": "../../Album covers/IMG_4603.jpg",
     "backCoverPath": "../../Album covers/IMG_4604.jpg",
     "favorite": false,
-    "label": "Columbia Records",
-    "catalogNumber": "1943-46",
+    "label": "Hindsight Records",
+    "catalogNumber": "HSR-102",
+    "pressingNotes": "Archival live/radio performances from the big-band era.",
     "format": "LP",
     "discCount": 1
   },
   {
     "id": "walt-disney-alice-in-wonderland",
-    "title": "Walt Disney's Alice in Wonderland",
-    "artist": "Walt Disney",
+    "title": "Walt Disney's Alice in Wonderland: The Story • The Songs • The Music",
+    "artist": "Various Disney performers",
+    "releaseYear": 1969,
     "genres": [
       "Children's",
       "Soundtrack",
@@ -407,6 +422,7 @@
     "backCoverPath": "../../Album covers/IMG_4606.jpg",
     "favorite": false,
     "label": "Disneyland Records",
+    "catalogNumber": "3909",
     "format": "LP",
     "discCount": 1
   },
@@ -544,6 +560,7 @@
     "id": "various-artists-swingin-stereo-with-ten-big-bands",
     "title": "Swingin' Stereo! With Ten Big Bands",
     "artist": "Various Artists",
+    "releaseYear": 1959,
     "genres": [
       "Big Band",
       "Swing",
@@ -568,6 +585,7 @@
     "backCoverPath": "../../Album covers/IMG_4616.jpg",
     "favorite": false,
     "label": "Capitol Records",
+    "catalogNumber": "SW-1161",
     "format": "LP",
     "discCount": 1
   },
@@ -840,6 +858,7 @@
     "id": "harry-james-and-his-orchestra-strictly-instrumental",
     "title": "Strictly Instrumental",
     "artist": "Harry James and His Orchestra",
+    "releaseYear": 1958,
     "genres": [
       "Big Band",
       "Swing",
@@ -863,7 +882,9 @@
     "frontCoverPath": "../../Album covers/IMG_4633.jpg",
     "backCoverPath": "../../Album covers/IMG_4634.jpg",
     "favorite": false,
-    "label": "Capitol Records",
+    "label": "Harmony Records",
+    "catalogNumber": "HL 7269",
+    "pressingNotes": "Harmony budget-label Columbia compilation.",
     "format": "LP",
     "discCount": 1
   },
@@ -904,6 +925,7 @@
     "id": "tony-bennett-tony-bennetts-all-time-greatest-hits",
     "title": "Tony Bennett's All-Time Greatest Hits",
     "artist": "Tony Bennett",
+    "releaseYear": 1972,
     "genres": [
       "Traditional Pop",
       "Vocal Jazz"
@@ -929,12 +951,14 @@
     "favorite": false,
     "label": "Columbia Records",
     "format": "2xLP",
-    "discCount": 1
+    "catalogNumber": "PG 31494",
+    "discCount": 2
   },
   {
     "id": "the-ink-spots-greatest-hits",
     "title": "Greatest Hits",
     "artist": "The Ink Spots",
+    "releaseYear": 2021,
     "genres": [
       "Vocal Group",
       "Traditional Pop",
@@ -959,7 +983,7 @@
     "frontCoverPath": "../../Album covers/IMG_4639.jpg",
     "backCoverPath": "../../Album covers/IMG_4640.jpg",
     "favorite": false,
-    "label": "Decca Records",
+    "label": "Not Now Music",
     "format": "2xLP",
     "discCount": 1
   },
@@ -1029,8 +1053,11 @@
   },
   {
     "id": "louis-armstrong-y-su-orquesta-historia-del-jazz",
-    "title": "Historia del Jazz: Louis Armstrong y su Orquesta",
-    "artist": "Louis Armstrong y su Orquesta",
+    "title": "Historia del Jazz: Louis Armstrong y su Orquesta (Grabaciones en 1944-1945)",
+    "artist": "Louis Armstrong and His Orchestra",
+    "releaseYear": 1974,
+    "originalReleaseYear": 1960,
+    "recordingYears": "1944-1945",
     "genres": [
       "Jazz",
       "Dixieland",
@@ -1054,8 +1081,9 @@
     "frontCoverPath": "../../Album covers/IMG_4646.jpg",
     "backCoverPath": "../../Album covers/IMG_4647.jpg",
     "favorite": false,
-    "label": "Coronet Records",
-    "catalogNumber": "1944-1945",
+    "label": "Gramusic",
+    "catalogNumber": "GM-350",
+    "pressingNotes": "Spanish pressing; recordings from 1944-1945.",
     "format": "LP",
     "discCount": 1
   },

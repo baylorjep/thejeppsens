@@ -35,6 +35,10 @@ export function statusLabel(status: VinylRecord["status"]) {
 }
 
 export function getDecade(record: VinylRecord) {
-  if (!record.releaseYear) return "Unknown";
-  return `${Math.floor(record.releaseYear / 10) * 10}s`;
+  const recordingYears = record.recordingYears?.match(/\b(\d{4})\b/);
+  const recordingDecade = record.recordingYears?.match(/\b(\d{4})s\b/);
+  const year = recordingYears ? Number(recordingYears[1]) : recordingDecade ? Number(recordingDecade[1]) : record.releaseYear;
+
+  if (!year) return "Unknown";
+  return `${Math.floor(year / 10) * 10}s`;
 }

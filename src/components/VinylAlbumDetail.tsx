@@ -206,6 +206,9 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
         <dl className="mt-6 grid gap-3 text-sm sm:mt-8 sm:grid-cols-2">
           {[
             ["Released", record.releaseYear?.toString()],
+            ["Original release", record.originalReleaseYear?.toString()],
+            ["Recording years", record.recordingYears],
+            ["Pressing year", record.pressingYear?.toString()],
             ["Decade", getDecade(record)],
             ["Status", statusLabel(record.status)],
             ["Format", record.format],
@@ -213,11 +216,12 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             ["Label", record.label],
             ["Catalog number", record.catalogNumber],
             ["Pressing", record.pressing],
+            ["Pressing notes", record.pressingNotes],
             ["Vinyl color", record.vinylColor],
             ["Condition", record.condition],
             ["Source", record.source],
             ["Date added", record.dateAdded],
-        ].map(([label, value]) =>
+          ].map(([label, value]) =>
             value ? (
               <div key={label} className="rounded-md bg-gray-50 p-4">
                 <dt className="text-gray-500">{label}</dt>

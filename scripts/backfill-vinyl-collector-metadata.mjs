@@ -213,6 +213,10 @@ async function main() {
     const nextRecord = inferCollectorMetadata(merged);
     nextManifest.push({
       ...input,
+      originalReleaseYear: nextRecord.originalReleaseYear,
+      recordingYears: nextRecord.recordingYears,
+      pressingYear: nextRecord.pressingYear,
+      pressingNotes: nextRecord.pressingNotes,
       label: nextRecord.label,
       catalogNumber: nextRecord.catalogNumber,
       format: nextRecord.format,
