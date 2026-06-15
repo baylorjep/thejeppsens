@@ -1,13 +1,13 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
-import { fetchVinylRecords } from "@/lib/vinylApi";
+import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
 import { Disc3, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type VinylAlbumDetailProps = {
   id: string;
@@ -62,23 +62,37 @@ function CoverGallery({ record }: { record: VinylRecord }) {
 }
 
 export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetailProps) {
-  const [remoteRecords, setRemoteRecords] = useState<VinylRecord[]>([]);
-  const [queuedRecords, setQueuedRecords] = useState<VinylRecord[]>([]);
+  const [records, setRecords] = useState<VinylRecord[]>(staticRecords);
+  const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
 
   useEffect(() => {
-    setQueuedRecords(readQueuedVinyls());
+    const queuedRecords = readQueuedVinyls();
     fetchVinylRecords()
       .then((response) => {
-        if (response.source === "supabase") setRemoteRecords(response.records);
+        setRecords(response.source === "supabase" ? response.records : [...response.records, ...queuedRecords]);
       })
-      .catch(() => undefined);
-  }, []);
+      .catch(() => setRecords([...staticRecords, ...queuedRecords]));
+  }, [staticRecords]);
 
-  const records = useMemo(
-    () => [...(remoteRecords.length ? remoteRecords : staticRecords), ...queuedRecords],
-    [queuedRecords, remoteRecords, staticRecords],
-  );
   const record = records.find((item) => item.id === id);
+
+  const toggleFavorite = async (target: VinylRecord) => {
+    const nextRecord = { ...target, favorite: !target.favorite };
+    setFavoriteRecordId(target.id);
+
+    try {
+      const response = await saveVinylRecord(nextRecord);
+      setRecords((current) =>
+        current.map((item) => (item.id === response.record.id ? response.record : item)),
+      );
+    } catch {
+      setRecords((current) =>
+        current.map((item) => (item.id === nextRecord.id ? nextRecord : item)),
+      );
+    } finally {
+      setFavoriteRecordId(null);
+    }
+  };
 
   if (!record) {
     return (
@@ -111,11 +125,19 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             </h1>
             <p className="mt-3 text-xl text-gray-600">{record.artist}</p>
           </div>
-          {record.favorite ? (
-            <div className="rounded-full bg-gray-950 p-3 text-white">
-              <Star className="h-5 w-5 fill-current" />
-            </div>
-          ) : null}
+          <button
+            type="button"
+            onClick={() => toggleFavorite(record)}
+            disabled={favoriteRecordId === record.id}
+            className={`rounded-full border p-3 transition-colors ${
+              record.favorite
+                ? "border-gray-950 bg-gray-950 text-white"
+                : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
+            }`}
+            aria-label={record.favorite ? `Remove ${record.title} from favorites` : `Add ${record.title} to favorites`}
+          >
+            <Star className={`h-5 w-5 ${record.favorite ? "fill-current" : ""}`} />
+          </button>
         </div>
 
         <dl className="mt-8 grid gap-3 text-sm sm:grid-cols-2">

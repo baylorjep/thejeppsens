@@ -1,7 +1,7 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
-import { fetchVinylRecords } from "@/lib/vinylApi";
+import { fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
 import {
@@ -75,30 +75,27 @@ function RecordMeta({ record }: { record: VinylRecord }) {
 }
 
 export default function VinylCatalog({ records }: VinylCatalogProps) {
-  const [queuedRecords, setQueuedRecords] = useState<VinylRecord[]>([]);
-  const [remoteRecords, setRemoteRecords] = useState<VinylRecord[]>([]);
+  const [allRecords, setAllRecords] = useState<VinylRecord[]>(records);
+  const [, setApiSource] = useState<VinylApiStatus>("local");
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
   const [activeMood, setActiveMood] = useState("All");
   const [activeStatus, setActiveStatus] = useState("All");
   const [activeDecade, setActiveDecade] = useState("All");
-  const [giftMode, setGiftMode] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [pickedRecordId, setPickedRecordId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<VinylRecord | null>(null);
-  const baseRecords = remoteRecords.length ? remoteRecords : records;
-  const allRecords = useMemo(() => [...baseRecords, ...queuedRecords], [baseRecords, queuedRecords]);
+  const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
 
   useEffect(() => {
-    setQueuedRecords(readQueuedVinyls());
+    const queuedRecords = readQueuedVinyls();
     fetchVinylRecords()
       .then((response) => {
-        if (response.source === "supabase") {
-          setRemoteRecords(response.records);
-        }
+        setApiSource(response.source);
+        setAllRecords(response.source === "supabase" ? response.records : [...response.records, ...queuedRecords]);
       })
-      .catch(() => undefined);
-  }, []);
+      .catch(() => setAllRecords([...records, ...queuedRecords]));
+  }, [records]);
 
   const filterOptions = useMemo(
     () => ({
@@ -137,11 +134,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       const matchesMood = activeMood === "All" || record.moods.includes(activeMood);
       const matchesStatus = activeStatus === "All" || statusLabel(record.status) === activeStatus;
       const matchesDecade = activeDecade === "All" || getDecade(record) === activeDecade;
-      const matchesGiftMode = !giftMode || record.status === "wishlist" || record.status === "upgrade";
-
-      return matchesQuery && matchesGenre && matchesMood && matchesStatus && matchesDecade && matchesGiftMode;
+      return matchesQuery && matchesGenre && matchesMood && matchesStatus && matchesDecade;
     });
-  }, [activeDecade, activeGenre, activeMood, activeStatus, allRecords, giftMode, query]);
+  }, [activeDecade, activeGenre, activeMood, activeStatus, allRecords, query]);
 
   const carouselRecords = allRecords;
   const rollingRecords = [...carouselRecords, ...carouselRecords, ...carouselRecords];
@@ -149,8 +144,6 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const pickedRecord = allRecords.find((record) => record.id === pickedRecordId);
 
   const favoriteCount = allRecords.filter((record) => record.favorite).length;
-  const wishlistCount = allRecords.filter((record) => record.status === "wishlist").length;
-  const upgradeCount = allRecords.filter((record) => record.status === "upgrade").length;
   const ownedCount = allRecords.filter((record) => record.status === "owned").length;
   const topDecade = uniqueSorted(allRecords.map(getDecade).filter((decade) => decade !== "Unknown"))[0] ?? "None";
 
@@ -166,7 +159,28 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     setActiveMood("All");
     setActiveStatus("All");
     setActiveDecade("All");
-    setGiftMode(false);
+  };
+
+  const toggleFavorite = async (record: VinylRecord) => {
+    const nextRecord = { ...record, favorite: !record.favorite };
+    setFavoriteRecordId(record.id);
+
+    try {
+      const response = await saveVinylRecord(nextRecord);
+      const savedRecord = response.record;
+      setApiSource(response.source);
+      setAllRecords((current) =>
+        current.map((item) => (item.id === savedRecord.id ? savedRecord : item)),
+      );
+      setSelectedRecord((current) => (current?.id === savedRecord.id ? savedRecord : current));
+    } catch {
+      setAllRecords((current) =>
+        current.map((item) => (item.id === nextRecord.id ? nextRecord : item)),
+      );
+      setSelectedRecord((current) => (current?.id === nextRecord.id ? nextRecord : current));
+    } finally {
+      setFavoriteRecordId(null);
+    }
   };
 
   const filterGroups: Array<{
@@ -208,7 +222,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
   return (
     <div>
-      <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
           <p className="text-sm text-gray-500">Records</p>
           <p className="mt-2 text-3xl font-semibold text-gray-950">{allRecords.length}</p>
@@ -220,10 +234,6 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
           <p className="text-sm text-gray-500">Owned</p>
           <p className="mt-2 text-3xl font-semibold text-gray-950">{ownedCount}</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-          <p className="text-sm text-gray-500">Gift ideas</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-950">{wishlistCount + upgradeCount}</p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
           <p className="text-sm text-gray-500">Top decade</p>
@@ -282,17 +292,6 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             >
               <Shuffle className="h-4 w-4" />
               Pick one
-            </button>
-            <button
-              type="button"
-              onClick={() => setGiftMode((current) => !current)}
-              className={`inline-flex items-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-colors ${
-                giftMode
-                  ? "bg-gray-950 text-white hover:bg-gray-800"
-                  : "border border-gray-300 text-gray-900 hover:border-gray-500"
-              }`}
-            >
-              Gift mode
             </button>
             <button
               type="button"
@@ -376,11 +375,20 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     <h2 className="text-xl font-semibold text-gray-950">{record.title}</h2>
                     <p className="mt-1 text-sm text-gray-600">{record.artist}</p>
                   </div>
-                  {record.favorite ? (
-                    <div className="rounded-full bg-gray-950 p-2 text-white" title="Favorite">
-                      <Star className="h-4 w-4 fill-current" />
-                    </div>
-                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(record)}
+                    disabled={favoriteRecordId === record.id}
+                    className={`rounded-full border p-2 transition-colors ${
+                      record.favorite
+                        ? "border-gray-950 bg-gray-950 text-white"
+                        : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
+                    }`}
+                    title={record.favorite ? "Remove favorite" : "Add favorite"}
+                    aria-label={record.favorite ? `Remove ${record.title} from favorites` : `Add ${record.title} to favorites`}
+                  >
+                    <Star className={`h-4 w-4 ${record.favorite ? "fill-current" : ""}`} />
+                  </button>
                 </div>
 
                 <RecordMeta record={record} />
@@ -451,14 +459,29 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     </h2>
                     <p className="mt-2 text-lg text-gray-600">{selectedRecord.artist}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRecord(null)}
-                    className="rounded-full border border-gray-200 p-2 text-gray-600 transition-colors hover:border-gray-500 hover:text-gray-950"
-                    aria-label="Close album details"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleFavorite(selectedRecord)}
+                      disabled={favoriteRecordId === selectedRecord.id}
+                      className={`rounded-full border p-2 transition-colors ${
+                        selectedRecord.favorite
+                          ? "border-gray-950 bg-gray-950 text-white"
+                          : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
+                      }`}
+                      aria-label={selectedRecord.favorite ? `Remove ${selectedRecord.title} from favorites` : `Add ${selectedRecord.title} to favorites`}
+                    >
+                      <Star className={`h-5 w-5 ${selectedRecord.favorite ? "fill-current" : ""}`} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRecord(null)}
+                      className="rounded-full border border-gray-200 p-2 text-gray-600 transition-colors hover:border-gray-500 hover:text-gray-950"
+                      aria-label="Close album details"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
 
                 <RecordMeta record={selectedRecord} />
