@@ -132,6 +132,16 @@ export default function Homepage() {
             </p>
           </Link>
 
+          <Link href="/vinyl" className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
+            <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
+              <Disc3 className="h-5 w-5 text-gray-800" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-950">Vinyl</h3>
+            <p className="text-sm leading-6 text-gray-600">
+              A growing catalog of Isabel&apos;s records.
+            </p>
+          </Link>
+
           <Link href="/restaurants" className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
             <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
               <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,16 +163,6 @@ export default function Homepage() {
             <h3 className="mb-2 text-lg font-semibold text-gray-950">Movies</h3>
             <p className="text-sm leading-6 text-gray-600">
               Keep movie night moving.
-            </p>
-          </Link>
-
-          <Link href="/vinyl" className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
-            <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
-              <Disc3 className="h-5 w-5 text-gray-800" />
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-gray-950">Vinyl</h3>
-            <p className="text-sm leading-6 text-gray-600">
-              A growing catalog of Isabel&apos;s records.
             </p>
           </Link>
 

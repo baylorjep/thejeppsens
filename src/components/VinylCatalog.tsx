@@ -38,10 +38,14 @@ type QuickFilter = "all" | "favorites" | "wishlist" | "upgrade";
 function CoverArt({
   record,
   priority = false,
+  loading = "lazy",
+  fetchPriority = "low",
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
 }: {
   record: VinylRecord;
   priority?: boolean;
+  loading?: "eager" | "lazy";
+  fetchPriority?: "high" | "low" | "auto";
   sizes?: string;
 }) {
   if (record.coverImage) {
@@ -51,6 +55,8 @@ function CoverArt({
         alt={`${record.title} by ${record.artist} cover`}
         fill
         priority={priority}
+        loading={loading}
+        fetchPriority={priority ? "high" : fetchPriority}
         sizes={sizes}
         quality={70}
         className="object-cover"
@@ -104,6 +110,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [pickedRecordId, setPickedRecordId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<VinylRecord | null>(null);
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
+  const [showRecordCovers, setShowRecordCovers] = useState(false);
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -114,6 +121,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       })
       .catch(() => setAllRecords([...records, ...queuedRecords]));
   }, [records]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setShowRecordCovers(true), 850);
+    return () => window.clearTimeout(timeout);
+  }, []);
 
   const filterOptions = useMemo(
     () => ({
@@ -480,14 +492,22 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 href={`/vinyl/${record.id}`}
                 className={viewMode === "grid" ? "relative aspect-square" : "relative aspect-square sm:aspect-auto"}
               >
-                <CoverArt
-                  record={record}
-                  sizes={
-                    viewMode === "grid"
-                      ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                      : "(max-width: 639px) 100vw, 180px"
-                  }
-                />
+                {showRecordCovers ? (
+                  <CoverArt
+                    record={record}
+                    loading="lazy"
+                    fetchPriority="low"
+                    sizes={
+                      viewMode === "grid"
+                        ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                        : "(max-width: 639px) 100vw, 180px"
+                    }
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,_#fafafa,_#e5e7eb)]">
+                    <Disc3 className="h-10 w-10 text-gray-300" />
+                  </div>
+                )}
               </Link>
 
               <div className="p-5">
