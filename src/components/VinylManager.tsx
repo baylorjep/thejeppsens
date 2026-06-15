@@ -24,6 +24,7 @@ type FormState = {
   favoriteStories: string;
   favorite: boolean;
   coverImage: string;
+  backCoverImage: string;
 };
 
 const emptyForm: FormState = {
@@ -42,6 +43,7 @@ const emptyForm: FormState = {
   favoriteStories: "",
   favorite: false,
   coverImage: "",
+  backCoverImage: "",
 };
 
 function recordToForm(record: VinylRecord): FormState {
@@ -61,6 +63,7 @@ function recordToForm(record: VinylRecord): FormState {
     favoriteStories: record.favoriteStories ?? "",
     favorite: Boolean(record.favorite),
     coverImage: record.coverImage ?? "",
+    backCoverImage: record.backCoverImage ?? "",
   };
 }
 
@@ -83,6 +86,7 @@ export default function VinylManager() {
   const [apiSource, setApiSource] = useState<VinylApiStatus>("local");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | undefined>();
+  const [backImageFile, setBackImageFile] = useState<File | undefined>();
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -121,12 +125,18 @@ export default function VinylManager() {
     writeQueuedVinyls(nextRecords.filter((record) => !staticIds.has(record.id)));
   };
 
-  const handleImageChange = async (file?: File) => {
+  const handleImageChange = async (side: "front" | "back", file?: File) => {
     if (!file) return;
 
     try {
-      setImageFile(file);
-      updateForm("coverImage", await imageToDataUrl(file));
+      const imageUrl = await imageToDataUrl(file);
+      if (side === "front") {
+        setImageFile(file);
+        updateForm("coverImage", imageUrl);
+      } else {
+        setBackImageFile(file);
+        updateForm("backCoverImage", imageUrl);
+      }
       setMessage("Image loaded.");
     } catch {
       setMessage("Could not load that image.");
@@ -137,6 +147,7 @@ export default function VinylManager() {
     setForm(emptyForm);
     setEditingId(null);
     setImageFile(undefined);
+    setBackImageFile(undefined);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -169,11 +180,12 @@ export default function VinylManager() {
       notes: form.notes.trim() || undefined,
       favoriteStories: form.favoriteStories.trim() || undefined,
       coverImage: form.coverImage || undefined,
+      backCoverImage: form.backCoverImage || undefined,
       favorite: form.favorite,
     };
 
     try {
-      const response = await saveVinylRecord(record, imageFile);
+      const response = await saveVinylRecord(record, imageFile, backImageFile);
       const savedRecord = response.record;
       const nextRecords = [...records.filter((item) => item.id !== savedRecord.id), savedRecord];
 
@@ -197,6 +209,7 @@ export default function VinylManager() {
     setEditingId(record.id);
     setForm(recordToForm(record));
     setImageFile(undefined);
+    setBackImageFile(undefined);
     setMessage(`Editing ${record.title}.`);
   };
 
@@ -325,9 +338,9 @@ export default function VinylManager() {
             />
           </label>
 
-          <label className="block sm:col-span-2">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Cover image</span>
-            <div className="grid gap-4 sm:grid-cols-[160px_minmax(0,1fr)]">
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Front cover image</span>
+            <div className="grid gap-4">
               <div className="relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-100">
                 {form.coverImage ? (
                   <Image src={form.coverImage} alt="Cover preview" fill className="object-cover" unoptimized />
@@ -337,7 +350,23 @@ export default function VinylManager() {
                   </div>
                 )}
               </div>
-              <input type="file" accept="image/*" onChange={(event) => handleImageChange(event.target.files?.[0])} className="block w-full rounded-md border border-dashed border-gray-300 px-4 py-10 text-sm text-gray-600" />
+              <input type="file" accept="image/*" onChange={(event) => handleImageChange("front", event.target.files?.[0])} className="block w-full rounded-md border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600" />
+            </div>
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Back cover image</span>
+            <div className="grid gap-4">
+              <div className="relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+                {form.backCoverImage ? (
+                  <Image src={form.backCoverImage} alt="Back cover preview" fill className="object-cover" unoptimized />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <ImagePlus className="h-10 w-10 text-gray-300" />
+                  </div>
+                )}
+              </div>
+              <input type="file" accept="image/*" onChange={(event) => handleImageChange("back", event.target.files?.[0])} className="block w-full rounded-md border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600" />
             </div>
           </label>
 

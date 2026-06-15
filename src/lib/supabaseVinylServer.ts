@@ -37,31 +37,37 @@ export async function listSupabaseVinylRecords() {
   return ((data ?? []) as VinylRow[]).map((row) => row.record).filter(isVinylRecord);
 }
 
-export async function saveSupabaseVinylRecord(record: VinylRecord, cover?: File) {
+export async function saveSupabaseVinylRecord(record: VinylRecord, covers: { front?: File; back?: File } = {}) {
   const supabase = getVinylSupabaseClient();
   if (!supabase) return null;
+  const client = supabase;
 
   let nextRecord = record;
 
-  if (cover) {
-    const extension = cover.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${record.id}-${Date.now()}.${extension}`;
-    const buffer = Buffer.from(await cover.arrayBuffer());
+  async function uploadCover(file: File, side: "front" | "back") {
+    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${record.id}-${side}-${Date.now()}.${extension}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await client.storage
       .from(VINYL_BUCKET)
-      .upload(path, buffer, {
-        contentType: cover.type || "image/jpeg",
-        upsert: true,
-      });
+      .upload(path, buffer, { contentType: file.type || "image/jpeg", upsert: true });
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage.from(VINYL_BUCKET).getPublicUrl(path);
-    nextRecord = { ...record, coverImage: data.publicUrl };
+    const { data } = client.storage.from(VINYL_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
   }
 
-  const { error } = await supabase
+  if (covers.front) {
+    nextRecord = { ...nextRecord, coverImage: await uploadCover(covers.front, "front") };
+  }
+
+  if (covers.back) {
+    nextRecord = { ...nextRecord, backCoverImage: await uploadCover(covers.back, "back") };
+  }
+
+  const { error } = await client
     .from("vinyl_records")
     .upsert({
       id: nextRecord.id,

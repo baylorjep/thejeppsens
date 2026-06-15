@@ -14,16 +14,16 @@ type VinylAlbumDetailProps = {
   staticRecords: VinylRecord[];
 };
 
-function Cover({ record }: { record: VinylRecord }) {
-  if (record.coverImage) {
+function CoverImage({ record, src, side }: { record: VinylRecord; src?: string; side: "front" | "back" }) {
+  if (src) {
     return (
       <Image
-        src={record.coverImage}
-        alt={`${record.title} by ${record.artist} cover`}
+        src={src}
+        alt={`${record.title} by ${record.artist} ${side} cover`}
         fill
-        priority
+        priority={side === "front"}
         className="object-cover"
-        unoptimized={record.coverImage.startsWith("data:")}
+        unoptimized={src.startsWith("data:")}
       />
     );
   }
@@ -31,6 +31,32 @@ function Cover({ record }: { record: VinylRecord }) {
   return (
     <div className="flex h-full items-center justify-center bg-gray-100">
       <Disc3 className="h-20 w-20 text-gray-300" />
+    </div>
+  );
+}
+
+function CoverGallery({ record }: { record: VinylRecord }) {
+  if (record.backCoverImage) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+        {[
+          ["Front", record.coverImage, "front"],
+          ["Back", record.backCoverImage, "back"],
+        ].map(([label, src, side]) => (
+          <figure key={label}>
+            <div className="relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+              <CoverImage record={record} src={src} side={side as "front" | "back"} />
+            </div>
+            <figcaption className="mt-2 text-sm font-medium text-gray-500">{label}</figcaption>
+          </figure>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+      <CoverImage record={record} src={record.coverImage} side="front" />
     </div>
   );
 }
@@ -68,9 +94,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
 
   return (
     <article className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-      <div className="relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-        <Cover record={record} />
-      </div>
+      <CoverGallery record={record} />
 
       <div>
         <Link href="/vinyl" className="mb-8 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline">

@@ -15,6 +15,7 @@ export type VinylRecord = {
   notes?: string;
   favoriteStories?: string;
   coverImage?: string;
+  backCoverImage?: string;
   favorite?: boolean;
 };
 

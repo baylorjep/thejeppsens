@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const rawRecord = formData.get("record");
     const cover = formData.get("cover");
+    const backCover = formData.get("backCover");
 
     if (typeof rawRecord !== "string") {
       return NextResponse.json({ error: "Missing record" }, { status: 400 });
@@ -30,7 +31,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid record" }, { status: 400 });
     }
 
-    const savedRecord = await saveSupabaseVinylRecord(record, cover instanceof File ? cover : undefined);
+    const savedRecord = await saveSupabaseVinylRecord(record, {
+      front: cover instanceof File ? cover : undefined,
+      back: backCover instanceof File ? backCover : undefined,
+    });
 
     if (savedRecord) {
       return NextResponse.json({ record: savedRecord, source: "supabase" });

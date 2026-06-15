@@ -13,10 +13,11 @@ export async function fetchVinylRecords(): Promise<VinylApiListResponse> {
   return response.json();
 }
 
-export async function saveVinylRecord(record: VinylRecord, imageFile?: File) {
+export async function saveVinylRecord(record: VinylRecord, imageFile?: File, backImageFile?: File) {
   const formData = new FormData();
   formData.set("record", JSON.stringify(record));
   if (imageFile) formData.set("cover", imageFile);
+  if (backImageFile) formData.set("backCover", backImageFile);
 
   const response = await fetch("/api/vinyl-records", {
     method: "POST",
