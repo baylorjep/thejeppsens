@@ -7,35 +7,17 @@ import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 // causing France to appear highlighted above Brazil. 50m keeps them as separate features.
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json';
 
-const VISITED: Set<string> = new Set([
-  'United States of America',
-  'Mexico',
-  'Dominican Rep.',
-  'Cuba',
-  'Germany',
-  'Austria',
-  'Switzerland',
-  'France',
-  'Belgium',
-  'Netherlands',
-  'Luxembourg',
-  'Czechia',
-  'United Kingdom',
-  'Italy',
-  'Greece',
-  'Turkey',
-  'Australia',
-]);
-
 type Tooltip = { name: string; x: number; y: number } | null;
 type GeographyItem = {
   rsmKey: string;
-  properties: {
-    name: string;
-  };
+  properties: { name: string };
 };
 
-export default function WorldMap() {
+interface WorldMapProps {
+  visitedGeoNames: Set<string>;
+}
+
+export default function WorldMap({ visitedGeoNames }: WorldMapProps) {
   const [tooltip, setTooltip] = useState<Tooltip>(null);
 
   return (
@@ -57,7 +39,7 @@ export default function WorldMap() {
         <Geographies geography={GEO_URL}>
           {({ geographies }: { geographies: GeographyItem[] }) =>
             geographies.map((geo) => {
-              const visited = VISITED.has(geo.properties.name);
+              const visited = visitedGeoNames.has(geo.properties.name);
               return (
                 <Geography
                   key={geo.rsmKey}
