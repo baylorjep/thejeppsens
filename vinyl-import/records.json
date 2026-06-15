@@ -461,8 +461,8 @@
   },
   {
     "id": "louis-armstrong-hello-dolly",
-    "title": "Hello, Dolly!",
-    "artist": "Louis Armstrong",
+    "title": "Hello, Dolly! This Is Louis Armstrong",
+    "artist": "Louis Armstrong and The All Stars",
     "releaseYear": 1964,
     "genres": [
       "Jazz",
@@ -489,6 +489,7 @@
     "backCoverPath": "../../Album covers/IMG_4610.jpg",
     "favorite": false,
     "label": "Kapp Records",
+    "catalogNumber": "KL-1364",
     "format": "LP",
     "discCount": 1
   },
@@ -661,7 +662,7 @@
   },
   {
     "id": "frank-sinatra-the-voice",
-    "title": "The Voice",
+    "title": "The Voice of Frank Sinatra",
     "artist": "Frank Sinatra",
     "releaseYear": 1955,
     "genres": [
@@ -686,13 +687,14 @@
     "frontCoverPath": "../../Album covers/IMG_4621.jpg",
     "backCoverPath": "../../Album covers/IMG_4622.jpg",
     "favorite": false,
-    "label": "Capitol Records",
+    "label": "Columbia Records",
+    "catalogNumber": "CL 743",
     "format": "LP",
     "discCount": 1
   },
   {
     "id": "frank-sinatra-swing-along-with-me",
-    "title": "Swing Along With Me",
+    "title": "Swing Along with Me",
     "artist": "Frank Sinatra",
     "releaseYear": 1961,
     "genres": [
@@ -720,6 +722,7 @@
     "backCoverPath": "../../Album covers/IMG_4624.jpg",
     "favorite": false,
     "label": "Reprise Records",
+    "catalogNumber": "R-1002",
     "format": "LP",
     "discCount": 1
   },
