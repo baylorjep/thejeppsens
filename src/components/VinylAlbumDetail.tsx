@@ -15,7 +15,17 @@ type VinylAlbumDetailProps = {
   staticRecords: VinylRecord[];
 };
 
-function CoverImage({ record, src, side }: { record: VinylRecord; src?: string; side: "front" | "back" }) {
+function CoverImage({
+  record,
+  src,
+  side,
+  sizes = "(max-width: 639px) 100vw, 50vw",
+}: {
+  record: VinylRecord;
+  src?: string;
+  side: "front" | "back";
+  sizes?: string;
+}) {
   if (src) {
     return (
       <Image
@@ -23,6 +33,8 @@ function CoverImage({ record, src, side }: { record: VinylRecord; src?: string; 
         alt={`${record.title} by ${record.artist} ${side} cover`}
         fill
         priority={side === "front"}
+        sizes={sizes}
+        quality={72}
         className="object-cover"
         unoptimized={src.startsWith("data:")}
       />
@@ -46,7 +58,12 @@ function CoverGallery({ record }: { record: VinylRecord }) {
         ].map(([label, src, side]) => (
           <figure key={label}>
             <div className="relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-              <CoverImage record={record} src={src} side={side as "front" | "back"} />
+              <CoverImage
+                record={record}
+                src={src}
+                side={side as "front" | "back"}
+                sizes="(max-width: 639px) 100vw, 50vw"
+              />
             </div>
             <figcaption className="mt-2 text-sm font-medium text-gray-500">{label}</figcaption>
           </figure>
@@ -57,7 +74,12 @@ function CoverGallery({ record }: { record: VinylRecord }) {
 
   return (
     <div className="relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-      <CoverImage record={record} src={record.coverImage} side="front" />
+      <CoverImage
+        record={record}
+        src={record.coverImage}
+        side="front"
+        sizes="(max-width: 639px) 100vw, 50vw"
+      />
     </div>
   );
 }

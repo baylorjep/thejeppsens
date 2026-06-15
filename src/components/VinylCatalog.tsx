@@ -35,7 +35,15 @@ type ViewMode = "grid" | "list";
 type FilterKey = "genres" | "moods" | "status" | "decades";
 type QuickFilter = "all" | "favorites" | "wishlist" | "upgrade";
 
-function CoverArt({ record, priority = false }: { record: VinylRecord; priority?: boolean }) {
+function CoverArt({
+  record,
+  priority = false,
+  sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
+}: {
+  record: VinylRecord;
+  priority?: boolean;
+  sizes?: string;
+}) {
   if (record.coverImage) {
     return (
       <Image
@@ -43,7 +51,8 @@ function CoverArt({ record, priority = false }: { record: VinylRecord; priority?
         alt={`${record.title} by ${record.artist} cover`}
         fill
         priority={priority}
-        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        sizes={sizes}
+        quality={70}
         className="object-cover"
         unoptimized={record.coverImage.startsWith("data:")}
       />
@@ -270,7 +279,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 className="relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56"
                 aria-label={`View ${record.title} by ${record.artist}`}
               >
-                <CoverArt record={record} priority={index < 6} />
+                <CoverArt
+                  record={record}
+                  priority={index < 2}
+                  sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
+                />
               </button>
             ))}
           </div>
@@ -283,7 +296,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-40 sm:w-40 lg:h-48 lg:w-48"
                 aria-label={`View ${record.title} by ${record.artist}`}
               >
-                <CoverArt record={record} priority={index < 6} />
+                <CoverArt
+                  record={record}
+                  sizes="(max-width: 639px) 96px, (max-width: 1023px) 160px, 192px"
+                />
               </button>
             ))}
           </div>
@@ -461,7 +477,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 href={`/vinyl/${record.id}`}
                 className={viewMode === "grid" ? "relative aspect-square" : "relative aspect-square sm:aspect-auto"}
               >
-                <CoverArt record={record} />
+                <CoverArt
+                  record={record}
+                  sizes={
+                    viewMode === "grid"
+                      ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                      : "(max-width: 639px) 100vw, 180px"
+                  }
+                />
               </Link>
 
               <div className="p-5">
@@ -560,7 +583,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           >
             <div className="grid md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
               <div className="relative aspect-square bg-gray-100">
-                <CoverArt record={selectedRecord} priority />
+                <CoverArt
+                  record={selectedRecord}
+                  priority
+                  sizes="(max-width: 639px) 100vw, 45vw"
+                />
               </div>
 
               <div className="p-6 sm:p-8">
