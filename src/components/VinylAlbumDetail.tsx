@@ -217,7 +217,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             ["Condition", record.condition],
             ["Source", record.source],
             ["Date added", record.dateAdded],
-          ].map(([label, value]) =>
+        ].map(([label, value]) =>
             value ? (
               <div key={label} className="rounded-md bg-gray-50 p-4">
                 <dt className="text-gray-500">{label}</dt>
@@ -301,6 +301,26 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             <div>
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite stories</h2>
               <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
+            </div>
+          ) : null}
+
+          {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
+            <div>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  ["Gift from", record.giftFrom],
+                  ["Where we got it", record.whereWeGotIt],
+                  ["Best for", record.bestFor],
+                ].map(([label, value]) =>
+                  value ? (
+                    <div key={label} className="rounded-md bg-gray-50 p-4">
+                      <p className="text-xs uppercase tracking-[0.16em] text-gray-400">{label}</p>
+                      <p className="mt-1 font-medium text-gray-950">{value}</p>
+                    </div>
+                  ) : null,
+                )}
+              </div>
             </div>
           ) : null}
         </div>

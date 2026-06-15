@@ -4,9 +4,20 @@
     "title": "Tommy Dorsey and His Orchestra Featuring Frank Sinatra",
     "artist": "Tommy Dorsey and His Orchestra",
     "releaseYear": 1963,
-    "genres": ["Big Band", "Jazz", "Vocal Jazz"],
-    "moods": ["Classic", "Nostalgic", "Dinner"],
-    "favoriteTracks": ["I'll Never Smile Again", "Marie"],
+    "genres": [
+      "Big Band",
+      "Jazz",
+      "Vocal Jazz"
+    ],
+    "moods": [
+      "Classic",
+      "Nostalgic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "I'll Never Smile Again",
+      "Marie"
+    ],
     "pressing": "Coronet Records mono compilation",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -15,16 +26,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4580.JPG",
     "backCoverPath": "../../Album covers/IMG_4581.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "Coronet Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "various-artists-big-band-75",
     "title": "Big Band 75",
     "artist": "Various Artists",
     "releaseYear": 1975,
-    "genres": ["Big Band", "Swing", "Jazz"],
-    "moods": ["Classic", "Upbeat", "Nostalgic"],
-    "favoriteTracks": ["Moonlight Serenade", "Take the A Train"],
+    "genres": [
+      "Big Band",
+      "Swing",
+      "Jazz"
+    ],
+    "moods": [
+      "Classic",
+      "Upbeat",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Moonlight Serenade",
+      "Take the A Train"
+    ],
     "pressing": "The Kings of Jazz compilation",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap and price sticker visible",
@@ -33,16 +58,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4582.JPG",
     "backCoverPath": "../../Album covers/IMG_4583.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "RCA Special Products",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "tyler-bates-guardians-of-the-galaxy-vol-2-deluxe-edition",
     "title": "Guardians of the Galaxy Vol. 2: Deluxe Edition",
     "artist": "Tyler Bates",
     "releaseYear": 2017,
-    "genres": ["Soundtrack", "Film Score", "Rock"],
-    "moods": ["Cinematic", "Fun", "Road trip"],
-    "favoriteTracks": ["Mr. Blue Sky", "Brandy (You're a Fine Girl)", "Come a Little Bit Closer"],
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Rock"
+    ],
+    "moods": [
+      "Cinematic",
+      "Fun",
+      "Road trip"
+    ],
+    "favoriteTracks": [
+      "Mr. Blue Sky",
+      "Brandy (You're a Fine Girl)",
+      "Come a Little Bit Closer"
+    ],
     "pressing": "Deluxe edition soundtrack",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -51,16 +91,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4585.JPG",
     "backCoverPath": "../../Album covers/IMG_4586.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Hollywood Records",
+    "format": "2xLP",
+    "discCount": 2
   },
   {
     "id": "luke-combs-what-you-see-aint-always-what-you-get",
     "title": "What You See Ain't Always What You Get",
     "artist": "Luke Combs",
     "releaseYear": 2020,
-    "genres": ["Country", "Contemporary Country"],
-    "moods": ["Road trip", "Heartland", "Singalong"],
-    "favoriteTracks": ["Beer Never Broke My Heart", "Even Though I'm Leaving", "Forever After All"],
+    "genres": [
+      "Country",
+      "Contemporary Country"
+    ],
+    "moods": [
+      "Road trip",
+      "Heartland",
+      "Singalong"
+    ],
+    "favoriteTracks": [
+      "Beer Never Broke My Heart",
+      "Even Though I'm Leaving",
+      "Forever After All"
+    ],
     "pressing": "Expanded album pressing",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -69,15 +123,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4587.JPG",
     "backCoverPath": "../../Album covers/IMG_4588.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "Columbia Nashville",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "ray-charles-live-in-concert-the-complete-performance",
     "title": "Live in Concert: The Complete Performance",
     "artist": "Ray Charles",
-    "genres": ["Soul", "Rhythm and Blues", "Jazz"],
-    "moods": ["Live", "Soulful", "Classic"],
-    "favoriteTracks": ["What'd I Say", "Georgia on My Mind"],
+    "genres": [
+      "Soul",
+      "Rhythm and Blues",
+      "Jazz"
+    ],
+    "moods": [
+      "Live",
+      "Soulful",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "What'd I Say",
+      "Georgia on My Mind"
+    ],
     "pressing": "Live concert complete performance",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -86,16 +154,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4589.JPG",
     "backCoverPath": "../../Album covers/IMG_4590.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "Atlantic Records",
+    "format": "2xLP",
+    "discCount": 2
   },
   {
     "id": "chet-baker-in-japan-1987-fukui-vol-2",
     "title": "In Japan 1987 Fukui Vol. 2",
     "artist": "Chet Baker",
     "releaseYear": 1987,
-    "genres": ["Jazz", "Cool Jazz"],
-    "moods": ["Late night", "Melancholy", "Live"],
-    "favoriteTracks": ["Ray's Ideas", "There Will Never Be Another You"],
+    "genres": [
+      "Jazz",
+      "Cool Jazz"
+    ],
+    "moods": [
+      "Late night",
+      "Melancholy",
+      "Live"
+    ],
+    "favoriteTracks": [
+      "Ray's Ideas",
+      "There Will Never Be Another You"
+    ],
     "pressing": "Japanese live recording",
     "vinylColor": "Black",
     "condition": "Used; obi strip visible",
@@ -104,15 +185,25 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4591.jpg",
     "backCoverPath": "../../Album covers/IMG_4592.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "King Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "frank-sinatra-sinatra",
     "title": "She Shot Me Down",
     "artist": "Frank Sinatra",
     "releaseYear": 1981,
-    "genres": ["Vocal Jazz", "Traditional Pop"],
-    "moods": ["Classic", "Lounge", "Late night"],
+    "genres": [
+      "Vocal Jazz",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Classic",
+      "Lounge",
+      "Late night"
+    ],
     "pressing": "Reprise Records pressing",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -121,16 +212,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4593.JPG",
     "backCoverPath": "../../Album covers/IMG_4594.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "Reprise Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "styx-cornerstone",
     "title": "Cornerstone",
     "artist": "Styx",
     "releaseYear": 1979,
-    "genres": ["Rock", "Progressive Rock", "Arena Rock"],
-    "moods": ["Classic rock", "Dramatic", "Road trip"],
-    "favoriteTracks": ["Babe", "Borrowed Time"],
+    "genres": [
+      "Rock",
+      "Progressive Rock",
+      "Arena Rock"
+    ],
+    "moods": [
+      "Classic rock",
+      "Dramatic",
+      "Road trip"
+    ],
+    "favoriteTracks": [
+      "Babe",
+      "Borrowed Time"
+    ],
     "pressing": "A&M Records pressing",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap and price sticker visible",
@@ -139,15 +244,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4595.JPG",
     "backCoverPath": "../../Album covers/IMG_4596.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "A&M Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "louis-armstrong-satchmos-golden-favorites",
     "title": "Satchmo's Golden Favorites",
     "artist": "Louis Armstrong",
-    "genres": ["Jazz", "Vocal Jazz", "Dixieland"],
-    "moods": ["Joyful", "Classic", "Dinner"],
-    "favoriteTracks": ["Jeepers Creepers", "A Kiss to Build a Dream On", "La Vie en Rose"],
+    "genres": [
+      "Jazz",
+      "Vocal Jazz",
+      "Dixieland"
+    ],
+    "moods": [
+      "Joyful",
+      "Classic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "Jeepers Creepers",
+      "A Kiss to Build a Dream On",
+      "La Vie en Rose"
+    ],
     "pressing": "Coronet Records compilation",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -156,16 +276,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4597.JPG",
     "backCoverPath": "../../Album covers/IMG_4598.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Coronet Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "stephen-schwartz-wicked-for-good-the-soundtrack",
     "title": "Wicked: For Good - The Soundtrack",
     "artist": "Stephen Schwartz",
     "releaseYear": 2025,
-    "genres": ["Soundtrack", "Musical", "Show Tunes"],
-    "moods": ["Theatrical", "Dramatic", "Singalong"],
-    "favoriteTracks": ["For Good", "No Good Deed", "As Long as You're Mine"],
+    "genres": [
+      "Soundtrack",
+      "Musical",
+      "Show Tunes"
+    ],
+    "moods": [
+      "Theatrical",
+      "Dramatic",
+      "Singalong"
+    ],
+    "favoriteTracks": [
+      "For Good",
+      "No Good Deed",
+      "As Long as You're Mine"
+    ],
     "pressing": "Motion picture soundtrack",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -174,15 +309,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4599.JPG",
     "backCoverPath": "../../Album covers/IMG_4600.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Decca Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "engelbert-humperdinck-live-in-concert-all-of-me-and-a-little-bit-more",
     "title": "Live in Concert: All of Me and a Little Bit More",
     "artist": "Engelbert Humperdinck",
-    "genres": ["Traditional Pop", "Vocal", "Easy Listening"],
-    "moods": ["Romantic", "Live", "Nostalgic"],
-    "favoriteTracks": ["Release Me", "The Last Waltz", "Quando Quando Quando"],
+    "genres": [
+      "Traditional Pop",
+      "Vocal",
+      "Easy Listening"
+    ],
+    "moods": [
+      "Romantic",
+      "Live",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Release Me",
+      "The Last Waltz",
+      "Quando Quando Quando"
+    ],
     "pressing": "Live concert album",
     "vinylColor": "Black",
     "condition": "Used; price sticker visible",
@@ -191,15 +341,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4601.jpg",
     "backCoverPath": "../../Album covers/IMG_4602.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Parrot Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "harry-james-and-his-orchestra-1943-46-live",
     "title": "1943-46 Live",
     "artist": "Harry James and His Orchestra",
-    "genres": ["Big Band", "Swing", "Jazz"],
-    "moods": ["Live", "Vintage", "Classic"],
-    "favoriteTracks": ["I've Heard That Song Before", "Sleepy Lagoon"],
+    "genres": [
+      "Big Band",
+      "Swing",
+      "Jazz"
+    ],
+    "moods": [
+      "Live",
+      "Vintage",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "I've Heard That Song Before",
+      "Sleepy Lagoon"
+    ],
     "pressing": "The Uncollected Harry James 1943-46 live material",
     "vinylColor": "Black",
     "condition": "Used; library markings visible",
@@ -208,15 +372,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4603.jpg",
     "backCoverPath": "../../Album covers/IMG_4604.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Columbia Records",
+    "catalogNumber": "1943-46",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "walt-disney-alice-in-wonderland",
     "title": "Walt Disney's Alice in Wonderland",
     "artist": "Walt Disney",
-    "genres": ["Children's", "Soundtrack", "Storybook"],
-    "moods": ["Whimsical", "Family", "Nostalgic"],
-    "favoriteTracks": ["Alice in Wonderland", "The Unbirthday Song", "I'm Late"],
+    "genres": [
+      "Children's",
+      "Soundtrack",
+      "Storybook"
+    ],
+    "moods": [
+      "Whimsical",
+      "Family",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Alice in Wonderland",
+      "The Unbirthday Song",
+      "I'm Late"
+    ],
     "pressing": "Illustrated book and long-playing record",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -225,16 +405,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4605.jpg",
     "backCoverPath": "../../Album covers/IMG_4606.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Disneyland Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "the-beatles-revolver",
     "title": "Revolver",
     "artist": "The Beatles",
     "releaseYear": 1966,
-    "genres": ["Rock", "Psychedelic Rock", "Pop Rock"],
-    "moods": ["Classic", "Inventive", "Road trip"],
-    "favoriteTracks": ["Eleanor Rigby", "Here, There and Everywhere", "Tomorrow Never Knows"],
+    "genres": [
+      "Rock",
+      "Psychedelic Rock",
+      "Pop Rock"
+    ],
+    "moods": [
+      "Classic",
+      "Inventive",
+      "Road trip"
+    ],
+    "favoriteTracks": [
+      "Eleanor Rigby",
+      "Here, There and Everywhere",
+      "Tomorrow Never Knows"
+    ],
     "pressing": "Capitol stereo pressing",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -243,16 +438,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4607.jpg",
     "backCoverPath": "../../Album covers/IMG_4608.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Capitol Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "louis-armstrong-hello-dolly",
     "title": "Hello, Dolly!",
     "artist": "Louis Armstrong",
     "releaseYear": 1964,
-    "genres": ["Jazz", "Vocal Jazz", "Traditional Pop"],
-    "moods": ["Joyful", "Classic", "Dinner"],
-    "favoriteTracks": ["Hello, Dolly!", "A Kiss to Build a Dream On", "Blueberry Hill"],
+    "genres": [
+      "Jazz",
+      "Vocal Jazz",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Joyful",
+      "Classic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "Hello, Dolly!",
+      "A Kiss to Build a Dream On",
+      "Blueberry Hill"
+    ],
     "pressing": "Kapp Records pressing",
     "vinylColor": "Black",
     "condition": "Used; library sticker visible",
@@ -261,16 +471,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4609.jpg",
     "backCoverPath": "../../Album covers/IMG_4610.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Kapp Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "frank-sinatra-thats-life",
     "title": "That's Life",
     "artist": "Frank Sinatra",
     "releaseYear": 1966,
-    "genres": ["Vocal Jazz", "Traditional Pop"],
-    "moods": ["Classic", "Resilient", "Lounge"],
-    "favoriteTracks": ["That's Life", "Somewhere My Love", "Winchester Cathedral"],
+    "genres": [
+      "Vocal Jazz",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Classic",
+      "Resilient",
+      "Lounge"
+    ],
+    "favoriteTracks": [
+      "That's Life",
+      "Somewhere My Love",
+      "Winchester Cathedral"
+    ],
     "pressing": "Reprise Records pressing",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -279,16 +503,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4611.jpg",
     "backCoverPath": "../../Album covers/IMG_4612.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Reprise Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "frank-sinatra-all-the-way",
     "title": "All the Way",
     "artist": "Frank Sinatra",
     "releaseYear": 1961,
-    "genres": ["Vocal Jazz", "Traditional Pop"],
-    "moods": ["Romantic", "Classic", "Dinner"],
-    "favoriteTracks": ["All the Way", "High Hopes", "Witchcraft"],
+    "genres": [
+      "Vocal Jazz",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Romantic",
+      "Classic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "All the Way",
+      "High Hopes",
+      "Witchcraft"
+    ],
     "pressing": "Capitol stereo pressing",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear and writing visible",
@@ -297,15 +535,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4613.jpg",
     "backCoverPath": "../../Album covers/IMG_4614.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Capitol Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "various-artists-swingin-stereo-with-ten-big-bands",
     "title": "Swingin' Stereo! With Ten Big Bands",
     "artist": "Various Artists",
-    "genres": ["Big Band", "Swing", "Jazz"],
-    "moods": ["Upbeat", "Vintage", "Dance"],
-    "favoriteTracks": ["In the Mood", "Stompin' at the Savoy"],
+    "genres": [
+      "Big Band",
+      "Swing",
+      "Jazz"
+    ],
+    "moods": [
+      "Upbeat",
+      "Vintage",
+      "Dance"
+    ],
+    "favoriteTracks": [
+      "In the Mood",
+      "Stompin' at the Savoy"
+    ],
     "pressing": "Capitol stereo compilation",
     "vinylColor": "Black",
     "condition": "Used; price sticker visible",
@@ -314,16 +566,35 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4615.jpg",
     "backCoverPath": "../../Album covers/IMG_4616.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Capitol Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "various-artists-50s-60s-the-hitwave-presents-the-authentic-hits",
     "title": "The Greatest Hits of the Century, Vol. III and IV (50's and 60's)",
     "artist": "Various Artists",
     "releaseYear": 1973,
-    "genres": ["Oldies", "Pop", "Rock and Roll"],
-    "moods": ["Nostalgic", "Party", "Throwback"],
-    "favoriteTracks": ["Hello Dolly", "I'm Sorry", "Unchained Melody", "Music! Music! Music!", "Mr. Wonderful", "Ebb Tide", "Love Is a Many-Splendored Thing"],
+    "genres": [
+      "Oldies",
+      "Pop",
+      "Rock and Roll"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Party",
+      "Throwback"
+    ],
+    "favoriteTracks": [
+      "Hello Dolly",
+      "I'm Sorry",
+      "Unchained Melody",
+      "Music! Music! Music!",
+      "Mr. Wonderful",
+      "Ebb Tide",
+      "Love Is a Many-Splendored Thing"
+    ],
     "pressing": "Oldies compilation",
     "vinylColor": "Black",
     "condition": "Used; price sticker visible",
@@ -332,16 +603,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4617.jpg",
     "backCoverPath": "../../Album covers/IMG_4618.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "The Hitwave",
+    "format": "2xLP",
+    "discCount": 2
   },
   {
     "id": "neil-diamond-the-jazz-singer",
     "title": "The Jazz Singer",
     "artist": "Neil Diamond",
     "releaseYear": 1980,
-    "genres": ["Soundtrack", "Pop", "Adult Contemporary"],
-    "moods": ["Cinematic", "Sentimental", "Classic"],
-    "favoriteTracks": ["Love on the Rocks", "Hello Again", "America"],
+    "genres": [
+      "Soundtrack",
+      "Pop",
+      "Adult Contemporary"
+    ],
+    "moods": [
+      "Cinematic",
+      "Sentimental",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "Love on the Rocks",
+      "Hello Again",
+      "America"
+    ],
     "pressing": "Original songs from the motion picture",
     "vinylColor": "Black",
     "condition": "Used; price sticker visible",
@@ -350,16 +636,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4619.jpg",
     "backCoverPath": "../../Album covers/IMG_4620.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Columbia Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "frank-sinatra-the-voice",
     "title": "The Voice",
     "artist": "Frank Sinatra",
     "releaseYear": 1955,
-    "genres": ["Vocal Jazz", "Traditional Pop"],
-    "moods": ["Classic", "Intimate", "Late night"],
-    "favoriteTracks": ["I Don't Know Why", "Try a Little Tenderness"],
+    "genres": [
+      "Vocal Jazz",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Classic",
+      "Intimate",
+      "Late night"
+    ],
+    "favoriteTracks": [
+      "I Don't Know Why",
+      "Try a Little Tenderness"
+    ],
     "pressing": "Columbia LP pressing",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear and price sticker visible",
@@ -368,16 +667,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4621.jpg",
     "backCoverPath": "../../Album covers/IMG_4622.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Capitol Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "frank-sinatra-swing-along-with-me",
     "title": "Swing Along With Me",
     "artist": "Frank Sinatra",
     "releaseYear": 1961,
-    "genres": ["Vocal Jazz", "Swing", "Traditional Pop"],
-    "moods": ["Swinging", "Classic", "Lounge"],
-    "favoriteTracks": ["Falling in Love with Love", "Moonlight on the Ganges", "Granada"],
+    "genres": [
+      "Vocal Jazz",
+      "Swing",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Swinging",
+      "Classic",
+      "Lounge"
+    ],
+    "favoriteTracks": [
+      "Falling in Love with Love",
+      "Moonlight on the Ganges",
+      "Granada"
+    ],
     "pressing": "Reprise/Billy May orchestral album",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -386,16 +700,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4623.jpg",
     "backCoverPath": "../../Album covers/IMG_4624.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Reprise Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "the-jeppsens-la-vie-en-rose-wedding-mix",
     "title": "The Jeppsens Wedding Mix",
     "artist": "The Jeppsens",
     "releaseYear": 2026,
-    "genres": ["Custom", "Wedding", "Pop"],
-    "moods": ["Romantic", "Personal", "Keepsake"],
-    "favoriteTracks": ["La Vie en Rose", "My Wish", "I Loved Her"],
+    "genres": [
+      "Custom",
+      "Wedding",
+      "Pop"
+    ],
+    "moods": [
+      "Romantic",
+      "Personal",
+      "Keepsake"
+    ],
+    "favoriteTracks": [
+      "La Vie en Rose",
+      "My Wish",
+      "I Loved Her"
+    ],
     "pressing": "Custom wedding photo record",
     "vinylColor": "Black",
     "condition": "Used; custom photo sleeve",
@@ -404,16 +733,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4625.jpg",
     "backCoverPath": "../../Album covers/IMG_4626.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "The Jeppsens",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "the-beach-boys-today",
     "title": "The Beach Boys Today!",
     "artist": "The Beach Boys",
     "releaseYear": 1965,
-    "genres": ["Pop Rock", "Surf Rock", "Rock"],
-    "moods": ["Sunny", "Classic", "Summer"],
-    "favoriteTracks": ["Help Me, Rhonda", "Dance, Dance, Dance", "Please Let Me Wonder"],
+    "genres": [
+      "Pop Rock",
+      "Surf Rock",
+      "Rock"
+    ],
+    "moods": [
+      "Sunny",
+      "Classic",
+      "Summer"
+    ],
+    "favoriteTracks": [
+      "Help Me, Rhonda",
+      "Dance, Dance, Dance",
+      "Please Let Me Wonder"
+    ],
     "pressing": "Capitol mono pressing",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -422,16 +766,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4627.jpg",
     "backCoverPath": "../../Album covers/IMG_4628.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Capitol Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "perry-como-comos-golden-records",
     "title": "Como's Golden Records",
     "artist": "Perry Como",
     "releaseYear": 1958,
-    "genres": ["Traditional Pop", "Easy Listening", "Vocal"],
-    "moods": ["Warm", "Classic", "Nostalgic"],
-    "favoriteTracks": ["Catch a Falling Star", "Magic Moments", "Papa Loves Mambo"],
+    "genres": [
+      "Traditional Pop",
+      "Easy Listening",
+      "Vocal"
+    ],
+    "moods": [
+      "Warm",
+      "Classic",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Catch a Falling Star",
+      "Magic Moments",
+      "Papa Loves Mambo"
+    ],
     "pressing": "RCA Victor compilation",
     "vinylColor": "Black",
     "condition": "Used; price sticker visible",
@@ -440,16 +799,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4629.jpg",
     "backCoverPath": "../../Album covers/IMG_4630.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "RCA Victor",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "harry-james-wild-about-harry",
     "title": "Wild About Harry!",
     "artist": "Harry James",
     "releaseYear": 1957,
-    "genres": ["Big Band", "Swing", "Jazz"],
-    "moods": ["Bright", "Vintage", "Classic"],
-    "favoriteTracks": ["Ciribiribin", "Trumpet Blues"],
+    "genres": [
+      "Big Band",
+      "Swing",
+      "Jazz"
+    ],
+    "moods": [
+      "Bright",
+      "Vintage",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "Ciribiribin",
+      "Trumpet Blues"
+    ],
     "pressing": "Capitol Records pressing",
     "vinylColor": "Black",
     "condition": "Used; price sticker visible",
@@ -458,15 +831,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4631.jpg",
     "backCoverPath": "../../Album covers/IMG_4632.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Capitol Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "harry-james-and-his-orchestra-strictly-instrumental",
     "title": "Strictly Instrumental",
     "artist": "Harry James and His Orchestra",
-    "genres": ["Big Band", "Swing", "Jazz"],
-    "moods": ["Instrumental", "Vintage", "Classic"],
-    "favoriteTracks": ["Strictly Instrumental", "Trumpet Blues"],
+    "genres": [
+      "Big Band",
+      "Swing",
+      "Jazz"
+    ],
+    "moods": [
+      "Instrumental",
+      "Vintage",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "Strictly Instrumental",
+      "Trumpet Blues"
+    ],
     "pressing": "Harmony/Columbia compilation",
     "vinylColor": "Black",
     "condition": "Used; price sticker visible",
@@ -475,16 +862,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4633.jpg",
     "backCoverPath": "../../Album covers/IMG_4634.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Capitol Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "rodgers-and-hammerstein-the-sound-of-music",
     "title": "The Sound of Music",
     "artist": "Rodgers and Hammerstein",
     "releaseYear": 1965,
-    "genres": ["Soundtrack", "Musical", "Show Tunes"],
-    "moods": ["Family", "Classic", "Uplifting"],
-    "favoriteTracks": ["The Sound of Music", "My Favorite Things", "Edelweiss"],
+    "genres": [
+      "Soundtrack",
+      "Musical",
+      "Show Tunes"
+    ],
+    "moods": [
+      "Family",
+      "Classic",
+      "Uplifting"
+    ],
+    "favoriteTracks": [
+      "The Sound of Music",
+      "My Favorite Things",
+      "Edelweiss"
+    ],
     "pressing": "Original soundtrack recording",
     "vinylColor": "Black",
     "condition": "Used; price sticker and name on sleeve visible",
@@ -493,15 +895,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4635.jpg",
     "backCoverPath": "../../Album covers/IMG_4636.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "RCA Victor",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "tony-bennett-tony-bennetts-all-time-greatest-hits",
     "title": "Tony Bennett's All-Time Greatest Hits",
     "artist": "Tony Bennett",
-    "genres": ["Traditional Pop", "Vocal Jazz"],
-    "moods": ["Classy", "Romantic", "Classic"],
-    "favoriteTracks": ["I Left My Heart in San Francisco", "Because of You", "Rags to Riches"],
+    "genres": [
+      "Traditional Pop",
+      "Vocal Jazz"
+    ],
+    "moods": [
+      "Classy",
+      "Romantic",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "I Left My Heart in San Francisco",
+      "Because of You",
+      "Rags to Riches"
+    ],
     "pressing": "Greatest hits compilation",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap and price sticker visible",
@@ -510,15 +926,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4637.JPG",
     "backCoverPath": "../../Album covers/IMG_4638.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Columbia Records",
+    "format": "2xLP",
+    "discCount": 1
   },
   {
     "id": "the-ink-spots-greatest-hits",
     "title": "Greatest Hits",
     "artist": "The Ink Spots",
-    "genres": ["Vocal Group", "Traditional Pop", "Doo-wop"],
-    "moods": ["Vintage", "Sweet", "Nostalgic"],
-    "favoriteTracks": ["I Don't Want to Set the World on Fire", "If I Didn't Care", "Java Jive"],
+    "genres": [
+      "Vocal Group",
+      "Traditional Pop",
+      "Doo-wop"
+    ],
+    "moods": [
+      "Vintage",
+      "Sweet",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "I Don't Want to Set the World on Fire",
+      "If I Didn't Care",
+      "Java Jive"
+    ],
     "pressing": "Greatest hits compilation",
     "vinylColor": "Black",
     "condition": "Used; sleeve appears clean",
@@ -527,16 +958,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4639.jpg",
     "backCoverPath": "../../Album covers/IMG_4640.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Decca Records",
+    "format": "2xLP",
+    "discCount": 1
   },
   {
     "id": "queen-jazz",
     "title": "Jazz",
     "artist": "Queen",
     "releaseYear": 1978,
-    "genres": ["Rock", "Hard Rock", "Glam Rock"],
-    "moods": ["Theatrical", "Energetic", "Classic rock"],
-    "favoriteTracks": ["Don't Stop Me Now", "Bicycle Race", "Fat Bottomed Girls"],
+    "genres": [
+      "Rock",
+      "Hard Rock",
+      "Glam Rock"
+    ],
+    "moods": [
+      "Theatrical",
+      "Energetic",
+      "Classic rock"
+    ],
+    "favoriteTracks": [
+      "Don't Stop Me Now",
+      "Bicycle Race",
+      "Fat Bottomed Girls"
+    ],
     "pressing": "Elektra Records pressing",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -545,16 +991,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4642.JPG",
     "backCoverPath": "../../Album covers/IMG_4643.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Elektra Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "the-beatles-hear-the-beatles-tell-all",
     "title": "Hear the Beatles Tell All",
     "artist": "The Beatles",
     "releaseYear": 1964,
-    "genres": ["Interview", "Spoken Word", "Rock"],
-    "moods": ["Archival", "Fan collection", "Vintage"],
-    "favoriteTracks": ["Interview recordings"],
+    "genres": [
+      "Interview",
+      "Spoken Word",
+      "Rock"
+    ],
+    "moods": [
+      "Archival",
+      "Fan collection",
+      "Vintage"
+    ],
+    "favoriteTracks": [
+      "Interview recordings"
+    ],
     "pressing": "Vee-Jay Records interview LP",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -563,15 +1022,29 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4644.jpg",
     "backCoverPath": "../../Album covers/IMG_4645.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Vee-Jay Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "louis-armstrong-y-su-orquesta-historia-del-jazz",
     "title": "Historia del Jazz: Louis Armstrong y su Orquesta",
     "artist": "Louis Armstrong y su Orquesta",
-    "genres": ["Jazz", "Dixieland", "Compilation"],
-    "moods": ["Vintage", "Archival", "Classic"],
-    "favoriteTracks": ["Ain't Misbehavin'", "Basin Street Blues"],
+    "genres": [
+      "Jazz",
+      "Dixieland",
+      "Compilation"
+    ],
+    "moods": [
+      "Vintage",
+      "Archival",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "Ain't Misbehavin'",
+      "Basin Street Blues"
+    ],
     "pressing": "Spanish-language jazz history compilation; recordings 1944-1945",
     "vinylColor": "Black",
     "condition": "Used; price sticker visible",
@@ -580,16 +1053,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4646.jpg",
     "backCoverPath": "../../Album covers/IMG_4647.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Coronet Records",
+    "catalogNumber": "1944-1945",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "billy-joel-glass-houses",
     "title": "Glass Houses",
     "artist": "Billy Joel",
     "releaseYear": 1980,
-    "genres": ["Rock", "Pop Rock"],
-    "moods": ["Punchy", "Classic rock", "Road trip"],
-    "favoriteTracks": ["You May Be Right", "It's Still Rock and Roll to Me", "Don't Ask Me Why"],
+    "genres": [
+      "Rock",
+      "Pop Rock"
+    ],
+    "moods": [
+      "Punchy",
+      "Classic rock",
+      "Road trip"
+    ],
+    "favoriteTracks": [
+      "You May Be Right",
+      "It's Still Rock and Roll to Me",
+      "Don't Ask Me Why"
+    ],
     "pressing": "Columbia Records pressing",
     "vinylColor": "Black",
     "condition": "Used; writing on front cover visible",
@@ -598,16 +1086,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4648.jpg",
     "backCoverPath": "../../Album covers/IMG_4649.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Columbia Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "billy-joel-an-innocent-man",
     "title": "An Innocent Man",
     "artist": "Billy Joel",
     "releaseYear": 1983,
-    "genres": ["Pop Rock", "Rock", "Blue-eyed Soul"],
-    "moods": ["Romantic", "Throwback", "Upbeat"],
-    "favoriteTracks": ["Uptown Girl", "The Longest Time", "Tell Her About It"],
+    "genres": [
+      "Pop Rock",
+      "Rock",
+      "Blue-eyed Soul"
+    ],
+    "moods": [
+      "Romantic",
+      "Throwback",
+      "Upbeat"
+    ],
+    "favoriteTracks": [
+      "Uptown Girl",
+      "The Longest Time",
+      "Tell Her About It"
+    ],
     "pressing": "Columbia Records pressing",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap and price sticker visible",
@@ -616,16 +1119,30 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4650.jpg",
     "backCoverPath": "../../Album covers/IMG_4651.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Columbia Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "brenton-wood-baby-you-got-it",
     "title": "Baby You Got It",
     "artist": "Brenton Wood",
     "releaseYear": 1967,
-    "genres": ["Soul", "Rhythm and Blues"],
-    "moods": ["Sweet", "Vintage", "Groovy"],
-    "favoriteTracks": ["Gimme Little Sign", "Baby You Got It", "The Oogum Boogum Song"],
+    "genres": [
+      "Soul",
+      "Rhythm and Blues"
+    ],
+    "moods": [
+      "Sweet",
+      "Vintage",
+      "Groovy"
+    ],
+    "favoriteTracks": [
+      "Gimme Little Sign",
+      "Baby You Got It",
+      "The Oogum Boogum Song"
+    ],
     "pressing": "Craft Records reissue",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -634,16 +1151,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4652.jpg",
     "backCoverPath": "../../Album covers/IMG_4653.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Double Shot Records",
+    "format": "7-inch single",
+    "discCount": 1
   },
   {
     "id": "michael-giacchino-ratatouille",
     "title": "Ratatouille",
     "artist": "Michael Giacchino",
     "releaseYear": 2007,
-    "genres": ["Soundtrack", "Film Score", "Children's"],
-    "moods": ["Whimsical", "Cooking", "Family"],
-    "favoriteTracks": ["Le Festin", "Anyone Can Cook", "End Creditouilles"],
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Children's"
+    ],
+    "moods": [
+      "Whimsical",
+      "Cooking",
+      "Family"
+    ],
+    "favoriteTracks": [
+      "Le Festin",
+      "Anyone Can Cook",
+      "End Creditouilles"
+    ],
     "pressing": "Walt Disney/Pixar picture disc soundtrack",
     "vinylColor": "Picture disc",
     "condition": "Used; clear sleeve visible",
@@ -652,16 +1184,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4654.jpg",
     "backCoverPath": "../../Album covers/IMG_4655.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "Walt Disney Records",
+    "format": "Picture disc",
+    "discCount": 1
   },
   {
     "id": "john-williams-the-empire-strikes-back",
     "title": "The Empire Strikes Back",
     "artist": "John Williams",
     "releaseYear": 1980,
-    "genres": ["Soundtrack", "Film Score", "Classical"],
-    "moods": ["Epic", "Cinematic", "Adventure"],
-    "favoriteTracks": ["The Imperial March", "Yoda's Theme", "Han Solo and the Princess"],
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Classical"
+    ],
+    "moods": [
+      "Epic",
+      "Cinematic",
+      "Adventure"
+    ],
+    "favoriteTracks": [
+      "The Imperial March",
+      "Yoda's Theme",
+      "Han Solo and the Princess"
+    ],
     "pressing": "Original motion picture soundtrack",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -670,16 +1217,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4656.jpg",
     "backCoverPath": "../../Album covers/IMG_4657.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "20th Century Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "jon-brion-lady-bird",
     "title": "Lady Bird",
     "artist": "Jon Brion",
     "releaseYear": 2017,
-    "genres": ["Soundtrack", "Film Score", "Indie"],
-    "moods": ["Tender", "Coming-of-age", "Reflective"],
-    "favoriteTracks": ["Lady Bird", "Hope", "Crash into Me"],
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Indie"
+    ],
+    "moods": [
+      "Tender",
+      "Coming-of-age",
+      "Reflective"
+    ],
+    "favoriteTracks": [
+      "Lady Bird",
+      "Hope",
+      "Crash into Me"
+    ],
     "pressing": "Original motion picture soundtrack",
     "vinylColor": "Black",
     "condition": "Used; sleeve appears clean",
@@ -688,16 +1250,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4658.jpg",
     "backCoverPath": "../../Album covers/IMG_4659.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Lakeshore Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "danny-elfman-spider-man-original-motion-picture-score",
     "title": "Spider-Man: Original Motion Picture Score",
     "artist": "Danny Elfman",
     "releaseYear": 2002,
-    "genres": ["Soundtrack", "Film Score", "Superhero"],
-    "moods": ["Cinematic", "Action", "Nostalgic"],
-    "favoriteTracks": ["Main Title", "Costume Montage", "Farewell"],
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Superhero"
+    ],
+    "moods": [
+      "Cinematic",
+      "Action",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Main Title",
+      "Costume Montage",
+      "Farewell"
+    ],
     "pressing": "Marvel picture disc soundtrack",
     "vinylColor": "Picture disc",
     "condition": "Used; clear sleeve visible",
@@ -706,16 +1283,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4660.JPG",
     "backCoverPath": "../../Album covers/IMG_4663.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "La-La Land Records",
+    "format": "Picture disc",
+    "discCount": 1
   },
   {
     "id": "the-head-and-the-heart-signs-of-light",
     "title": "Signs of Light",
     "artist": "The Head and the Heart",
     "releaseYear": 2016,
-    "genres": ["Indie Folk", "Folk Rock", "Indie Rock"],
-    "moods": ["Warm", "Road trip", "Reflective"],
-    "favoriteTracks": ["All We Ever Knew", "City of Angels", "Rhythm & Blues"],
+    "genres": [
+      "Indie Folk",
+      "Folk Rock",
+      "Indie Rock"
+    ],
+    "moods": [
+      "Warm",
+      "Road trip",
+      "Reflective"
+    ],
+    "favoriteTracks": [
+      "All We Ever Knew",
+      "City of Angels",
+      "Rhythm & Blues"
+    ],
     "pressing": "Warner Bros. picture disc",
     "vinylColor": "Picture disc",
     "condition": "Used; clear sleeve visible",
@@ -724,16 +1316,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4664.jpg",
     "backCoverPath": "../../Album covers/IMG_4665.JPG",
-    "favorite": false
+    "favorite": false,
+    "label": "Dualtone Records",
+    "format": "Picture disc",
+    "discCount": 1
   },
   {
     "id": "frank-sinatra-swing-easy",
     "title": "Swing Easy!",
     "artist": "Frank Sinatra",
     "releaseYear": 1954,
-    "genres": ["Vocal Jazz", "Swing", "Traditional Pop"],
-    "moods": ["Swinging", "Classic", "Lounge"],
-    "favoriteTracks": ["Just One of Those Things", "Get Happy", "Wrap Your Troubles in Dreams"],
+    "genres": [
+      "Vocal Jazz",
+      "Swing",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Swinging",
+      "Classic",
+      "Lounge"
+    ],
+    "favoriteTracks": [
+      "Just One of Those Things",
+      "Get Happy",
+      "Wrap Your Troubles in Dreams"
+    ],
     "pressing": "Capitol Duophonic reissue",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap and price sticker visible",
@@ -742,16 +1349,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4666.jpg",
     "backCoverPath": "../../Album covers/IMG_4667.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Capitol Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "tom-jones-live-at-caesars-palace",
     "title": "Tom Jones Live! At the Talk of the Town",
     "artist": "Tom Jones",
     "releaseYear": 1967,
-    "genres": ["Pop", "Vocal", "Live"],
-    "moods": ["Showman", "Vegas", "Energetic"],
-    "favoriteTracks": ["Delilah", "It's Not Unusual", "She's a Lady"],
+    "genres": [
+      "Pop",
+      "Vocal",
+      "Live"
+    ],
+    "moods": [
+      "Showman",
+      "Vegas",
+      "Energetic"
+    ],
+    "favoriteTracks": [
+      "Delilah",
+      "It's Not Unusual",
+      "She's a Lady"
+    ],
     "pressing": "Parrot Records live album",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -760,16 +1382,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4668.jpg",
     "backCoverPath": "../../Album covers/IMG_4669.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Decca Records",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "sade-the-best-of-sade",
     "title": "The Best of Sade",
     "artist": "Sade",
     "releaseYear": 1994,
-    "genres": ["Soul", "Smooth Jazz", "Sophisti-pop"],
-    "moods": ["Smooth", "Romantic", "Late night"],
-    "favoriteTracks": ["Smooth Operator", "No Ordinary Love", "Your Love Is King"],
+    "genres": [
+      "Soul",
+      "Smooth Jazz",
+      "Sophisti-pop"
+    ],
+    "moods": [
+      "Smooth",
+      "Romantic",
+      "Late night"
+    ],
+    "favoriteTracks": [
+      "Smooth Operator",
+      "No Ordinary Love",
+      "Your Love Is King"
+    ],
     "pressing": "Greatest hits compilation",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -778,16 +1415,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4670.jpg",
     "backCoverPath": "../../Album covers/IMG_4671.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Epic Records",
+    "format": "2xLP",
+    "discCount": 2
   },
   {
     "id": "dire-straits-brothers-in-arms",
     "title": "Brothers in Arms",
     "artist": "Dire Straits",
     "releaseYear": 1985,
-    "genres": ["Rock", "Pop Rock", "Roots Rock"],
-    "moods": ["Road trip", "Classic rock", "Reflective"],
-    "favoriteTracks": ["Money for Nothing", "Walk of Life", "Brothers in Arms"],
+    "genres": [
+      "Rock",
+      "Pop Rock",
+      "Roots Rock"
+    ],
+    "moods": [
+      "Road trip",
+      "Classic rock",
+      "Reflective"
+    ],
+    "favoriteTracks": [
+      "Money for Nothing",
+      "Walk of Life",
+      "Brothers in Arms"
+    ],
     "pressing": "Warner Bros. pressing",
     "vinylColor": "Black",
     "condition": "Used; sleeve appears clean",
@@ -796,16 +1448,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4672.jpg",
     "backCoverPath": "../../Album covers/IMG_4673.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Vertigo",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "bob-dylan-bob-dylans-greatest-hits",
     "title": "Bob Dylan's Greatest Hits",
     "artist": "Bob Dylan",
     "releaseYear": 1967,
-    "genres": ["Folk Rock", "Singer-songwriter", "Rock"],
-    "moods": ["Classic", "Poetic", "Road trip"],
-    "favoriteTracks": ["Blowin' in the Wind", "Like a Rolling Stone", "The Times They Are a-Changin'"],
+    "genres": [
+      "Folk Rock",
+      "Singer-songwriter",
+      "Rock"
+    ],
+    "moods": [
+      "Classic",
+      "Poetic",
+      "Road trip"
+    ],
+    "favoriteTracks": [
+      "Blowin' in the Wind",
+      "Like a Rolling Stone",
+      "The Times They Are a-Changin'"
+    ],
     "pressing": "Greatest hits compilation",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
@@ -814,16 +1481,31 @@
     "status": "owned",
     "frontCoverPath": "../../Album covers/IMG_4674.jpg",
     "backCoverPath": "../../Album covers/IMG_4675.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Columbia Records",
+    "format": "2xLP",
+    "discCount": 1
   },
   {
     "id": "henry-mancini-breakfast-at-tiffanys",
     "title": "Breakfast at Tiffany's",
     "artist": "Henry Mancini",
     "releaseYear": 1961,
-    "genres": ["Soundtrack", "Film Score", "Jazz"],
-    "moods": ["Classic", "Romantic", "Dinner"],
-    "favoriteTracks": ["Moon River", "Breakfast at Tiffany's", "Something for Cat"],
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Jazz"
+    ],
+    "moods": [
+      "Classic",
+      "Romantic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "Moon River",
+      "Breakfast at Tiffany's",
+      "Something for Cat"
+    ],
     "pressing": "50th Anniversary Edition",
     "vinylColor": "Black",
     "condition": "Used; sleeve appears clean",
@@ -832,16 +1514,31 @@
     "status": "owned",
     "frontCoverPath": "../../IMG_4677.JPG",
     "backCoverPath": "../../IMG_4678.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "RCA Victor",
+    "format": "LP",
+    "discCount": 1
   },
   {
     "id": "ella-fitzgerald-and-louis-armstrong-ella-and-louis",
     "title": "Ella and Louis",
     "artist": "Ella Fitzgerald and Louis Armstrong",
     "releaseYear": 1956,
-    "genres": ["Jazz", "Vocal Jazz"],
-    "moods": ["Classic", "Dinner", "Romantic"],
-    "favoriteTracks": ["They Can't Take That Away from Me", "Moonlight in Vermont", "Cheek to Cheek", "April in Paris"],
+    "genres": [
+      "Jazz",
+      "Vocal Jazz"
+    ],
+    "moods": [
+      "Classic",
+      "Dinner",
+      "Romantic"
+    ],
+    "favoriteTracks": [
+      "They Can't Take That Away from Me",
+      "Moonlight in Vermont",
+      "Cheek to Cheek",
+      "April in Paris"
+    ],
     "pressing": "Pan-Am Records reissue",
     "vinylColor": "Black",
     "condition": "Used; sleeve appears clean",
@@ -850,6 +1547,9 @@
     "status": "owned",
     "frontCoverPath": "../../IMG_4679.jpg",
     "backCoverPath": "../../IMG_4680.jpg",
-    "favorite": false
+    "favorite": false,
+    "label": "Verve Records",
+    "format": "LP",
+    "discCount": 1
   }
 ]

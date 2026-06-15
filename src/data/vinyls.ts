@@ -14,6 +14,9 @@ export type VinylRecord = {
   vinylColor?: string;
   condition?: string;
   source?: string;
+  giftFrom?: string;
+  whereWeGotIt?: string;
+  bestFor?: string;
   dateAdded?: string;
   status: "owned" | "wishlist" | "upgrade";
   notes?: string;

@@ -24,6 +24,9 @@ type FormState = {
   vinylColor: string;
   condition: string;
   source: string;
+  giftFrom: string;
+  whereWeGotIt: string;
+  bestFor: string;
   status: VinylRecord["status"];
   notes: string;
   favoriteStories: string;
@@ -47,6 +50,9 @@ const emptyForm: FormState = {
   vinylColor: "",
   condition: "",
   source: "",
+  giftFrom: "",
+  whereWeGotIt: "",
+  bestFor: "",
   status: "owned",
   notes: "",
   favoriteStories: "",
@@ -71,6 +77,9 @@ function recordToForm(record: VinylRecord): FormState {
     vinylColor: record.vinylColor ?? "",
     condition: record.condition ?? "",
     source: record.source ?? "",
+    giftFrom: record.giftFrom ?? "",
+    whereWeGotIt: record.whereWeGotIt ?? "",
+    bestFor: record.bestFor ?? "",
     status: record.status,
     notes: record.notes ?? "",
     favoriteStories: record.favoriteStories ?? "",
@@ -193,6 +202,9 @@ export default function VinylManager() {
       vinylColor: form.vinylColor.trim() || undefined,
       condition: form.condition.trim() || undefined,
       source: form.source.trim() || undefined,
+      giftFrom: form.giftFrom.trim() || undefined,
+      whereWeGotIt: form.whereWeGotIt.trim() || undefined,
+      bestFor: form.bestFor.trim() || undefined,
       dateAdded: new Date().toISOString().slice(0, 10),
       status: form.status,
       notes: form.notes.trim() || undefined,
@@ -401,6 +413,21 @@ export default function VinylManager() {
           <label className="block sm:col-span-2">
             <span className="mb-2 block text-sm font-medium text-gray-700">Source</span>
             <input value={form.source} onChange={(event) => updateForm("source", event.target.value)} className={inputClassName()} placeholder="Gift, record store, thrifted, wishlist..." />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Gift from</span>
+            <input value={form.giftFrom} onChange={(event) => updateForm("giftFrom", event.target.value)} className={inputClassName()} placeholder="If it was a gift, who from?" />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Where we got it</span>
+            <input value={form.whereWeGotIt} onChange={(event) => updateForm("whereWeGotIt", event.target.value)} className={inputClassName()} placeholder="Record store, thrift shop, inheritance..." />
+          </label>
+
+          <label className="block sm:col-span-2">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Best for</span>
+            <input value={form.bestFor} onChange={(event) => updateForm("bestFor", event.target.value)} className={inputClassName()} placeholder="Dinner, road trip, rainy night, background music..." />
           </label>
 
           <label className="block sm:col-span-2">
