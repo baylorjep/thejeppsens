@@ -114,6 +114,11 @@ body {
   to { transform: translateX(-33.333%); }
 }
 
+@keyframes vinyl-marquee-reverse {
+  from { transform: translateX(-33.333%); }
+  to { transform: translateX(0); }
+}
+
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
@@ -132,5 +137,13 @@ body {
 }
 
 .vinyl-marquee:hover {
+  animation-play-state: paused;
+}
+
+.vinyl-marquee-reverse {
+  animation: vinyl-marquee-reverse 34s linear infinite;
+}
+
+.vinyl-marquee-reverse:hover {
   animation-play-state: paused;
 }

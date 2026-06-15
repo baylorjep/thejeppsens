@@ -11,14 +11,16 @@ export default function Header() {
   const pathname = usePathname();
 
   const navigation = [
+    { name: 'Travel', href: '/travel' },
     { name: 'Food', href: '/restaurants' },
     { name: 'Movies', href: '/movies' },
     { name: 'Vinyl', href: '/vinyl' },
     { name: 'Budget', href: '/budget' },
-    { name: 'Travel', href: '/travel' }
   ];
 
   const miniGames = [
+    { name: 'Cliplash', href: 'https://scene-it-baylor.vercel.app/host', external: true },
+    { name: 'Movie Trivia', href: 'https://scene-it-baylor.vercel.app/host', external: true },
     { name: 'Bracket', href: '/bracket' },
     { name: 'Keep 4', href: '/keep4' }
   ];
@@ -52,21 +54,7 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`px-3 py-2 text-sm font-medium transition-colors ${
-                  pathname === item.href
-                    ? 'text-gray-900 border-b-2 border-gray-900'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-
-            {/* Mini Games Dropdown */}
+            {/* Mini Games Dropdown — first */}
             <div className="relative mini-games-dropdown">
               <button
                 onClick={() => setIsMiniGamesOpen(!isMiniGamesOpen)}
@@ -82,23 +70,52 @@ export default function Header() {
 
               {isMiniGamesOpen && (
                 <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  {miniGames.map((game) => (
-                    <Link
-                      key={game.name}
-                      href={game.href}
-                      className={`block px-4 py-2 text-sm transition-colors ${
-                        pathname === game.href
-                          ? 'text-gray-900 bg-gray-50'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                      }`}
-                      onClick={() => setIsMiniGamesOpen(false)}
-                    >
-                      {game.name}
-                    </Link>
-                  ))}
+                  {miniGames.map((game) => {
+                    const className = `block px-4 py-2 text-sm transition-colors ${
+                      pathname === game.href
+                        ? 'text-gray-900 bg-gray-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`;
+
+                    return game.external ? (
+                      <a
+                        key={game.name}
+                        href={game.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={className}
+                        onClick={() => setIsMiniGamesOpen(false)}
+                      >
+                        {game.name}
+                      </a>
+                    ) : (
+                      <Link
+                        key={game.name}
+                        href={game.href}
+                        className={className}
+                        onClick={() => setIsMiniGamesOpen(false)}
+                      >
+                        {game.name}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
+
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  pathname === item.href
+                    ? 'text-gray-900 border-b-2 border-gray-900'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
           </nav>
 
           {/* Mobile menu button */}
@@ -116,6 +133,42 @@ export default function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200">
             <div className="px-2 pt-2 pb-3 space-y-1">
+              {/* Mobile Mini Games — first */}
+              <div className="px-3 py-2">
+                <div className="text-base font-medium text-gray-600 mb-2">Mini Games</div>
+                <div className="pl-4 space-y-1">
+                  {miniGames.map((game) => {
+                    const className = `block px-3 py-2 text-sm transition-colors rounded ${
+                      pathname === game.href
+                        ? 'text-gray-900 bg-gray-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`;
+
+                    return game.external ? (
+                      <a
+                        key={game.name}
+                        href={game.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={className}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {game.name}
+                      </a>
+                    ) : (
+                      <Link
+                        key={game.name}
+                        href={game.href}
+                        className={className}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {game.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -130,27 +183,6 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
-
-              {/* Mobile Mini Games */}
-              <div className="px-3 py-2">
-                <div className="text-base font-medium text-gray-600 mb-2">Mini Games</div>
-                <div className="pl-4 space-y-1">
-                  {miniGames.map((game) => (
-                    <Link
-                      key={game.name}
-                      href={game.href}
-                      className={`block px-3 py-2 text-sm transition-colors rounded ${
-                        pathname === game.href
-                          ? 'text-gray-900 bg-gray-50'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                      }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {game.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         )}

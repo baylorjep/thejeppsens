@@ -1,0 +1,160 @@
+"use client";
+
+import { VinylRecord } from "@/data/vinyls";
+import { fetchVinylRecords } from "@/lib/vinylApi";
+import { readQueuedVinyls } from "@/lib/vinylQueue";
+import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
+import { Disc3, Star } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+
+type VinylAlbumDetailProps = {
+  id: string;
+  staticRecords: VinylRecord[];
+};
+
+function Cover({ record }: { record: VinylRecord }) {
+  if (record.coverImage) {
+    return (
+      <Image
+        src={record.coverImage}
+        alt={`${record.title} by ${record.artist} cover`}
+        fill
+        priority
+        className="object-cover"
+        unoptimized={record.coverImage.startsWith("data:")}
+      />
+    );
+  }
+
+  return (
+    <div className="flex h-full items-center justify-center bg-gray-100">
+      <Disc3 className="h-20 w-20 text-gray-300" />
+    </div>
+  );
+}
+
+export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetailProps) {
+  const [remoteRecords, setRemoteRecords] = useState<VinylRecord[]>([]);
+  const [queuedRecords, setQueuedRecords] = useState<VinylRecord[]>([]);
+
+  useEffect(() => {
+    setQueuedRecords(readQueuedVinyls());
+    fetchVinylRecords()
+      .then((response) => {
+        if (response.source === "supabase") setRemoteRecords(response.records);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const records = useMemo(
+    () => [...(remoteRecords.length ? remoteRecords : staticRecords), ...queuedRecords],
+    [queuedRecords, remoteRecords, staticRecords],
+  );
+  const record = records.find((item) => item.id === id);
+
+  if (!record) {
+    return (
+      <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
+        <Disc3 className="mx-auto h-12 w-12 text-gray-300" />
+        <h1 className="mt-4 text-2xl font-semibold text-gray-950">Album not found</h1>
+        <Link href="/vinyl" className="mt-4 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline">
+          Back to vinyl
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <article className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+        <Cover record={record} />
+      </div>
+
+      <div>
+        <Link href="/vinyl" className="mb-8 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline">
+          Back to vinyl
+        </Link>
+
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
+              Album
+            </p>
+            <h1 className="text-4xl font-semibold tracking-tight text-gray-950 sm:text-6xl">
+              {record.title}
+            </h1>
+            <p className="mt-3 text-xl text-gray-600">{record.artist}</p>
+          </div>
+          {record.favorite ? (
+            <div className="rounded-full bg-gray-950 p-3 text-white">
+              <Star className="h-5 w-5 fill-current" />
+            </div>
+          ) : null}
+        </div>
+
+        <dl className="mt-8 grid gap-3 text-sm sm:grid-cols-2">
+          {[
+            ["Released", record.releaseYear?.toString()],
+            ["Decade", getDecade(record)],
+            ["Status", statusLabel(record.status)],
+            ["Pressing", record.pressing],
+            ["Vinyl color", record.vinylColor],
+            ["Condition", record.condition],
+            ["Source", record.source],
+            ["Date added", record.dateAdded],
+          ].map(([label, value]) =>
+            value ? (
+              <div key={label} className="rounded-md bg-gray-50 p-4">
+                <dt className="text-gray-500">{label}</dt>
+                <dd className="mt-1 font-medium text-gray-950">{value}</dd>
+              </div>
+            ) : null,
+          )}
+        </dl>
+
+        <div className="mt-8 space-y-6">
+          <div>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Genres</h2>
+            <div className="flex flex-wrap gap-2">
+              {record.genres.map((genre) => (
+                <span key={genre} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">{genre}</span>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Moods</h2>
+            <div className="flex flex-wrap gap-2">
+              {record.moods.map((mood) => (
+                <span key={mood} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">{mood}</span>
+              ))}
+            </div>
+          </div>
+
+          {record.favoriteTracks?.length ? (
+            <div>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite tracks</h2>
+              <p className="leading-7 text-gray-700">{record.favoriteTracks.join(", ")}</p>
+            </div>
+          ) : null}
+
+          {record.notes ? (
+            <div>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Notes</h2>
+              <p className="leading-7 text-gray-700">{record.notes}</p>
+            </div>
+          ) : null}
+
+          {record.favoriteStories ? (
+            <div>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite stories</h2>
+              <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </article>
+  );
+}

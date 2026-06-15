@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   description: "A personal space for Baylor and Isabel.",
   keywords: "personal, date night, restaurant picker, movie picker, vinyl catalog",
   authors: [{ name: "Baylor & Isabel Jeppsen" }],
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export const viewport: Viewport = {

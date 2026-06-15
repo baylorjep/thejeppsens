@@ -1,6 +1,9 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
+import { fetchVinylRecords } from "@/lib/vinylApi";
+import { readQueuedVinyls } from "@/lib/vinylQueue";
+import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
 import {
   X,
   Disc3,
@@ -11,7 +14,8 @@ import {
   Star,
 } from "lucide-react";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 type VinylCatalogProps = {
   records: VinylRecord[];
@@ -20,19 +24,8 @@ type VinylCatalogProps = {
 type ViewMode = "grid" | "list";
 type FilterKey = "genres" | "moods" | "status" | "decades";
 
-const statusLabels: Record<VinylRecord["status"], string> = {
-  owned: "Owned",
-  wishlist: "Wishlist",
-  upgrade: "Upgrade wanted",
-};
-
 function uniqueSorted(values: string[]) {
   return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b));
-}
-
-function getDecade(record: VinylRecord) {
-  if (!record.releaseYear) return "Unknown";
-  return `${Math.floor(record.releaseYear / 10) * 10}s`;
 }
 
 function CoverArt({ record, priority = false }: { record: VinylRecord; priority?: boolean }) {
@@ -45,6 +38,7 @@ function CoverArt({ record, priority = false }: { record: VinylRecord; priority?
         priority={priority}
         sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         className="object-cover"
+        unoptimized={record.coverImage.startsWith("data:")}
       />
     );
   }
@@ -63,7 +57,7 @@ function RecordMeta({ record }: { record: VinylRecord }) {
     record.releaseYear?.toString(),
     getDecade(record),
     record.vinylColor,
-    statusLabels[record.status],
+    statusLabel(record.status),
   ].filter(Boolean);
 
   return (
@@ -81,29 +75,45 @@ function RecordMeta({ record }: { record: VinylRecord }) {
 }
 
 export default function VinylCatalog({ records }: VinylCatalogProps) {
+  const [queuedRecords, setQueuedRecords] = useState<VinylRecord[]>([]);
+  const [remoteRecords, setRemoteRecords] = useState<VinylRecord[]>([]);
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
   const [activeMood, setActiveMood] = useState("All");
   const [activeStatus, setActiveStatus] = useState("All");
   const [activeDecade, setActiveDecade] = useState("All");
+  const [giftMode, setGiftMode] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [pickedRecordId, setPickedRecordId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<VinylRecord | null>(null);
+  const baseRecords = remoteRecords.length ? remoteRecords : records;
+  const allRecords = useMemo(() => [...baseRecords, ...queuedRecords], [baseRecords, queuedRecords]);
+
+  useEffect(() => {
+    setQueuedRecords(readQueuedVinyls());
+    fetchVinylRecords()
+      .then((response) => {
+        if (response.source === "supabase") {
+          setRemoteRecords(response.records);
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   const filterOptions = useMemo(
     () => ({
-      genres: uniqueSorted(records.flatMap((record) => record.genres)),
-      moods: uniqueSorted(records.flatMap((record) => record.moods)),
+      genres: uniqueSorted(allRecords.flatMap((record) => record.genres)),
+      moods: uniqueSorted(allRecords.flatMap((record) => record.moods)),
       status: ["Owned", "Wishlist", "Upgrade wanted"],
-      decades: uniqueSorted(records.map(getDecade)),
+      decades: uniqueSorted(allRecords.map(getDecade)),
     }),
-    [records],
+    [allRecords],
   );
 
   const filteredRecords = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return records.filter((record) => {
+    return allRecords.filter((record) => {
       const searchable = [
         record.title,
         record.artist,
@@ -113,6 +123,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         record.condition,
         record.source,
         record.notes,
+        record.favoriteStories,
         ...record.genres,
         ...record.moods,
         ...(record.favoriteTracks ?? []),
@@ -124,24 +135,27 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
       const matchesGenre = activeGenre === "All" || record.genres.includes(activeGenre);
       const matchesMood = activeMood === "All" || record.moods.includes(activeMood);
-      const matchesStatus =
-        activeStatus === "All" || statusLabels[record.status] === activeStatus;
+      const matchesStatus = activeStatus === "All" || statusLabel(record.status) === activeStatus;
       const matchesDecade = activeDecade === "All" || getDecade(record) === activeDecade;
+      const matchesGiftMode = !giftMode || record.status === "wishlist" || record.status === "upgrade";
 
-      return matchesQuery && matchesGenre && matchesMood && matchesStatus && matchesDecade;
+      return matchesQuery && matchesGenre && matchesMood && matchesStatus && matchesDecade && matchesGiftMode;
     });
-  }, [activeDecade, activeGenre, activeMood, activeStatus, query, records]);
+  }, [activeDecade, activeGenre, activeMood, activeStatus, allRecords, giftMode, query]);
 
-  const carouselRecords = records;
+  const carouselRecords = allRecords;
   const rollingRecords = [...carouselRecords, ...carouselRecords, ...carouselRecords];
-  const pickedRecord = records.find((record) => record.id === pickedRecordId);
+  const rollingRecordsReverse = [...carouselRecords].reverse().concat([...carouselRecords].reverse(), [...carouselRecords].reverse());
+  const pickedRecord = allRecords.find((record) => record.id === pickedRecordId);
 
-  const favoriteCount = records.filter((record) => record.favorite).length;
-  const wishlistCount = records.filter((record) => record.status === "wishlist").length;
-  const topGenre = filterOptions.genres[0] ?? "None";
+  const favoriteCount = allRecords.filter((record) => record.favorite).length;
+  const wishlistCount = allRecords.filter((record) => record.status === "wishlist").length;
+  const upgradeCount = allRecords.filter((record) => record.status === "upgrade").length;
+  const ownedCount = allRecords.filter((record) => record.status === "owned").length;
+  const topDecade = uniqueSorted(allRecords.map(getDecade).filter((decade) => decade !== "Unknown"))[0] ?? "None";
 
   const pickRandomRecord = () => {
-    const pool = filteredRecords.length ? filteredRecords : records;
+    const pool = filteredRecords.length ? filteredRecords : allRecords;
     const next = pool[Math.floor(Math.random() * pool.length)];
     setPickedRecordId(next.id);
   };
@@ -152,6 +166,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     setActiveMood("All");
     setActiveStatus("All");
     setActiveDecade("All");
+    setGiftMode(false);
   };
 
   const filterGroups: Array<{
@@ -193,22 +208,26 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
   return (
     <div>
-      <div className="mb-10 grid gap-3 sm:grid-cols-4">
+      <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
           <p className="text-sm text-gray-500">Records</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-950">{records.length}</p>
+          <p className="mt-2 text-3xl font-semibold text-gray-950">{allRecords.length}</p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
           <p className="text-sm text-gray-500">Favorites</p>
           <p className="mt-2 text-3xl font-semibold text-gray-950">{favoriteCount}</p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-          <p className="text-sm text-gray-500">Wishlist</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-950">{wishlistCount}</p>
+          <p className="text-sm text-gray-500">Owned</p>
+          <p className="mt-2 text-3xl font-semibold text-gray-950">{ownedCount}</p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-          <p className="text-sm text-gray-500">First genre</p>
-          <p className="mt-2 text-lg font-semibold text-gray-950">{topGenre}</p>
+          <p className="text-sm text-gray-500">Gift ideas</p>
+          <p className="mt-2 text-3xl font-semibold text-gray-950">{wishlistCount + upgradeCount}</p>
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+          <p className="text-sm text-gray-500">Top decade</p>
+          <p className="mt-2 text-lg font-semibold text-gray-950">{topDecade}</p>
         </div>
       </div>
 
@@ -227,6 +246,19 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               </button>
             ))}
           </div>
+          <div className="vinyl-marquee-reverse mt-4 flex w-max gap-4">
+            {rollingRecordsReverse.map((record, index) => (
+              <button
+                key={`${record.id}-reverse-${index}`}
+                type="button"
+                onClick={() => setSelectedRecord(record)}
+                className="relative h-32 w-32 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-40 sm:w-40 lg:h-48 lg:w-48"
+                aria-label={`View ${record.title} by ${record.artist}`}
+              >
+                <CoverArt record={record} priority={index < 6} />
+              </button>
+            ))}
+          </div>
         </section>
       ) : null}
 
@@ -237,7 +269,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search title, artist, song, genre, notes..."
+              placeholder="Search title, artist, song, genre, notes, stories..."
               className="w-full rounded-md border border-gray-300 py-3 pl-10 pr-4 text-sm outline-none transition-colors focus:border-gray-950"
             />
           </label>
@@ -250,6 +282,17 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             >
               <Shuffle className="h-4 w-4" />
               Pick one
+            </button>
+            <button
+              type="button"
+              onClick={() => setGiftMode((current) => !current)}
+              className={`inline-flex items-center gap-2 rounded-md px-4 py-3 text-sm font-medium transition-colors ${
+                giftMode
+                  ? "bg-gray-950 text-white hover:bg-gray-800"
+                  : "border border-gray-300 text-gray-900 hover:border-gray-500"
+              }`}
+            >
+              Gift mode
             </button>
             <button
               type="button"
@@ -285,7 +328,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
         <div className="mt-5 flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-gray-600">
-            Showing {filteredRecords.length} of {records.length} records
+            Showing {filteredRecords.length} of {allRecords.length} records
           </p>
           <button
             type="button"
@@ -361,6 +404,13 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     {record.notes}
                   </p>
                 ) : null}
+
+                <Link
+                  href={`/vinyl/${record.id}`}
+                  className="mt-4 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+                >
+                  Open album page
+                </Link>
               </div>
             </article>
           ))}
@@ -416,7 +466,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
                   {[
                     ["Released", selectedRecord.releaseYear?.toString()],
-                    ["Status", statusLabels[selectedRecord.status]],
+                    ["Status", statusLabel(selectedRecord.status)],
                     ["Pressing", selectedRecord.pressing],
                     ["Vinyl color", selectedRecord.vinylColor],
                     ["Condition", selectedRecord.condition],
@@ -469,7 +519,21 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       <p className="text-sm leading-6 text-gray-600">{selectedRecord.notes}</p>
                     </div>
                   ) : null}
+
+                  {selectedRecord.favoriteStories ? (
+                    <div>
+                      <p className="mb-2 text-sm font-medium text-gray-950">Favorite stories</p>
+                      <p className="text-sm leading-6 text-gray-600">{selectedRecord.favoriteStories}</p>
+                    </div>
+                  ) : null}
                 </div>
+
+                <Link
+                  href={`/vinyl/${selectedRecord.id}`}
+                  className="mt-8 inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                >
+                  Open album page
+                </Link>
               </div>
             </div>
           </div>

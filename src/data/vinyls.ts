@@ -13,6 +13,7 @@ export type VinylRecord = {
   dateAdded?: string;
   status: "owned" | "wishlist" | "upgrade";
   notes?: string;
+  favoriteStories?: string;
   coverImage?: string;
   favorite?: boolean;
 };
@@ -32,6 +33,7 @@ export const vinyls: VinylRecord[] = [
     source: "Gift idea",
     status: "owned",
     notes: "Replace this with one of Isabel's records.",
+    favoriteStories: "Add a memory about when she got it, where it played, or why it matters.",
     favorite: true,
   },
   {
@@ -48,6 +50,7 @@ export const vinyls: VinylRecord[] = [
     source: "Example",
     status: "wishlist",
     notes: "Add a cover image later or leave coverImage blank.",
+    favoriteStories: "This can hold the story behind wanting this record.",
   },
   {
     id: "golden-hour",

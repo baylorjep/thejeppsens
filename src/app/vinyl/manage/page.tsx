@@ -1,9 +1,8 @@
 import Header from "@/components/Header";
-import VinylCatalog from "@/components/VinylCatalog";
-import { vinyls } from "@/data/vinyls";
+import VinylManager from "@/components/VinylManager";
 import Link from "next/link";
 
-export default function VinylPage() {
+export default function VinylManagePage() {
   return (
     <main className="min-h-screen bg-white">
       <Header />
@@ -12,20 +11,25 @@ export default function VinylPage() {
         <div className="mb-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-              Isabel&apos;s collection
+              Vinyl queue
             </p>
             <h1 className="text-4xl font-semibold tracking-tight text-gray-950 sm:text-6xl">
-              Vinyl catalog
+              Add records
             </h1>
+            <p className="mt-5 text-base leading-7 text-gray-600 sm:text-lg">
+              Add albums and covers here first. They save in this browser, show immediately on the
+              vinyl page, and can be exported when you are ready to make them permanent.
+            </p>
           </div>
           <Link
-            href="/vinyl/manage"
-            className="inline-flex w-fit rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+            href="/vinyl"
+            className="inline-flex w-fit rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
           >
-            Add records
+            View catalog
           </Link>
         </div>
-        <VinylCatalog records={vinyls} />
+
+        <VinylManager />
       </section>
     </main>
   );

@@ -59,7 +59,7 @@ export default function Homepage() {
                   alt={photos[currentPhotoIndex].alt}
                   fill
                   className={`object-cover ${
-                    isCurrentPhotoVertical() ? 'object-contain' : 'object-cover'
+                    isCurrentPhotoVertical() ? 'object-contain' : 'object-cover object-bottom'
                   }`}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -120,6 +120,18 @@ export default function Homepage() {
 
         {/* Features Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-16">
+          <Link href="/travel" className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
+            <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
+              <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-950">Travel</h3>
+            <p className="text-sm leading-6 text-gray-600">
+              Remember where we&apos;ve been.
+            </p>
+          </Link>
+
           <Link href="/restaurants" className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
             <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
               <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,18 +177,6 @@ export default function Homepage() {
               Keep money plans in one place.
             </p>
           </Link>
-
-          <Link href="/travel" className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
-            <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
-              <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-gray-950">Travel</h3>
-            <p className="text-sm leading-6 text-gray-600">
-              Remember where we&apos;ve been.
-            </p>
-          </Link>
         </div>
 
         {/* Call to Action */}
@@ -187,10 +187,26 @@ export default function Homepage() {
           <p className="mx-auto mb-8 max-w-xl text-gray-600">
             Quick tools for brackets, rankings, and narrowing choices down.
           </p>
-          <div className="flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
+            <a
+              href="https://scene-it-baylor.vercel.app/host"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-md border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+            >
+              Play Cliplash
+            </a>
+            <a
+              href="https://scene-it-baylor.vercel.app/host"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-md border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+            >
+              Movie Trivia
+            </a>
             <Link
               href="/bracket"
-              className="rounded-md bg-gray-950 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+              className="rounded-md border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
             >
               Tournament Bracket
             </Link>
@@ -200,14 +216,6 @@ export default function Homepage() {
             >
               Keep 4 Game
             </Link>
-            <a
-              href="https://scene-it-baylor.vercel.app/"
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-md border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
-            >
-              Play Cliplash
-            </a>
           </div>
         </div>
       </div>

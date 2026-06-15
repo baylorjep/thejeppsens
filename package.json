@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",
+    "@supabase/supabase-js": "^2.108.1",
     "lucide-react": "^0.534.0",
     "next": "16.2.9",
     "react": "19.1.0",
     "react-confetti": "^6.4.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-simple-maps": "^3.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
