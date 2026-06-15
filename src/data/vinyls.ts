@@ -3,6 +3,10 @@ export type VinylRecord = {
   title: string;
   artist: string;
   releaseYear?: number;
+  label?: string;
+  catalogNumber?: string;
+  format?: string;
+  discCount?: number;
   genres: string[];
   moods: string[];
   favoriteTracks?: string[];

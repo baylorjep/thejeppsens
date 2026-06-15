@@ -69,6 +69,9 @@ function validateRecord(input) {
   };
 
   const optionalFields = [
+    "label",
+    "catalogNumber",
+    "format",
     "pressing",
     "vinylColor",
     "condition",
@@ -85,6 +88,7 @@ function validateRecord(input) {
   }
 
   if (input.releaseYear !== undefined && input.releaseYear !== "") record.releaseYear = Number(input.releaseYear);
+  if (input.discCount !== undefined && input.discCount !== "") record.discCount = Number(input.discCount);
   if (input.favorite !== undefined) record.favorite = Boolean(input.favorite);
 
   const favoriteTracks = asList(input.favoriteTracks);

@@ -2,9 +2,10 @@
 
 import { VinylRecord } from "@/data/vinyls";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
+import { getStatusTone } from "@/lib/vinylAnalytics";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
-import { Disc3, Star } from "lucide-react";
+import { Disc3, Pencil, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -38,7 +39,7 @@ function CoverImage({ record, src, side }: { record: VinylRecord; src?: string; 
 function CoverGallery({ record }: { record: VinylRecord }) {
   if (record.backCoverImage) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+      <div className="grid gap-4 sm:grid-cols-2">
         {[
           ["Front", record.coverImage, "front"],
           ["Back", record.backCoverImage, "back"],
@@ -64,6 +65,9 @@ function CoverGallery({ record }: { record: VinylRecord }) {
 export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetailProps) {
   const [records, setRecords] = useState<VinylRecord[]>(staticRecords);
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
+  const [notesDraft, setNotesDraft] = useState("");
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -91,6 +95,32 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       );
     } finally {
       setFavoriteRecordId(null);
+    }
+  };
+
+  useEffect(() => {
+    setNotesDraft(record?.notes ?? "");
+    setIsEditingNotes(false);
+  }, [record?.id, record?.notes]);
+
+  const saveNotes = async () => {
+    if (!record) return;
+    setIsSavingNotes(true);
+    const nextRecord = { ...record, notes: notesDraft.trim() || undefined };
+
+    try {
+      const response = await saveVinylRecord(nextRecord);
+      setRecords((current) =>
+        current.map((item) => (item.id === response.record.id ? response.record : item)),
+      );
+      setIsEditingNotes(false);
+    } catch {
+      setRecords((current) =>
+        current.map((item) => (item.id === nextRecord.id ? nextRecord : item)),
+      );
+      setIsEditingNotes(false);
+    } finally {
+      setIsSavingNotes(false);
     }
   };
 
@@ -140,11 +170,26 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
           </button>
         </div>
 
+        {record.status !== "owned" ? (
+          <div className={`mt-5 rounded-lg border p-4 ${getStatusTone(record.status).card}`}>
+            <p className="text-sm font-medium text-gray-950">{statusLabel(record.status)}</p>
+            <p className="mt-1 text-sm text-gray-700">
+              {record.status === "wishlist"
+                ? "This one is on Isabel's wishlist."
+                : "This copy is in the collection, but a better version is still on the radar."}
+            </p>
+          </div>
+        ) : null}
+
         <dl className="mt-6 grid gap-3 text-sm sm:mt-8 sm:grid-cols-2">
           {[
             ["Released", record.releaseYear?.toString()],
             ["Decade", getDecade(record)],
             ["Status", statusLabel(record.status)],
+            ["Format", record.format],
+            ["Disc count", record.discCount?.toString()],
+            ["Label", record.label],
+            ["Catalog number", record.catalogNumber],
             ["Pressing", record.pressing],
             ["Vinyl color", record.vinylColor],
             ["Condition", record.condition],
@@ -182,16 +227,53 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
           {record.favoriteTracks?.length ? (
             <div>
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite tracks</h2>
-              <p className="leading-7 text-gray-700">{record.favoriteTracks.join(", ")}</p>
+              <ol className="space-y-2 text-gray-700">
+                {record.favoriteTracks.map((track, index) => (
+                  <li key={track} className="flex gap-3">
+                    <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
+                    <span>{track}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
           ) : null}
 
-          {record.notes ? (
-            <div>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Notes</h2>
-              <p className="leading-7 text-gray-700">{record.notes}</p>
+          <div>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Notes</h2>
+              <button
+                type="button"
+                onClick={() => setIsEditingNotes((current) => !current)}
+                className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+              >
+                <Pencil className="h-4 w-4" />
+                {isEditingNotes ? "Cancel" : record.notes ? "Edit notes" : "Add notes"}
+              </button>
             </div>
-          ) : null}
+
+            {isEditingNotes ? (
+              <div className="space-y-3">
+                <textarea
+                  value={notesDraft}
+                  onChange={(event) => setNotesDraft(event.target.value)}
+                  className="min-h-28 w-full rounded-md border border-gray-300 px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                  placeholder="Add something personal about this record..."
+                />
+                <button
+                  type="button"
+                  onClick={saveNotes}
+                  disabled={isSavingNotes}
+                  className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSavingNotes ? "Saving..." : "Save notes"}
+                </button>
+              </div>
+            ) : record.notes ? (
+              <p className="leading-7 text-gray-700">{record.notes}</p>
+            ) : (
+              <p className="text-sm text-gray-500">No notes yet.</p>
+            )}
+          </div>
 
           {record.favoriteStories ? (
             <div>

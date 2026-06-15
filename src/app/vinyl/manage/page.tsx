@@ -17,8 +17,8 @@ export default function VinylManagePage() {
               Add records
             </h1>
             <p className="mt-5 text-base leading-7 text-gray-600 sm:text-lg">
-              Add albums and covers here first. They save in this browser, show immediately on the
-              vinyl page, and can be exported when you are ready to make them permanent.
+              Start with front and back cover photos, fill in the details, and save records straight
+              into the collection.
             </p>
           </div>
           <Link

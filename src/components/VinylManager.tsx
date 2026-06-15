@@ -1,6 +1,7 @@
 "use client";
 
 import { VinylRecord, vinyls } from "@/data/vinyls";
+import { optimizeImageFile } from "@/lib/vinylImage";
 import { deleteVinylRecord, fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylApi";
 import { readQueuedVinyls, writeQueuedVinyls } from "@/lib/vinylQueue";
 import { slugifyVinylId, splitList, statusLabel } from "@/lib/vinylRecordUtils";
@@ -12,6 +13,10 @@ type FormState = {
   title: string;
   artist: string;
   releaseYear: string;
+  label: string;
+  catalogNumber: string;
+  format: string;
+  discCount: string;
   genres: string;
   moods: string;
   favoriteTracks: string;
@@ -31,6 +36,10 @@ const emptyForm: FormState = {
   title: "",
   artist: "",
   releaseYear: "",
+  label: "",
+  catalogNumber: "",
+  format: "LP",
+  discCount: "1",
   genres: "",
   moods: "",
   favoriteTracks: "",
@@ -51,6 +60,10 @@ function recordToForm(record: VinylRecord): FormState {
     title: record.title,
     artist: record.artist,
     releaseYear: record.releaseYear?.toString() ?? "",
+    label: record.label ?? "",
+    catalogNumber: record.catalogNumber ?? "",
+    format: record.format ?? "LP",
+    discCount: record.discCount?.toString() ?? "1",
     genres: record.genres.join(", "),
     moods: record.moods.join(", "),
     favoriteTracks: record.favoriteTracks?.join(", ") ?? "",
@@ -129,15 +142,16 @@ export default function VinylManager() {
     if (!file) return;
 
     try {
-      const imageUrl = await imageToDataUrl(file);
+      const optimizedFile = await optimizeImageFile(file);
+      const imageUrl = await imageToDataUrl(optimizedFile);
       if (side === "front") {
-        setImageFile(file);
+        setImageFile(optimizedFile);
         updateForm("coverImage", imageUrl);
       } else {
-        setBackImageFile(file);
+        setBackImageFile(optimizedFile);
         updateForm("backCoverImage", imageUrl);
       }
-      setMessage("Image loaded.");
+      setMessage("Image loaded and optimized.");
     } catch {
       setMessage("Could not load that image.");
     }
@@ -168,6 +182,10 @@ export default function VinylManager() {
       title,
       artist,
       releaseYear: form.releaseYear ? Number(form.releaseYear) : undefined,
+      label: form.label.trim() || undefined,
+      catalogNumber: form.catalogNumber.trim() || undefined,
+      format: form.format.trim() || undefined,
+      discCount: form.discCount ? Number(form.discCount) : undefined,
       genres: splitList(form.genres),
       moods: splitList(form.moods),
       favoriteTracks: splitList(form.favoriteTracks),
@@ -263,7 +281,49 @@ export default function VinylManager() {
           ) : null}
         </div>
 
+        <div className="mb-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">
+            Start With Photos
+          </h3>
+          <p className="mt-2 text-sm text-gray-600">
+            Drop in the front and back cover first. Images are automatically resized before upload
+            so the vinyl pages stay faster on mobile.
+          </p>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Front cover image</span>
+            <div className="grid gap-4">
+              <div className="relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+                {form.coverImage ? (
+                  <Image src={form.coverImage} alt="Cover preview" fill className="object-cover" unoptimized />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <ImagePlus className="h-10 w-10 text-gray-300" />
+                  </div>
+                )}
+              </div>
+              <input type="file" accept="image/*" onChange={(event) => handleImageChange("front", event.target.files?.[0])} className="block w-full rounded-md border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600" />
+            </div>
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Back cover image</span>
+            <div className="grid gap-4">
+              <div className="relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+                {form.backCoverImage ? (
+                  <Image src={form.backCoverImage} alt="Back cover preview" fill className="object-cover" unoptimized />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <ImagePlus className="h-10 w-10 text-gray-300" />
+                  </div>
+                )}
+              </div>
+              <input type="file" accept="image/*" onChange={(event) => handleImageChange("back", event.target.files?.[0])} className="block w-full rounded-md border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600" />
+            </div>
+          </label>
+
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-gray-700">Album title</span>
             <input value={form.title} onChange={(event) => updateForm("title", event.target.value)} className={inputClassName()} required />
@@ -280,12 +340,32 @@ export default function VinylManager() {
           </label>
 
           <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Format</span>
+            <input value={form.format} onChange={(event) => updateForm("format", event.target.value)} className={inputClassName()} placeholder="LP, soundtrack, picture disc..." />
+          </label>
+
+          <label className="block">
             <span className="mb-2 block text-sm font-medium text-gray-700">Status</span>
             <select value={form.status} onChange={(event) => updateForm("status", event.target.value as VinylRecord["status"])} className={inputClassName()}>
               <option value="owned">Owned</option>
               <option value="wishlist">Wishlist</option>
               <option value="upgrade">Upgrade wanted</option>
             </select>
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Label</span>
+            <input value={form.label} onChange={(event) => updateForm("label", event.target.value)} className={inputClassName()} placeholder="Capitol, Reprise, Verve..." />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Catalog number</span>
+            <input value={form.catalogNumber} onChange={(event) => updateForm("catalogNumber", event.target.value)} className={inputClassName()} placeholder="SW-1538, RS-1234..." />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Disc count</span>
+            <input value={form.discCount} onChange={(event) => updateForm("discCount", event.target.value)} className={inputClassName()} inputMode="numeric" placeholder="1" />
           </label>
 
           <label className="block">
@@ -336,38 +416,6 @@ export default function VinylManager() {
               className={`${inputClassName()} min-h-32`}
               placeholder="Where she found it, who gave it to her, when you played it together, why it is special..."
             />
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Front cover image</span>
-            <div className="grid gap-4">
-              <div className="relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-100">
-                {form.coverImage ? (
-                  <Image src={form.coverImage} alt="Cover preview" fill className="object-cover" unoptimized />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <ImagePlus className="h-10 w-10 text-gray-300" />
-                  </div>
-                )}
-              </div>
-              <input type="file" accept="image/*" onChange={(event) => handleImageChange("front", event.target.files?.[0])} className="block w-full rounded-md border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600" />
-            </div>
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Back cover image</span>
-            <div className="grid gap-4">
-              <div className="relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-100">
-                {form.backCoverImage ? (
-                  <Image src={form.backCoverImage} alt="Back cover preview" fill className="object-cover" unoptimized />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <ImagePlus className="h-10 w-10 text-gray-300" />
-                  </div>
-                )}
-              </div>
-              <input type="file" accept="image/*" onChange={(event) => handleImageChange("back", event.target.files?.[0])} className="block w-full rounded-md border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600" />
-            </div>
           </label>
 
           <label className="flex items-center gap-3 sm:col-span-2">
