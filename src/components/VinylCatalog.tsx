@@ -28,6 +28,27 @@ function uniqueSorted(values: string[]) {
   return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b));
 }
 
+function getTopValue(values: string[]) {
+  const counts = new Map<string, number>();
+
+  for (const value of values) {
+    if (!value) continue;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+
+  let topValue = "None";
+  let topCount = 0;
+
+  for (const [value, count] of counts.entries()) {
+    if (count > topCount || (count === topCount && value.localeCompare(topValue) < 0)) {
+      topValue = value;
+      topCount = count;
+    }
+  }
+
+  return { value: topValue, count: topCount };
+}
+
 function CoverArt({ record, priority = false }: { record: VinylRecord; priority?: boolean }) {
   if (record.coverImage) {
     return (
@@ -144,8 +165,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const pickedRecord = allRecords.find((record) => record.id === pickedRecordId);
 
   const favoriteCount = allRecords.filter((record) => record.favorite).length;
-  const ownedCount = allRecords.filter((record) => record.status === "owned").length;
-  const topDecade = uniqueSorted(allRecords.map(getDecade).filter((decade) => decade !== "Unknown"))[0] ?? "None";
+  const artistCount = uniqueSorted(allRecords.map((record) => record.artist)).length;
+  const genreCount = uniqueSorted(allRecords.flatMap((record) => record.genres)).length;
+  const topGenre = getTopValue(allRecords.flatMap((record) => record.genres));
+  const topArtist = getTopValue(allRecords.map((record) => record.artist));
+  const topMood = getTopValue(allRecords.flatMap((record) => record.moods));
+  const topEra = getTopValue(allRecords.map(getDecade).filter((decade) => decade !== "Unknown"));
 
   const pickRandomRecord = () => {
     const pool = filteredRecords.length ? filteredRecords : allRecords;
@@ -223,21 +248,21 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   return (
     <div>
       <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
           <p className="text-sm text-gray-500">Records</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-950">{allRecords.length}</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{allRecords.length}</p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+          <p className="text-sm text-gray-500">Artists</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{artistCount}</p>
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+          <p className="text-sm text-gray-500">Genres</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{genreCount}</p>
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
           <p className="text-sm text-gray-500">Favorites</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-950">{favoriteCount}</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-          <p className="text-sm text-gray-500">Owned</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-950">{ownedCount}</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-          <p className="text-sm text-gray-500">Top decade</p>
-          <p className="mt-2 text-lg font-semibold text-gray-950">{topDecade}</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{favoriteCount}</p>
         </div>
       </div>
 
@@ -249,7 +274,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 key={`${record.id}-${index}`}
                 type="button"
                 onClick={() => setSelectedRecord(record)}
-                className="relative h-40 w-40 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56"
+                className="relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56"
                 aria-label={`View ${record.title} by ${record.artist}`}
               >
                 <CoverArt record={record} priority={index < 6} />
@@ -262,7 +287,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 key={`${record.id}-reverse-${index}`}
                 type="button"
                 onClick={() => setSelectedRecord(record)}
-                className="relative h-32 w-32 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-40 sm:w-40 lg:h-48 lg:w-48"
+                className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-40 sm:w-40 lg:h-48 lg:w-48"
                 aria-label={`View ${record.title} by ${record.artist}`}
               >
                 <CoverArt record={record} priority={index < 6} />
@@ -271,6 +296,30 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           </div>
         </section>
       ) : null}
+
+      <section className="mb-10 rounded-lg border border-gray-200 bg-white p-5">
+        <div className="mb-5">
+          <p className="text-sm font-medium uppercase tracking-[0.16em] text-gray-500">
+            Collection Snapshot
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-gray-950">Top patterns</h2>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Top decade", topEra.value, `${topEra.count} records`],
+            ["Top genre", topGenre.value, `${topGenre.count} records`],
+            ["Top artist", topArtist.value, `${topArtist.count} records`],
+            ["Top mood", topMood.value, `${topMood.count} records`],
+          ].map(([label, value, sublabel]) => (
+            <div key={label} className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+              <p className="text-sm text-gray-500">{label}</p>
+              <p className="mt-2 text-lg font-semibold text-gray-950">{value}</p>
+              <p className="mt-1 text-sm text-gray-500">{sublabel}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="mb-8 rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -284,11 +333,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             />
           </label>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
               onClick={pickRandomRecord}
-              className="inline-flex items-center gap-2 rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 sm:w-auto"
             >
               <Shuffle className="h-4 w-4" />
               Pick one
@@ -296,7 +345,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             <button
               type="button"
               onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-              className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 sm:w-auto"
             >
               {viewMode === "grid" ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
               {viewMode === "grid" ? "List" : "Grid"}
@@ -433,14 +482,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
       {selectedRecord ? (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-6"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 px-0 py-0 sm:items-center sm:px-4 sm:py-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="vinyl-modal-title"
           onClick={() => setSelectedRecord(null)}
         >
           <div
-            className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white shadow-2xl"
+            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-lg"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="grid md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">

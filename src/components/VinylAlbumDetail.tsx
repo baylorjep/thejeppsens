@@ -107,29 +107,29 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
   }
 
   return (
-    <article className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+    <article className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       <CoverGallery record={record} />
 
       <div>
-        <Link href="/vinyl" className="mb-8 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline">
+        <Link href="/vinyl" className="mb-6 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline sm:mb-8">
           Back to vinyl
         </Link>
 
-        <div className="flex items-start justify-between gap-4">
-          <div>
+        <div className="flex items-start justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
             <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
               Album
             </p>
-            <h1 className="text-4xl font-semibold tracking-tight text-gray-950 sm:text-6xl">
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl lg:text-6xl">
               {record.title}
             </h1>
-            <p className="mt-3 text-xl text-gray-600">{record.artist}</p>
+            <p className="mt-3 text-lg text-gray-600 sm:text-xl">{record.artist}</p>
           </div>
           <button
             type="button"
             onClick={() => toggleFavorite(record)}
             disabled={favoriteRecordId === record.id}
-            className={`rounded-full border p-3 transition-colors ${
+            className={`shrink-0 rounded-full border p-3 transition-colors ${
               record.favorite
                 ? "border-gray-950 bg-gray-950 text-white"
                 : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
@@ -140,7 +140,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
           </button>
         </div>
 
-        <dl className="mt-8 grid gap-3 text-sm sm:grid-cols-2">
+        <dl className="mt-6 grid gap-3 text-sm sm:mt-8 sm:grid-cols-2">
           {[
             ["Released", record.releaseYear?.toString()],
             ["Decade", getDecade(record)],
