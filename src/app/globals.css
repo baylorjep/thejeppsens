@@ -133,7 +133,7 @@ body {
 }
 
 .vinyl-marquee {
-  animation: vinyl-marquee 52s linear infinite;
+  animation: vinyl-marquee 72s linear infinite;
 }
 
 .vinyl-marquee:hover {
@@ -141,7 +141,7 @@ body {
 }
 
 .vinyl-marquee-reverse {
-  animation: vinyl-marquee-reverse 52s linear infinite;
+  animation: vinyl-marquee-reverse 72s linear infinite;
 }
 
 .vinyl-marquee-reverse:hover {

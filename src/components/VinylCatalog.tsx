@@ -610,7 +610,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             >
               <Link
                 href={`/vinyl/${record.id}`}
-                className={viewMode === "grid" ? "relative aspect-square" : "relative aspect-square sm:aspect-auto"}
+                className={
+                  viewMode === "grid"
+                    ? "relative block aspect-square w-full"
+                    : "relative block aspect-square w-full sm:aspect-auto"
+                }
               >
                 <CoverArt
                   record={record}
