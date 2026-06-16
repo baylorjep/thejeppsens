@@ -389,6 +389,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       keyName: "decades",
     },
   ];
+  const quickFilterOptions = [
+    ["all", "All"],
+    ["favorites", "Favorites"],
+    allRecords.some((record) => record.status === "wishlist") ? ["wishlist", "Wishlist"] : null,
+    allRecords.some((record) => record.status === "upgrade") ? ["upgrade", "Upgrades"] : null,
+  ].filter(Boolean) as Array<[string, string]>;
 
   return (
     <div>
@@ -508,12 +514,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
           <div className="flex flex-col gap-2 sm:flex-row">
             <div className="flex flex-wrap gap-2">
-              {[
-                ["all", "All"],
-                ["favorites", "Favorites"],
-                ["wishlist", "Wishlist"],
-                ["upgrade", "Upgrades"],
-              ].map(([value, label]) => (
+              {quickFilterOptions.map(([value, label]) => (
                 <button
                   key={value}
                   type="button"
