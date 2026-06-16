@@ -134,8 +134,8 @@ body {
 
 /* Vinyl marquee timing lives here. Change only these variables. */
 :root {
-  --vinyl-marquee-duration: 84s;
-  --vinyl-marquee-duration-mobile: 40s;
+  --vinyl-marquee-duration: 120s;
+  --vinyl-marquee-duration-mobile: 48s;
 }
 
 .vinyl-marquee {

@@ -310,7 +310,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     return filteredRecords.slice(startIndex, startIndex + recordsPerPage);
   }, [currentPage, filteredRecords]);
 
-  const carouselRecords = isCompactCarousel ? allRecords.slice(0, 24) : allRecords;
+  const carouselRecords = (isCompactCarousel ? allRecords.slice(0, 24) : allRecords).filter(
+    (record) => record.status !== "wishlist",
+  );
   const rollingRecords = isCompactCarousel
     ? [...carouselRecords, ...carouselRecords]
     : [...carouselRecords, ...carouselRecords, ...carouselRecords];
