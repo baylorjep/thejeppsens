@@ -10,6 +10,7 @@ import { Disc3, ExternalLink, Pencil, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Confetti from "react-confetti";
 
 type VinylAlbumDetailProps = {
   id: string;
@@ -91,6 +92,8 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
   const [notesDraft, setNotesDraft] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -119,6 +122,30 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
     } finally {
       setFavoriteRecordId(null);
     }
+  };
+
+  const markAsOwned = async (target: VinylRecord) => {
+    if (target.status === "owned") return;
+
+    const nextRecord = { ...target, status: "owned" as const };
+
+    try {
+      const response = await saveVinylRecord(nextRecord);
+      setRecords((current) =>
+        current.map((item) => (item.id === response.record.id ? response.record : item)),
+      );
+    } catch {
+      setRecords((current) =>
+        current.map((item) => (item.id === nextRecord.id ? nextRecord : item)),
+      );
+    }
+
+    setStatusMessage(`Nice. ${target.title} is now on the owned shelf.`);
+    setShowConfetti(true);
+    window.setTimeout(() => {
+      setShowConfetti(false);
+      setStatusMessage("");
+    }, 3000);
   };
 
   useEffect(() => {
@@ -161,6 +188,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
 
   return (
     <article className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      {showConfetti ? <Confetti recycle={false} numberOfPieces={180} /> : null}
       <CoverGallery record={record} />
 
       <div>
@@ -211,6 +239,18 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ? "This one is on Isabel's wishlist."
                 : "This copy is in the collection, but a better version is still on the radar."}
             </p>
+            <button
+              type="button"
+              onClick={() => markAsOwned(record)}
+              className="mt-4 inline-flex rounded-md bg-gray-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+            >
+              Mark as owned
+            </button>
+          </div>
+        ) : null}
+        {statusMessage ? (
+          <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+            {statusMessage}
           </div>
         ) : null}
 

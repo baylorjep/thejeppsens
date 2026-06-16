@@ -106,6 +106,17 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         ))}
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2">
+        <BreakdownSection title="By genre" items={snapshot.genreBreakdown} />
+        <BreakdownSection title="Top artists" items={snapshot.artistBreakdown} />
+        <BreakdownSection title="By release decade" items={snapshot.releaseDecadeBreakdown} />
+        <BreakdownSection title="By recording decade" items={snapshot.recordingDecadeBreakdown} />
+        <BreakdownSection title="By format" items={snapshot.formatBreakdown} />
+        <BreakdownSection title="By label" items={snapshot.labelBreakdown} />
+        <BreakdownSection title="Top moods" items={snapshot.moodBreakdown} />
+        <BreakdownSection title="By status" items={snapshot.statusBreakdown} />
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "Top label", value: snapshot.topLabel.value, sublabel: `${snapshot.topLabel.count} records` },
@@ -127,17 +138,6 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             <p className="mt-1 text-sm text-gray-500">{item.sublabel}</p>
           </div>
         ))}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <BreakdownSection title="By recording decade" items={snapshot.recordingDecadeBreakdown} />
-        <BreakdownSection title="By release decade" items={snapshot.releaseDecadeBreakdown} />
-        <BreakdownSection title="By genre" items={snapshot.genreBreakdown} />
-        <BreakdownSection title="By format" items={snapshot.formatBreakdown} />
-        <BreakdownSection title="By label" items={snapshot.labelBreakdown} />
-        <BreakdownSection title="Top artists" items={snapshot.artistBreakdown} />
-        <BreakdownSection title="Top moods" items={snapshot.moodBreakdown} />
-        <BreakdownSection title="By status" items={snapshot.statusBreakdown} />
       </div>
     </div>
   );

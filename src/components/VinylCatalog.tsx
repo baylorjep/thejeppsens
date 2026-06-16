@@ -26,6 +26,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import Confetti from "react-confetti";
 
 type VinylCatalogProps = {
   records: VinylRecord[];
@@ -110,7 +111,8 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [pickedRecordId, setPickedRecordId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<VinylRecord | null>(null);
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
-  const [showRecordCovers, setShowRecordCovers] = useState(false);
+  const [statusCelebrationMessage, setStatusCelebrationMessage] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
   const hasAppliedFavoriteDefault = useRef(false);
 
   useEffect(() => {
@@ -122,11 +124,6 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       })
       .catch(() => setAllRecords([...records, ...queuedRecords]));
   }, [records]);
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => setShowRecordCovers(true), 850);
-    return () => window.clearTimeout(timeout);
-  }, []);
 
   useEffect(() => {
     const hasFavorites = allRecords.some((record) => record.favorite);
@@ -236,6 +233,34 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     } finally {
       setFavoriteRecordId(null);
     }
+  };
+
+  const markAsOwned = async (record: VinylRecord) => {
+    if (record.status === "owned") return;
+
+    const nextRecord = { ...record, status: "owned" as const };
+
+    try {
+      const response = await saveVinylRecord(nextRecord);
+      const savedRecord = response.record;
+      setApiSource(response.source);
+      setAllRecords((current) =>
+        current.map((item) => (item.id === savedRecord.id ? savedRecord : item)),
+      );
+      setSelectedRecord((current) => (current?.id === savedRecord.id ? savedRecord : current));
+    } catch {
+      setAllRecords((current) =>
+        current.map((item) => (item.id === nextRecord.id ? nextRecord : item)),
+      );
+      setSelectedRecord((current) => (current?.id === nextRecord.id ? nextRecord : current));
+    }
+
+    setStatusCelebrationMessage(`Nice. ${record.title} is now on the owned shelf.`);
+    setShowConfetti(true);
+    window.setTimeout(() => {
+      setShowConfetti(false);
+      setStatusCelebrationMessage("");
+    }, 3000);
   };
 
   const filterGroups: Array<{
@@ -509,22 +534,16 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 href={`/vinyl/${record.id}`}
                 className={viewMode === "grid" ? "relative aspect-square" : "relative aspect-square sm:aspect-auto"}
               >
-                {showRecordCovers ? (
-                  <CoverArt
-                    record={record}
-                    loading="lazy"
-                    fetchPriority="low"
-                    sizes={
-                      viewMode === "grid"
-                        ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                        : "(max-width: 639px) 100vw, 180px"
-                    }
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,_#fafafa,_#e5e7eb)]">
-                    <Disc3 className="h-10 w-10 text-gray-300" />
-                  </div>
-                )}
+                <CoverArt
+                  record={record}
+                  loading="lazy"
+                  fetchPriority="low"
+                  sizes={
+                    viewMode === "grid"
+                      ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                      : "(max-width: 639px) 100vw, 180px"
+                  }
+                />
               </Link>
 
               <div className="p-5">
@@ -617,20 +636,23 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           aria-labelledby="vinyl-modal-title"
           onClick={() => setSelectedRecord(null)}
         >
+          {showConfetti ? <Confetti recycle={false} numberOfPieces={160} /> : null}
           <div
-            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-lg"
+            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="grid md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-              <div className="relative aspect-square bg-gray-100">
-                <CoverArt
-                  record={selectedRecord}
-                  priority
-                  sizes="(max-width: 639px) 100vw, 45vw"
-                />
+            <div className="grid gap-0 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+              <div className="p-3 sm:p-4 md:border-r md:border-gray-200">
+                <div className="relative aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-sm">
+                  <CoverArt
+                    record={selectedRecord}
+                    priority
+                    sizes="(max-width: 639px) calc(100vw - 1.5rem), (max-width: 1023px) 45vw, 42vw"
+                  />
+                </div>
               </div>
 
-              <div className="p-6 sm:p-8">
+              <div className="border-t border-gray-100 p-5 sm:p-6 md:border-t-0 md:border-l md:border-gray-200">
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
                     <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
@@ -667,6 +689,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 </div>
 
                 <RecordMeta record={selectedRecord} />
+
+                {statusCelebrationMessage ? (
+                  <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                    {statusCelebrationMessage}
+                  </div>
+                ) : null}
 
                 <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
                   {[
@@ -732,6 +760,16 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     </div>
                   ) : null}
                 </div>
+
+                {selectedRecord.status !== "owned" ? (
+                  <button
+                    type="button"
+                    onClick={() => markAsOwned(selectedRecord)}
+                    className="mt-4 inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                  >
+                    Mark as owned
+                  </button>
+                ) : null}
 
                 <Link
                   href={`/vinyl/${selectedRecord.id}`}
