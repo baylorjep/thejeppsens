@@ -132,8 +132,14 @@ body {
   will-change: opacity, transform;
 }
 
+/* Vinyl marquee timing lives here. Change only these variables. */
+:root {
+  --vinyl-marquee-duration: 84s;
+  --vinyl-marquee-duration-mobile: 40s;
+}
+
 .vinyl-marquee {
-  animation: vinyl-marquee 84s linear infinite;
+  animation: vinyl-marquee var(--vinyl-marquee-duration) linear infinite;
 }
 
 .vinyl-marquee:hover {
@@ -141,7 +147,7 @@ body {
 }
 
 .vinyl-marquee-reverse {
-  animation: vinyl-marquee-reverse 84s linear infinite;
+  animation: vinyl-marquee-reverse var(--vinyl-marquee-duration) linear infinite;
 }
 
 .vinyl-marquee-reverse:hover {
@@ -149,11 +155,15 @@ body {
 }
 
 @media (max-width: 639px) {
+  :root {
+    --vinyl-marquee-duration: var(--vinyl-marquee-duration-mobile);
+  }
+
   .vinyl-marquee {
-    animation-duration: 40s;
+    animation-duration: var(--vinyl-marquee-duration-mobile);
   }
 
   .vinyl-marquee-reverse {
-    animation-duration: 40s;
+    animation-duration: var(--vinyl-marquee-duration-mobile);
   }
 }
