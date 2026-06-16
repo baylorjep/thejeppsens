@@ -159,6 +159,7 @@ function RecordMeta({ record }: { record: VinylRecord }) {
 
 function AnimatedNumber({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const duration = 700;
@@ -168,6 +169,7 @@ function AnimatedNumber({ value }: { value: number }) {
     const tick = (now: number) => {
       const progress = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
+      if (!isVisible) setIsVisible(true);
       setDisplayValue(Math.round(value * eased));
       if (progress < 1) frame = window.requestAnimationFrame(tick);
     };
@@ -176,7 +178,7 @@ function AnimatedNumber({ value }: { value: number }) {
     return () => window.cancelAnimationFrame(frame);
   }, [value]);
 
-  return <>{displayValue}</>;
+  return <span className={`transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}>{displayValue}</span>;
 }
 
 export default function VinylCatalog({ records }: VinylCatalogProps) {
@@ -544,13 +546,6 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             Collection Snapshot
           </p>
           <h2 className="text-2xl font-semibold text-gray-950">Top patterns</h2>
-          <Link
-            href="/vinyl/insights"
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
-          >
-            <Sparkles className="h-4 w-4" />
-            View more analytics
-          </Link>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -570,7 +565,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
         <Link
           href="/vinyl/insights"
-          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline sm:hidden"
+          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
         >
           <Sparkles className="h-4 w-4" />
           View more analytics
