@@ -189,6 +189,18 @@ function createSeededRandom(seed: number) {
   };
 }
 
+function seededShuffle<T>(items: T[], seed: number) {
+  const random = createSeededRandom(seed);
+  const result = [...items];
+
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+  }
+
+  return result;
+}
+
 export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [allRecords, setAllRecords] = useState<VinylRecord[]>(records);
   const [, setApiSource] = useState<VinylApiStatus>("local");
@@ -319,12 +331,17 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     return filteredRecords.slice(startIndex, startIndex + recordsPerPage);
   }, [currentPage, filteredRecords]);
 
-  const carouselRecords = (isCompactCarousel ? allRecords.slice(0, 24) : allRecords).filter(
-    (record) => record.status !== "wishlist",
+  const carouselPool = useMemo(
+    () => allRecords.filter((record) => record.status !== "wishlist"),
+    [allRecords],
   );
+  const shuffledCarouselRecords = useMemo(
+    () => seededShuffle(carouselPool, carouselSeed),
+    [carouselPool, carouselSeed],
+  );
+  const carouselRecords = isCompactCarousel ? shuffledCarouselRecords.slice(0, 24) : shuffledCarouselRecords;
   const desktopCarouselRows = useMemo(() => {
-    const seededRandom = createSeededRandom(carouselSeed);
-    const shuffled = [...carouselRecords].sort(() => seededRandom() - 0.5);
+    const shuffled = carouselRecords;
 
     return {
       top: shuffled.filter((_, index) => index % 2 === 0),
