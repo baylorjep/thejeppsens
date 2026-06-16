@@ -310,7 +310,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     return filteredRecords.slice(startIndex, startIndex + recordsPerPage);
   }, [currentPage, filteredRecords]);
 
-  const carouselRecords = isCompactCarousel ? allRecords.slice(0, 10) : allRecords;
+  const carouselRecords = isCompactCarousel ? allRecords.slice(0, 24) : allRecords;
   const rollingRecords = isCompactCarousel
     ? [...carouselRecords, ...carouselRecords]
     : [...carouselRecords, ...carouselRecords, ...carouselRecords];
@@ -371,7 +371,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     const tick = (now: number) => {
       const loopWidth = container.scrollWidth / 2;
       if (loopWidth > 0 && now >= pauseUntil) {
-        container.scrollLeft += 0.35;
+        container.scrollLeft += 1.1;
         if (container.scrollLeft >= loopWidth) {
           container.scrollLeft -= loopWidth;
         }
