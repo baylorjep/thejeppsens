@@ -59,6 +59,11 @@ function CoverArt({
 }) {
   const imageSrc = src ?? record.coverImage;
   const [isFlipped, setIsFlipped] = useState(false);
+  const [canHover, setCanHover] = useState(false);
+
+  useEffect(() => {
+    setCanHover(typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+  }, []);
 
   if (imageSrc) {
     const hasBackCover = Boolean(backSrc ?? record.backCoverImage);
@@ -68,12 +73,12 @@ function CoverArt({
       <div
         className="group relative h-full w-full"
         style={{ perspective: "1200px" }}
-        onMouseEnter={flipOnHover && hasBackCover ? () => setIsFlipped(true) : undefined}
-        onMouseLeave={flipOnHover && hasBackCover ? () => setIsFlipped(false) : undefined}
-        onFocus={flipOnHover && hasBackCover ? () => setIsFlipped(true) : undefined}
-        onBlur={flipOnHover && hasBackCover ? () => setIsFlipped(false) : undefined}
+        onMouseEnter={flipOnHover && hasBackCover && canHover ? () => setIsFlipped(true) : undefined}
+        onMouseLeave={flipOnHover && hasBackCover && canHover ? () => setIsFlipped(false) : undefined}
+        onFocus={flipOnHover && hasBackCover && canHover ? () => setIsFlipped(true) : undefined}
+        onBlur={flipOnHover && hasBackCover && canHover ? () => setIsFlipped(false) : undefined}
       >
-        {flipOnHover && hasBackCover ? (
+        {flipOnHover && hasBackCover && canHover ? (
           <div
             className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-white/80 bg-black/55 text-white opacity-0 shadow-sm transition-opacity duration-200 group-hover:opacity-100"
             aria-hidden="true"
@@ -869,6 +874,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       ["Released", selectedRecord.releaseYear?.toString()],
                       ["Status", statusLabel(selectedRecord.status)],
                       ["Pressing", selectedRecord.pressing],
+                      ["Storage location", selectedRecord.storageLocation],
                       ["Vinyl color", selectedRecord.vinylColor],
                       ["Condition", selectedRecord.condition],
                       ["Source", selectedRecord.source],

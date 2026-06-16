@@ -345,244 +345,270 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
   }
 
   return (
-    <article className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+    <article className="space-y-8">
       {showConfetti ? <Confetti recycle={false} numberOfPieces={180} /> : null}
-      <CoverGallery record={record} />
 
-      <div>
-        <Link href="/vinyl" className="mb-6 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline sm:mb-8">
-          Back to vinyl
-        </Link>
+      <Link href="/vinyl" className="inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline">
+        Back to vinyl
+      </Link>
 
-        <div className="flex items-start justify-between gap-3 sm:gap-4">
-          <div className="min-w-0">
-            <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-              Album
-            </p>
-            {isEditingRecord && editForm ? (
-              <div className="space-y-3">
-                <input
-                  value={editForm.title}
-                  onChange={(event) => updateEditForm("title", event.target.value)}
-                  className={`${inputClassName} text-3xl font-semibold tracking-tight sm:text-5xl lg:text-6xl`}
-                  aria-label="Album title"
-                />
-                <input
-                  value={editForm.artist}
-                  onChange={(event) => updateEditForm("artist", event.target.value)}
-                  className={`${inputClassName} text-lg text-gray-600 sm:text-xl`}
-                  aria-label="Artist"
-                />
+      <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
+        <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.05fr)]">
+          <div className="border-b border-gray-200 bg-gray-50 p-4 sm:p-6 lg:border-b-0 lg:border-r lg:p-8">
+            <CoverGallery record={record} />
+          </div>
+
+          <div className="space-y-6 p-5 sm:p-6 lg:p-10">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-3">
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">Album</p>
+                {isEditingRecord && editForm ? (
+                  <div className="space-y-3">
+                    <input
+                      value={editForm.title}
+                      onChange={(event) => updateEditForm("title", event.target.value)}
+                      className={`${inputClassName} text-3xl font-semibold tracking-tight sm:text-5xl lg:text-6xl`}
+                      aria-label="Album title"
+                    />
+                    <input
+                      value={editForm.artist}
+                      onChange={(event) => updateEditForm("artist", event.target.value)}
+                      className={`${inputClassName} text-lg text-gray-600 sm:text-xl`}
+                      aria-label="Artist"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <h1 className="text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl lg:text-6xl">
+                      {record.title}
+                    </h1>
+                    <p className="text-lg text-gray-600 sm:text-xl">{record.artist}</p>
+                  </>
+                )}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusTone(record.status).badge}`}>
+                    {statusLabel(record.status)}
+                  </span>
+                  {record.storageLocation ? (
+                    <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-600">
+                      {record.storageLocation}
+                    </span>
+                  ) : null}
+                  {record.favorite ? (
+                    <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-700">
+                      Favorite
+                    </span>
+                  ) : null}
+                </div>
               </div>
-            ) : (
-              <>
-                <h1 className="text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl lg:text-6xl">
-                  {record.title}
-                </h1>
-                <p className="mt-3 text-lg text-gray-600 sm:text-xl">{record.artist}</p>
-              </>
-            )}
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const next = !isEditingRecord;
-                setIsEditingRecord(next);
-                if (next) setIsEditingNotes(false);
-              }}
-              className="rounded-full border border-gray-200 p-3 text-gray-600 transition-colors hover:border-gray-500 hover:text-gray-950"
-              aria-label={isEditingRecord ? "Exit edit mode" : "Edit album details"}
-            >
-              <Settings2 className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => toggleFavorite(record)}
-              disabled={favoriteRecordId === record.id}
-              className={`rounded-full border p-3 transition-colors ${
-                record.favorite
-                  ? "border-gray-950 bg-gray-950 text-white"
-                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
-              }`}
-              aria-label={record.favorite ? `Remove ${record.title} from favorites` : `Add ${record.title} to favorites`}
-            >
-              <Star className={`h-5 w-5 ${record.favorite ? "fill-current" : ""}`} />
-            </button>
-          </div>
-        </div>
 
-        <a
-          href={getAppleMusicSearchUrl(record)}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-4 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Open in Apple Music
-        </a>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !isEditingRecord;
+                    setIsEditingRecord(next);
+                    if (next) setIsEditingNotes(false);
+                  }}
+                  className="rounded-full border border-gray-200 p-3 text-gray-600 transition-colors hover:border-gray-500 hover:text-gray-950"
+                  aria-label={isEditingRecord ? "Exit edit mode" : "Edit album details"}
+                >
+                  <Settings2 className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(record)}
+                  disabled={favoriteRecordId === record.id}
+                  className={`rounded-full border p-3 transition-colors ${
+                    record.favorite
+                      ? "border-gray-950 bg-gray-950 text-white"
+                      : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
+                  }`}
+                  aria-label={record.favorite ? `Remove ${record.title} from favorites` : `Add ${record.title} to favorites`}
+                >
+                  <Star className={`h-5 w-5 ${record.favorite ? "fill-current" : ""}`} />
+                </button>
+              </div>
+            </div>
 
-        {record.status !== "owned" && !isEditingRecord ? (
-          <div className={`mt-5 rounded-lg border p-4 ${getStatusTone(record.status).card}`}>
-            <p className="text-sm font-medium text-gray-950">{statusLabel(record.status)}</p>
-            <p className="mt-1 text-sm text-gray-700">
-              {record.status === "wishlist"
-                ? "This one is on Isabel's wishlist."
-                : "This copy is in the collection, but a better version is still on the radar."}
-            </p>
-            <button
-              type="button"
-              onClick={() => markAsOwned(record)}
-              className="mt-4 inline-flex rounded-md bg-gray-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+            <a
+              href={getAppleMusicSearchUrl(record)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
             >
-              Mark as owned
-            </button>
-          </div>
-        ) : null}
-        {statusMessage ? (
-          <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-            {statusMessage}
-          </div>
-        ) : null}
+              <ExternalLink className="h-4 w-4" />
+              Open in Apple Music
+            </a>
 
-        {!isEditingRecord ? (
-          <>
-            <dl className="mt-6 grid gap-3 text-sm sm:mt-8 sm:grid-cols-2">
+            {record.status !== "owned" && !isEditingRecord ? (
+              <div className={`rounded-2xl border p-5 ${getStatusTone(record.status).card}`}>
+                <p className="text-sm font-medium text-gray-950">{statusLabel(record.status)}</p>
+                <p className="mt-1 text-sm text-gray-700">
+                  {record.status === "wishlist"
+                    ? "This one is on Isabel's wishlist."
+                    : "This copy is in the collection, but a better version is still on the radar."}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => markAsOwned(record)}
+                  className="mt-4 inline-flex rounded-md bg-gray-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                >
+                  Mark as owned
+                </button>
+              </div>
+            ) : null}
+
+            {statusMessage ? (
+              <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                {statusMessage}
+              </div>
+            ) : null}
+
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
               {[
                 ["Released", record.releaseYear?.toString()],
                 ["Original release", record.originalReleaseYear?.toString()],
                 ["Recording years", record.recordingYears],
                 ["Pressing year", record.pressingYear?.toString()],
                 ["Decade", getDecade(record)],
-                ["Status", statusLabel(record.status)],
                 ["Format", record.format],
                 ["Disc count", record.discCount?.toString()],
                 ["Label", record.label],
+                ["Storage location", record.storageLocation],
                 ["Catalog number", record.catalogNumber],
                 ["Pressing", record.pressing],
                 ["Pressing notes", record.pressingNotes],
-                ["Storage location", record.storageLocation],
                 ["Vinyl color", record.vinylColor],
                 ["Condition", record.condition],
                 ["Source", record.source],
                 ["Date added", record.dateAdded],
               ].map(([label, value]) =>
                 value ? (
-                  <div key={label} className="rounded-md bg-gray-50 p-4">
+                  <div key={label} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                     <dt className="text-gray-500">{label}</dt>
                     <dd className="mt-1 font-medium text-gray-950">{value}</dd>
                   </div>
                 ) : null,
               )}
             </dl>
+          </div>
+        </div>
+      </section>
 
-            <div className="mt-8 space-y-6">
-              <div>
-                <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Genres</h2>
-                <div className="flex flex-wrap gap-2">
-                  {record.genres.map((genre) => (
-                    <span key={genre} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">{genre}</span>
-                  ))}
-                </div>
-              </div>
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
+        <div className="space-y-6 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
+          <div>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Genres</h2>
+            <div className="flex flex-wrap gap-2">
+              {record.genres.map((genre) => (
+                <span key={genre} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
+                  {genre}
+                </span>
+              ))}
+            </div>
+          </div>
 
-              <div>
-                <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Moods</h2>
-                <div className="flex flex-wrap gap-2">
-                  {record.moods.map((mood) => (
-                    <span key={mood} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">{mood}</span>
-                  ))}
-                </div>
-              </div>
+          <div>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Moods</h2>
+            <div className="flex flex-wrap gap-2">
+              {record.moods.map((mood) => (
+                <span key={mood} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
+                  {mood}
+                </span>
+              ))}
+            </div>
+          </div>
 
-              {record.favoriteTracks?.length ? (
-                <div>
-                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite tracks</h2>
-                  <ol className="space-y-2 text-gray-700">
-                    {record.favoriteTracks.map((track, index) => (
-                      <li key={track} className="flex gap-3">
-                        <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
-                        <span>{track}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              ) : null}
+          {record.favoriteTracks?.length ? (
+            <div>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite tracks</h2>
+              <ol className="space-y-2 text-gray-700">
+                {record.favoriteTracks.map((track, index) => (
+                  <li key={track} className="flex gap-3">
+                    <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
+                    <span>{track}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
 
-              <div>
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Notes</h2>
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingNotes((current) => !current)}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    {isEditingNotes ? "Cancel" : record.notes ? "Edit notes" : "Add notes"}
-                  </button>
-                </div>
-
-                {isEditingNotes ? (
-                  <div className="space-y-3">
-                    <textarea
-                      value={notesDraft}
-                      onChange={(event) => setNotesDraft(event.target.value)}
-                      className="min-h-28 w-full rounded-md border border-gray-300 px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
-                      placeholder="Add something personal about this record..."
-                    />
-                    <button
-                      type="button"
-                      onClick={saveNotes}
-                      disabled={isSavingNotes}
-                      className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSavingNotes ? "Saving..." : "Save notes"}
-                    </button>
-                  </div>
-                ) : record.notes ? (
-                  <p className="leading-7 text-gray-700">{record.notes}</p>
-                ) : (
-                  <p className="text-sm text-gray-500">No notes yet.</p>
-                )}
-              </div>
-
-              {record.favoriteStories ? (
-                <div>
-                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite stories</h2>
-                  <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
-                </div>
-              ) : null}
-
-              {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
-                <div>
-                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {[
-                      ["Gift from", record.giftFrom],
-                      ["Where we got it", record.whereWeGotIt],
-                      ["Best for", record.bestFor],
-                    ].map(([label, value]) =>
-                      value ? (
-                        <div key={label} className="rounded-md bg-gray-50 p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-gray-400">{label}</p>
-                          <p className="mt-1 font-medium text-gray-950">{value}</p>
-                        </div>
-                      ) : null,
-                    )}
-                  </div>
-                </div>
-              ) : null}
+          <div>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Notes</h2>
+              <button
+                type="button"
+                onClick={() => setIsEditingNotes((current) => !current)}
+                className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+              >
+                <Pencil className="h-4 w-4" />
+                {isEditingNotes ? "Cancel" : record.notes ? "Edit notes" : "Add notes"}
+              </button>
             </div>
 
-            <Link
-              href="/vinyl"
-              className="mt-8 inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
-            >
-              Back to catalog
-            </Link>
-          </>
-        ) : (
+            {isEditingNotes ? (
+              <div className="space-y-3">
+                <textarea
+                  value={notesDraft}
+                  onChange={(event) => setNotesDraft(event.target.value)}
+                  className="min-h-28 w-full rounded-md border border-gray-300 px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                  placeholder="Add something personal about this record..."
+                />
+                <button
+                  type="button"
+                  onClick={saveNotes}
+                  disabled={isSavingNotes}
+                  className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSavingNotes ? "Saving..." : "Save notes"}
+                </button>
+              </div>
+            ) : record.notes ? (
+              <p className="leading-7 text-gray-700">{record.notes}</p>
+            ) : (
+              <p className="text-sm text-gray-500">No notes yet.</p>
+            )}
+          </div>
+
+          {record.favoriteStories ? (
+            <div>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite stories</h2>
+              <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
+            </div>
+          ) : null}
+        </div>
+
+        {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
+          <div className="space-y-4 rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6 lg:p-8">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
+            <div className="space-y-3">
+              {[
+                ["Gift from", record.giftFrom],
+                ["Where we got it", record.whereWeGotIt],
+                ["Best for", record.bestFor],
+              ].map(([label, value]) =>
+                value ? (
+                  <div key={label} className="rounded-xl border border-gray-200 bg-white p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">{label}</p>
+                    <p className="mt-1 font-medium text-gray-950">{value}</p>
+                  </div>
+                ) : null,
+              )}
+            </div>
+          </div>
+        ) : null}
+      </section>
+
+      {isEditingRecord ? (
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
           <form onSubmit={saveRecordChanges} className="space-y-6">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">Edit album</p>
+                <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-950">Full record details</h2>
+              </div>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block sm:col-span-2">
                 <span className="mb-2 block text-sm font-medium text-gray-700">Front cover image</span>
@@ -645,7 +671,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 }
 
                 return (
-                    <label key={field} className="block">
+                  <label key={field} className="block">
                     <span className="mb-2 block text-sm font-medium text-gray-700">{label}</span>
                     <input
                       value={String(editForm?.[key] ?? "")}
@@ -705,8 +731,8 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               </button>
             </div>
           </form>
-        )}
-      </div>
+        </section>
+      ) : null}
     </article>
   );
 }
