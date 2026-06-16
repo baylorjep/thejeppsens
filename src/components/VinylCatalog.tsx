@@ -1138,20 +1138,22 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     </div>
                   ) : null}
 
-                  <button
-                    type="button"
-                    onClick={() => window.open(selectedRecordAppleMusicUrl, "_blank", "noopener,noreferrer")}
-                    className="inline-flex rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
-                  >
-                    Open in Apple Music
-                  </button>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => window.open(selectedRecordAppleMusicUrl, "_blank", "noopener,noreferrer")}
+                      className="inline-flex rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+                    >
+                      Open in Apple Music
+                    </button>
 
-                  <Link
-                    href={`/vinyl/${selectedRecord.id}`}
-                    className="inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
-                  >
-                    Open album page
-                  </Link>
+                    <Link
+                      href={`/vinyl/${selectedRecord.id}`}
+                      className="inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                    >
+                      Open album page
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
