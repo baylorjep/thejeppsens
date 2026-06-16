@@ -34,11 +34,26 @@ export function statusLabel(status: VinylRecord["status"]) {
   return "Owned";
 }
 
+function decadeFromYear(year?: number) {
+  if (!year) return "Unknown";
+  return `${Math.floor(year / 10) * 10}s`;
+}
+
 export function getDecade(record: VinylRecord) {
   const recordingYears = record.recordingYears?.match(/\b(\d{4})\b/);
   const recordingDecade = record.recordingYears?.match(/\b(\d{4})s\b/);
   const year = recordingYears ? Number(recordingYears[1]) : recordingDecade ? Number(recordingDecade[1]) : record.releaseYear;
 
-  if (!year) return "Unknown";
-  return `${Math.floor(year / 10) * 10}s`;
+  return decadeFromYear(year);
+}
+
+export function getReleaseDecade(record: VinylRecord) {
+  return decadeFromYear(record.releaseYear);
+}
+
+export function getRecordingDecade(record: VinylRecord) {
+  const recordingYears = record.recordingYears?.match(/\b(\d{4})\b/);
+  const recordingDecade = record.recordingYears?.match(/\b(\d{4})s\b/);
+  const year = recordingYears ? Number(recordingYears[1]) : recordingDecade ? Number(recordingDecade[1]) : undefined;
+  return decadeFromYear(year);
 }

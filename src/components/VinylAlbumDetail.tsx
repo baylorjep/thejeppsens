@@ -1,11 +1,12 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
+import { getAppleMusicSearchUrl } from "@/lib/appleMusic";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { getStatusTone } from "@/lib/vinylAnalytics";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
-import { Disc3, Pencil, Star } from "lucide-react";
+import { Disc3, ExternalLink, Pencil, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -34,7 +35,7 @@ function CoverImage({
         fill
         priority={side === "front"}
         sizes={sizes}
-        quality={72}
+        quality={68}
         className="object-cover"
         unoptimized={src.startsWith("data:")}
       />
@@ -191,6 +192,16 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             <Star className={`h-5 w-5 ${record.favorite ? "fill-current" : ""}`} />
           </button>
         </div>
+
+        <a
+          href={getAppleMusicSearchUrl(record)}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+        >
+          <ExternalLink className="h-4 w-4" />
+          Open in Apple Music
+        </a>
 
         {record.status !== "owned" ? (
           <div className={`mt-5 rounded-lg border p-4 ${getStatusTone(record.status).card}`}>

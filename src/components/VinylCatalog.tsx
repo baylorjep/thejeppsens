@@ -58,7 +58,7 @@ function CoverArt({
         loading={loading}
         fetchPriority={priority ? "high" : fetchPriority}
         sizes={sizes}
-        quality={70}
+        quality={62}
         className="object-cover"
         unoptimized={record.coverImage.startsWith("data:")}
       />
@@ -486,6 +486,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           {filteredRecords.map((record) => (
             <article
               key={record.id}
+              style={{ contentVisibility: "auto", containIntrinsicSize: "360px" }}
               className={
                 viewMode === "grid"
                   ? `overflow-hidden rounded-lg border ${getStatusTone(record.status).card}`

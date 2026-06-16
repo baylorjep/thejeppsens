@@ -92,11 +92,52 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         ))}
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Owned", value: snapshot.owned },
+          { label: "Wishlist", value: snapshot.wishlist },
+          { label: "Upgrades", value: snapshot.upgrade },
+          { label: "Formats", value: snapshot.formats },
+        ].map((item) => (
+          <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
+            <p className="text-sm text-gray-500">{item.label}</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Top label", value: snapshot.topLabel.value, sublabel: `${snapshot.topLabel.count} records` },
+          { label: "Top format", value: snapshot.topFormat.value, sublabel: `${snapshot.topFormat.count} records` },
+          {
+            label: "Top release era",
+            value: snapshot.topReleaseEra.value,
+            sublabel: `${snapshot.topReleaseEra.count} records`,
+          },
+          {
+            label: "Top recording era",
+            value: snapshot.topRecordingEra.value,
+            sublabel: `${snapshot.topRecordingEra.count} records`,
+          },
+        ].map((item) => (
+          <div key={item.label} className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+            <p className="text-sm text-gray-500">{item.label}</p>
+            <p className="mt-2 text-lg font-semibold text-gray-950">{item.value}</p>
+            <p className="mt-1 text-sm text-gray-500">{item.sublabel}</p>
+          </div>
+        ))}
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-2">
-        <BreakdownSection title="By decade" items={snapshot.decadeBreakdown} />
+        <BreakdownSection title="By recording decade" items={snapshot.recordingDecadeBreakdown} />
+        <BreakdownSection title="By release decade" items={snapshot.releaseDecadeBreakdown} />
         <BreakdownSection title="By genre" items={snapshot.genreBreakdown} />
+        <BreakdownSection title="By format" items={snapshot.formatBreakdown} />
+        <BreakdownSection title="By label" items={snapshot.labelBreakdown} />
         <BreakdownSection title="Top artists" items={snapshot.artistBreakdown} />
         <BreakdownSection title="Top moods" items={snapshot.moodBreakdown} />
+        <BreakdownSection title="By status" items={snapshot.statusBreakdown} />
       </div>
     </div>
   );
