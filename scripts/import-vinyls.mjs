@@ -150,6 +150,18 @@ async function main() {
     const record = validateRecord(input);
     const frontCoverPath = input.frontCoverPath || input.coverPath || input.imagePath;
     const backCoverPath = input.backCoverPath;
+    const preserveFavorite = input.favorite === undefined;
+
+    if (preserveFavorite) {
+      const { data: existingRow, error: existingError } = await supabase
+        .from("vinyl_records")
+        .select("record")
+        .eq("id", record.id)
+        .maybeSingle();
+
+      if (existingError) throw existingError;
+      if (existingRow?.record?.favorite) record.favorite = true;
+    }
 
     if (frontCoverPath) {
       record.coverImage = await uploadCover(supabase, record, frontCoverPath, manifestDir, "front");
