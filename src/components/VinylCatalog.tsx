@@ -39,36 +39,84 @@ type QuickFilter = "all" | "favorites" | "wishlist" | "upgrade";
 function CoverArt({
   record,
   src,
+  backSrc,
   side = "front",
   priority = false,
   loading = "lazy",
   fetchPriority = "low",
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
+  flipOnHover = false,
 }: {
   record: VinylRecord;
   src?: string;
+  backSrc?: string;
   side?: "front" | "back";
   priority?: boolean;
   loading?: "eager" | "lazy";
   fetchPriority?: "high" | "low" | "auto";
   sizes?: string;
+  flipOnHover?: boolean;
 }) {
   const imageSrc = src ?? record.coverImage;
+  const [isFlipped, setIsFlipped] = useState(false);
 
   if (imageSrc) {
+    const hasBackCover = Boolean(backSrc ?? record.backCoverImage);
+    const imageClassName = "object-cover transition-transform duration-500 ease-out";
+
     return (
-      <Image
-        src={imageSrc}
-        alt={`${record.title} by ${record.artist} ${side} cover`}
-        fill
-        priority={priority}
-        loading={loading}
-        fetchPriority={priority ? "high" : fetchPriority}
-        sizes={sizes}
-        quality={62}
-        className="object-cover"
-        unoptimized={imageSrc.startsWith("data:")}
-      />
+      <div
+        className="group relative h-full w-full"
+        style={{ perspective: "1200px" }}
+        onMouseEnter={flipOnHover && hasBackCover ? () => setIsFlipped(true) : undefined}
+        onMouseLeave={flipOnHover && hasBackCover ? () => setIsFlipped(false) : undefined}
+        onFocus={flipOnHover && hasBackCover ? () => setIsFlipped(true) : undefined}
+        onBlur={flipOnHover && hasBackCover ? () => setIsFlipped(false) : undefined}
+      >
+        {flipOnHover && hasBackCover ? (
+          <div
+            className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-white/80 bg-black/55 text-white opacity-0 shadow-sm transition-opacity duration-200 group-hover:opacity-100"
+            aria-hidden="true"
+          >
+            <Shuffle className="h-3.5 w-3.5" />
+          </div>
+        ) : null}
+        <div
+          className="relative h-full w-full transition-transform duration-500 ease-out"
+          style={{ transformStyle: "preserve-3d", transform: flipOnHover && hasBackCover && isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+        >
+          <div className="absolute inset-0 [backface-visibility:hidden]">
+            <Image
+              src={imageSrc}
+              alt={`${record.title} by ${record.artist} ${side} cover`}
+              fill
+              priority={priority}
+              loading={loading}
+              fetchPriority={priority ? "high" : fetchPriority}
+              sizes={sizes}
+              quality={62}
+              className={imageClassName}
+              unoptimized={imageSrc.startsWith("data:")}
+            />
+          </div>
+          {hasBackCover ? (
+            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+              <Image
+                src={backSrc ?? record.backCoverImage!}
+                alt={`${record.title} by ${record.artist} back cover`}
+                fill
+                priority={false}
+                loading="lazy"
+                fetchPriority="low"
+                sizes={sizes}
+                quality={62}
+                className={imageClassName}
+                unoptimized={String(backSrc ?? record.backCoverImage).startsWith("data:")}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
     );
   }
 
@@ -384,8 +432,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               >
                 <CoverArt
                   record={record}
+                  backSrc={record.backCoverImage}
                   priority={index < 2}
                   sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
+                  flipOnHover
                 />
               </button>
             ))}
@@ -401,7 +451,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               >
                 <CoverArt
                   record={record}
+                  backSrc={record.backCoverImage}
                   sizes="(max-width: 639px) 96px, (max-width: 1023px) 160px, 192px"
+                  flipOnHover
                 />
               </button>
             ))}
@@ -618,6 +670,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               >
                 <CoverArt
                   record={record}
+                  backSrc={record.backCoverImage}
                   priority={index < 4}
                   loading={index < 4 ? "eager" : "lazy"}
                   fetchPriority={index < 4 ? "high" : "low"}
@@ -626,6 +679,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
                       : "(max-width: 639px) 100vw, 180px"
                   }
+                  flipOnHover
                 />
               </Link>
 
@@ -697,7 +751,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                   href={`/vinyl/${record.id}`}
                   className="mt-4 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
                 >
-                  Open album page
+                  Back to catalog
                 </Link>
               </div>
             </article>

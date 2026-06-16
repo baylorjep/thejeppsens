@@ -574,12 +574,12 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               ) : null}
             </div>
 
-            <Link
-              href={`/vinyl/${record.id}`}
-              className="mt-8 inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
-            >
-              Open album page
-            </Link>
+              <Link
+                href={`/vinyl/${record.id}`}
+                className="mt-8 inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+              >
+              Back to catalog
+              </Link>
           </>
         ) : (
           <form onSubmit={saveRecordChanges} className="space-y-6">
