@@ -9,6 +9,7 @@ import {
   VinylSortKey,
 } from "@/lib/vinylAnalytics";
 import { fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylApi";
+import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
 import {
@@ -191,11 +192,13 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [pickedRecordId, setPickedRecordId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<VinylRecord | null>(null);
+  const [selectedRecordAppleMusicUrl, setSelectedRecordAppleMusicUrl] = useState("");
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusCelebrationMessage, setStatusCelebrationMessage] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
   const [isCompactCarousel, setIsCompactCarousel] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const hasAppliedFavoriteDefault = useRef(false);
   const recordsPerPage = 9;
 
@@ -220,6 +223,15 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 639px)");
     const update = () => setIsCompactCarousel(mediaQuery.matches);
+
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(hover: none), (pointer: coarse)");
+    const update = () => setIsTouchDevice(mediaQuery.matches);
 
     update();
     mediaQuery.addEventListener("change", update);
@@ -299,6 +311,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     ? []
     : [...carouselRecords].reverse().concat([...carouselRecords].reverse(), [...carouselRecords].reverse());
   const pickedRecord = allRecords.find((record) => record.id === pickedRecordId);
+  const shouldUseModal = !isTouchDevice;
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
 
@@ -321,6 +334,23 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   useEffect(() => {
     setCurrentPage(1);
   }, [activeDecade, activeGenre, activeMood, activeStatus, quickFilter, query, sortKey, viewMode]);
+
+  useEffect(() => {
+    if (!selectedRecord) {
+      setSelectedRecordAppleMusicUrl("");
+      return;
+    }
+
+    let active = true;
+    setSelectedRecordAppleMusicUrl(getAppleMusicSearchUrl(selectedRecord));
+    getAppleMusicAlbumUrl(selectedRecord).then((url) => {
+      if (active) setSelectedRecordAppleMusicUrl(url);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedRecord]);
 
   const toggleFavorite = async (record: VinylRecord) => {
     const nextRecord = { ...record, favorite: !record.favorite };
@@ -447,25 +477,45 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       {rollingRecords.length > 0 ? (
         <section className="mb-10 overflow-hidden py-2">
           <div className="vinyl-marquee flex w-max gap-4">
-            {rollingRecords.map((record, index) => (
-              <button
-                key={`${record.id}-${index}`}
-                type="button"
-                onClick={() => setSelectedRecord(record)}
-                className="relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56"
-                aria-label={`View ${record.title} by ${record.artist}`}
-              >
-                <CoverArt
-                  record={record}
-                  backSrc={record.backCoverImage}
-                  priority={index < (isCompactCarousel ? 1 : 2)}
-                  sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
-                  flipOnHover
-                />
-              </button>
-            ))}
+            {rollingRecords.map((record, index) => {
+              const recordHref = `/vinyl/${record.id}`;
+              const coverClasses = "relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
+
+              return shouldUseModal ? (
+                <button
+                  key={`${record.id}-${index}`}
+                  type="button"
+                  onClick={() => setSelectedRecord(record)}
+                  className={coverClasses}
+                  aria-label={`View ${record.title} by ${record.artist}`}
+                >
+                  <CoverArt
+                    record={record}
+                    backSrc={record.backCoverImage}
+                    priority={index < (isCompactCarousel ? 1 : 2)}
+                    sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
+                    flipOnHover
+                  />
+                </button>
+              ) : (
+                <Link
+                  key={`${record.id}-${index}`}
+                  href={recordHref}
+                  className={coverClasses}
+                  aria-label={`Open ${record.title} by ${record.artist}`}
+                >
+                  <CoverArt
+                    record={record}
+                    backSrc={record.backCoverImage}
+                    priority={index < (isCompactCarousel ? 1 : 2)}
+                    sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
+                    flipOnHover
+                  />
+                </Link>
+              );
+            })}
           </div>
-          {rollingRecordsReverse.length > 0 ? (
+          {shouldUseModal && rollingRecordsReverse.length > 0 ? (
             <div className="vinyl-marquee-reverse mt-4 flex w-max gap-4">
               {rollingRecordsReverse.map((record, index) => (
                 <button
@@ -982,6 +1032,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       <p className="text-sm leading-6 text-gray-600">{selectedRecord.favoriteStories}</p>
                     </div>
                   ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => window.open(selectedRecordAppleMusicUrl, "_blank", "noopener,noreferrer")}
+                    className="inline-flex rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+                  >
+                    Open in Apple Music
+                  </button>
 
                   <Link
                     href={`/vinyl/${selectedRecord.id}`}

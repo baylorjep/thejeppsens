@@ -1,7 +1,7 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
-import { getAppleMusicSearchUrl } from "@/lib/appleMusic";
+import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { getStatusTone } from "@/lib/vinylAnalytics";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
@@ -163,6 +163,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [appleMusicUrl, setAppleMusicUrl] = useState("");
   const inputClassName =
     "w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950";
 
@@ -223,6 +224,18 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
     setNotesDraft(record?.notes ?? "");
     setIsEditingNotes(false);
   }, [record?.id, record?.notes]);
+
+  useEffect(() => {
+    if (!record) return;
+    let active = true;
+    setAppleMusicUrl(getAppleMusicSearchUrl(record));
+    getAppleMusicAlbumUrl(record).then((url) => {
+      if (active) setAppleMusicUrl(url);
+    });
+    return () => {
+      active = false;
+    };
+  }, [record]);
 
   useEffect(() => {
     if (!record) return;
@@ -431,15 +444,14 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               </div>
             </div>
 
-            <a
-              href={getAppleMusicSearchUrl(record)}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => window.open(appleMusicUrl, "_blank", "noopener,noreferrer")}
               className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
             >
               <ExternalLink className="h-4 w-4" />
               Open in Apple Music
-            </a>
+            </button>
 
             {record.status !== "owned" && !isEditingRecord ? (
               <div className={`rounded-2xl border p-5 ${getStatusTone(record.status).card}`}>
