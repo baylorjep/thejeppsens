@@ -133,7 +133,7 @@ body {
 }
 
 .vinyl-marquee {
-  animation: vinyl-marquee 72s linear infinite;
+  animation: vinyl-marquee 84s linear infinite;
 }
 
 .vinyl-marquee:hover {
@@ -141,9 +141,19 @@ body {
 }
 
 .vinyl-marquee-reverse {
-  animation: vinyl-marquee-reverse 72s linear infinite;
+  animation: vinyl-marquee-reverse 84s linear infinite;
 }
 
 .vinyl-marquee-reverse:hover {
   animation-play-state: paused;
+}
+
+@media (max-width: 639px) {
+  .vinyl-marquee {
+    animation-duration: 40s;
+  }
+
+  .vinyl-marquee-reverse {
+    animation-duration: 40s;
+  }
 }
