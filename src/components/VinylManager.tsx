@@ -5,8 +5,9 @@ import { optimizeImageFile } from "@/lib/vinylImage";
 import { deleteVinylRecord, fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylApi";
 import { readQueuedVinyls, writeQueuedVinyls } from "@/lib/vinylQueue";
 import { slugifyVinylId, splitList, statusLabel } from "@/lib/vinylRecordUtils";
-import { Copy, Download, Edit3, ImagePlus, Trash2 } from "lucide-react";
+import { CheckCircle2, Copy, Download, Edit3, ImagePlus, Trash2, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type FormState = {
@@ -127,6 +128,7 @@ export default function VinylManager() {
   const [backImageFile, setBackImageFile] = useState<File | undefined>();
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [savedRecord, setSavedRecord] = useState<VinylRecord | null>(null);
   const [recordsPage, setRecordsPage] = useState(1);
   const recordsPerPage = 12;
 
@@ -198,6 +200,8 @@ export default function VinylManager() {
     setBackImageFile(undefined);
   };
 
+  const dismissSavedRecord = () => setSavedRecord(null);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -243,6 +247,7 @@ export default function VinylManager() {
       backCoverImage: form.backCoverImage || undefined,
       favorite: form.favorite,
     };
+    const isNewRecord = !editingId;
 
     try {
       const response = await saveVinylRecord(record, imageFile, backImageFile);
@@ -252,12 +257,14 @@ export default function VinylManager() {
       setApiSource(response.source);
       setRecords(nextRecords);
       syncLocalQueue(nextRecords);
+      if (isNewRecord) setSavedRecord(savedRecord);
       resetForm();
       setMessage(response.source === "supabase" ? `${title} saved permanently.` : `${title} queued locally.`);
     } catch {
       const nextRecords = [...records.filter((item) => item.id !== record.id), record];
       setRecords(nextRecords);
       writeQueuedVinyls(nextRecords.filter((item) => !vinyls.some((staticRecord) => staticRecord.id === item.id)));
+      if (isNewRecord) setSavedRecord(record);
       resetForm();
       setMessage(`${title} saved locally because Supabase is not available.`);
     } finally {
@@ -307,6 +314,52 @@ export default function VinylManager() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
+      {savedRecord ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
+          <div className="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-xl">
+            <button
+              type="button"
+              onClick={dismissSavedRecord}
+              className="absolute right-3 top-3 rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-950"
+              aria-label="Close success message"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium uppercase tracking-[0.16em] text-gray-500">Saved</p>
+                <h2 className="mt-1 text-2xl font-semibold tracking-tight text-gray-950">
+                  {savedRecord.title} is in the catalog
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  The record was saved successfully. You can keep adding records or jump to the album page now.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={dismissSavedRecord}
+                className="inline-flex flex-1 items-center justify-center rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+              >
+                Add another
+              </button>
+              <Link
+                href={`/vinyl/${savedRecord.id}`}
+                onClick={dismissSavedRecord}
+                className="inline-flex flex-1 items-center justify-center rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+              >
+                View album page
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white p-5">
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
