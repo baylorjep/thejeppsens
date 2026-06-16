@@ -157,46 +157,44 @@ export default function TravelPage() {
       {/* Country grid */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-12">Countries we&apos;ve explored</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-12">Countries we&apos;ve both explored</h2>
           {countries === null ? (
             <div className="flex justify-center py-12">
               <div className="h-6 w-6 rounded-full border-2 border-slate-200 border-t-teal-500 animate-spin" />
             </div>
           ) : (
             <div className="space-y-12">
-              {continents.map((continent) => (
-                <div key={continent.name}>
-                  <div className="flex items-center gap-3 mb-6">
-                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                      {continent.name}
-                    </h3>
-                    <div className="flex-1 h-px bg-slate-100" />
-                    <span className="text-xs text-slate-400 font-medium tabular-nums">
-                      {continent.countries.length}
-                      <span className="text-slate-300">/{CONTINENT_TOTALS[continent.name] ?? '?'}</span>
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    {continent.countries.map((country) => {
-                      const vt = visitType(country);
-                      return (
+              {continents.map((continent) => {
+                const shared = continent.countries.filter((c) => c.baylor_visited && c.isabel_visited);
+                if (!shared.length) return null;
+                return (
+                  <div key={continent.name}>
+                    <div className="flex items-center gap-3 mb-6">
+                      <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                        {continent.name}
+                      </h3>
+                      <div className="flex-1 h-px bg-slate-100" />
+                      <span className="text-xs text-slate-400 font-medium tabular-nums">
+                        {continent.countries.length}
+                        <span className="text-slate-300">/{CONTINENT_TOTALS[continent.name] ?? '?'}</span>
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                      {shared.map((country) => (
                         <div
                           key={country.id}
-                          className={`flex flex-col items-center gap-2 border rounded-xl p-4 transition-colors cursor-default ${CARD_STYLE[vt]}`}
+                          className="flex flex-col items-center gap-2.5 bg-teal-50 hover:bg-teal-100 border border-teal-100 hover:border-teal-200 rounded-xl p-4 transition-colors cursor-default"
                         >
                           <span className="text-3xl leading-none">{country.flag}</span>
                           <span className="text-xs font-medium text-slate-600 text-center leading-tight">
                             {country.display_name}
                           </span>
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${PILL_STYLE[vt]}`}>
-                            {PILL_LABEL[vt]}
-                          </span>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
