@@ -209,6 +209,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [isCompactCarousel, setIsCompactCarousel] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [carouselSeed] = useState(() => Math.random());
   const hasAppliedFavoriteDefault = useRef(false);
   const desktopCarouselDelay = `${-(carouselSeed * 84).toFixed(2)}s`;
@@ -523,6 +524,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     allRecords.some((record) => record.status === "wishlist") ? ["wishlist", "Wishlist"] : null,
     allRecords.some((record) => record.status === "upgrade") ? ["upgrade", "Upgrades"] : null,
   ].filter(Boolean) as Array<[string, string]>;
+  const activeAdvancedFilters = [activeGenre, activeMood, activeStatus, activeDecade].filter((value) => value !== "All").length;
 
   return (
     <div>
@@ -730,7 +732,73 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-4 flex items-center justify-between gap-3 sm:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileFiltersOpen((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+          >
+            {mobileFiltersOpen ? "Hide filters" : "More filters"}
+            {activeAdvancedFilters > 0 ? (
+              <span className="rounded-full bg-gray-950 px-2 py-0.5 text-xs text-white">
+                {activeAdvancedFilters}
+              </span>
+            ) : null}
+          </button>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+          >
+            Clear filters
+          </button>
+        </div>
+
+        <div className="mt-5 hidden gap-3 sm:grid lg:grid-cols-5">
+          {filterGroups.map((group) => (
+            <label key={group.keyName} className="block">
+              <span className="mb-2 block text-xs font-medium uppercase tracking-[0.16em] text-gray-500">
+                {group.label}
+              </span>
+              <select
+                value={group.value}
+                onChange={(event) => group.setValue(event.target.value)}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+              >
+                {["All", ...group.options].map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <label className="block">
+            <span className="mb-2 block text-xs font-medium uppercase tracking-[0.16em] text-gray-500">
+              Sort
+            </span>
+            <div className="relative">
+              <ArrowUpDown className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <select
+                value={sortKey}
+                onChange={(event) => {
+                  hasAppliedFavoriteDefault.current = true;
+                  setSortKey(event.target.value as VinylSortKey);
+                }}
+                className="w-full rounded-md border border-gray-300 bg-white py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+              >
+                <option value="date-added">Recently added</option>
+                <option value="favorites">Favorites first</option>
+                <option value="artist">Artist A-Z</option>
+                <option value="title">Title A-Z</option>
+                <option value="year-desc">Newest release</option>
+                <option value="year-asc">Oldest release</option>
+              </select>
+            </div>
+          </label>
+        </div>
+
+        <div className={`mt-4 grid gap-3 sm:hidden ${mobileFiltersOpen ? "grid" : "hidden"}`}>
           {filterGroups.map((group) => (
             <label key={group.keyName} className="block">
               <span className="mb-2 block text-xs font-medium uppercase tracking-[0.16em] text-gray-500">
@@ -781,7 +849,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           <button
             type="button"
             onClick={clearFilters}
-            className="text-left text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+            className="hidden text-left text-sm font-medium text-gray-950 underline-offset-4 hover:underline sm:inline"
           >
             Clear filters
           </button>
