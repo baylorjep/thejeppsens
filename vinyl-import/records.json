@@ -1949,5 +1949,673 @@
     "label": "Jeppsen Family and Friends",
     "format": "LP",
     "discCount": 1
+  },
+  {
+    "id": "harry-james-and-his-big-band-the-king-james-version",
+    "title": "The King James Version",
+    "artist": "Harry James and His Big Band",
+    "releaseYear": 1977,
+    "recordingYears": "1976",
+    "genres": [
+      "Big Band",
+      "Jazz",
+      "Audiophile"
+    ],
+    "moods": [
+      "Classic",
+      "Live",
+      "Energetic"
+    ],
+    "pressing": "Sheffield Lab direct-to-disc audiophile release",
+    "pressingNotes": "Recorded July 1976.",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../IMG_4755.jpg",
+    "backCoverPath": "../../IMG_4756.jpg",
+    "favorite": false,
+    "label": "Sheffield Lab",
+    "catalogNumber": "LAB-6",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "ed-sheeran-songs-i-wrote-with-amy",
+    "title": "Songs I Wrote With Amy",
+    "artist": "Ed Sheeran",
+    "releaseYear": 2016,
+    "originalReleaseYear": 2010,
+    "recordingYears": "2010",
+    "genres": [
+      "Pop",
+      "Singer-Songwriter",
+      "Acoustic"
+    ],
+    "moods": [
+      "Intimate",
+      "Reflective",
+      "Acoustic"
+    ],
+    "favoriteTracks": [
+      "The City",
+      "Fall",
+      "Cold Coffee"
+    ],
+    "pressing": "Vinyl reissue",
+    "pressingYear": 2016,
+    "pressingNotes": "2016 vinyl pressing/reissue of the 2010 EP.",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4757.JPG",
+    "backCoverPath": "../../Batch 3/IMG_4758.JPG",
+    "favorite": false,
+    "label": "Asylum Records",
+    "format": "EP",
+    "discCount": 1
+  },
+  {
+    "id": "the-four-seasons-the-4-seasons-gold-vault-of-hits",
+    "title": "The 4 Seasons' Gold Vault of Hits",
+    "artist": "The 4 Seasons",
+    "releaseYear": 1965,
+    "genres": [
+      "Pop",
+      "Rock",
+      "Doo-Wop"
+    ],
+    "moods": [
+      "Classic",
+      "Upbeat",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Let's Hang On!",
+      "Dawn (Go Away)",
+      "Rag Doll"
+    ],
+    "pressing": "Philips compilation",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4762.JPG",
+    "backCoverPath": "../../Batch 3/IMG_4763.jpg",
+    "favorite": false,
+    "label": "Philips",
+    "catalogNumber": "PHS 600-196",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "the-beatles-abbey-road",
+    "title": "Abbey Road",
+    "artist": "The Beatles",
+    "releaseYear": 1969,
+    "genres": [
+      "Rock",
+      "Pop Rock",
+      "Classic Rock"
+    ],
+    "moods": [
+      "Classic",
+      "Road trip",
+      "Timeless"
+    ],
+    "favoriteTracks": [
+      "Come Together",
+      "Something",
+      "Here Comes the Sun"
+    ],
+    "pressing": "Apple Records pressing",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4764.JPG",
+    "backCoverPath": "../../Batch 3/IMG_4765.jpg",
+    "favorite": false,
+    "label": "Apple Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "la-la-land-original-motion-picture-score",
+    "title": "La La Land: Original Motion Picture Score",
+    "artist": "Justin Hurwitz",
+    "releaseYear": 2016,
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Jazz"
+    ],
+    "moods": [
+      "Cinematic",
+      "Romantic",
+      "Reflective"
+    ],
+    "favoriteTracks": [
+      "Mia & Sebastian's Theme",
+      "Planetarium",
+      "City of Stars"
+    ],
+    "pressing": "Original motion picture score",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4766.JPG",
+    "backCoverPath": "../../Batch 3/IMG_4767.JPG",
+    "favorite": false,
+    "label": "Interscope Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "bleachers-strange-desire",
+    "title": "Strange Desire",
+    "artist": "Bleachers",
+    "releaseYear": 2014,
+    "genres": [
+      "Indie Pop",
+      "Pop Rock",
+      "Alternative"
+    ],
+    "moods": [
+      "Energetic",
+      "Big",
+      "Road trip"
+    ],
+    "favoriteTracks": [
+      "Rollercoaster",
+      "I Wanna Get Better",
+      "Wild Heart"
+    ],
+    "pressing": "RCA Records release",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4768.JPG",
+    "backCoverPath": "../../Batch 3/IMG_4769.jpg",
+    "favorite": false,
+    "label": "RCA Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "la-la-land-original-motion-picture-soundtrack",
+    "title": "La La Land: Original Motion Picture Soundtrack",
+    "artist": "Various Artists / Justin Hurwitz",
+    "releaseYear": 2016,
+    "genres": [
+      "Soundtrack",
+      "Musical",
+      "Film Score"
+    ],
+    "moods": [
+      "Romantic",
+      "Cinematic",
+      "Dreamy"
+    ],
+    "favoriteTracks": [
+      "Another Day of Sun",
+      "Someone in the Crowd",
+      "Audition (The Fools Who Dream)"
+    ],
+    "pressing": "Original motion picture soundtrack",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4772.jpg",
+    "backCoverPath": "../../Batch 3/IMG_4773.jpg",
+    "favorite": false,
+    "label": "Interscope Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "billy-joel-52nd-street",
+    "title": "52nd Street",
+    "artist": "Billy Joel",
+    "releaseYear": 1978,
+    "genres": [
+      "Rock",
+      "Pop Rock",
+      "Soft Rock"
+    ],
+    "moods": [
+      "Classic",
+      "Road trip",
+      "Smooth"
+    ],
+    "favoriteTracks": [
+      "Big Shot",
+      "Honesty",
+      "My Life"
+    ],
+    "pressing": "Original album",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4774.JPG",
+    "backCoverPath": "../../Batch 3/IMG_4776.jpg",
+    "favorite": false,
+    "label": "Columbia Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "bleachers-gone-now",
+    "title": "Gone Now",
+    "artist": "Bleachers",
+    "releaseYear": 2017,
+    "genres": [
+      "Indie Pop",
+      "Pop Rock",
+      "Alternative"
+    ],
+    "moods": [
+      "Big",
+      "Reflective",
+      "Energetic"
+    ],
+    "favoriteTracks": [
+      "Don't Take the Money",
+      "Everybody Lost Somebody",
+      "Let's Get Married"
+    ],
+    "pressing": "RCA Records release",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4779.jpg",
+    "backCoverPath": "../../Batch 3/IMG_4780.jpg",
+    "favorite": false,
+    "label": "RCA Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "al-green-greatest-hits",
+    "title": "Greatest Hits",
+    "artist": "Al Green",
+    "releaseYear": 1975,
+    "genres": [
+      "Soul",
+      "R&B",
+      "Funk"
+    ],
+    "moods": [
+      "Romantic",
+      "Classic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "Let's Stay Together",
+      "Tired of Being Alone",
+      "Love and Happiness"
+    ],
+    "pressing": "Greatest hits compilation",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 3/IMG_4781.jpg",
+    "backCoverPath": "../../Batch 3/IMG_4782.jpg",
+    "favorite": false,
+    "label": "Hi Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "frank-sinatra-ultimate-sinatra",
+    "title": "Ultimate Sinatra",
+    "artist": "Frank Sinatra",
+    "releaseYear": 2015,
+    "genres": [
+      "Vocal Jazz",
+      "Traditional Pop",
+      "Compilation"
+    ],
+    "moods": [
+      "Classic",
+      "Dinner",
+      "Lounge"
+    ],
+    "favoriteTracks": [
+      "All or Nothing at All",
+      "I've Got the World on a String",
+      "My Way"
+    ],
+    "pressing": "4-LP career-spanning compilation",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4783.jpg",
+    "backCoverPath": "../../Batch 4/IMG_4784.jpg",
+    "favorite": false,
+    "label": "Universal Music Enterprises",
+    "format": "4xLP",
+    "discCount": 4,
+    "pressingNotes": "2015 4-LP Ultimate Sinatra box set."
+  },
+  {
+    "id": "sam-cooke-portrait-of-a-legend-1951-1964",
+    "title": "Portrait of a Legend 1951-1964",
+    "artist": "Sam Cooke",
+    "releaseYear": 2003,
+    "recordingYears": "1951-1964",
+    "genres": [
+      "Soul",
+      "R&B",
+      "Compilation"
+    ],
+    "moods": [
+      "Classic",
+      "Smooth",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "You Send Me",
+      "Cupid",
+      "Chain Gang"
+    ],
+    "pressing": "ABKCO compilation",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4786.JPG",
+    "backCoverPath": "../../Batch 4/IMG_4789.jpg",
+    "favorite": false,
+    "label": "ABKCO Records",
+    "format": "2xLP",
+    "discCount": 2
+  },
+  {
+    "id": "hello-dolly-original-motion-picture-soundtrack",
+    "title": "Hello, Dolly! (Original Motion Picture Soundtrack)",
+    "artist": "Barbra Streisand / Walter Matthau / Michael Crawford / Louis Armstrong",
+    "releaseYear": 1975,
+    "genres": [
+      "Soundtrack",
+      "Musical",
+      "Film Score"
+    ],
+    "moods": [
+      "Theatrical",
+      "Classic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "Hello, Dolly!",
+      "Before the Parade Passes By",
+      "It Only Takes a Moment"
+    ],
+    "pressing": "Original motion picture soundtrack album",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4791.jpg",
+    "backCoverPath": "../../Batch 4/IMG_4792.jpg",
+    "favorite": false,
+    "label": "Hollywood Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "john-williams-raiders-of-the-lost-ark",
+    "title": "Raiders of the Lost Ark",
+    "artist": "John Williams",
+    "releaseYear": 1981,
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Orchestral"
+    ],
+    "moods": [
+      "Epic",
+      "Adventure",
+      "Cinematic"
+    ],
+    "favoriteTracks": [
+      "Raiders of the Lost Ark",
+      "Flight from Peru",
+      "The Map Room: Dawn"
+    ],
+    "pressing": "Original motion picture soundtrack",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4793.jpg",
+    "backCoverPath": "../../Batch 4/IMG_4794.jpg",
+    "favorite": false,
+    "label": "Columbia Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "soundtrack-factory-singin-in-the-rain-original-motion-picture-soundtrack",
+    "title": "Singin' in the Rain (Original Motion Picture Soundtrack)",
+    "artist": "Gene Kelly / Debbie Reynolds / Donald O'Connor",
+    "releaseYear": 2018,
+    "originalReleaseYear": 1952,
+    "recordingYears": "1951-1952",
+    "genres": [
+      "Soundtrack",
+      "Musical",
+      "Film Score"
+    ],
+    "moods": [
+      "Classic",
+      "Joyful",
+      "Theatrical"
+    ],
+    "favoriteTracks": [
+      "Singin' in the Rain",
+      "Make 'Em Laugh",
+      "Good Morning"
+    ],
+    "pressing": "Soundtrack Factory reissue",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4795.jpg",
+    "backCoverPath": "../../Batch 4/IMG_4796.jpg",
+    "favorite": false,
+    "label": "Soundtrack Factory",
+    "format": "LP",
+    "discCount": 1,
+    "pressingYear": 2018
+  },
+  {
+    "id": "elvis-presley-blue-hawaii",
+    "title": "Blue Hawaii",
+    "artist": "Elvis Presley",
+    "releaseYear": 1961,
+    "genres": [
+      "Soundtrack",
+      "Rock and Roll",
+      "Pop"
+    ],
+    "moods": [
+      "Tropical",
+      "Nostalgic",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "Blue Hawaii",
+      "Can't Help Falling in Love",
+      "Rock-A-Hula Baby"
+    ],
+    "pressing": "Original soundtrack album",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4797.JPG",
+    "backCoverPath": "../../Batch 4/IMG_4798.jpg",
+    "favorite": false,
+    "label": "RCA Victor",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "queen-a-night-at-the-opera",
+    "title": "A Night at the Opera",
+    "artist": "Queen",
+    "releaseYear": 1975,
+    "genres": [
+      "Rock",
+      "Hard Rock",
+      "Progressive Rock"
+    ],
+    "moods": [
+      "Theatrical",
+      "Epic",
+      "Classic rock"
+    ],
+    "favoriteTracks": [
+      "Bohemian Rhapsody",
+      "Love of My Life",
+      "You're My Best Friend"
+    ],
+    "pressing": "Hollywood Records reissue",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4800.jpg",
+    "backCoverPath": "../../Batch 4/IMG_4801.JPG",
+    "favorite": false,
+    "label": "Hollywood Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "john-powell-how-to-train-your-dragon",
+    "title": "How to Train Your Dragon",
+    "artist": "John Powell",
+    "releaseYear": 2010,
+    "genres": [
+      "Soundtrack",
+      "Film Score",
+      "Orchestral"
+    ],
+    "moods": [
+      "Epic",
+      "Whimsical",
+      "Adventure"
+    ],
+    "favoriteTracks": [
+      "This Is Berk",
+      "Dragon Battle",
+      "Romantic Flight"
+    ],
+    "pressing": "Picture disc soundtrack",
+    "vinylColor": "Picture disc",
+    "condition": "Used; clear sleeve visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4802.JPG",
+    "backCoverPath": "../../Batch 4/IMG_4804.jpg",
+    "favorite": false,
+    "label": "Varèse Sarabande",
+    "format": "Picture disc",
+    "discCount": 1
+  },
+  {
+    "id": "various-artists-the-fault-in-our-stars-music-from-the-motion-picture",
+    "title": "The Fault in Our Stars (Music from the Motion Picture)",
+    "artist": "Various Artists",
+    "releaseYear": 2014,
+    "genres": [
+      "Soundtrack",
+      "Indie",
+      "Pop"
+    ],
+    "moods": [
+      "Romantic",
+      "Reflective",
+      "Coming-of-age"
+    ],
+    "favoriteTracks": [
+      "All of the Stars",
+      "Simple as This",
+      "Let Me In"
+    ],
+    "pressing": "Motion picture soundtrack compilation",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4805.JPG",
+    "backCoverPath": "../../Batch 4/IMG_4806.JPG",
+    "favorite": false,
+    "label": "Atlantic",
+    "format": "2xLP",
+    "discCount": 2
+  },
+  {
+    "id": "khalid-american-teen",
+    "title": "American Teen",
+    "artist": "Khalid",
+    "releaseYear": 2017,
+    "genres": [
+      "R&B",
+      "Pop",
+      "Contemporary R&B"
+    ],
+    "moods": [
+      "Smooth",
+      "Reflective",
+      "Late night"
+    ],
+    "favoriteTracks": [
+      "Young Dumb & Broke",
+      "Location",
+      "Saved"
+    ],
+    "pressing": "Debut album pressing",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 4/IMG_4807.jpg",
+    "backCoverPath": "../../Batch 4/IMG_4808.jpg",
+    "favorite": false,
+    "label": "RCA Records",
+    "format": "LP",
+    "discCount": 1
   }
 ]
