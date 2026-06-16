@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Shuffle, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shuffle, X, Plus, ChevronDown, ChevronUp, Check, Search } from 'lucide-react';
 
 interface Movie {
   id: string;
@@ -9,6 +9,7 @@ interface Movie {
   genre: string;
   length: string;
   type: 'animated' | 'live-action';
+  watched: boolean;
 }
 
 const GENRES = [
@@ -17,17 +18,18 @@ const GENRES = [
   'sci-fi', 'superhero', 'thriller', 'war', 'documentary', 'crime',
 ];
 const LENGTHS = ['short (<90 min)', 'medium (90-120 min)', 'long (>120 min)'];
-const BLANK: Omit<Movie, 'id'> = { title: '', genre: 'action', length: 'medium (90-120 min)', type: 'live-action' };
+const BLANK: Omit<Movie, 'id' | 'watched'> = { title: '', genre: 'action', length: 'medium (90-120 min)', type: 'live-action' };
 
 export default function MoviePicker() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(BLANK);
+  const [search, setSearch] = useState('');
   const [filterGenre, setFilterGenre] = useState('');
   const [filterLength, setFilterLength] = useState('');
   const [filterType, setFilterType] = useState<'animated' | 'live-action' | ''>('');
+  const [showWatched, setShowWatched] = useState(false);
   const [result, setResult] = useState<Movie | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -40,14 +42,26 @@ export default function MoviePicker() {
 
   const filtered = useMemo(() => {
     return movies.filter((m) => {
+      if (!showWatched && m.watched) return false;
       if (filterGenre && m.genre !== filterGenre) return false;
       if (filterLength && m.length !== filterLength) return false;
       if (filterType && m.type !== filterType) return false;
+      if (search && !m.title.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [movies, filterGenre, filterLength, filterType]);
+  }, [movies, filterGenre, filterLength, filterType, search, showWatched]);
 
-  const hasFilters = filterGenre || filterLength || filterType;
+  const watchedCount = useMemo(() => movies.filter((m) => m.watched).length, [movies]);
+  const hasFilters = filterGenre || filterLength || filterType || search;
+
+  const toggleWatched = async (id: string, watched: boolean) => {
+    setMovies((prev) => prev.map((m) => (m.id === id ? { ...m, watched } : m)));
+    await fetch(`/api/movies/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ watched }),
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +70,7 @@ export default function MoviePicker() {
     const res = await fetch('/api/movies', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, watched: false }),
     });
     const data = await res.json();
     if (data.movie) {
@@ -73,10 +87,10 @@ export default function MoviePicker() {
   };
 
   const pickRandom = () => {
-    if (!filtered.length) return;
-    setResult(filtered[Math.floor(Math.random() * filtered.length)]);
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3500);
+    const unwatched = filtered.filter((m) => !m.watched);
+    const pool = unwatched.length ? unwatched : filtered;
+    if (!pool.length) return;
+    setResult(pool[Math.floor(Math.random() * pool.length)]);
   };
 
   const lengthLabel = (l: string) =>
@@ -84,34 +98,28 @@ export default function MoviePicker() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
-          {Array.from({ length: 60 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-2 h-2 rounded-sm animate-bounce"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 40}%`,
-                backgroundColor: ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'][i % 5],
-                animationDelay: `${Math.random() * 0.5}s`,
-                animationDuration: `${0.6 + Math.random() * 0.6}s`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-
       <div className="max-w-5xl mx-auto space-y-8">
 
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-1">What should we watch?</h1>
-          <p className="text-gray-500">Filter by genre, length, or format, then let us decide.</p>
+          <p className="text-gray-500">Filter, search, then let us decide.</p>
         </div>
 
         {/* Filters + Pick */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-5">
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search movies…"
+              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+            />
+          </div>
+
           <div className="grid sm:grid-cols-3 gap-4">
             {/* Genre */}
             <div>
@@ -123,9 +131,7 @@ export default function MoviePicker() {
               >
                 <option value="">Any genre</option>
                 {GENRES.map((g) => (
-                  <option key={g} value={g}>
-                    {g.charAt(0).toUpperCase() + g.slice(1)}
-                  </option>
+                  <option key={g} value={g}>{g.charAt(0).toUpperCase() + g.slice(1)}</option>
                 ))}
               </select>
             </div>
@@ -139,9 +145,7 @@ export default function MoviePicker() {
                     key={l || 'any'}
                     onClick={() => setFilterLength(l)}
                     className={`flex-1 py-2 text-xs font-medium rounded-lg transition-colors ${
-                      filterLength === l
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      filterLength === l ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     {l ? lengthLabel(l) : 'Any'}
@@ -150,7 +154,7 @@ export default function MoviePicker() {
               </div>
             </div>
 
-            {/* Type */}
+            {/* Format */}
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Format</p>
               <div className="flex gap-1.5">
@@ -159,9 +163,7 @@ export default function MoviePicker() {
                     key={val || 'any'}
                     onClick={() => setFilterType(val as typeof filterType)}
                     className={`flex-1 py-2 text-xs font-medium rounded-lg transition-colors ${
-                      filterType === val
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      filterType === val ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     {label}
@@ -185,8 +187,8 @@ export default function MoviePicker() {
             </button>
             {hasFilters && (
               <button
-                onClick={() => { setFilterGenre(''); setFilterLength(''); setFilterType(''); }}
-                className="px-4 py-4 text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                onClick={() => { setFilterGenre(''); setFilterLength(''); setFilterType(''); setSearch(''); }}
+                className="px-4 py-4 text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-colors whitespace-nowrap"
               >
                 Clear
               </button>
@@ -196,13 +198,23 @@ export default function MoviePicker() {
 
         {/* Movie grid */}
         <div>
-          <p className="text-sm text-gray-400 mb-4">
-            {loading
-              ? 'Loading…'
-              : hasFilters
-              ? `${filtered.length} of ${movies.length} movies match`
-              : `${movies.length} movies`}
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-400">
+              {loading ? 'Loading…' : hasFilters || !showWatched
+                ? `${filtered.length} of ${movies.length} movies`
+                : `${movies.length} movies`}
+            </p>
+            {watchedCount > 0 && (
+              <button
+                onClick={() => setShowWatched((v) => !v)}
+                className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+                  showWatched ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
+              >
+                {showWatched ? 'Hiding watched' : `Show watched (${watchedCount})`}
+              </button>
+            )}
+          </div>
 
           {loading ? (
             <div className="flex justify-center py-16">
@@ -215,41 +227,55 @@ export default function MoviePicker() {
               {filtered.map((m) => (
                 <div
                   key={m.id}
-                  className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-start justify-between gap-2 group hover:border-gray-200 transition-colors"
+                  className={`bg-white rounded-xl p-4 border shadow-sm flex items-start justify-between gap-2 group transition-colors ${
+                    m.watched ? 'border-gray-100 opacity-60' : 'border-gray-100 hover:border-gray-200'
+                  }`}
                 >
-                  <div className="min-w-0">
-                    <div className="font-semibold text-gray-900 truncate">{m.title}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className={`font-semibold truncate ${m.watched ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                      {m.title}
+                    </div>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {m.genre && (
-                        <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full capitalize">
-                          {m.genre}
-                        </span>
+                        <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full capitalize">{m.genre}</span>
                       )}
                       {m.length && (
-                        <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full">
-                          {lengthLabel(m.length)}
-                        </span>
+                        <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full">{lengthLabel(m.length)}</span>
                       )}
                       {m.type && (
-                        <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full capitalize">
-                          {m.type.replace('-', ' ')}
-                        </span>
+                        <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full capitalize">{m.type.replace('-', ' ')}</span>
+                      )}
+                      {m.watched && (
+                        <span className="px-2 py-0.5 text-xs bg-green-50 text-green-600 rounded-full">watched</span>
                       )}
                     </div>
                   </div>
-                  <button
-                    onClick={() => removeMovie(m.id)}
-                    className="shrink-0 text-gray-200 hover:text-red-400 transition-colors mt-0.5 opacity-0 group-hover:opacity-100"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                  <div className="flex flex-col gap-1.5 shrink-0">
+                    <button
+                      onClick={() => toggleWatched(m.id, !m.watched)}
+                      title={m.watched ? 'Mark unwatched' : 'Mark watched'}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        m.watched
+                          ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                          : 'text-gray-200 hover:text-green-500 hover:bg-green-50 opacity-0 group-hover:opacity-100'
+                      }`}
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => removeMovie(m.id)}
+                      className="p-1.5 text-gray-200 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 rounded-lg"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Add movie (collapsed by default) */}
+        {/* Add movie */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <button
             onClick={() => setShowAddForm((v) => !v)}
@@ -259,11 +285,7 @@ export default function MoviePicker() {
               <Plus className="h-4 w-4" />
               Add a movie
             </span>
-            {showAddForm ? (
-              <ChevronUp className="h-4 w-4 text-gray-400" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-gray-400" />
-            )}
+            {showAddForm ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
           </button>
 
           {showAddForm && (
@@ -283,9 +305,7 @@ export default function MoviePicker() {
                     className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                   >
                     {GENRES.map((g) => (
-                      <option key={g} value={g}>
-                        {g.charAt(0).toUpperCase() + g.slice(1)}
-                      </option>
+                      <option key={g} value={g}>{g.charAt(0).toUpperCase() + g.slice(1)}</option>
                     ))}
                   </select>
                   <select
@@ -294,9 +314,7 @@ export default function MoviePicker() {
                     className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
                   >
                     {LENGTHS.map((l) => (
-                      <option key={l} value={l}>
-                        {lengthLabel(l)}
-                      </option>
+                      <option key={l} value={l}>{lengthLabel(l)}</option>
                     ))}
                   </select>
                 </div>
@@ -337,18 +355,20 @@ export default function MoviePicker() {
             className="bg-white rounded-2xl p-10 shadow-2xl max-w-md w-full text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
-              Tonight we&apos;re watching
-            </p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Tonight we&apos;re watching</p>
             <h2 className="text-4xl font-bold text-gray-900 mb-5">{result.title}</h2>
             <div className="flex flex-wrap justify-center gap-2 mb-8">
               {[result.genre, result.length ? lengthLabel(result.length) : '', result.type?.replace('-', ' ')].filter(Boolean).map((v) => (
-                <span key={v} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm capitalize">
-                  {v}
-                </span>
+                <span key={v} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm capitalize">{v}</span>
               ))}
             </div>
             <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => { toggleWatched(result.id, true); setResult(null); }}
+                className="px-5 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                We watched it ✓
+              </button>
               <button
                 onClick={pickRandom}
                 className="px-5 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"

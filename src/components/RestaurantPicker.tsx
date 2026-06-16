@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Shuffle, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shuffle, X, Plus, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import Confetti from 'react-confetti';
 
 interface Restaurant {
@@ -15,6 +15,7 @@ interface Restaurant {
 
 const AVAILABLE_TAGS = ['cheap', 'fancy', 'within 5 miles', 'pizza', 'sushi', 'burgers', 'italian', 'mexican', 'asian', 'american'];
 const BLANK: Omit<Restaurant, 'id'> = { name: '', cuisine: '', price: '$$', distance: '', tags: [] };
+const LAST_PICKED_KEY = 'lastPickedRestaurantId';
 
 export default function RestaurantPicker() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -22,6 +23,8 @@ export default function RestaurantPicker() {
   const [form, setForm] = useState(BLANK);
   const [formTags, setFormTags] = useState<string[]>([]);
   const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
+  const [lastPickedId, setLastPickedId] = useState<string | null>(null);
   const [result, setResult] = useState<Restaurant | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -32,12 +35,18 @@ export default function RestaurantPicker() {
       .then((r) => r.json())
       .then((d) => setRestaurants(d.restaurants ?? []))
       .finally(() => setLoading(false));
+    setLastPickedId(localStorage.getItem(LAST_PICKED_KEY));
   }, []);
 
   const filtered = useMemo(() => {
-    if (!filterTags.length) return restaurants;
-    return restaurants.filter((r) => filterTags.every((t) => r.tags.includes(t)));
-  }, [restaurants, filterTags]);
+    return restaurants.filter((r) => {
+      if (filterTags.length && !filterTags.every((t) => r.tags.includes(t))) return false;
+      if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }, [restaurants, filterTags, search]);
+
+  const hasFilters = filterTags.length > 0 || search;
 
   const toggleFilterTag = (tag: string) =>
     setFilterTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
@@ -71,7 +80,10 @@ export default function RestaurantPicker() {
 
   const pickRandom = () => {
     if (!filtered.length) return;
-    setResult(filtered[Math.floor(Math.random() * filtered.length)]);
+    const pick = filtered[Math.floor(Math.random() * filtered.length)];
+    setResult(pick);
+    setLastPickedId(pick.id);
+    localStorage.setItem(LAST_PICKED_KEY, pick.id);
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 3500);
   };
@@ -85,11 +97,24 @@ export default function RestaurantPicker() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-1">Where should we eat?</h1>
-          <p className="text-gray-500">Filter by vibe, then let us decide.</p>
+          <p className="text-gray-500">Filter by vibe, search by name, then let us decide.</p>
         </div>
 
         {/* Filters + Pick */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-5">
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search restaurants…"
+              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+            />
+          </div>
+
+          {/* Tag filters */}
           <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Filter by</p>
             <div className="flex flex-wrap gap-2">
@@ -106,9 +131,9 @@ export default function RestaurantPicker() {
                   {tag}
                 </button>
               ))}
-              {filterTags.length > 0 && (
+              {hasFilters && (
                 <button
-                  onClick={() => setFilterTags([])}
+                  onClick={() => { setFilterTags([]); setSearch(''); }}
                   className="px-4 py-1.5 rounded-full text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
                 >
                   Clear
@@ -135,7 +160,7 @@ export default function RestaurantPicker() {
           <p className="text-sm text-gray-400 mb-4">
             {loading
               ? 'Loading…'
-              : filterTags.length
+              : hasFilters
               ? `${filtered.length} of ${restaurants.length} restaurants match`
               : `${restaurants.length} restaurants`}
           </p>
@@ -151,19 +176,26 @@ export default function RestaurantPicker() {
               {filtered.map((r) => (
                 <div
                   key={r.id}
-                  className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-start justify-between gap-2 group hover:border-gray-200 transition-colors"
+                  className={`bg-white rounded-xl p-4 border shadow-sm flex items-start justify-between gap-2 group transition-colors ${
+                    r.id === lastPickedId ? 'border-amber-200 bg-amber-50/40' : 'border-gray-100 hover:border-gray-200'
+                  }`}
                 >
                   <div className="min-w-0">
-                    <div className="font-semibold text-gray-900 truncate">{r.name}</div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-gray-900 truncate">{r.name}</span>
+                      {r.id === lastPickedId && (
+                        <span className="text-xs font-medium text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full shrink-0">
+                          Last picked
+                        </span>
+                      )}
+                    </div>
                     <div className="text-sm text-gray-400 mt-0.5">
                       {[r.cuisine, r.price, r.distance].filter(Boolean).join(' · ')}
                     </div>
                     {r.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {r.tags.map((t) => (
-                          <span key={t} className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full">
-                            {t}
-                          </span>
+                          <span key={t} className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full">{t}</span>
                         ))}
                       </div>
                     )}
@@ -180,7 +212,7 @@ export default function RestaurantPicker() {
           )}
         </div>
 
-        {/* Add restaurant (collapsed by default) */}
+        {/* Add restaurant */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <button
             onClick={() => setShowAddForm((v) => !v)}
@@ -190,11 +222,7 @@ export default function RestaurantPicker() {
               <Plus className="h-4 w-4" />
               Add a restaurant
             </span>
-            {showAddForm ? (
-              <ChevronUp className="h-4 w-4 text-gray-400" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-gray-400" />
-            )}
+            {showAddForm ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
           </button>
 
           {showAddForm && (
@@ -233,9 +261,7 @@ export default function RestaurantPicker() {
                     type="button"
                     onClick={() => toggleFormTag(tag)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                      formTags.includes(tag)
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      formTags.includes(tag) ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     {tag}
@@ -270,9 +296,7 @@ export default function RestaurantPicker() {
             <h2 className="text-4xl font-bold text-gray-900 mb-5">{result.name}</h2>
             <div className="flex flex-wrap justify-center gap-2 mb-8">
               {[result.cuisine, result.price, result.distance].filter(Boolean).map((v) => (
-                <span key={v} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-                  {v}
-                </span>
+                <span key={v} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{v}</span>
               ))}
             </div>
             <div className="flex gap-3 justify-center">
