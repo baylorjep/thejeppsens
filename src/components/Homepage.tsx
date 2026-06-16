@@ -119,7 +119,7 @@ export default function Homepage() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-16">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-16">
           <Link href="/travel" className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
             <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
               <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,17 +166,6 @@ export default function Homepage() {
             </p>
           </Link>
 
-          <Link href="/budget" className="rounded-lg border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
-            <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-md bg-gray-100">
-              <svg className="h-5 w-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-gray-950">Budget</h3>
-            <p className="text-sm leading-6 text-gray-600">
-              Keep money plans in one place.
-            </p>
-          </Link>
         </div>
 
         {/* Call to Action */}

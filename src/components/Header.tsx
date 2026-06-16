@@ -15,7 +15,6 @@ export default function Header() {
     { name: 'Vinyl', href: '/vinyl' },
     { name: 'Food', href: '/restaurants' },
     { name: 'Movies', href: '/movies' },
-    { name: 'Budget', href: '/budget' },
   ];
 
   const miniGames = [
