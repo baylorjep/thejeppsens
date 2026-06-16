@@ -6,10 +6,11 @@ import { useEffect, useMemo, useState } from 'react';
 
 const WorldMap = dynamic(() => import('@/components/WorldMap'), { ssr: false });
 
-const CONTINENT_ORDER = ['Americas', 'Oceania', 'Europe', 'Asia', 'Africa'];
+const CONTINENT_ORDER = ['North America', 'South America', 'Oceania', 'Europe', 'Asia', 'Africa'];
 
 const CONTINENT_TOTALS: Record<string, number> = {
-  Americas: 35,
+  'North America': 23,
+  'South America': 12,
   Europe: 44,
   Asia: 48,
   Africa: 54,
