@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type VinylCatalogProps = {
   records: VinylRecord[];
@@ -111,6 +111,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [selectedRecord, setSelectedRecord] = useState<VinylRecord | null>(null);
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
   const [showRecordCovers, setShowRecordCovers] = useState(false);
+  const hasAppliedFavoriteDefault = useRef(false);
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -126,6 +127,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     const timeout = window.setTimeout(() => setShowRecordCovers(true), 850);
     return () => window.clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    const hasFavorites = allRecords.some((record) => record.favorite);
+    if (hasFavorites && !hasAppliedFavoriteDefault.current && sortKey === "date-added") {
+      hasAppliedFavoriteDefault.current = true;
+      setSortKey("favorites");
+    }
+  }, [allRecords, sortKey]);
 
   const filterOptions = useMemo(
     () => ({
@@ -438,7 +447,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               <ArrowUpDown className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <select
                 value={sortKey}
-                onChange={(event) => setSortKey(event.target.value as VinylSortKey)}
+                onChange={(event) => {
+                  hasAppliedFavoriteDefault.current = true;
+                  setSortKey(event.target.value as VinylSortKey);
+                }}
                 className="w-full rounded-md border border-gray-300 bg-white py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
               >
                 <option value="date-added">Recently added</option>
