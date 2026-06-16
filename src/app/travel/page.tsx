@@ -8,6 +8,14 @@ const WorldMap = dynamic(() => import('@/components/WorldMap'), { ssr: false });
 
 const CONTINENT_ORDER = ['Americas', 'Oceania', 'Europe', 'Asia', 'Africa'];
 
+const CONTINENT_TOTALS: Record<string, number> = {
+  Americas: 35,
+  Europe: 44,
+  Asia: 48,
+  Africa: 54,
+  Oceania: 14,
+};
+
 interface Country {
   id: string;
   geo_name: string;
@@ -128,7 +136,10 @@ export default function TravelPage() {
                       {continent.name}
                     </h3>
                     <div className="flex-1 h-px bg-slate-100" />
-                    <span className="text-xs text-slate-300">{continent.countries.length} countries</span>
+                    <span className="text-xs text-slate-400 font-medium tabular-nums">
+                      {continent.countries.length}
+                      <span className="text-slate-300">/{CONTINENT_TOTALS[continent.name] ?? '?'}</span>
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                     {continent.countries.map((country) => (
