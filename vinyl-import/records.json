@@ -65,9 +65,9 @@
   },
   {
     "id": "tyler-bates-guardians-of-the-galaxy-vol-2-deluxe-edition",
-    "title": "Guardians of the Galaxy Vol. 2: Deluxe Edition",
-    "artist": "Tyler Bates",
-    "releaseYear": 2017,
+    "title": "Guardians of the Galaxy: Deluxe Vinyl Edition",
+    "artist": "Various Artists / Tyler Bates",
+    "releaseYear": 2014,
     "genres": [
       "Soundtrack",
       "Film Score",
@@ -79,18 +79,18 @@
       "Road trip"
     ],
     "favoriteTracks": [
-      "Mr. Blue Sky",
-      "Brandy (You're a Fine Girl)",
-      "Come a Little Bit Closer"
+      "Hooked on a Feeling",
+      "Come and Get Your Love",
+      "Ain't No Mountain High Enough"
     ],
-    "pressing": "Deluxe edition soundtrack",
+    "pressing": "Deluxe vinyl soundtrack edition",
     "vinylColor": "Black",
     "condition": "Used; shrink wrap visible",
     "source": "Personal collection",
-    "dateAdded": "2026-06-15",
+    "dateAdded": "2026-06-16",
     "status": "owned",
-    "frontCoverPath": "../../Album covers/IMG_4585.JPG",
-    "backCoverPath": "../../Album covers/IMG_4586.jpg",
+    "frontCoverPath": "../../Batch 2/IMG_4743.jpg",
+    "backCoverPath": "../../Batch 2/IMG_4744.jpg",
     "favorite": false,
     "label": "Hollywood Records",
     "format": "2xLP",
@@ -730,7 +730,7 @@
     "id": "the-jeppsens-la-vie-en-rose-wedding-mix",
     "title": "The Jeppsens Wedding Mix",
     "artist": "The Jeppsens",
-    "releaseYear": 2026,
+    "releaseYear": 2023,
     "genres": [
       "Custom",
       "Wedding",
@@ -1543,8 +1543,8 @@
     "source": "Personal collection",
     "dateAdded": "2026-06-15",
     "status": "owned",
-    "frontCoverPath": "../../IMG_4677.JPG",
-    "backCoverPath": "../../IMG_4678.jpg",
+    "frontCoverPath": "../../Album covers/IMG_4677.JPG",
+    "backCoverPath": "../../Album covers/IMG_4678.jpg",
     "favorite": false,
     "label": "RCA Victor",
     "format": "LP",
@@ -1576,10 +1576,377 @@
     "source": "Personal collection",
     "dateAdded": "2026-06-15",
     "status": "owned",
-    "frontCoverPath": "../../IMG_4679.jpg",
-    "backCoverPath": "../../IMG_4680.jpg",
+    "frontCoverPath": "../../Album covers/IMG_4679.jpg",
+    "backCoverPath": "../../Album covers/IMG_4680.jpg",
     "favorite": false,
     "label": "Verve Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "jimmy-dorsey-and-his-orchestra-the-uncollected-jimmy-dorsey-vol-3-1949-1951",
+    "title": "The Uncollected Jimmy Dorsey, Vol. 3, 1949, 1951",
+    "artist": "Jimmy Dorsey and His Orchestra",
+    "releaseYear": 1981,
+    "genres": [
+      "Big Band",
+      "Jazz",
+      "Swing"
+    ],
+    "moods": [
+      "Classic",
+      "Nostalgic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "If You Were the Only Girl in the World",
+      "Once in a While",
+      "Green Eyes"
+    ],
+    "pressing": "Hindsight archival compilation",
+    "recordingYears": "1949, 1951",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4725.JPG",
+    "backCoverPath": "../../Batch 2/IMG_4726.jpg",
+    "favorite": false,
+    "label": "Hindsight Records",
+    "catalogNumber": "HSR-165",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "frank-sinatra-tell-her-you-love-her",
+    "title": "Tell Her You Love Her",
+    "artist": "Frank Sinatra",
+    "releaseYear": 1963,
+    "genres": [
+      "Vocal Jazz",
+      "Traditional Pop",
+      "Standards"
+    ],
+    "moods": [
+      "Classic",
+      "Romantic",
+      "Dinner"
+    ],
+    "favoriteTracks": [
+      "Tell Her You Love Her",
+      "They Can't Take That Away from Me",
+      "I've Got the World on a String"
+    ],
+    "pressing": "Capitol Duophonic reissue",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4727.JPG",
+    "backCoverPath": "../../Batch 2/IMG_4729.JPG",
+    "favorite": false,
+    "label": "Capitol Records",
+    "catalogNumber": "DT-1919",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "the-kinks-state-of-confusion",
+    "title": "State of Confusion",
+    "artist": "The Kinks",
+    "releaseYear": 1983,
+    "genres": [
+      "Rock",
+      "Pop Rock",
+      "New Wave"
+    ],
+    "moods": [
+      "Upbeat",
+      "Energetic",
+      "Road trip"
+    ],
+    "favoriteTracks": [
+      "Come Dancing",
+      "State of Confusion",
+      "Don't Forget to Dance"
+    ],
+    "pressing": "Original album",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4731.jpg",
+    "backCoverPath": "../../Batch 2/IMG_4732.jpg",
+    "favorite": false,
+    "label": "Arista Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "ella-fitzgerald-and-louis-armstrong-ella-and-louis-wxtm-2010",
+    "title": "Ella & Louis",
+    "artist": "Ella Fitzgerald and Louis Armstrong",
+    "releaseYear": 2010,
+    "originalReleaseYear": 1956,
+    "recordingYears": "1956",
+    "genres": [
+      "Jazz",
+      "Vocal Jazz"
+    ],
+    "moods": [
+      "Classic",
+      "Dinner",
+      "Romantic"
+    ],
+    "favoriteTracks": [
+      "They Can't Take That Away from Me",
+      "Moonlight in Vermont",
+      "Cheek to Cheek",
+      "April in Paris"
+    ],
+    "pressing": "WaxTime 180g reissue",
+    "pressingYear": 2010,
+    "pressingNotes": "WaxTime Jazz Classics reissue",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4733.jpg",
+    "backCoverPath": "../../Batch 2/IMG_4734.jpg",
+    "favorite": false,
+    "label": "WaxTime Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "frank-sinatra-songs-for-swingin-lovers-2016",
+    "title": "Songs for Swingin' Lovers!",
+    "artist": "Frank Sinatra",
+    "releaseYear": 2016,
+    "originalReleaseYear": 1956,
+    "recordingYears": "1956",
+    "genres": [
+      "Vocal Jazz",
+      "Swing",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Swinging",
+      "Classic",
+      "Lounge"
+    ],
+    "favoriteTracks": [
+      "You Make Me Feel So Young",
+      "I've Got You Under My Skin",
+      "Makin' Whoopee"
+    ],
+    "pressing": "Capitol / UMe reissue",
+    "pressingYear": 2016,
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4735.jpg",
+    "backCoverPath": "../../Batch 2/IMG_4736.JPG",
+    "favorite": false,
+    "label": "Capitol Records / UMe",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "frank-sinatra-nice-n-easy-2020",
+    "title": "Nice 'n' Easy",
+    "artist": "Frank Sinatra",
+    "releaseYear": 2020,
+    "originalReleaseYear": 1960,
+    "recordingYears": "1960",
+    "genres": [
+      "Vocal Jazz",
+      "Traditional Pop",
+      "Standards"
+    ],
+    "moods": [
+      "Romantic",
+      "Dinner",
+      "Lounge"
+    ],
+    "favoriteTracks": [
+      "Nice 'n' Easy",
+      "I've Got a Crush on You",
+      "How Deep Is the Ocean?"
+    ],
+    "pressing": "60th anniversary / 2020 mix reissue",
+    "pressingYear": 2020,
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4738.jpg",
+    "backCoverPath": "../../Batch 2/IMG_4739.jpg",
+    "favorite": false,
+    "label": "Capitol Records / UMe",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "julio-iglesias-in-concert",
+    "title": "In Concert",
+    "artist": "Julio Iglesias",
+    "releaseYear": 1983,
+    "genres": [
+      "Latin Pop",
+      "Pop",
+      "Ballad"
+    ],
+    "moods": [
+      "Romantic",
+      "Lounge",
+      "Dinner"
+    ],
+    "pressing": "Live concert album",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4741.JPG",
+    "backCoverPath": "../../Batch 2/IMG_4742.jpg",
+    "favorite": false,
+    "label": "Columbia Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "the-lumineers-the-lumineers",
+    "title": "The Lumineers",
+    "artist": "The Lumineers",
+    "releaseYear": 2012,
+    "genres": [
+      "Indie Folk",
+      "Folk Rock",
+      "Americana"
+    ],
+    "moods": [
+      "Road trip",
+      "Reflective",
+      "Acoustic"
+    ],
+    "favoriteTracks": [
+      "Ho Hey",
+      "Stubborn Love",
+      "Submarines"
+    ],
+    "pressing": "Dualtone original pressing",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4745.JPG",
+    "backCoverPath": "../../Batch 2/IMG_4746.jpg",
+    "favorite": false,
+    "label": "Dualtone Records",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "harry-connick-jr-music-from-the-motion-picture-when-harry-met-sally",
+    "title": "Music From the Motion Picture When Harry Met Sally...",
+    "artist": "Harry Connick, Jr.",
+    "releaseYear": 2019,
+    "originalReleaseYear": 1989,
+    "genres": [
+      "Soundtrack",
+      "Vocal Jazz",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Romantic",
+      "Dinner",
+      "Lounge"
+    ],
+    "favoriteTracks": [
+      "It Had to Be You",
+      "Don't Get Around Much Anymore",
+      "Let's Call the Whole Thing Off"
+    ],
+    "pressing": "Music On Vinyl / At The Movies reissue",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4748.jpg",
+    "backCoverPath": "../../Batch 2/IMG_4749.jpg",
+    "favorite": false,
+    "label": "Music On Vinyl",
+    "format": "LP",
+    "discCount": 1
+  },
+  {
+    "id": "original-broadway-cast-of-dear-evan-hansen-dear-evan-hansen-original-broadway-cast-recording",
+    "title": "Dear Evan Hansen: Original Broadway Cast Recording",
+    "artist": "Original Broadway Cast of Dear Evan Hansen",
+    "releaseYear": 2017,
+    "genres": [
+      "Musical",
+      "Cast Recording",
+      "Theatre"
+    ],
+    "moods": [
+      "Emotional",
+      "Reflective",
+      "Contemporary"
+    ],
+    "favoriteTracks": [
+      "Waving Through a Window",
+      "For Forever",
+      "You Will Be Found"
+    ],
+    "pressing": "Original Broadway cast recording",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve appears clean",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4751.JPG",
+    "backCoverPath": "../../Batch 2/IMG_4752.jpg",
+    "favorite": false,
+    "label": "Atlantic Records",
+    "format": "2xLP",
+    "discCount": 2
+  },
+  {
+    "id": "jeppsen-family-and-friends-jeppsen-wedding-voice-recordings",
+    "title": "Jeppsen Wedding Voice Recordings",
+    "artist": "Jeppsen Family and Friends",
+    "releaseYear": 2023,
+    "genres": [
+      "Custom",
+      "Wedding",
+      "Spoken Word"
+    ],
+    "moods": [
+      "Personal",
+      "Keepsake",
+      "Nostalgic"
+    ],
+    "pressing": "Custom wedding voice recordings",
+    "vinylColor": "Black",
+    "condition": "Used; custom sleeve",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-16",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 2/IMG_4753.jpg",
+    "backCoverPath": "../../Batch 2/IMG_4754.jpg",
+    "favorite": false,
+    "label": "Jeppsen Family and Friends",
     "format": "LP",
     "discCount": 1
   }
