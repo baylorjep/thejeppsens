@@ -201,7 +201,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [isCompactCarousel, setIsCompactCarousel] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [carouselSeed] = useState(() => Math.random());
   const hasAppliedFavoriteDefault = useRef(false);
+  const desktopCarouselDelay = `${-(carouselSeed * 84).toFixed(2)}s`;
+  const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
+  const mobileCarouselItemRefs = useRef<Array<HTMLAnchorElement | HTMLButtonElement | null>>([]);
+  const hasInitializedTouchCarousel = useRef(false);
   const recordsPerPage = 9;
 
   useEffect(() => {
@@ -309,6 +314,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const rollingRecords = isCompactCarousel
     ? [...carouselRecords, ...carouselRecords]
     : [...carouselRecords, ...carouselRecords, ...carouselRecords];
+  const touchCarouselRecords = [...carouselRecords, ...carouselRecords];
   const rollingRecordsReverse = isCompactCarousel
     ? []
     : [...carouselRecords].reverse().concat([...carouselRecords].reverse(), [...carouselRecords].reverse());
@@ -336,6 +342,55 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   useEffect(() => {
     setCurrentPage(1);
   }, [activeDecade, activeGenre, activeMood, activeStatus, quickFilter, query, sortKey, viewMode]);
+
+  useEffect(() => {
+    if (!isTouchDevice || hasInitializedTouchCarousel.current || !mobileCarouselRef.current || !carouselRecords.length) {
+      return;
+    }
+
+    const startIndex = Math.floor(Math.random() * carouselRecords.length);
+    mobileCarouselItemRefs.current[startIndex]?.scrollIntoView({
+      behavior: "auto",
+      block: "nearest",
+      inline: "center",
+    });
+    hasInitializedTouchCarousel.current = true;
+  }, [carouselRecords.length, isTouchDevice]);
+
+  useEffect(() => {
+    if (!isTouchDevice || !mobileCarouselRef.current) return;
+
+    const container = mobileCarouselRef.current;
+    let frame = 0;
+    let pauseUntil = 0;
+
+    const pause = () => {
+      pauseUntil = performance.now() + 1200;
+    };
+
+    const tick = (now: number) => {
+      const loopWidth = container.scrollWidth / 2;
+      if (loopWidth > 0 && now >= pauseUntil) {
+        container.scrollLeft += 0.35;
+        if (container.scrollLeft >= loopWidth) {
+          container.scrollLeft -= loopWidth;
+        }
+      }
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    frame = window.requestAnimationFrame(tick);
+    container.addEventListener("touchstart", pause, { passive: true });
+    container.addEventListener("pointerdown", pause);
+    container.addEventListener("wheel", pause, { passive: true });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      container.removeEventListener("touchstart", pause);
+      container.removeEventListener("pointerdown", pause);
+      container.removeEventListener("wheel", pause);
+    };
+  }, [carouselRecords.length, isTouchDevice]);
 
   useEffect(() => {
     if (!selectedRecord) {
@@ -478,7 +533,39 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
       {rollingRecords.length > 0 ? (
         <section className="mb-10 overflow-hidden py-2">
-          <div className="vinyl-marquee flex w-max gap-4">
+          {isTouchDevice ? (
+            <div
+              ref={mobileCarouselRef}
+              className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {touchCarouselRecords.map((record, index) => {
+                const recordHref = `/vinyl/${record.id}`;
+                const coverClasses =
+                  "relative h-28 w-28 shrink-0 snap-center overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
+
+                return (
+                  <Link
+                    key={`${record.id}-touch-${index}`}
+                    href={recordHref}
+                    ref={(node) => {
+                      mobileCarouselItemRefs.current[index] = node;
+                    }}
+                    className={coverClasses}
+                    aria-label={`Open ${record.title} by ${record.artist}`}
+                  >
+                    <CoverArt
+                      record={record}
+                      backSrc={record.backCoverImage}
+                      priority={index < 2}
+                      sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
+                      flipOnHover
+                    />
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="vinyl-marquee flex w-max gap-4" style={{ animationDelay: desktopCarouselDelay }}>
             {rollingRecords.map((record, index) => {
               const recordHref = `/vinyl/${record.id}`;
               const coverClasses = "relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
@@ -516,9 +603,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 </Link>
               );
             })}
-          </div>
+            </div>
+          )}
           {shouldUseModal && rollingRecordsReverse.length > 0 ? (
-            <div className="vinyl-marquee-reverse mt-4 flex w-max gap-4">
+            <div className="vinyl-marquee-reverse mt-4 flex w-max gap-4" style={{ animationDelay: desktopCarouselDelay }}>
               {rollingRecordsReverse.map((record, index) => (
                 <button
                   key={`${record.id}-reverse-${index}`}
