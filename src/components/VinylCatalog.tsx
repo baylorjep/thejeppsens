@@ -181,6 +181,14 @@ function AnimatedNumber({ value }: { value: number }) {
   return <span className={`transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}>{displayValue}</span>;
 }
 
+function createSeededRandom(seed: number) {
+  let state = Math.floor(seed * 2147483647) || 1;
+  return () => {
+    state = (state * 16807) % 2147483647;
+    return (state - 1) / 2147483646;
+  };
+}
+
 export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [allRecords, setAllRecords] = useState<VinylRecord[]>(records);
   const [, setApiSource] = useState<VinylApiStatus>("local");
@@ -313,13 +321,25 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const carouselRecords = (isCompactCarousel ? allRecords.slice(0, 24) : allRecords).filter(
     (record) => record.status !== "wishlist",
   );
+  const desktopCarouselRows = useMemo(() => {
+    const seededRandom = createSeededRandom(carouselSeed);
+    const shuffled = [...carouselRecords].sort(() => seededRandom() - 0.5);
+
+    return {
+      top: shuffled.filter((_, index) => index % 2 === 0),
+      bottom: shuffled.filter((_, index) => index % 2 === 1),
+    };
+  }, [carouselRecords, carouselSeed]);
   const rollingRecords = isCompactCarousel
     ? [...carouselRecords, ...carouselRecords]
     : [...carouselRecords, ...carouselRecords, ...carouselRecords];
   const touchCarouselRecords = [...carouselRecords, ...carouselRecords];
   const rollingRecordsReverse = isCompactCarousel
     ? []
-    : [...carouselRecords].reverse().concat([...carouselRecords].reverse(), [...carouselRecords].reverse());
+    : [...desktopCarouselRows.bottom, ...desktopCarouselRows.bottom, ...desktopCarouselRows.bottom];
+  const rollingRecordsTop = isCompactCarousel
+    ? []
+    : [...desktopCarouselRows.top, ...desktopCarouselRows.top, ...desktopCarouselRows.top];
   const pickedRecord = allRecords.find((record) => record.id === pickedRecordId);
   const shouldUseModal = !isTouchDevice;
 
@@ -568,7 +588,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             </div>
           ) : (
             <div className="vinyl-marquee flex w-max gap-4" style={{ animationDelay: desktopCarouselDelay }}>
-            {rollingRecords.map((record, index) => {
+            {rollingRecordsTop.map((record, index) => {
               const recordHref = `/vinyl/${record.id}`;
               const coverClasses = "relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
 
