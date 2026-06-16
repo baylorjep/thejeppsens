@@ -195,6 +195,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusCelebrationMessage, setStatusCelebrationMessage] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isCompactCarousel, setIsCompactCarousel] = useState(false);
   const hasAppliedFavoriteDefault = useRef(false);
   const recordsPerPage = 9;
 
@@ -215,6 +216,15 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       setSortKey("favorites");
     }
   }, [allRecords, sortKey]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsCompactCarousel(mediaQuery.matches);
+
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
 
   const filterOptions = useMemo(
     () => ({
@@ -281,9 +291,13 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     return filteredRecords.slice(startIndex, startIndex + recordsPerPage);
   }, [currentPage, filteredRecords]);
 
-  const carouselRecords = allRecords;
-  const rollingRecords = [...carouselRecords, ...carouselRecords, ...carouselRecords];
-  const rollingRecordsReverse = [...carouselRecords].reverse().concat([...carouselRecords].reverse(), [...carouselRecords].reverse());
+  const carouselRecords = isCompactCarousel ? allRecords.slice(0, 10) : allRecords;
+  const rollingRecords = isCompactCarousel
+    ? [...carouselRecords, ...carouselRecords]
+    : [...carouselRecords, ...carouselRecords, ...carouselRecords];
+  const rollingRecordsReverse = isCompactCarousel
+    ? []
+    : [...carouselRecords].reverse().concat([...carouselRecords].reverse(), [...carouselRecords].reverse());
   const pickedRecord = allRecords.find((record) => record.id === pickedRecordId);
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
@@ -444,31 +458,33 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 <CoverArt
                   record={record}
                   backSrc={record.backCoverImage}
-                  priority={index < 2}
+                  priority={index < (isCompactCarousel ? 1 : 2)}
                   sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
                   flipOnHover
                 />
               </button>
             ))}
           </div>
-          <div className="vinyl-marquee-reverse mt-4 flex w-max gap-4">
-            {rollingRecordsReverse.map((record, index) => (
-              <button
-                key={`${record.id}-reverse-${index}`}
-                type="button"
-                onClick={() => setSelectedRecord(record)}
-                className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-40 sm:w-40 lg:h-48 lg:w-48"
-                aria-label={`View ${record.title} by ${record.artist}`}
-              >
-                <CoverArt
-                  record={record}
-                  backSrc={record.backCoverImage}
-                  sizes="(max-width: 639px) 96px, (max-width: 1023px) 160px, 192px"
-                  flipOnHover
-                />
-              </button>
-            ))}
-          </div>
+          {rollingRecordsReverse.length > 0 ? (
+            <div className="vinyl-marquee-reverse mt-4 flex w-max gap-4">
+              {rollingRecordsReverse.map((record, index) => (
+                <button
+                  key={`${record.id}-reverse-${index}`}
+                  type="button"
+                  onClick={() => setSelectedRecord(record)}
+                  className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-40 sm:w-40 lg:h-48 lg:w-48"
+                  aria-label={`View ${record.title} by ${record.artist}`}
+                >
+                  <CoverArt
+                    record={record}
+                    backSrc={record.backCoverImage}
+                    sizes="(max-width: 639px) 96px, (max-width: 1023px) 160px, 192px"
+                    flipOnHover
+                  />
+                </button>
+              ))}
+            </div>
+          ) : null}
         </section>
       ) : null}
 
@@ -683,9 +699,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 <CoverArt
                   record={record}
                   backSrc={record.backCoverImage}
-                  priority={index < 4}
-                  loading={index < 4 ? "eager" : "lazy"}
-                  fetchPriority={index < 4 ? "high" : "low"}
+                  priority={index < (isCompactCarousel ? 2 : 4)}
+                  loading={index < (isCompactCarousel ? 2 : 4) ? "eager" : "lazy"}
+                  fetchPriority={index < (isCompactCarousel ? 2 : 4) ? "high" : "low"}
                   sizes={
                     viewMode === "grid"
                       ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
