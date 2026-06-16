@@ -473,20 +473,18 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       ) : null}
 
       <section className="mb-10 rounded-lg border border-gray-200 bg-white p-5">
-        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-5 flex flex-col gap-3">
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-gray-500">
             Collection Snapshot
           </p>
-          <div className="sm:text-right">
-            <h2 className="mt-2 text-2xl font-semibold text-gray-950">Top patterns</h2>
-            <Link
-              href="/vinyl/insights"
-              className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
-            >
-              <Sparkles className="h-4 w-4" />
-              View more analytics
-            </Link>
-          </div>
+          <h2 className="text-2xl font-semibold text-gray-950">Top patterns</h2>
+          <Link
+            href="/vinyl/insights"
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+          >
+            <Sparkles className="h-4 w-4" />
+            View more analytics
+          </Link>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -503,6 +501,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             </div>
           ))}
         </div>
+
+        <Link
+          href="/vinyl/insights"
+          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline sm:hidden"
+        >
+          <Sparkles className="h-4 w-4" />
+          View more analytics
+        </Link>
       </section>
 
       <section className="mb-8 rounded-lg border border-gray-200 bg-white p-4 sm:p-5">

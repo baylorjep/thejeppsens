@@ -492,95 +492,101 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ) : null,
               )}
             </dl>
+
+            <div className="grid gap-6 border-t border-gray-200 pt-6 lg:grid-cols-2">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Genres</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {record.genres.map((genre) => (
+                      <span key={genre} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Moods</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {record.moods.map((mood) => (
+                      <span key={mood} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
+                        {mood}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {record.favoriteTracks?.length ? (
+                  <div>
+                    <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite tracks</h2>
+                    <ol className="space-y-2 text-gray-700">
+                      {record.favoriteTracks.map((track, index) => (
+                        <li key={track} className="flex gap-3">
+                          <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
+                          <span>{track}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="space-y-6 rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+                <div>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Notes</h2>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingNotes((current) => !current)}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      {isEditingNotes ? "Cancel" : record.notes ? "Edit notes" : "Add notes"}
+                    </button>
+                  </div>
+
+                  {isEditingNotes ? (
+                    <div className="space-y-3">
+                      <textarea
+                        value={notesDraft}
+                        onChange={(event) => setNotesDraft(event.target.value)}
+                        className="min-h-28 w-full rounded-md border border-gray-300 px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                        placeholder="Add something personal about this record..."
+                      />
+                      <button
+                        type="button"
+                        onClick={saveNotes}
+                        disabled={isSavingNotes}
+                        className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isSavingNotes ? "Saving..." : "Save notes"}
+                      </button>
+                    </div>
+                  ) : record.notes ? (
+                    <p className="leading-7 text-gray-700">{record.notes}</p>
+                  ) : (
+                    <p className="text-sm text-gray-500">No notes yet.</p>
+                  )}
+                </div>
+
+                {record.favoriteStories ? (
+                  <div>
+                    <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">
+                      Favorite stories
+                    </h2>
+                    <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="space-y-6 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
-          <div>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Genres</h2>
-            <div className="flex flex-wrap gap-2">
-              {record.genres.map((genre) => (
-                <span key={genre} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
-                  {genre}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Moods</h2>
-            <div className="flex flex-wrap gap-2">
-              {record.moods.map((mood) => (
-                <span key={mood} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
-                  {mood}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {record.favoriteTracks?.length ? (
-            <div>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite tracks</h2>
-              <ol className="space-y-2 text-gray-700">
-                {record.favoriteTracks.map((track, index) => (
-                  <li key={track} className="flex gap-3">
-                    <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
-                    <span>{track}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ) : null}
-
-          <div>
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Notes</h2>
-              <button
-                type="button"
-                onClick={() => setIsEditingNotes((current) => !current)}
-                className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
-              >
-                <Pencil className="h-4 w-4" />
-                {isEditingNotes ? "Cancel" : record.notes ? "Edit notes" : "Add notes"}
-              </button>
-            </div>
-
-            {isEditingNotes ? (
-              <div className="space-y-3">
-                <textarea
-                  value={notesDraft}
-                  onChange={(event) => setNotesDraft(event.target.value)}
-                  className="min-h-28 w-full rounded-md border border-gray-300 px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
-                  placeholder="Add something personal about this record..."
-                />
-                <button
-                  type="button"
-                  onClick={saveNotes}
-                  disabled={isSavingNotes}
-                  className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSavingNotes ? "Saving..." : "Save notes"}
-                </button>
-              </div>
-            ) : record.notes ? (
-              <p className="leading-7 text-gray-700">{record.notes}</p>
-            ) : (
-              <p className="text-sm text-gray-500">No notes yet.</p>
-            )}
-          </div>
-
-          {record.favoriteStories ? (
-            <div>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite stories</h2>
-              <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
-            </div>
-          ) : null}
-        </div>
-
         {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
-          <div className="space-y-4 rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6 lg:p-8">
+          <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
             <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
             <div className="space-y-3">
               {[
