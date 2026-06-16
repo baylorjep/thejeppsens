@@ -117,9 +117,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [pickedRecordId, setPickedRecordId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<VinylRecord | null>(null);
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [statusCelebrationMessage, setStatusCelebrationMessage] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
   const hasAppliedFavoriteDefault = useRef(false);
+  const recordsPerPage = 12;
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -197,6 +199,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     return sortVinylRecords(matches, sortKey);
   }, [activeDecade, activeGenre, activeMood, activeStatus, allRecords, query, quickFilter, sortKey]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredRecords.length / recordsPerPage));
+  const paginatedRecords = useMemo(() => {
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    return filteredRecords.slice(startIndex, startIndex + recordsPerPage);
+  }, [currentPage, filteredRecords]);
+
   const carouselRecords = allRecords;
   const rollingRecords = [...carouselRecords, ...carouselRecords, ...carouselRecords];
   const rollingRecordsReverse = [...carouselRecords].reverse().concat([...carouselRecords].reverse(), [...carouselRecords].reverse());
@@ -217,7 +225,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     setActiveStatus("All");
     setActiveDecade("All");
     setQuickFilter("all");
+    setCurrentPage(1);
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeDecade, activeGenre, activeMood, activeStatus, quickFilter, query, sortKey, viewMode]);
 
   const toggleFavorite = async (record: VinylRecord) => {
     const nextRecord = { ...record, favorite: !record.favorite };
@@ -519,14 +532,43 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       ) : null}
 
       {filteredRecords.length > 0 ? (
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-              : "space-y-4"
-          }
-        >
-          {filteredRecords.map((record) => (
+        <div className="space-y-5">
+          <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              Showing {Math.min((currentPage - 1) * recordsPerPage + 1, filteredRecords.length)}-
+              {Math.min(currentPage * recordsPerPage, filteredRecords.length)} of {filteredRecords.length} records
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((value) => Math.max(1, value - 1))}
+                disabled={currentPage === 1}
+                className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <span className="min-w-20 text-center text-sm font-medium text-gray-900">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}
+                disabled={currentPage === totalPages}
+                className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+                : "space-y-4"
+            }
+          >
+            {paginatedRecords.map((record) => (
             <article
               key={record.id}
               style={{ contentVisibility: "auto", containIntrinsicSize: "360px" }}
@@ -624,7 +666,27 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 </Link>
               </div>
             </article>
-          ))}
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-gray-600">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((value) => Math.max(1, value - 1))}
+              disabled={currentPage === 1}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Next
+              </button>
+          </div>
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
