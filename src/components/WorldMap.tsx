@@ -13,11 +13,19 @@ type GeographyItem = {
   properties: { name: string };
 };
 
+export type VisitType = 'both' | 'baylor' | 'isabel';
+
+const FILL: Record<VisitType, { default: string; hover: string }> = {
+  both:   { default: '#0d9488', hover: '#0f766e' }, // teal
+  baylor: { default: '#3b82f6', hover: '#2563eb' }, // blue
+  isabel: { default: '#a855f7', hover: '#9333ea' }, // purple
+};
+
 interface WorldMapProps {
-  visitedGeoNames: Set<string>;
+  visitedMap: Map<string, VisitType>;
 }
 
-export default function WorldMap({ visitedGeoNames }: WorldMapProps) {
+export default function WorldMap({ visitedMap }: WorldMapProps) {
   const [tooltip, setTooltip] = useState<Tooltip>(null);
 
   return (
@@ -39,7 +47,8 @@ export default function WorldMap({ visitedGeoNames }: WorldMapProps) {
         <Geographies geography={GEO_URL}>
           {({ geographies }: { geographies: GeographyItem[] }) =>
             geographies.map((geo) => {
-              const visited = visitedGeoNames.has(geo.properties.name);
+              const visit = visitedMap.get(geo.properties.name);
+              const colors = visit ? FILL[visit] : { default: '#cbd5e1', hover: '#94a3b8' };
               return (
                 <Geography
                   key={geo.rsmKey}
@@ -49,18 +58,8 @@ export default function WorldMap({ visitedGeoNames }: WorldMapProps) {
                   }
                   onMouseLeave={() => setTooltip(null)}
                   style={{
-                    default: {
-                      fill: visited ? '#0d9488' : '#cbd5e1',
-                      stroke: '#ffffff',
-                      strokeWidth: 0.5,
-                      outline: 'none',
-                    },
-                    hover: {
-                      fill: visited ? '#0f766e' : '#94a3b8',
-                      stroke: '#ffffff',
-                      strokeWidth: 0.5,
-                      outline: 'none',
-                    },
+                    default: { fill: colors.default, stroke: '#ffffff', strokeWidth: 0.5, outline: 'none' },
+                    hover:   { fill: colors.hover,   stroke: '#ffffff', strokeWidth: 0.5, outline: 'none' },
                     pressed: { outline: 'none' },
                   }}
                 />

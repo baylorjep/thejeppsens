@@ -7,7 +7,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('visited_countries')
-    .select('id, geo_name, display_name, flag, continent')
+    .select('id, geo_name, display_name, flag, continent, baylor_visited, isabel_visited')
     .order('continent')
     .order('display_name');
 

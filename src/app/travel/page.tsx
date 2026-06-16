@@ -3,6 +3,7 @@
 import Header from '@/components/Header';
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
+import type { VisitType } from '@/components/WorldMap';
 
 const WorldMap = dynamic(() => import('@/components/WorldMap'), { ssr: false });
 
@@ -23,7 +24,33 @@ interface Country {
   display_name: string;
   flag: string;
   continent: string;
+  baylor_visited: boolean;
+  isabel_visited: boolean;
 }
+
+function visitType(c: Country): VisitType {
+  if (c.baylor_visited && c.isabel_visited) return 'both';
+  if (c.baylor_visited) return 'baylor';
+  return 'isabel';
+}
+
+const CARD_STYLE: Record<VisitType, string> = {
+  both:   'bg-teal-50  border-teal-100  hover:border-teal-300',
+  baylor: 'bg-blue-50  border-blue-100  hover:border-blue-300',
+  isabel: 'bg-purple-50 border-purple-100 hover:border-purple-300',
+};
+
+const PILL_STYLE: Record<VisitType, string> = {
+  both:   'bg-teal-100   text-teal-700',
+  baylor: 'bg-blue-100   text-blue-700',
+  isabel: 'bg-purple-100 text-purple-700',
+};
+
+const PILL_LABEL: Record<VisitType, string> = {
+  both:   'Both',
+  baylor: 'Baylor',
+  isabel: 'Isabel',
+};
 
 const MAP_LOADING = (
   <div className="w-full h-[440px] bg-sky-50 rounded-xl flex items-center justify-center">
@@ -44,17 +71,16 @@ export default function TravelPage() {
       .catch(() => setCountries([]));
   }, []);
 
-  const visitedGeoNames = useMemo(
-    () => new Set((countries ?? []).map((c) => c.geo_name)),
-    [countries]
-  );
+  const visitedMap = useMemo<Map<string, VisitType>>(() => {
+    const m = new Map<string, VisitType>();
+    for (const c of countries ?? []) m.set(c.geo_name, visitType(c));
+    return m;
+  }, [countries]);
 
   const continents = useMemo(() => {
     if (!countries) return [];
     const grouped: Record<string, Country[]> = {};
-    for (const c of countries) {
-      (grouped[c.continent] ??= []).push(c);
-    }
+    for (const c of countries) (grouped[c.continent] ??= []).push(c);
     return CONTINENT_ORDER.filter((name) => grouped[name]).map((name) => ({
       name,
       countries: grouped[name],
@@ -103,19 +129,27 @@ export default function TravelPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-slate-900">Where we&apos;ve been</h2>
-            <div className="flex items-center gap-5 text-sm text-slate-500">
-              <span className="flex items-center gap-2">
+            <div className="flex items-center gap-4 text-xs text-slate-500">
+              <span className="flex items-center gap-1.5">
                 <span className="inline-block w-3 h-3 rounded-full bg-teal-500" />
-                Visited
+                Both
               </span>
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-3 h-3 rounded-full bg-blue-500" />
+                Baylor
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-3 h-3 rounded-full bg-purple-500" />
+                Isabel
+              </span>
+              <span className="flex items-center gap-1.5">
                 <span className="inline-block w-3 h-3 rounded-full bg-slate-300" />
                 Not yet
               </span>
             </div>
           </div>
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 sm:p-5">
-            {countries === null ? MAP_LOADING : <WorldMap visitedGeoNames={visitedGeoNames} />}
+            {countries === null ? MAP_LOADING : <WorldMap visitedMap={visitedMap} />}
           </div>
         </div>
       </section>
@@ -143,17 +177,23 @@ export default function TravelPage() {
                     </span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    {continent.countries.map((country) => (
-                      <div
-                        key={country.id}
-                        className="flex flex-col items-center gap-2.5 bg-slate-50 hover:bg-teal-50 border border-slate-100 hover:border-teal-200 rounded-xl p-4 transition-colors cursor-default group"
-                      >
-                        <span className="text-3xl leading-none">{country.flag}</span>
-                        <span className="text-xs font-medium text-slate-600 group-hover:text-teal-700 text-center leading-tight transition-colors">
-                          {country.display_name}
-                        </span>
-                      </div>
-                    ))}
+                    {continent.countries.map((country) => {
+                      const vt = visitType(country);
+                      return (
+                        <div
+                          key={country.id}
+                          className={`flex flex-col items-center gap-2 border rounded-xl p-4 transition-colors cursor-default ${CARD_STYLE[vt]}`}
+                        >
+                          <span className="text-3xl leading-none">{country.flag}</span>
+                          <span className="text-xs font-medium text-slate-600 text-center leading-tight">
+                            {country.display_name}
+                          </span>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${PILL_STYLE[vt]}`}>
+                            {PILL_LABEL[vt]}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
