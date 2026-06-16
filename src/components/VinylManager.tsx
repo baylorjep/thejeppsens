@@ -119,10 +119,13 @@ export default function VinylManager() {
   const [records, setRecords] = useState<VinylRecord[]>([]);
   const [apiSource, setApiSource] = useState<VinylApiStatus>("local");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [imageFile, setImageFile] = useState<File | undefined>();
   const [backImageFile, setBackImageFile] = useState<File | undefined>();
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [recordsPage, setRecordsPage] = useState(1);
+  const recordsPerPage = 12;
 
   useEffect(() => {
     const loadRecords = async () => {
@@ -145,6 +148,12 @@ export default function VinylManager() {
     const staticIds = new Set(vinyls.map((record) => record.id));
     return records.filter((record) => !staticIds.has(record.id));
   }, [records]);
+
+  const totalRecordsPages = Math.max(1, Math.ceil(records.length / recordsPerPage));
+  const paginatedRecords = useMemo(() => {
+    const startIndex = (recordsPage - 1) * recordsPerPage;
+    return records.slice(startIndex, startIndex + recordsPerPage);
+  }, [records, recordsPage]);
 
   const exportText = useMemo(() => JSON.stringify(queuedOnlyRecords, null, 2), [queuedOnlyRecords]);
 
@@ -181,6 +190,7 @@ export default function VinylManager() {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
+    setShowAdvancedOptions(false);
     setImageFile(undefined);
     setBackImageFile(undefined);
   };
@@ -254,10 +264,15 @@ export default function VinylManager() {
   const editRecord = (record: VinylRecord) => {
     setEditingId(record.id);
     setForm(recordToForm(record));
+    setShowAdvancedOptions(false);
     setImageFile(undefined);
     setBackImageFile(undefined);
     setMessage(`Editing ${record.title}.`);
   };
+
+  useEffect(() => {
+    setRecordsPage((current) => Math.min(current, totalRecordsPages));
+  }, [totalRecordsPages]);
 
   const removeRecord = async (id: string) => {
     const nextRecords = records.filter((record) => record.id !== id);
@@ -397,21 +412,6 @@ export default function VinylManager() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Label</span>
-            <input value={form.label} onChange={(event) => updateForm("label", event.target.value)} className={inputClassName()} placeholder="Capitol, Reprise, Verve..." />
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Catalog number</span>
-            <input value={form.catalogNumber} onChange={(event) => updateForm("catalogNumber", event.target.value)} className={inputClassName()} placeholder="SW-1538, RS-1234..." />
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Disc count</span>
-            <input value={form.discCount} onChange={(event) => updateForm("discCount", event.target.value)} className={inputClassName()} inputMode="numeric" placeholder="1" />
-          </label>
-
-          <label className="block">
             <span className="mb-2 block text-sm font-medium text-gray-700">Genres</span>
             <input value={form.genres} onChange={(event) => updateForm("genres", event.target.value)} className={inputClassName()} placeholder="Rock, Pop" />
           </label>
@@ -426,70 +426,114 @@ export default function VinylManager() {
             <input value={form.favoriteTracks} onChange={(event) => updateForm("favoriteTracks", event.target.value)} className={inputClassName()} placeholder="Track one, Track two" />
           </label>
 
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Pressing</span>
-            <input value={form.pressing} onChange={(event) => updateForm("pressing", event.target.value)} className={inputClassName()} placeholder="Deluxe, standard, limited..." />
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Vinyl color</span>
-            <input value={form.vinylColor} onChange={(event) => updateForm("vinylColor", event.target.value)} className={inputClassName()} placeholder="Black, clear, pink..." />
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Condition</span>
-            <input value={form.condition} onChange={(event) => updateForm("condition", event.target.value)} className={inputClassName()} placeholder="New, good, used..." />
-          </label>
-
-          <label className="block sm:col-span-2">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Source</span>
-            <input value={form.source} onChange={(event) => updateForm("source", event.target.value)} className={inputClassName()} placeholder="Gift, record store, thrifted, wishlist..." />
-          </label>
-
-          <label className="block sm:col-span-2">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Pressing notes</span>
-            <textarea
-              value={form.pressingNotes}
-              onChange={(event) => updateForm("pressingNotes", event.target.value)}
-              className={`${inputClassName()} min-h-24`}
-              placeholder="Italian reissue, expanded 2-LP edition, archival pressing..."
-            />
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Gift from</span>
-            <input value={form.giftFrom} onChange={(event) => updateForm("giftFrom", event.target.value)} className={inputClassName()} placeholder="If it was a gift, who from?" />
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Where we got it</span>
-            <input value={form.whereWeGotIt} onChange={(event) => updateForm("whereWeGotIt", event.target.value)} className={inputClassName()} placeholder="Record store, thrift shop, inheritance..." />
-          </label>
-
-          <label className="block sm:col-span-2">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Best for</span>
-            <input value={form.bestFor} onChange={(event) => updateForm("bestFor", event.target.value)} className={inputClassName()} placeholder="Dinner, road trip, rainy night, background music..." />
-          </label>
-
           <label className="block sm:col-span-2">
             <span className="mb-2 block text-sm font-medium text-gray-700">Notes</span>
             <textarea value={form.notes} onChange={(event) => updateForm("notes", event.target.value)} className={`${inputClassName()} min-h-28`} placeholder="Anything personal, condition notes, why she loves it..." />
           </label>
 
-          <label className="block sm:col-span-2">
-            <span className="mb-2 block text-sm font-medium text-gray-700">Favorite stories / memories</span>
-            <textarea
-              value={form.favoriteStories}
-              onChange={(event) => updateForm("favoriteStories", event.target.value)}
-              className={`${inputClassName()} min-h-32`}
-              placeholder="Where she found it, who gave it to her, when you played it together, why it is special..."
-            />
-          </label>
+          <div className="sm:col-span-2">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedOptions((current) => !current)}
+              className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+            >
+              {showAdvancedOptions ? "Hide advanced options" : "Show advanced options"}
+            </button>
 
-          <label className="flex items-center gap-3 sm:col-span-2">
-            <input type="checkbox" checked={form.favorite} onChange={(event) => updateForm("favorite", event.target.checked)} className="h-4 w-4 rounded border-gray-300" />
-            <span className="text-sm font-medium text-gray-700">Mark as a favorite</span>
-          </label>
+            {showAdvancedOptions ? (
+              <div className="mt-4 grid gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Label</span>
+                  <input value={form.label} onChange={(event) => updateForm("label", event.target.value)} className={inputClassName()} placeholder="Capitol, Reprise, Verve..." />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Catalog number</span>
+                  <input value={form.catalogNumber} onChange={(event) => updateForm("catalogNumber", event.target.value)} className={inputClassName()} placeholder="SW-1538, RS-1234..." />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Disc count</span>
+                  <input value={form.discCount} onChange={(event) => updateForm("discCount", event.target.value)} className={inputClassName()} inputMode="numeric" placeholder="1" />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Original release year</span>
+                  <input value={form.originalReleaseYear} onChange={(event) => updateForm("originalReleaseYear", event.target.value)} className={inputClassName()} inputMode="numeric" placeholder="1960" />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Recording years</span>
+                  <input value={form.recordingYears} onChange={(event) => updateForm("recordingYears", event.target.value)} className={inputClassName()} placeholder="1944-1945, late 1940s-1950s" />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Pressing year</span>
+                  <input value={form.pressingYear} onChange={(event) => updateForm("pressingYear", event.target.value)} className={inputClassName()} inputMode="numeric" placeholder="1974" />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Pressing</span>
+                  <input value={form.pressing} onChange={(event) => updateForm("pressing", event.target.value)} className={inputClassName()} placeholder="Deluxe, standard, limited..." />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Vinyl color</span>
+                  <input value={form.vinylColor} onChange={(event) => updateForm("vinylColor", event.target.value)} className={inputClassName()} placeholder="Black, clear, pink..." />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Condition</span>
+                  <input value={form.condition} onChange={(event) => updateForm("condition", event.target.value)} className={inputClassName()} placeholder="New, good, used..." />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Source</span>
+                  <input value={form.source} onChange={(event) => updateForm("source", event.target.value)} className={inputClassName()} placeholder="Gift, record store, thrifted, wishlist..." />
+                </label>
+
+                <label className="block sm:col-span-2">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Pressing notes</span>
+                  <textarea
+                    value={form.pressingNotes}
+                    onChange={(event) => updateForm("pressingNotes", event.target.value)}
+                    className={`${inputClassName()} min-h-24`}
+                    placeholder="Italian reissue, expanded 2-LP edition, archival pressing..."
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Gift from</span>
+                  <input value={form.giftFrom} onChange={(event) => updateForm("giftFrom", event.target.value)} className={inputClassName()} placeholder="If it was a gift, who from?" />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Where we got it</span>
+                  <input value={form.whereWeGotIt} onChange={(event) => updateForm("whereWeGotIt", event.target.value)} className={inputClassName()} placeholder="Record store, thrift shop, inheritance..." />
+                </label>
+
+                <label className="block sm:col-span-2">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Best for</span>
+                  <input value={form.bestFor} onChange={(event) => updateForm("bestFor", event.target.value)} className={inputClassName()} placeholder="Dinner, road trip, rainy night, background music..." />
+                </label>
+
+                <label className="block sm:col-span-2">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Favorite stories / memories</span>
+                  <textarea
+                    value={form.favoriteStories}
+                    onChange={(event) => updateForm("favoriteStories", event.target.value)}
+                    className={`${inputClassName()} min-h-32`}
+                    placeholder="Where she found it, who gave it to her, when you played it together, why it is special..."
+                  />
+                </label>
+
+                <label className="flex items-center gap-3 sm:col-span-2">
+                  <input type="checkbox" checked={form.favorite} onChange={(event) => updateForm("favorite", event.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+                  <span className="text-sm font-medium text-gray-700">Mark as a favorite</span>
+                </label>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
@@ -503,9 +547,7 @@ export default function VinylManager() {
       <aside className="rounded-lg border border-gray-200 bg-gray-50 p-5">
         <div className="mb-5">
           <h2 className="text-xl font-semibold text-gray-950">Records</h2>
-          <p className="mt-1 text-sm text-gray-600">
-            {records.length} loaded. {apiSource === "supabase" ? "Backed by Supabase." : "Local queue until Supabase env is added."}
-          </p>
+          <p className="mt-1 text-sm text-gray-600">{records.length} total records.</p>
         </div>
 
         <div className="mb-5 flex flex-col gap-2 sm:flex-row">
@@ -520,7 +562,7 @@ export default function VinylManager() {
         </div>
 
         <div className="space-y-3">
-          {records.map((record) => (
+          {paginatedRecords.map((record) => (
             <div key={record.id} className="grid grid-cols-[64px_minmax(0,1fr)_auto] gap-3 rounded-md border border-gray-200 bg-white p-3">
               <div className="relative aspect-square overflow-hidden rounded bg-gray-100">
                 {record.coverImage ? (
@@ -542,6 +584,34 @@ export default function VinylManager() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-gray-200 pt-4 text-sm text-gray-600">
+          <p>
+            Showing {Math.min((recordsPage - 1) * recordsPerPage + 1, records.length)}-
+            {Math.min(recordsPage * recordsPerPage, records.length)} of {records.length}
+          </p>
+          <p>
+            Page {recordsPage} of {totalRecordsPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setRecordsPage((current) => Math.max(1, current - 1))}
+              disabled={recordsPage === 1}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              onClick={() => setRecordsPage((current) => Math.min(totalRecordsPages, current + 1))}
+              disabled={recordsPage === totalRecordsPages}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </aside>
     </div>

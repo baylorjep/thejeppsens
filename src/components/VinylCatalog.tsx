@@ -38,22 +38,28 @@ type QuickFilter = "all" | "favorites" | "wishlist" | "upgrade";
 
 function CoverArt({
   record,
+  src,
+  side = "front",
   priority = false,
   loading = "lazy",
   fetchPriority = "low",
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
 }: {
   record: VinylRecord;
+  src?: string;
+  side?: "front" | "back";
   priority?: boolean;
   loading?: "eager" | "lazy";
   fetchPriority?: "high" | "low" | "auto";
   sizes?: string;
 }) {
-  if (record.coverImage) {
+  const imageSrc = src ?? record.coverImage;
+
+  if (imageSrc) {
     return (
       <Image
-        src={record.coverImage}
-        alt={`${record.title} by ${record.artist} cover`}
+        src={imageSrc}
+        alt={`${record.title} by ${record.artist} ${side} cover`}
         fill
         priority={priority}
         loading={loading}
@@ -61,7 +67,7 @@ function CoverArt({
         sizes={sizes}
         quality={62}
         className="object-cover"
-        unoptimized={record.coverImage.startsWith("data:")}
+        unoptimized={imageSrc.startsWith("data:")}
       />
     );
   }
@@ -638,83 +644,120 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         >
           {showConfetti ? <Confetti recycle={false} numberOfPieces={160} /> : null}
           <div
-            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
+            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="grid gap-0 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-              <div className="p-3 sm:p-4 md:border-r md:border-gray-200">
-                <div className="relative aspect-square overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-sm">
-                  <CoverArt
-                    record={selectedRecord}
-                    priority
-                    sizes="(max-width: 639px) calc(100vw - 1.5rem), (max-width: 1023px) 45vw, 42vw"
-                  />
+            <div className="p-5 sm:p-6 lg:p-8">
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
+                    Album details
+                  </p>
+                  <h2 id="vinyl-modal-title" className="text-3xl font-semibold text-gray-950">
+                    {selectedRecord.title}
+                  </h2>
+                  <p className="mt-2 text-lg text-gray-600">{selectedRecord.artist}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(selectedRecord)}
+                    disabled={favoriteRecordId === selectedRecord.id}
+                    className={`rounded-full border p-2 transition-colors ${
+                      selectedRecord.favorite
+                        ? "border-gray-950 bg-gray-950 text-white"
+                        : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
+                    }`}
+                    aria-label={selectedRecord.favorite ? `Remove ${selectedRecord.title} from favorites` : `Add ${selectedRecord.title} to favorites`}
+                  >
+                    <Star className={`h-5 w-5 ${selectedRecord.favorite ? "fill-current" : ""}`} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRecord(null)}
+                    className="rounded-full border border-gray-200 p-2 text-gray-600 transition-colors hover:border-gray-500 hover:text-gray-950"
+                    aria-label="Close album details"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
 
-              <div className="border-t border-gray-100 p-5 sm:p-6 md:border-t-0 md:border-l md:border-gray-200">
-                <div className="mb-6 flex items-start justify-between gap-4">
-                  <div>
-                    <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
-                      Album details
-                    </p>
-                    <h2 id="vinyl-modal-title" className="text-3xl font-semibold text-gray-950">
-                      {selectedRecord.title}
-                    </h2>
-                    <p className="mt-2 text-lg text-gray-600">{selectedRecord.artist}</p>
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
+                <div className="space-y-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                      <div className="relative aspect-square overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
+                        <CoverArt
+                          record={selectedRecord}
+                          priority
+                          sizes="(max-width: 639px) calc(100vw - 2.5rem), (max-width: 1023px) 50vw, 42vw"
+                        />
+                      </div>
+                      <p className="mt-3 text-sm font-medium text-gray-500">Front cover</p>
+                    </div>
+
+                    {selectedRecord.backCoverImage ? (
+                      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                        <div className="relative aspect-square overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
+                          <CoverArt
+                            record={selectedRecord}
+                            src={selectedRecord.backCoverImage}
+                            side="back"
+                            sizes="(max-width: 639px) calc(100vw - 2.5rem), (max-width: 1023px) 50vw, 34vw"
+                          />
+                        </div>
+                        <p className="mt-3 text-sm font-medium text-gray-500">Back cover</p>
+                      </div>
+                    ) : null}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleFavorite(selectedRecord)}
-                      disabled={favoriteRecordId === selectedRecord.id}
-                      className={`rounded-full border p-2 transition-colors ${
-                        selectedRecord.favorite
-                          ? "border-gray-950 bg-gray-950 text-white"
-                          : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
-                      }`}
-                      aria-label={selectedRecord.favorite ? `Remove ${selectedRecord.title} from favorites` : `Add ${selectedRecord.title} to favorites`}
-                    >
-                      <Star className={`h-5 w-5 ${selectedRecord.favorite ? "fill-current" : ""}`} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedRecord(null)}
-                      className="rounded-full border border-gray-200 p-2 text-gray-600 transition-colors hover:border-gray-500 hover:text-gray-950"
-                      aria-label="Close album details"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
+
+                  <div className="grid gap-3 text-sm sm:grid-cols-2">
+                    {[
+                      ["Released", selectedRecord.releaseYear?.toString()],
+                      ["Status", statusLabel(selectedRecord.status)],
+                      ["Pressing", selectedRecord.pressing],
+                      ["Vinyl color", selectedRecord.vinylColor],
+                      ["Condition", selectedRecord.condition],
+                      ["Source", selectedRecord.source],
+                    ].map(([label, value]) =>
+                      value ? (
+                        <div key={label} className="rounded-md bg-gray-50 p-3">
+                          <dt className="text-gray-500">{label}</dt>
+                          <dd className="mt-1 font-medium text-gray-950">{value}</dd>
+                        </div>
+                      ) : null,
+                    )}
                   </div>
+
+                  {selectedRecord.status !== "owned" ? (
+                    <div className={`rounded-lg border p-4 ${getStatusTone(selectedRecord.status).card}`}>
+                      <p className="text-sm font-medium text-gray-950">{statusLabel(selectedRecord.status)}</p>
+                      <p className="mt-1 text-sm text-gray-700">
+                        {selectedRecord.status === "wishlist"
+                          ? "This one is on Isabel's wishlist."
+                          : "This copy is in the collection, but a better version is still on the radar."}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => markAsOwned(selectedRecord)}
+                        className="mt-4 inline-flex rounded-md bg-gray-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                      >
+                        Mark as owned
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {statusCelebrationMessage ? (
+                    <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                      {statusCelebrationMessage}
+                    </div>
+                  ) : null}
                 </div>
 
-                <RecordMeta record={selectedRecord} />
+                <div className="space-y-6">
+                  <RecordMeta record={selectedRecord} />
 
-                {statusCelebrationMessage ? (
-                  <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-                    {statusCelebrationMessage}
-                  </div>
-                ) : null}
-
-                <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-                  {[
-                    ["Released", selectedRecord.releaseYear?.toString()],
-                    ["Status", statusLabel(selectedRecord.status)],
-                    ["Pressing", selectedRecord.pressing],
-                    ["Vinyl color", selectedRecord.vinylColor],
-                    ["Condition", selectedRecord.condition],
-                    ["Source", selectedRecord.source],
-                  ].map(([label, value]) =>
-                    value ? (
-                      <div key={label} className="rounded-md bg-gray-50 p-3">
-                        <dt className="text-gray-500">{label}</dt>
-                        <dd className="mt-1 font-medium text-gray-950">{value}</dd>
-                      </div>
-                    ) : null,
-                  )}
-                </dl>
-
-                <div className="mt-6 space-y-4">
                   <div>
                     <p className="mb-2 text-sm font-medium text-gray-950">Genres</p>
                     <div className="flex flex-wrap gap-2">
@@ -759,24 +802,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       <p className="text-sm leading-6 text-gray-600">{selectedRecord.favoriteStories}</p>
                     </div>
                   ) : null}
-                </div>
 
-                {selectedRecord.status !== "owned" ? (
-                  <button
-                    type="button"
-                    onClick={() => markAsOwned(selectedRecord)}
-                    className="mt-4 inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                  <Link
+                    href={`/vinyl/${selectedRecord.id}`}
+                    className="inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
                   >
-                    Mark as owned
-                  </button>
-                ) : null}
-
-                <Link
-                  href={`/vinyl/${selectedRecord.id}`}
-                  className="mt-8 inline-flex rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
-                >
-                  Open album page
-                </Link>
+                    Open album page
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
