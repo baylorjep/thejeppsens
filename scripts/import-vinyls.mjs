@@ -73,6 +73,7 @@ function validateRecord(input) {
     "catalogNumber",
     "format",
     "pressing",
+    "storageLocation",
     "originalReleaseYear",
     "recordingYears",
     "pressingYear",

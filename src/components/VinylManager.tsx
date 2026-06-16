@@ -21,6 +21,7 @@ type FormState = {
   catalogNumber: string;
   format: string;
   discCount: string;
+  storageLocation: string;
   genres: string;
   moods: string;
   favoriteTracks: string;
@@ -51,6 +52,7 @@ const emptyForm: FormState = {
   catalogNumber: "",
   format: "LP",
   discCount: "1",
+  storageLocation: "",
   genres: "",
   moods: "",
   favoriteTracks: "",
@@ -82,6 +84,7 @@ function recordToForm(record: VinylRecord): FormState {
     catalogNumber: record.catalogNumber ?? "",
     format: record.format ?? "LP",
     discCount: record.discCount?.toString() ?? "1",
+    storageLocation: record.storageLocation ?? "",
     genres: record.genres.join(", "),
     moods: record.moods.join(", "),
     favoriteTracks: record.favoriteTracks?.join(", ") ?? "",
@@ -221,6 +224,7 @@ export default function VinylManager() {
       catalogNumber: form.catalogNumber.trim() || undefined,
       format: form.format.trim() || undefined,
       discCount: form.discCount ? Number(form.discCount) : undefined,
+      storageLocation: form.storageLocation.trim() || undefined,
       genres: splitList(form.genres),
       moods: splitList(form.moods),
       favoriteTracks: splitList(form.favoriteTracks),
@@ -490,6 +494,16 @@ export default function VinylManager() {
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-gray-700">Source</span>
                   <input value={form.source} onChange={(event) => updateForm("source", event.target.value)} className={inputClassName()} placeholder="Gift, record store, thrifted, wishlist..." />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">Storage location</span>
+                  <input
+                    value={form.storageLocation}
+                    onChange={(event) => updateForm("storageLocation", event.target.value)}
+                    className={inputClassName()}
+                    placeholder="Crate 1, crate 3.1..."
+                  />
                 </label>
 
                 <label className="block sm:col-span-2">

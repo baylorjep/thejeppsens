@@ -11,6 +11,7 @@ export type VinylRecord = {
   catalogNumber?: string;
   format?: string;
   discCount?: number;
+  storageLocation?: string;
   genres: string[];
   moods: string[];
   favoriteTracks?: string[];

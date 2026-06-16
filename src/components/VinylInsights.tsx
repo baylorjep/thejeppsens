@@ -43,6 +43,28 @@ function BreakdownSection({
   );
 }
 
+function AnimatedNumber({ value }: { value: number }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const duration = 700;
+    const start = performance.now();
+    let frame = 0;
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(value * eased));
+      if (progress < 1) frame = window.requestAnimationFrame(tick);
+    };
+
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [value]);
+
+  return <>{displayValue}</>;
+}
+
 export default function VinylInsights({ records }: VinylInsightsProps) {
   const [allRecords, setAllRecords] = useState(records);
 
@@ -87,7 +109,9 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         ].map(([label, value]) => (
           <div key={label} className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
             <p className="text-sm text-gray-500">{label}</p>
-            <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{value}</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+              <AnimatedNumber value={value as number} />
+            </p>
           </div>
         ))}
       </div>
@@ -101,7 +125,9 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         ].map((item) => (
           <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
             <p className="text-sm text-gray-500">{item.label}</p>
-            <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{item.value}</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+              <AnimatedNumber value={item.value} />
+            </p>
           </div>
         ))}
       </div>
@@ -118,9 +144,9 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: "Top label", value: snapshot.topLabel.value, sublabel: `${snapshot.topLabel.count} records` },
-          { label: "Top format", value: snapshot.topFormat.value, sublabel: `${snapshot.topFormat.count} records` },
+          {[
+            { label: "Top label", value: snapshot.topLabel.value, sublabel: `${snapshot.topLabel.count} records` },
+            { label: "Top format", value: snapshot.topFormat.value, sublabel: `${snapshot.topFormat.count} records` },
           {
             label: "Top release era",
             value: snapshot.topReleaseEra.value,
@@ -131,11 +157,11 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             value: snapshot.topRecordingEra.value,
             sublabel: `${snapshot.topRecordingEra.count} records`,
           },
-        ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
-            <p className="text-sm text-gray-500">{item.label}</p>
-            <p className="mt-2 text-lg font-semibold text-gray-950">{item.value}</p>
-            <p className="mt-1 text-sm text-gray-500">{item.sublabel}</p>
+          ].map((item) => (
+            <div key={item.label} className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+              <p className="text-sm text-gray-500">{item.label}</p>
+              <p className="mt-2 text-lg font-semibold text-gray-950">{item.value}</p>
+              <p className="mt-1 text-sm text-gray-500">{item.sublabel}</p>
           </div>
         ))}
       </div>

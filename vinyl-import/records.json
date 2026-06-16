@@ -29,7 +29,8 @@
     "favorite": false,
     "label": "Coronet Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "various-artists-big-band-75",
@@ -61,7 +62,8 @@
     "favorite": false,
     "label": "RCA Special Products",
     "format": "2xLP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "tyler-bates-guardians-of-the-galaxy-vol-2-deluxe-edition",
@@ -94,7 +96,8 @@
     "favorite": false,
     "label": "Hollywood Records",
     "format": "2xLP",
-    "discCount": 2
+    "discCount": 2,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "luke-combs-what-you-see-aint-always-what-you-get",
@@ -126,7 +129,8 @@
     "favorite": false,
     "label": "Columbia Nashville",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "ray-charles-live-in-concert-the-complete-performance",
@@ -162,7 +166,8 @@
     "format": "2xLP",
     "discCount": 2,
     "pressingYear": 2026,
-    "pressingNotes": "Expanded 2-LP 2026 vinyl edition; first vinyl release of the complete performance."
+    "pressingNotes": "Expanded 2-LP 2026 vinyl edition; first vinyl release of the complete performance.",
+    "storageLocation": "Crate 1"
   },
   {
     "id": "chet-baker-in-japan-1987-fukui-vol-2",
@@ -193,7 +198,8 @@
     "favorite": false,
     "label": "King Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "frank-sinatra-sinatra",
@@ -220,7 +226,8 @@
     "favorite": false,
     "label": "Reprise Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "styx-cornerstone",
@@ -252,7 +259,8 @@
     "favorite": false,
     "label": "A&M Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "louis-armstrong-satchmos-golden-favorites",
@@ -289,7 +297,8 @@
     "catalogNumber": "COPS 7005",
     "pressingNotes": "Italian MCA/Coral licensed reissue, likely a 1970s pressing.",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "stephen-schwartz-wicked-for-good-the-soundtrack",
@@ -322,7 +331,8 @@
     "favorite": false,
     "label": "Decca Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "engelbert-humperdinck-live-in-concert-all-of-me-and-a-little-bit-more",
@@ -355,7 +365,8 @@
     "favorite": false,
     "label": "Epic Records",
     "format": "2xLP",
-    "discCount": 2
+    "discCount": 2,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "harry-james-and-his-orchestra-1943-46-live",
@@ -390,7 +401,8 @@
     "catalogNumber": "HSR-102",
     "pressingNotes": "Archival live/radio performances from the big-band era.",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "walt-disney-alice-in-wonderland",
@@ -424,7 +436,8 @@
     "label": "Disneyland Records",
     "catalogNumber": "3909",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "the-beatles-revolver",
@@ -457,7 +470,8 @@
     "favorite": false,
     "label": "Capitol Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "louis-armstrong-hello-dolly",
@@ -491,7 +505,8 @@
     "label": "Kapp Records",
     "catalogNumber": "KL-1364",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "frank-sinatra-thats-life",
@@ -523,7 +538,8 @@
     "favorite": false,
     "label": "Reprise Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "frank-sinatra-all-the-way",
@@ -555,7 +571,8 @@
     "favorite": false,
     "label": "Capitol Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "various-artists-swingin-stereo-with-ten-big-bands",
@@ -588,7 +605,8 @@
     "label": "Capitol Records",
     "catalogNumber": "SW-1161",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "various-artists-50s-60s-the-hitwave-presents-the-authentic-hits",
@@ -625,7 +643,8 @@
     "favorite": false,
     "label": "The Hitwave",
     "format": "2xLP",
-    "discCount": 2
+    "discCount": 2,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "neil-diamond-the-jazz-singer",
@@ -658,7 +677,8 @@
     "favorite": false,
     "label": "Columbia Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "frank-sinatra-the-voice",
@@ -690,7 +710,8 @@
     "label": "Columbia Records",
     "catalogNumber": "CL 743",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "frank-sinatra-swing-along-with-me",
@@ -724,7 +745,8 @@
     "label": "Reprise Records",
     "catalogNumber": "R-1002",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "the-jeppsens-la-vie-en-rose-wedding-mix",
@@ -757,7 +779,8 @@
     "favorite": false,
     "label": "The Jeppsens",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "the-beach-boys-today",
@@ -790,7 +813,8 @@
     "favorite": false,
     "label": "Capitol Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "perry-como-comos-golden-records",
@@ -823,7 +847,8 @@
     "favorite": false,
     "label": "RCA Victor",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "harry-james-wild-about-harry",
@@ -855,7 +880,8 @@
     "favorite": false,
     "label": "Capitol Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "harry-james-and-his-orchestra-strictly-instrumental",
@@ -889,7 +915,8 @@
     "catalogNumber": "HL 7269",
     "pressingNotes": "Harmony budget-label Columbia compilation.",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "rodgers-and-hammerstein-the-sound-of-music",
@@ -922,7 +949,8 @@
     "favorite": false,
     "label": "RCA Victor",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "tony-bennett-tony-bennetts-all-time-greatest-hits",
@@ -955,7 +983,8 @@
     "label": "Columbia Records",
     "format": "2xLP",
     "catalogNumber": "PG 31494",
-    "discCount": 2
+    "discCount": 2,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "the-ink-spots-greatest-hits",
@@ -988,7 +1017,8 @@
     "favorite": false,
     "label": "Not Now Music",
     "format": "2xLP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "queen-jazz",
@@ -1021,7 +1051,8 @@
     "favorite": false,
     "label": "Elektra Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "the-beatles-hear-the-beatles-tell-all",
@@ -1052,7 +1083,8 @@
     "favorite": false,
     "label": "Vee-Jay Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "louis-armstrong-y-su-orquesta-historia-del-jazz",
@@ -1088,7 +1120,8 @@
     "catalogNumber": "GM-350",
     "pressingNotes": "Spanish pressing; recordings from 1944-1945.",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "billy-joel-glass-houses",
@@ -1120,7 +1153,8 @@
     "favorite": false,
     "label": "Columbia Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "billy-joel-an-innocent-man",
@@ -1153,7 +1187,8 @@
     "favorite": false,
     "label": "Columbia Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "brenton-wood-baby-you-got-it",
@@ -1185,7 +1220,8 @@
     "favorite": false,
     "label": "Double Shot Records",
     "format": "7-inch single",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "michael-giacchino-ratatouille",
@@ -1218,7 +1254,8 @@
     "favorite": false,
     "label": "Walt Disney Records",
     "format": "Picture disc",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "john-williams-the-empire-strikes-back",
@@ -1251,7 +1288,8 @@
     "favorite": false,
     "label": "20th Century Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "jon-brion-lady-bird",
@@ -1284,7 +1322,8 @@
     "favorite": false,
     "label": "Lakeshore Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "danny-elfman-spider-man-original-motion-picture-score",
@@ -1317,7 +1356,8 @@
     "favorite": false,
     "label": "La-La Land Records",
     "format": "Picture disc",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "the-head-and-the-heart-signs-of-light",
@@ -1350,7 +1390,8 @@
     "favorite": false,
     "label": "Dualtone Records",
     "format": "Picture disc",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "frank-sinatra-swing-easy",
@@ -1383,7 +1424,8 @@
     "favorite": false,
     "label": "Capitol Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "tom-jones-live-at-caesars-palace",
@@ -1416,7 +1458,8 @@
     "favorite": false,
     "label": "Decca Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "sade-the-best-of-sade",
@@ -1449,7 +1492,8 @@
     "favorite": false,
     "label": "Epic Records",
     "format": "2xLP",
-    "discCount": 2
+    "discCount": 2,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "dire-straits-brothers-in-arms",
@@ -1482,7 +1526,8 @@
     "favorite": false,
     "label": "Vertigo",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "bob-dylan-bob-dylans-greatest-hits",
@@ -1515,7 +1560,8 @@
     "favorite": false,
     "label": "Columbia Records",
     "format": "2xLP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "henry-mancini-breakfast-at-tiffanys",
@@ -1548,7 +1594,8 @@
     "favorite": false,
     "label": "RCA Victor",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "ella-fitzgerald-and-louis-armstrong-ella-and-louis",
@@ -1581,7 +1628,8 @@
     "favorite": false,
     "label": "Verve Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 1"
   },
   {
     "id": "jimmy-dorsey-and-his-orchestra-the-uncollected-jimmy-dorsey-vol-3-1949-1951",
@@ -1616,7 +1664,8 @@
     "label": "Hindsight Records",
     "catalogNumber": "HSR-165",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "frank-sinatra-tell-her-you-love-her",
@@ -1650,7 +1699,8 @@
     "label": "Capitol Records",
     "catalogNumber": "DT-1919",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "the-kinks-state-of-confusion",
@@ -1683,7 +1733,8 @@
     "favorite": false,
     "label": "Arista Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "ella-fitzgerald-and-louis-armstrong-ella-and-louis-wxtm-2010",
@@ -1720,7 +1771,8 @@
     "favorite": false,
     "label": "WaxTime Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "frank-sinatra-songs-for-swingin-lovers-2016",
@@ -1756,7 +1808,8 @@
     "favorite": false,
     "label": "Capitol Records / UMe",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "frank-sinatra-nice-n-easy-2020",
@@ -1792,7 +1845,8 @@
     "favorite": false,
     "label": "Capitol Records / UMe",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "julio-iglesias-in-concert",
@@ -1820,7 +1874,8 @@
     "favorite": false,
     "label": "Columbia Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "the-lumineers-the-lumineers",
@@ -1853,7 +1908,8 @@
     "favorite": false,
     "label": "Dualtone Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "harry-connick-jr-music-from-the-motion-picture-when-harry-met-sally",
@@ -1887,7 +1943,8 @@
     "favorite": false,
     "label": "Music On Vinyl",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "original-broadway-cast-of-dear-evan-hansen-dear-evan-hansen-original-broadway-cast-recording",
@@ -1920,7 +1977,8 @@
     "favorite": false,
     "label": "Atlantic Records",
     "format": "2xLP",
-    "discCount": 2
+    "discCount": 2,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "jeppsen-family-and-friends-jeppsen-wedding-voice-recordings",
@@ -1948,7 +2006,8 @@
     "favorite": false,
     "label": "Jeppsen Family and Friends",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "harry-james-and-his-big-band-the-king-james-version",
@@ -2016,7 +2075,8 @@
     "favorite": false,
     "label": "Asylum Records",
     "format": "EP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "the-four-seasons-the-4-seasons-gold-vault-of-hits",
@@ -2050,7 +2110,8 @@
     "label": "Philips",
     "catalogNumber": "PHS 600-196",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "the-beatles-abbey-road",
@@ -2083,7 +2144,8 @@
     "favorite": false,
     "label": "Apple Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "la-la-land-original-motion-picture-score",
@@ -2116,7 +2178,8 @@
     "favorite": false,
     "label": "Interscope Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "bleachers-strange-desire",
@@ -2149,7 +2212,8 @@
     "favorite": false,
     "label": "RCA Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "la-la-land-original-motion-picture-soundtrack",
@@ -2182,7 +2246,8 @@
     "favorite": false,
     "label": "Interscope Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "billy-joel-52nd-street",
@@ -2215,7 +2280,8 @@
     "favorite": false,
     "label": "Columbia Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "bleachers-gone-now",
@@ -2248,7 +2314,8 @@
     "favorite": false,
     "label": "RCA Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "al-green-greatest-hits",
@@ -2281,7 +2348,8 @@
     "favorite": false,
     "label": "Hi Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.2"
   },
   {
     "id": "frank-sinatra-ultimate-sinatra",
@@ -2315,7 +2383,8 @@
     "label": "Universal Music Enterprises",
     "format": "4xLP",
     "discCount": 4,
-    "pressingNotes": "2015 4-LP Ultimate Sinatra box set."
+    "pressingNotes": "2015 4-LP Ultimate Sinatra box set.",
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "sam-cooke-portrait-of-a-legend-1951-1964",
@@ -2349,7 +2418,8 @@
     "favorite": false,
     "label": "ABKCO Records",
     "format": "2xLP",
-    "discCount": 2
+    "discCount": 2,
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "hello-dolly-original-motion-picture-soundtrack",
@@ -2382,7 +2452,8 @@
     "favorite": false,
     "label": "Hollywood Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "john-williams-raiders-of-the-lost-ark",
@@ -2415,7 +2486,8 @@
     "favorite": false,
     "label": "Columbia Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "soundtrack-factory-singin-in-the-rain-original-motion-picture-soundtrack",
@@ -2451,7 +2523,8 @@
     "label": "Soundtrack Factory",
     "format": "LP",
     "discCount": 1,
-    "pressingYear": 2018
+    "pressingYear": 2018,
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "elvis-presley-blue-hawaii",
@@ -2484,7 +2557,8 @@
     "favorite": false,
     "label": "RCA Victor",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "queen-a-night-at-the-opera",
@@ -2517,7 +2591,8 @@
     "favorite": false,
     "label": "Hollywood Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "john-powell-how-to-train-your-dragon",
@@ -2550,7 +2625,8 @@
     "favorite": false,
     "label": "Varèse Sarabande",
     "format": "Picture disc",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "various-artists-the-fault-in-our-stars-music-from-the-motion-picture",
@@ -2583,7 +2659,8 @@
     "favorite": false,
     "label": "Atlantic",
     "format": "2xLP",
-    "discCount": 2
+    "discCount": 2,
+    "storageLocation": "Crate 3.3"
   },
   {
     "id": "khalid-american-teen",
@@ -2616,6 +2693,7 @@
     "favorite": false,
     "label": "RCA Records",
     "format": "LP",
-    "discCount": 1
+    "discCount": 1,
+    "storageLocation": "Crate 3.3"
   }
 ]

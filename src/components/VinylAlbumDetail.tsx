@@ -29,6 +29,7 @@ type AlbumEditForm = {
   catalogNumber: string;
   format: string;
   discCount: string;
+  storageLocation: string;
   genres: string;
   moods: string;
   favoriteTracks: string;
@@ -60,6 +61,7 @@ function recordToEditForm(record: VinylRecord): AlbumEditForm {
     catalogNumber: record.catalogNumber ?? "",
     format: record.format ?? "LP",
     discCount: record.discCount?.toString() ?? "1",
+    storageLocation: record.storageLocation ?? "",
     genres: record.genres.join(", "),
     moods: record.moods.join(", "),
     favoriteTracks: record.favoriteTracks?.join(", ") ?? "",
@@ -265,6 +267,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       catalogNumber: editForm.catalogNumber.trim() || undefined,
       format: editForm.format.trim() || undefined,
       discCount: editForm.discCount ? Number(editForm.discCount) : undefined,
+      storageLocation: editForm.storageLocation.trim() || undefined,
       genres: editForm.genres
         .split(",")
         .map((item) => item.trim())
@@ -458,6 +461,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ["Catalog number", record.catalogNumber],
                 ["Pressing", record.pressing],
                 ["Pressing notes", record.pressingNotes],
+                ["Storage location", record.storageLocation],
                 ["Vinyl color", record.vinylColor],
                 ["Condition", record.condition],
                 ["Source", record.source],
@@ -609,6 +613,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ["Label", "label", "Capitol, Reprise, Verve..."],
                 ["Catalog number", "catalogNumber", "SW-1538, RS-1234..."],
                 ["Disc count", "discCount", "1"],
+                ["Storage location", "storageLocation", "Crate 1, crate 3.1..."],
                 ["Genres", "genres", "Rock, Pop"],
                 ["Moods", "moods", "Cozy, Dinner, Rainy"],
                 ["Favorite tracks", "favoriteTracks", "Track one, Track two"],

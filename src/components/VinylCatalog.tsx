@@ -103,6 +103,28 @@ function RecordMeta({ record }: { record: VinylRecord }) {
   );
 }
 
+function AnimatedNumber({ value }: { value: number }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const duration = 700;
+    const start = performance.now();
+    let frame = 0;
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(value * eased));
+      if (progress < 1) frame = window.requestAnimationFrame(tick);
+    };
+
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [value]);
+
+  return <>{displayValue}</>;
+}
+
 export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [allRecords, setAllRecords] = useState<VinylRecord[]>(records);
   const [, setApiSource] = useState<VinylApiStatus>("local");
@@ -170,6 +192,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         record.vinylColor,
         record.condition,
         record.source,
+        record.storageLocation,
         record.giftFrom,
         record.whereWeGotIt,
         record.bestFor,
@@ -324,19 +347,27 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
           <p className="text-sm text-gray-500">Records</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{allRecords.length}</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+            <AnimatedNumber value={allRecords.length} />
+          </p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
           <p className="text-sm text-gray-500">Artists</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{snapshot.artists}</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+            <AnimatedNumber value={snapshot.artists} />
+          </p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
           <p className="text-sm text-gray-500">Genres</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{snapshot.genres}</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+            <AnimatedNumber value={snapshot.genres} />
+          </p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
           <p className="text-sm text-gray-500">Favorites</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">{snapshot.favorites}</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+            <AnimatedNumber value={snapshot.favorites} />
+          </p>
         </div>
       </div>
 
@@ -418,7 +449,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search title, artist, song, genre, notes, stories..."
+              placeholder="Search title, artist, song, genre, notes, stories, storage..."
               className="w-full rounded-md border border-gray-300 py-3 pl-10 pr-4 text-sm outline-none transition-colors focus:border-gray-950"
             />
           </label>
@@ -568,10 +599,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 : "space-y-4"
             }
           >
-            {paginatedRecords.map((record) => (
+            {paginatedRecords.map((record, index) => (
             <article
               key={record.id}
-              style={{ contentVisibility: "auto", containIntrinsicSize: "360px" }}
               className={
                 viewMode === "grid"
                   ? `overflow-hidden rounded-lg border ${getStatusTone(record.status).card}`
@@ -584,8 +614,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               >
                 <CoverArt
                   record={record}
-                  loading="lazy"
-                  fetchPriority="low"
+                  priority={index < 4}
+                  loading={index < 4 ? "eager" : "lazy"}
+                  fetchPriority={index < 4 ? "high" : "low"}
                   sizes={
                     viewMode === "grid"
                       ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
