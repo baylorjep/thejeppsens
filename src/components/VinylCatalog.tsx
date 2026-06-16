@@ -143,7 +143,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [statusCelebrationMessage, setStatusCelebrationMessage] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
   const hasAppliedFavoriteDefault = useRef(false);
-  const recordsPerPage = 12;
+  const recordsPerPage = 9;
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
