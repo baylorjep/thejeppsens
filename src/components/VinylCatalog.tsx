@@ -473,7 +473,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       ) : null}
 
       <section className="mb-10 rounded-lg border border-gray-200 bg-white p-5">
-        <div className="mb-5 flex flex-col gap-3">
+        <div className="mb-5 flex flex-col items-start gap-3 text-left">
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-gray-500">
             Collection Snapshot
           </p>
