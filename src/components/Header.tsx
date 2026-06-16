@@ -12,9 +12,9 @@ export default function Header() {
 
   const navigation = [
     { name: 'Travel', href: '/travel' },
+    { name: 'Vinyl', href: '/vinyl' },
     { name: 'Food', href: '/restaurants' },
     { name: 'Movies', href: '/movies' },
-    { name: 'Vinyl', href: '/vinyl' },
     { name: 'Budget', href: '/budget' },
   ];
 
