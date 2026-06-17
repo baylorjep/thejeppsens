@@ -1273,7 +1273,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       onClick={() => window.open(selectedRecordAppleMusicUrl, "_blank", "noopener,noreferrer")}
                       className="inline-flex rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
                     >
-                      Open in Apple Music
+                      {selectedRecordAppleMusicUrl.startsWith("https://music.apple.com")
+                        ? "Open in Apple Music"
+                        : "Find on Apple Music"}
                     </button>
 
                     <Link
