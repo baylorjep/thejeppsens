@@ -16,8 +16,45 @@ interface Country {
 }
 interface VinylRecord {
   id: string; title: string; artist: string;
-  releaseYear?: number; vinylColor?: string; coverImage?: string;
+  releaseYear?: number; vinylColor?: string; coverImage?: string; backCoverImage?: string;
   status: 'owned' | 'wishlist' | 'upgrade';
+}
+
+function VinylCard({ record }: { record: VinylRecord }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const hasBack = Boolean(record.backCoverImage);
+
+  return (
+    <Link
+      href={`/vinyl/${record.id}`}
+      className="relative shrink-0 h-40 w-40 sm:h-48 sm:w-48 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm block"
+      style={{ perspective: '1200px' }}
+      onMouseEnter={() => hasBack && setIsFlipped(true)}
+      onMouseLeave={() => setIsFlipped(false)}
+    >
+      <div
+        className="relative h-full w-full transition-transform duration-500 ease-out"
+        style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
+      >
+        <div className="absolute inset-0 [backface-visibility:hidden]">
+          {record.coverImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={record.coverImage} alt={record.title} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center" style={{ backgroundColor: record.vinylColor ? `${record.vinylColor}22` : '#f3f4f6' }}>
+              <Disc3 className="h-10 w-10 text-gray-300" style={{ color: record.vinylColor ?? undefined }} />
+            </div>
+          )}
+        </div>
+        {hasBack && (
+          <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={record.backCoverImage!} alt={`${record.title} back`} className="h-full w-full object-cover" />
+          </div>
+        )}
+      </div>
+    </Link>
+  );
 }
 
 const photos: Photo[] = [
@@ -154,9 +191,9 @@ export default function Homepage() {
       </section>
 
       {/* ── Vinyl carousel ── */}
-      <section className="py-14 border-t border-gray-100 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
+      <section className="py-14 border-t border-gray-100 bg-gray-50 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+          <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-gray-900">Vinyl collection</h2>
               {vinyls.length > 0 && (
@@ -167,46 +204,23 @@ export default function Homepage() {
               View all →
             </Link>
           </div>
-
-          {vinyls.length === 0 ? (
-            <div className="flex gap-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="shrink-0 w-36 bg-white rounded-xl border border-gray-100 overflow-hidden animate-pulse">
-                  <div className="aspect-square bg-gray-100" />
-                  <div className="p-3 space-y-1.5">
-                    <div className="h-3 bg-gray-100 rounded w-3/4" />
-                    <div className="h-2.5 bg-gray-100 rounded w-1/2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {vinyls.map((r) => (
-                <Link key={r.id} href="/vinyl"
-                  className="snap-start shrink-0 w-36 bg-white rounded-xl border border-gray-100 hover:border-gray-300 overflow-hidden transition-colors group">
-                  {r.coverImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={r.coverImage} alt={r.title} className="w-full aspect-square object-cover" />
-                  ) : (
-                    <div className="w-full aspect-square flex items-center justify-center"
-                      style={{ backgroundColor: r.vinylColor ? `${r.vinylColor}22` : '#f3f4f6' }}>
-                      <Disc3 className="h-10 w-10 text-gray-300 group-hover:text-gray-400 transition-colors"
-                        style={{ color: r.vinylColor ?? undefined }} />
-                    </div>
-                  )}
-                  <div className="p-3">
-                    <div className="text-xs font-semibold text-gray-900 truncate">{r.title}</div>
-                    <div className="text-xs text-gray-400 truncate mt-0.5">{r.artist}</div>
-                    {r.releaseYear && (
-                      <div className="text-[10px] text-gray-300 mt-1">{r.releaseYear}</div>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
+
+        {vinyls.length === 0 ? (
+          <div className="flex gap-4 px-4 sm:px-6 lg:px-8">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="shrink-0 h-40 w-40 rounded-xl bg-gray-200 animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="py-2">
+            <div className="vinyl-marquee flex w-max gap-4">
+              {[...vinyls, ...vinyls, ...vinyls].map((r, i) => (
+                <VinylCard key={`${r.id}-${i}`} record={r} />
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ── Mini games ── */}
