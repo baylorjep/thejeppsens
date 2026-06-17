@@ -545,28 +545,28 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
   return (
     <div>
-      <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+      <div className="mb-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
           <p className="text-sm text-gray-500">Records</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
             <AnimatedNumber value={allRecords.length} />
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
           <p className="text-sm text-gray-500">Artists</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
             <AnimatedNumber value={snapshot.artists} />
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
           <p className="text-sm text-gray-500">Genres</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
             <AnimatedNumber value={snapshot.genres} />
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
           <p className="text-sm text-gray-500">Favorites</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-950 sm:text-3xl">
+          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
             <AnimatedNumber value={snapshot.favorites} />
           </p>
         </div>
