@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { ChevronLeft, ChevronRight, Disc3, Utensils, Film, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Disc3, Utensils, Film, ExternalLink, Globe, Music2 } from 'lucide-react';
 import type { VisitType } from '@/components/WorldMap';
 
 const WorldMap = dynamic(() => import('@/components/WorldMap'), { ssr: false });
@@ -93,12 +93,35 @@ export default function Homepage() {
         </div>
       </section>
 
+      {/* ── Quick nav ── */}
+      <section className="border-t border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { label: 'Travel', href: '/travel', icon: <Globe className="h-5 w-5" /> },
+              { label: 'Vinyl', href: '/vinyl', icon: <Music2 className="h-5 w-5" /> },
+              { label: 'Food', href: '/restaurants', icon: <Utensils className="h-5 w-5" /> },
+              { label: 'Movies', href: '/movies', icon: <Film className="h-5 w-5" /> },
+            ].map(({ label, href, icon }) => (
+              <Link
+                key={label}
+                href={href}
+                className="flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-white py-4 px-2 text-center hover:border-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                <span className="text-gray-500">{icon}</span>
+                <span className="text-xs font-medium text-gray-700">{label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Travel map preview ── */}
       <section className="py-14 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Our travels</h2>
+              <h2 className="text-xl font-bold text-gray-900">Where we&apos;ve been</h2>
               {countries && (
                 <p className="text-sm text-gray-400 mt-1">
                   {countries.length} countries · {continentCount} continents
