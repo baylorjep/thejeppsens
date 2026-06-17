@@ -19,7 +19,7 @@ export async function getAppleMusicAlbumUrl(record: VinylRecord) {
   const term = encodeURIComponent(`${record.artist} ${record.title}`.trim());
 
   try {
-    const response = await fetch(`https://itunes.apple.com/search?term=${term}&entity=album&limit=10&country=US`);
+    const response = await fetch(`https://itunes.apple.com/search?term=${term}&entity=album&limit=25&country=US`);
     if (!response.ok) return fallback;
 
     const data = (await response.json()) as {
