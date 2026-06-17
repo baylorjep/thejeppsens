@@ -392,12 +392,12 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.05fr)]">
           <div className="border-b border-gray-200 bg-gray-50 p-4 sm:p-6 lg:border-b-0 lg:border-r lg:p-8">
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <CoverGallery record={record} />
 
-              <div className="hidden space-y-5 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 md:block">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="space-y-1">
+              <div className="hidden space-y-4 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 md:block">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="space-y-0.5">
                     <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Album details</h2>
                     <span className="text-xs uppercase tracking-[0.18em] text-gray-400">Quick view</span>
                   </div>
@@ -419,7 +419,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
                     <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Genres</h3>
                     <div className="flex flex-wrap gap-2">
@@ -443,7 +443,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                   </div>
 
                   {record.favoriteTracks?.length ? (
-                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-5">
+                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                       <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
                         Favorite tracks
                       </h3>
@@ -480,7 +480,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                     </button>
                   </div>
 
-                  <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+                  <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-6">
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Notes</h3>
                       <button
@@ -518,7 +518,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                   </div>
 
                   {record.favoriteStories ? (
-                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-6">
                       <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
                         Favorite stories
                       </h3>
@@ -530,9 +530,9 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             </div>
           </div>
 
-          <div className="space-y-6 p-5 sm:p-6 lg:p-10">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0 space-y-3">
+          <div className="space-y-5 p-4 sm:p-6 lg:p-10">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-2">
                 <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">Album</p>
                 {isEditingRecord && editForm ? (
                   <div className="space-y-3">
@@ -603,7 +603,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               </div>
             </div>
 
-            <div className="grid gap-3 md:hidden">
+            <div className="grid gap-2 md:hidden">
               <button
                 type="button"
                 onClick={() => window.open(appleMusicUrl, "_blank", "noopener,noreferrer")}
@@ -697,7 +697,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               )}
             </dl>
             {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
-              <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
+              <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
                 <div className="space-y-3">
                   {[
