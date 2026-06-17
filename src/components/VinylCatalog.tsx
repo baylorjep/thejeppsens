@@ -97,7 +97,7 @@ function CoverArt({
               alt={`${record.title} by ${record.artist} ${side} cover`}
               fill
               priority={priority}
-              loading={loading}
+              loading={priority ? undefined : loading}
               fetchPriority={priority ? "high" : fetchPriority}
               sizes={sizes}
               quality={62}
@@ -222,12 +222,15 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [isCompactCarousel, setIsCompactCarousel] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [carouselSeed] = useState(() => Math.random());
+  const [carouselSeed, setCarouselSeed] = useState(0);
   const hasAppliedFavoriteDefault = useRef(false);
   const desktopCarouselDelay = `${-(carouselSeed * 84).toFixed(2)}s`;
   const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
   const mobileCarouselItemRefs = useRef<Array<HTMLAnchorElement | HTMLButtonElement | null>>([]);
+  const mobileCarouselReverseRef = useRef<HTMLDivElement | null>(null);
+  const mobileCarouselReverseItemRefs = useRef<Array<HTMLAnchorElement | HTMLButtonElement | null>>([]);
   const hasInitializedTouchCarousel = useRef(false);
+  const hasInitializedTouchCarouselReverse = useRef(false);
   const recordsPerPage = 9;
 
   useEffect(() => {
@@ -276,6 +279,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     update();
     mediaQuery.addEventListener("change", update);
     return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    setCarouselSeed(Math.random());
   }, []);
 
   const filterOptions = useMemo(
@@ -360,10 +367,18 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       bottom: shuffled.filter((_, index) => index % 2 === 1),
     };
   }, [carouselRecords, carouselSeed]);
+  const mobileCarouselRows = useMemo(() => {
+    const midpoint = Math.ceil(carouselRecords.length / 2);
+    return {
+      top: carouselRecords.slice(0, midpoint),
+      bottom: carouselRecords.slice(midpoint),
+    };
+  }, [carouselRecords]);
   const rollingRecords = isCompactCarousel
     ? [...carouselRecords, ...carouselRecords]
     : [...carouselRecords, ...carouselRecords, ...carouselRecords];
-  const touchCarouselRecords = [...carouselRecords, ...carouselRecords];
+  const touchCarouselRecords = [...mobileCarouselRows.top, ...mobileCarouselRows.top];
+  const touchCarouselReverseRecords = [...mobileCarouselRows.bottom, ...mobileCarouselRows.bottom];
   const rollingRecordsReverse = isCompactCarousel
     ? []
     : [...desktopCarouselRows.bottom, ...desktopCarouselRows.bottom, ...desktopCarouselRows.bottom];
@@ -410,10 +425,26 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   }, [carouselRecords.length, isTouchDevice]);
 
   useEffect(() => {
-    if (!isTouchDevice || !mobileCarouselRef.current) return;
+    if (!isTouchDevice || hasInitializedTouchCarouselReverse.current || !mobileCarouselReverseRef.current || !touchCarouselReverseRecords.length) {
+      return;
+    }
+
+    const startIndex = Math.floor(Math.random() * touchCarouselReverseRecords.length);
+    mobileCarouselReverseItemRefs.current[startIndex]?.scrollIntoView({
+      behavior: "auto",
+      block: "nearest",
+      inline: "center",
+    });
+    hasInitializedTouchCarouselReverse.current = true;
+  }, [isTouchDevice, touchCarouselReverseRecords.length]);
+
+  useEffect(() => {
+    if (!isTouchDevice || !mobileCarouselRef.current || !mobileCarouselReverseRef.current) return;
 
     const container = mobileCarouselRef.current;
+    const reverseContainer = mobileCarouselReverseRef.current;
     let frame = 0;
+    let reverseFrame = 0;
     let pauseUntil = 0;
 
     const pause = () => {
@@ -431,18 +462,37 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       frame = window.requestAnimationFrame(tick);
     };
 
+    const reverseTick = (now: number) => {
+      const loopWidth = reverseContainer.scrollWidth / 2;
+      if (loopWidth > 0 && now >= pauseUntil) {
+        reverseContainer.scrollLeft += 0.9;
+        if (reverseContainer.scrollLeft >= loopWidth) {
+          reverseContainer.scrollLeft -= loopWidth;
+        }
+      }
+      reverseFrame = window.requestAnimationFrame(reverseTick);
+    };
+
     frame = window.requestAnimationFrame(tick);
+    reverseFrame = window.requestAnimationFrame(reverseTick);
     container.addEventListener("touchstart", pause, { passive: true });
     container.addEventListener("pointerdown", pause);
     container.addEventListener("wheel", pause, { passive: true });
+    reverseContainer.addEventListener("touchstart", pause, { passive: true });
+    reverseContainer.addEventListener("pointerdown", pause);
+    reverseContainer.addEventListener("wheel", pause, { passive: true });
 
     return () => {
       window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(reverseFrame);
       container.removeEventListener("touchstart", pause);
       container.removeEventListener("pointerdown", pause);
       container.removeEventListener("wheel", pause);
+      reverseContainer.removeEventListener("touchstart", pause);
+      reverseContainer.removeEventListener("pointerdown", pause);
+      reverseContainer.removeEventListener("wheel", pause);
     };
-  }, [carouselRecords.length, isTouchDevice]);
+  }, [carouselRecords.length, isTouchDevice, touchCarouselReverseRecords.length]);
 
   useEffect(() => {
     if (!selectedRecord) {
@@ -587,35 +637,69 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       {rollingRecords.length > 0 ? (
         <section className="mb-10 overflow-hidden py-2">
           {isTouchDevice ? (
-            <div
-              ref={mobileCarouselRef}
-              className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {touchCarouselRecords.map((record, index) => {
-                const recordHref = `/vinyl/${record.id}`;
-                const coverClasses =
-                  "relative h-28 w-28 shrink-0 snap-center overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
+            <div className="space-y-4">
+              <div
+                ref={mobileCarouselRef}
+                className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {touchCarouselRecords.map((record, index) => {
+                  const recordHref = `/vinyl/${record.id}`;
+                  const coverClasses =
+                    "relative h-28 w-28 shrink-0 snap-center overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
 
-                return (
-                  <Link
-                    key={`${record.id}-touch-${index}`}
-                    href={recordHref}
-                    ref={(node) => {
-                      mobileCarouselItemRefs.current[index] = node;
-                    }}
-                    className={coverClasses}
-                    aria-label={`Open ${record.title} by ${record.artist}`}
-                  >
-                    <CoverArt
-                      record={record}
-                      backSrc={record.backCoverImage}
-                      priority={index < 2}
-                      sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
-                      flipOnHover
-                    />
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={`${record.id}-touch-${index}`}
+                      href={recordHref}
+                      ref={(node) => {
+                        mobileCarouselItemRefs.current[index] = node;
+                      }}
+                      className={coverClasses}
+                      aria-label={`Open ${record.title} by ${record.artist}`}
+                    >
+                      <CoverArt
+                        record={record}
+                        backSrc={record.backCoverImage}
+                        priority={index < 2}
+                        sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
+                        flipOnHover
+                      />
+                    </Link>
+                  );
+                })}
+              </div>
+              {touchCarouselReverseRecords.length ? (
+                <div
+                  ref={mobileCarouselReverseRef}
+                  className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  {touchCarouselReverseRecords.map((record, index) => {
+                    const recordHref = `/vinyl/${record.id}`;
+                    const coverClasses =
+                      "relative h-28 w-28 shrink-0 snap-center overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
+
+                    return (
+                      <Link
+                        key={`${record.id}-touch-reverse-${index}`}
+                        href={recordHref}
+                        ref={(node) => {
+                          mobileCarouselReverseItemRefs.current[index] = node;
+                        }}
+                        className={coverClasses}
+                        aria-label={`Open ${record.title} by ${record.artist}`}
+                      >
+                        <CoverArt
+                          record={record}
+                          backSrc={record.backCoverImage}
+                          priority={false}
+                          sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
+                          flipOnHover
+                        />
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="vinyl-marquee flex w-max gap-4" style={{ animationDelay: desktopCarouselDelay }}>
