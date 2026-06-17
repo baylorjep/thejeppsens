@@ -213,7 +213,7 @@ export default function Homepage() {
       <section className="py-14 border-t border-gray-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-2">Mini games</h2>
-          <p className="text-sm text-gray-400 mb-8">Quick tools for brackets, rankings, and narrowing down choices.</p>
+          <p className="text-sm text-gray-400 mb-8">Fun stuff to play together.</p>
           <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
             <a href="https://scene-it-baylor.vercel.app/host" target="_blank" rel="noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:border-gray-400 transition-colors">
