@@ -368,7 +368,102 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.05fr)]">
           <div className="border-b border-gray-200 bg-gray-50 p-4 sm:p-6 lg:border-b-0 lg:border-r lg:p-8">
-            <CoverGallery record={record} />
+            <div className="space-y-6">
+              <CoverGallery record={record} />
+
+              <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Album details</h2>
+                  <span className="text-xs uppercase tracking-[0.18em] text-gray-400">Quick view</span>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Genres</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {record.genres.map((genre) => (
+                        <span key={genre} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
+                          {genre}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Moods</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {record.moods.map((mood) => (
+                        <span key={mood} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
+                          {mood}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {record.favoriteTracks?.length ? (
+                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-5">
+                      <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                        Favorite tracks
+                      </h3>
+                      <ol className="space-y-2 text-gray-700">
+                        {record.favoriteTracks.map((track, index) => (
+                          <li key={track} className="flex gap-3">
+                            <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
+                            <span>{track}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  ) : null}
+
+                  <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Notes</h3>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingNotes((current) => !current)}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        {isEditingNotes ? "Cancel" : record.notes ? "Edit notes" : "Add notes"}
+                      </button>
+                    </div>
+
+                    {isEditingNotes ? (
+                      <div className="space-y-3">
+                        <textarea
+                          value={notesDraft}
+                          onChange={(event) => setNotesDraft(event.target.value)}
+                          className="min-h-28 w-full rounded-md border border-gray-300 px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                          placeholder="Add something personal about this record..."
+                        />
+                        <button
+                          type="button"
+                          onClick={saveNotes}
+                          disabled={isSavingNotes}
+                          className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isSavingNotes ? "Saving..." : "Save notes"}
+                        </button>
+                      </div>
+                    ) : record.notes ? (
+                      <p className="leading-7 text-gray-700">{record.notes}</p>
+                    ) : (
+                      <p className="text-sm text-gray-500">No notes yet.</p>
+                    )}
+                  </div>
+
+                  {record.favoriteStories ? (
+                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+                      <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                        Favorite stories
+                      </h3>
+                      <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-6 p-5 sm:p-6 lg:p-10">
@@ -504,113 +599,27 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ) : null,
               )}
             </dl>
-
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.82fr)]">
-        <div className="space-y-6 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
-          <div>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Genres</h2>
-            <div className="flex flex-wrap gap-2">
-              {record.genres.map((genre) => (
-                <span key={genre} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
-                  {genre}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Moods</h2>
-            <div className="flex flex-wrap gap-2">
-              {record.moods.map((mood) => (
-                <span key={mood} className="rounded-full bg-gray-50 px-3 py-1 text-sm text-gray-700">
-                  {mood}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {record.favoriteTracks?.length ? (
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-5">
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite tracks</h2>
-              <ol className="space-y-2 text-gray-700">
-                {record.favoriteTracks.map((track, index) => (
-                  <li key={track} className="flex gap-3">
-                    <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
-                    <span>{track}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ) : null}
-
-          <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Notes</h2>
-              <button
-                type="button"
-                onClick={() => setIsEditingNotes((current) => !current)}
-                className="inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
-              >
-                <Pencil className="h-4 w-4" />
-                {isEditingNotes ? "Cancel" : record.notes ? "Edit notes" : "Add notes"}
-              </button>
-            </div>
-
-            {isEditingNotes ? (
-              <div className="space-y-3">
-                <textarea
-                  value={notesDraft}
-                  onChange={(event) => setNotesDraft(event.target.value)}
-                  className="min-h-28 w-full rounded-md border border-gray-300 px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
-                  placeholder="Add something personal about this record..."
-                />
-                <button
-                  type="button"
-                  onClick={saveNotes}
-                  disabled={isSavingNotes}
-                  className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSavingNotes ? "Saving..." : "Save notes"}
-                </button>
+            {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
+              <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
+                <div className="space-y-3">
+                  {[
+                    ["Gift from", record.giftFrom],
+                    ["Where we got it", record.whereWeGotIt],
+                    ["Best for", record.bestFor],
+                  ].map(([label, value]) =>
+                    value ? (
+                      <div key={label} className="rounded-xl border border-gray-200 bg-white p-4">
+                        <p className="text-xs uppercase tracking-[0.16em] text-gray-400">{label}</p>
+                        <p className="mt-1 font-medium text-gray-950">{value}</p>
+                      </div>
+                    ) : null,
+                  )}
+                </div>
               </div>
-            ) : record.notes ? (
-              <p className="leading-7 text-gray-700">{record.notes}</p>
-            ) : (
-              <p className="text-sm text-gray-500">No notes yet.</p>
-            )}
+            ) : null}
           </div>
-
-          {record.favoriteStories ? (
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Favorite stories</h2>
-              <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
-            </div>
-          ) : null}
         </div>
-
-        {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
-          <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
-            <div className="space-y-3">
-              {[
-                ["Gift from", record.giftFrom],
-                ["Where we got it", record.whereWeGotIt],
-                ["Best for", record.bestFor],
-              ].map(([label, value]) =>
-                value ? (
-                  <div key={label} className="rounded-xl border border-gray-200 bg-white p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-gray-400">{label}</p>
-                    <p className="mt-1 font-medium text-gray-950">{value}</p>
-                  </div>
-                ) : null,
-              )}
-            </div>
-          </div>
-        ) : null}
       </section>
 
       {isEditingRecord ? (
