@@ -681,37 +681,15 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         </section>
       ) : null}
 
-      <section className="mb-10 rounded-lg border border-gray-200 bg-white p-5">
-        <div className="mb-5 flex flex-col items-start gap-3 text-left">
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-gray-500">
-            Collection Snapshot
-          </p>
-          <h2 className="text-2xl font-semibold text-gray-950">Top patterns</h2>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[
-            ["Top decade", snapshot.topEra.value, `${snapshot.topEra.count} records`],
-            ["Top genre", snapshot.topGenre.value, `${snapshot.topGenre.count} records`],
-            ["Top artist", snapshot.topArtist.value, `${snapshot.topArtist.count} records`],
-            ["Top mood", snapshot.topMood.value, `${snapshot.topMood.count} records`],
-          ].map(([label, value, sublabel]) => (
-            <div key={label} className="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
-              <p className="text-sm text-gray-500">{label}</p>
-              <p className="mt-2 text-lg font-semibold text-gray-950">{value}</p>
-              <p className="mt-1 text-sm text-gray-500">{sublabel}</p>
-            </div>
-          ))}
-        </div>
-
+      <div className="mb-10 flex justify-end">
         <Link
           href="/vinyl/insights"
-          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
         >
           <Sparkles className="h-4 w-4" />
-          View more analytics
+          View analytics
         </Link>
-      </section>
+      </div>
 
       <section className="mb-8 rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -871,63 +849,49 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           </label>
         </div>
 
-        <div className="mt-5 flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-gray-600">
-            Showing {filteredRecords.length} of {allRecords.length} records
-          </p>
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="hidden text-left text-sm font-medium text-gray-950 underline-offset-4 hover:underline sm:inline"
-          >
-            Clear filters
-          </button>
-        </div>
-      </section>
-
-      {pickedRecord ? (
-        <div className="mb-8 overflow-hidden rounded-lg border border-gray-950 bg-gray-950 text-white">
-          <div className="flex gap-4 p-5">
-            {/* Cover art */}
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-gray-800 sm:h-32 sm:w-32">
-              {pickedRecord.coverImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={pickedRecord.coverImage}
-                  alt={pickedRecord.title}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <Disc3 className="h-10 w-10 text-gray-600" />
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="flex flex-col justify-center gap-1 min-w-0">
-              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
-                Tonight&apos;s pick
-              </p>
-              <p className="text-xl font-semibold leading-tight sm:text-2xl truncate">{pickedRecord.title}</p>
-              <p className="text-gray-400 truncate">{pickedRecord.artist}</p>
-              {pickedRecord.storageLocation && (
-                <p className="mt-1 text-sm text-gray-500">
-                  📍 {pickedRecord.storageLocation}
-                </p>
-              )}
-            </div>
+        {(activeAdvancedFilters > 0 || quickFilter !== "all" || query) ? (
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4">
+            {activeGenre !== "All" && (
+              <button type="button" onClick={() => setActiveGenre("All")} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200">
+                Genre: {activeGenre} <X className="h-3 w-3" />
+              </button>
+            )}
+            {activeMood !== "All" && (
+              <button type="button" onClick={() => setActiveMood("All")} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200">
+                Mood: {activeMood} <X className="h-3 w-3" />
+              </button>
+            )}
+            {activeStatus !== "All" && (
+              <button type="button" onClick={() => setActiveStatus("All")} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200">
+                Status: {activeStatus} <X className="h-3 w-3" />
+              </button>
+            )}
+            {activeDecade !== "All" && (
+              <button type="button" onClick={() => setActiveDecade("All")} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200">
+                Decade: {activeDecade} <X className="h-3 w-3" />
+              </button>
+            )}
+            {quickFilter !== "all" && (
+              <button type="button" onClick={() => setQuickFilter("all")} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200">
+                {quickFilter === "favorites" ? "Favorites" : quickFilter === "wishlist" ? "Wishlist" : "Upgrades"} <X className="h-3 w-3" />
+              </button>
+            )}
+            {query && (
+              <button type="button" onClick={() => setQuery("")} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200">
+                &ldquo;{query}&rdquo; <X className="h-3 w-3" />
+              </button>
+            )}
+            <button type="button" onClick={clearFilters} className="ml-1 text-xs font-medium text-gray-400 underline-offset-2 transition-colors hover:text-gray-700 hover:underline">
+              Clear all
+            </button>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </section>
 
       {filteredRecords.length > 0 ? (
         <div className="space-y-5">
-          <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white px-4 py-4 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
-            <p>
-              Showing {Math.min((currentPage - 1) * recordsPerPage + 1, filteredRecords.length)}-
-              {Math.min(currentPage * recordsPerPage, filteredRecords.length)} of {filteredRecords.length} records
-            </p>
+          <div className="flex items-center justify-between gap-3 text-sm text-gray-600">
+            <p>{filteredRecords.length} of {allRecords.length} records</p>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -1091,6 +1055,56 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           <p className="mt-2 text-gray-600">Try clearing filters or changing the search.</p>
         </div>
       )}
+
+      {pickedRecord ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={() => setPickedRecordId(null)}
+        >
+          <div
+            className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="aspect-square bg-gray-100">
+              {pickedRecord.coverImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={pickedRecord.coverImage} alt={pickedRecord.title} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <Disc3 className="h-16 w-16 text-gray-300" />
+                </div>
+              )}
+            </div>
+            <div className="p-6">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-400">
+                Tonight&apos;s pick
+              </p>
+              <p className="text-2xl font-semibold text-gray-950">{pickedRecord.title}</p>
+              <p className="mt-1 text-gray-500">{pickedRecord.artist}</p>
+              {pickedRecord.storageLocation && (
+                <p className="mt-2 text-sm text-gray-400">📍 {pickedRecord.storageLocation}</p>
+              )}
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={pickRandomRecord}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-950 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                >
+                  <Shuffle className="h-4 w-4" />
+                  Pick again
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPickedRecordId(null)}
+                  className="flex-1 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {selectedRecord ? (
         <div
