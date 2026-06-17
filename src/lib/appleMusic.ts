@@ -33,13 +33,12 @@ export async function getAppleMusicAlbumUrl(record: VinylRecord) {
 
     const targetTitle = normalizeAppleText(record.title);
     const targetArtist = normalizeAppleText(record.artist);
-    const result =
-      data.results?.find((item) => {
-        if (item.collectionType !== "Album" || !item.collectionViewUrl) return false;
-        const collectionName = normalizeAppleText(item.collectionName ?? "");
-        const artistName = normalizeAppleText(item.artistName ?? "");
-        return collectionName.includes(targetTitle) && artistName.includes(targetArtist);
-      }) ?? data.results?.find((item) => item.collectionViewUrl);
+    const result = data.results?.find((item) => {
+      if (item.collectionType !== "Album" || !item.collectionViewUrl) return false;
+      const collectionName = normalizeAppleText(item.collectionName ?? "");
+      const artistName = normalizeAppleText(item.artistName ?? "");
+      return collectionName.includes(targetTitle) && artistName.includes(targetArtist);
+    });
 
     return result?.collectionViewUrl ?? fallback;
   } catch {

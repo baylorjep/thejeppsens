@@ -681,15 +681,6 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         </section>
       ) : null}
 
-      <div className="mb-10 flex justify-end">
-        <Link
-          href="/vinyl/insights"
-          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
-        >
-          <Sparkles className="h-4 w-4" />
-          View analytics
-        </Link>
-      </div>
 
       <section className="mb-8 rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
