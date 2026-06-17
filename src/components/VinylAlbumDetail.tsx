@@ -561,16 +561,6 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                   <span className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusTone(record.status).badge}`}>
                     {statusLabel(record.status)}
                   </span>
-                  {record.storageLocation ? (
-                    <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-600">
-                      {record.storageLocation}
-                    </span>
-                  ) : null}
-                  {record.favorite ? (
-                    <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-700">
-                      Favorite
-                    </span>
-                  ) : null}
                 </div>
               </div>
 
