@@ -372,9 +372,27 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               <CoverGallery record={record} />
 
               <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Album details</h2>
-                  <span className="text-xs uppercase tracking-[0.18em] text-gray-400">Quick view</span>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Album details</h2>
+                    <span className="text-xs uppercase tracking-[0.18em] text-gray-400">Quick view</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleFavorite(record)}
+                      disabled={favoriteRecordId === record.id}
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors ${
+                        record.favorite
+                          ? "border-gray-950 bg-gray-950 text-white"
+                          : "border-gray-200 bg-white text-gray-600 hover:border-gray-500 hover:text-gray-950"
+                      }`}
+                      aria-label={record.favorite ? `Remove ${record.title} from favorites` : `Add ${record.title} to favorites`}
+                    >
+                      <Star className={`h-4 w-4 ${record.favorite ? "fill-current" : ""}`} />
+                      {record.favorite ? "Favorite" : "Favorite"}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -415,6 +433,28 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                       </ol>
                     </div>
                   ) : null}
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {record.storageLocation ? (
+                      <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-600">
+                        {record.storageLocation}
+                      </span>
+                    ) : null}
+                    <span className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusTone(record.status).badge}`}>
+                      {statusLabel(record.status)}
+                    </span>
+                  </div>
+
+                  <div className="md:hidden">
+                    <button
+                      type="button"
+                      onClick={() => window.open(appleMusicUrl, "_blank", "noopener,noreferrer")}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Open in Apple Music
+                    </button>
+                  </div>
 
                   <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
                     <div className="mb-3 flex items-center justify-between gap-3">
@@ -542,7 +582,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             <button
               type="button"
               onClick={() => window.open(appleMusicUrl, "_blank", "noopener,noreferrer")}
-              className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+              className="hidden items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 md:inline-flex"
             >
               <ExternalLink className="h-4 w-4" />
               Open in Apple Music
@@ -572,7 +612,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               </div>
             ) : null}
 
-            <dl className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
+            <dl className="grid grid-cols-2 gap-2 text-[11px] leading-tight sm:grid-cols-2 sm:gap-3 sm:text-sm xl:grid-cols-3">
               {[
                 ["Released", record.releaseYear?.toString()],
                 ["Original release", record.originalReleaseYear?.toString()],
@@ -592,7 +632,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ["Date added", record.dateAdded],
               ].map(([label, value]) =>
                 value ? (
-                  <div key={label} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <div key={label} className="rounded-2xl border border-gray-200 bg-gray-50 p-3 sm:p-4">
                     <dt className="text-gray-500">{label}</dt>
                     <dd className="mt-1 font-medium text-gray-950">{value}</dd>
                   </div>
