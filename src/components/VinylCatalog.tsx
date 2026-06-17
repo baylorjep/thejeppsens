@@ -886,11 +886,38 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       </section>
 
       {pickedRecord ? (
-        <div className="mb-8 rounded-lg border border-gray-950 bg-gray-950 p-5 text-white">
-          <p className="text-sm text-gray-400">Tonight&apos;s pick</p>
-          <p className="mt-1 text-2xl font-semibold">
-            {pickedRecord.title} <span className="text-gray-400">by {pickedRecord.artist}</span>
-          </p>
+        <div className="mb-8 overflow-hidden rounded-lg border border-gray-950 bg-gray-950 text-white">
+          <div className="flex gap-4 p-5">
+            {/* Cover art */}
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-gray-800 sm:h-32 sm:w-32">
+              {pickedRecord.coverImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={pickedRecord.coverImage}
+                  alt={pickedRecord.title}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <Disc3 className="h-10 w-10 text-gray-600" />
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex flex-col justify-center gap-1 min-w-0">
+              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                Tonight&apos;s pick
+              </p>
+              <p className="text-xl font-semibold leading-tight sm:text-2xl truncate">{pickedRecord.title}</p>
+              <p className="text-gray-400 truncate">{pickedRecord.artist}</p>
+              {pickedRecord.storageLocation && (
+                <p className="mt-1 text-sm text-gray-500">
+                  📍 {pickedRecord.storageLocation}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       ) : null}
 
