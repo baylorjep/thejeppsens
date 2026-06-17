@@ -127,11 +127,15 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   const genreTotal = snapshot.genreBreakdown.reduce((s, i) => s + i.count, 0);
   const moodTotal = snapshot.moodBreakdown.reduce((s, i) => s + i.count, 0);
 
+  const topRealArtist = snapshot.artistBreakdown.find(
+    (a) => a.label.toLowerCase() !== "various artists",
+  );
+
   const genrePct =
     allRecords.length > 0 ? Math.round((snapshot.topGenre.count / allRecords.length) * 100) : 0;
   const dna =
     allRecords.length > 0
-      ? `${genrePct}% of the collection is ${snapshot.topGenre.value}, led by ${snapshot.topArtist.value}, mostly from the ${snapshot.topReleaseEra.value}.`
+      ? `${genrePct}% of the collection is ${snapshot.topGenre.value}, led by ${topRealArtist?.label ?? snapshot.topArtist.value}, mostly from the ${snapshot.topReleaseEra.value}.`
       : "";
 
   const statCards = [
