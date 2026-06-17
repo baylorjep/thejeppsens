@@ -2697,9 +2697,23 @@
     "storageLocation": "Crate 3.3"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Latin Jazz",
+      "Easy Listening",
+      "Exotica",
+      "Lounge"
+    ],
+    "moods": [
+      "Lively",
+      "Playful",
+      "Tropical",
+      "Vintage"
+    ],
+    "favoriteTracks": [
+      "Guantanamera",
+      "La Cucaracha",
+      "Cielito Lindo"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2718,9 +2732,22 @@
     "backCoverPath": "../../Batch 5/IMG_4813.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Dixieland Jazz",
+      "Traditional Jazz",
+      "Live Jazz"
+    ],
+    "moods": [
+      "Energetic",
+      "Festive",
+      "Improvisational",
+      "Vintage"
+    ],
+    "favoriteTracks": [
+      "Maple Leaf Rag",
+      "Baby Won't You Please Come Home",
+      "Indiana"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2741,9 +2768,22 @@
     "backCoverPath": "../../Batch 5/IMG_4815.JPG"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Big Band",
+      "Swing",
+      "Jazz"
+    ],
+    "moods": [
+      "Classic",
+      "Smooth",
+      "Nostalgic",
+      "Romantic"
+    ],
+    "favoriteTracks": [
+      "Moonglow",
+      "Star Dust",
+      "Begin the Beguine"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2761,9 +2801,24 @@
     "backCoverPath": "../../Batch 5/IMG_4817.JPG"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Disco",
+      "Rock",
+      "Pop",
+      "Soundtrack",
+      "Funk"
+    ],
+    "moods": [
+      "Dramatic",
+      "Retro",
+      "Cinematic",
+      "Energetic"
+    ],
+    "favoriteTracks": [
+      "Rocker Ride",
+      "Theme From Close Encounters",
+      "Flashlight"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2782,9 +2837,23 @@
     "backCoverPath": "../../Batch 5/IMG_4819.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Big Band",
+      "Traditional Pop",
+      "Dance Band",
+      "Holiday"
+    ],
+    "moods": [
+      "Festive",
+      "Nostalgic",
+      "Cheerful",
+      "Celebratory"
+    ],
+    "favoriteTracks": [
+      "Auld Lang Syne",
+      "The Music Goes ’Round and Around",
+      "Beer Barrel Polka"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2805,9 +2874,23 @@
     "backCoverPath": "../../Batch 5/IMG_4821.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "German Folk",
+      "Traditional",
+      "Easy Listening",
+      "World"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Cultural",
+      "Cheerful",
+      "Old-World"
+    ],
+    "favoriteTracks": [
+      "Ich Hab' Mein Herz in Heidelberg Verloren",
+      "Berliner Luft",
+      "Lili Marlene"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2827,9 +2910,23 @@
     "backCoverPath": "../../Batch 5/IMG_4827.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "German Schlager",
+      "Oldies",
+      "Easy Listening",
+      "Dance"
+    ],
+    "moods": [
+      "Fun",
+      "Nostalgic",
+      "Lighthearted",
+      "Party"
+    ],
+    "favoriteTracks": [
+      "Tanze mit mir in den Morgen",
+      "In the Mood",
+      "Chattanooga Choo-Choo"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2851,9 +2948,22 @@
     "backCoverPath": "../../Batch 5/IMG_4850.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Country",
+      "Country Pop",
+      "Patriotic"
+    ],
+    "moods": [
+      "Sentimental",
+      "Proud",
+      "Warm",
+      "Reflective"
+    ],
+    "favoriteTracks": [
+      "God Bless the U.S.A.",
+      "Dixie Road",
+      "Somebody's Gonna Love You"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2872,9 +2982,22 @@
     "backCoverPath": "../../Batch 5/IMG_4829.JPG"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Indie Pop",
+      "Electropop",
+      "Alternative Pop"
+    ],
+    "moods": [
+      "Bright",
+      "Dreamy",
+      "Romantic",
+      "Uplifting"
+    ],
+    "favoriteTracks": [
+      "Ultralife",
+      "Lifetimes",
+      "High on Humans"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2893,9 +3016,23 @@
     "backCoverPath": "../../Batch 5/IMG_4831.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Rock",
+      "Classic Rock",
+      "Soundtrack",
+      "Pop Rock"
+    ],
+    "moods": [
+      "Epic",
+      "Theatrical",
+      "Energetic",
+      "Triumphant"
+    ],
+    "favoriteTracks": [
+      "Bohemian Rhapsody",
+      "We Will Rock You",
+      "The Show Must Go On"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2914,9 +3051,23 @@
     "backCoverPath": "../../Batch 5/IMG_4833.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Musical Theater",
+      "Soundtrack",
+      "Pop",
+      "Broadway"
+    ],
+    "moods": [
+      "Theatrical",
+      "Magical",
+      "Dramatic",
+      "Empowering"
+    ],
+    "favoriteTracks": [
+      "Defying Gravity",
+      "Popular",
+      "What Is This Feeling?"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2935,9 +3086,22 @@
     "backCoverPath": "../../Batch 5/IMG_4835.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Ragtime",
+      "Classical Crossover",
+      "Chamber Jazz"
+    ],
+    "moods": [
+      "Playful",
+      "Elegant",
+      "Vintage",
+      "Lighthearted"
+    ],
+    "favoriteTracks": [
+      "The Entertainer",
+      "Maple Leaf Rag",
+      "Elite Syncopations"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2956,9 +3120,22 @@
     "backCoverPath": "../../Batch 5/IMG_4838.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Ragtime",
+      "Classical Piano",
+      "Americana"
+    ],
+    "moods": [
+      "Bright",
+      "Nostalgic",
+      "Playful",
+      "Refined"
+    ],
+    "favoriteTracks": [
+      "Maple Leaf Rag",
+      "The Entertainer",
+      "Pine Apple Rag"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2977,9 +3154,23 @@
     "backCoverPath": "../../Batch 5/IMG_4841.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Easy Listening",
+      "Orchestral",
+      "Instrumental",
+      "Italian"
+    ],
+    "moods": [
+      "Romantic",
+      "Dreamy",
+      "Elegant",
+      "Relaxed"
+    ],
+    "favoriteTracks": [
+      "Venice By Night",
+      "Gondolier Serenade",
+      "Beautiful Venice"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -2998,9 +3189,23 @@
     "backCoverPath": "../../Batch 5/IMG_4843.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Traditional Pop",
+      "Sing-Along",
+      "Vocal Pop",
+      "Standards"
+    ],
+    "moods": [
+      "Cheerful",
+      "Nostalgic",
+      "Family-Friendly",
+      "Playful"
+    ],
+    "favoriteTracks": [
+      "Take Me Out to the Ball Game",
+      "Give My Regards to Broadway",
+      "You're a Grand Old Flag"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3018,9 +3223,21 @@
     "backCoverPath": "../../Batch 5/IMG_4845.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Outlaw Country",
+      "Country"
+    ],
+    "moods": [
+      "Restless",
+      "Gritty",
+      "Reflective",
+      "Road-Worn"
+    ],
+    "favoriteTracks": [
+      "Ramblin' Fever",
+      "If We're Not Back in Love by Monday",
+      "When My Blue Moon Turns to Gold Again"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3039,9 +3256,23 @@
     "backCoverPath": "../../Batch 5/IMG_4847.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Disney",
+      "Children's",
+      "Soundtrack",
+      "Storybook"
+    ],
+    "moods": [
+      "Whimsical",
+      "Classic",
+      "Magical",
+      "Sweet"
+    ],
+    "favoriteTracks": [
+      "Heigh-Ho",
+      "Some Day My Prince Will Come",
+      "Whistle While You Work"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3060,9 +3291,23 @@
     "backCoverPath": "../../Batch 5/IMG_4853.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Disney",
+      "Children's",
+      "Soundtrack",
+      "Storybook"
+    ],
+    "moods": [
+      "Gentle",
+      "Whimsical",
+      "Tender",
+      "Nature-Themed"
+    ],
+    "favoriteTracks": [
+      "Love Is a Song",
+      "Little April Shower",
+      "Let's Sing a Gay Little Spring Song"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3081,9 +3326,22 @@
     "backCoverPath": "../../Batch 5/IMG_4855.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Traditional Pop",
+      "Vocal Jazz",
+      "Easy Listening"
+    ],
+    "moods": [
+      "Romantic",
+      "Warm",
+      "Elegant",
+      "Sentimental"
+    ],
+    "favoriteTracks": [
+      "When I Fall in Love",
+      "Stardust",
+      "At Last"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3102,9 +3360,23 @@
     "backCoverPath": "../../Batch 5/IMG_4857.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Christmas",
+      "Traditional Pop",
+      "Easy Listening",
+      "Vocal"
+    ],
+    "moods": [
+      "Festive",
+      "Nostalgic",
+      "Warm",
+      "Patriotic"
+    ],
+    "favoriteTracks": [
+      "Have Yourself a Merry Little Christmas",
+      "Silent Night",
+      "Over the River and Through the Woods"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3123,9 +3395,22 @@
     "backCoverPath": "../../Batch 5/IMG_4859.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Christmas",
+      "Traditional Pop",
+      "Vocal Pop"
+    ],
+    "moods": [
+      "Dramatic",
+      "Festive",
+      "Elegant",
+      "Reverent"
+    ],
+    "favoriteTracks": [
+      "Jingle Bells",
+      "Have Yourself a Merry Little Christmas",
+      "The Best Gift"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3144,9 +3429,22 @@
     "backCoverPath": "../../Batch 5/IMG_4861.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Christmas",
+      "Traditional Pop",
+      "Vocal Jazz"
+    ],
+    "moods": [
+      "Warm",
+      "Nostalgic",
+      "Cozy",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "White Christmas",
+      "Peace on Earth/The Little Drummer Boy",
+      "Do You Hear What I Hear?"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3169,9 +3467,23 @@
     "backCoverPath": "../../Batch 5/IMG_4863.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Traditional Pop",
+      "Vocal Jazz",
+      "Easy Listening",
+      "Pop Standards"
+    ],
+    "moods": [
+      "Smooth",
+      "Romantic",
+      "Classy",
+      "Loungey"
+    ],
+    "favoriteTracks": [
+      "Feeling Good",
+      "Home",
+      "Quando, Quando, Quando"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3190,9 +3502,23 @@
     "backCoverPath": "../../Batch 5/IMG_4865.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Christmas",
+      "Traditional Pop",
+      "Vocal Jazz",
+      "Holiday Pop"
+    ],
+    "moods": [
+      "Cozy",
+      "Festive",
+      "Romantic",
+      "Warm"
+    ],
+    "favoriteTracks": [
+      "It's Beginning to Look a Lot Like Christmas",
+      "Christmas (Baby Please Come Home)",
+      "Have Yourself a Merry Little Christmas"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3211,9 +3537,23 @@
     "backCoverPath": "../../Batch 5/IMG_4867.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Bachata",
+      "Latin Pop",
+      "Tropical",
+      "R&B"
+    ],
+    "moods": [
+      "Romantic",
+      "Smooth",
+      "Passionate",
+      "Danceable"
+    ],
+    "favoriteTracks": [
+      "Promise",
+      "You",
+      "La Diabla"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3232,9 +3572,23 @@
     "backCoverPath": "../../Batch 5/IMG_4870.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Easy Listening",
+      "Light Classical",
+      "Orchestral",
+      "Strings"
+    ],
+    "moods": [
+      "Calm",
+      "Elegant",
+      "Relaxing",
+      "Refined"
+    ],
+    "favoriteTracks": [
+      "Clair de Lune",
+      "Greensleeves",
+      "Dream of Olwen"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3252,9 +3606,23 @@
     "backCoverPath": "../../Batch 5/IMG_4872.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Cuban Music",
+      "Bolero",
+      "Latin",
+      "Traditional Vocal"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Emotional",
+      "Patriotic",
+      "Dramatic"
+    ],
+    "favoriteTracks": [
+      "Yo Volveré",
+      "Llanto de Luna",
+      "Mi Cuba"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3276,9 +3644,22 @@
     "backCoverPath": "../../Batch 5/IMG_4874.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Indie Folk",
+      "Indie Pop",
+      "Alternative"
+    ],
+    "moods": [
+      "Expansive",
+      "Earthy",
+      "Uplifting",
+      "Bittersweet"
+    ],
+    "favoriteTracks": [
+      "Little Talks",
+      "Mountain Sound",
+      "Dirty Paws"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3297,9 +3678,22 @@
     "backCoverPath": "../../Batch 5/IMG_4878.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Jazz",
+      "Bebop",
+      "Hard Bop"
+    ],
+    "moods": [
+      "Cool",
+      "Sophisticated",
+      "Energetic",
+      "Moody"
+    ],
+    "favoriteTracks": [
+      "Blues After Dark",
+      "Sea Breeze",
+      "Smoke Signals"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3318,9 +3712,23 @@
     "backCoverPath": "../../Batch 5/IMG_4880.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Film Soundtrack",
+      "Traditional Pop",
+      "Vintage Hollywood",
+      "Musical"
+    ],
+    "moods": [
+      "Glamorous",
+      "Nostalgic",
+      "Cinematic",
+      "Classic"
+    ],
+    "favoriteTracks": [
+      "Cheek to Cheek",
+      "The Man That Got Away",
+      "I Can't Begin to Tell You"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3339,9 +3747,23 @@
     "backCoverPath": "../../Batch 5/IMG_4882.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Disney",
+      "Storybook",
+      "Soundtrack",
+      "Children's"
+    ],
+    "moods": [
+      "Adventurous",
+      "Dramatic",
+      "Swashbuckling",
+      "Vintage"
+    ],
+    "favoriteTracks": [
+      "Treasure Island Theme",
+      "Narrated Story Highlights",
+      "Pirate Adventure Selections"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3360,9 +3782,23 @@
     "backCoverPath": "../../Batch 5/IMG_4884.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Disney",
+      "Children's",
+      "Soundtrack",
+      "Musical"
+    ],
+    "moods": [
+      "Whimsical",
+      "Cheerful",
+      "Magical",
+      "Playful"
+    ],
+    "favoriteTracks": [
+      "A Spoonful of Sugar",
+      "Supercalifragilisticexpialidocious",
+      "Chim Chim Cher-ee"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
@@ -3381,9 +3817,23 @@
     "backCoverPath": "../../Batch 5/IMG_4886.jpg"
   },
   {
-    "genres": [],
-    "moods": [],
-    "favoriteTracks": [],
+    "genres": [
+      "Disney",
+      "Children's",
+      "Folk",
+      "World"
+    ],
+    "moods": [
+      "Cheerful",
+      "Innocent",
+      "Global",
+      "Playful"
+    ],
+    "favoriteTracks": [
+      "It's a Small World",
+      "Frère Jacques",
+      "Cielito Lindo"
+    ],
     "pressing": "",
     "vinylColor": "Black",
     "condition": "Used; sleeve wear visible",
