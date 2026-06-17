@@ -2728,6 +2728,8 @@
     "title": "Tijuana A Gogo",
     "artist": "Dick Smede",
     "releaseYear": 1971,
+    "label": "Pronit",
+    "catalogNumber": "SXL 0852 / XL 0852",
     "frontCoverPath": "../../Batch 5/IMG_4812.jpg",
     "backCoverPath": "../../Batch 5/IMG_4813.jpg"
   },
@@ -3226,8 +3228,10 @@
     "discCount": 1,
     "storageLocation": "Crate 2",
     "id": "33-sing-along-favorites",
-    "title": "33 Sing Along Favorites",
-    "artist": "Bing Crosby",
+    "title": "Join Bing & Sing Along",
+    "artist": "Bing Crosby & His Friends",
+    "label": "RCA Victor",
+    "catalogNumber": "LSP-2276",
     "frontCoverPath": "../../Batch 5/IMG_4844.jpg",
     "backCoverPath": "../../Batch 5/IMG_4845.jpg"
   },
