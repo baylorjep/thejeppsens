@@ -695,7 +695,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           </label>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
               {quickFilterOptions.map(([value, label]) => (
                 <button
                   key={value}
@@ -1013,7 +1013,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                   href={`/vinyl/${record.id}`}
                   className="mt-4 inline-flex text-sm font-medium text-gray-950 underline-offset-4 hover:underline"
                 >
-                  Back to catalog
+                  Album details
                 </Link>
               </div>
             </article>
