@@ -4196,5 +4196,663 @@
     "frontCoverPath": "../../Batch 6/IMG_4915.jpg",
     "backCoverPath": "../../Batch 6/IMG_4916.jpg",
     "personalDetails": "best for French soundtrack / romantic listening"
+  },
+  {
+    "genres": [
+      "Country",
+      "Western Swing"
+    ],
+    "moods": [
+      "Upbeat",
+      "Danceable",
+      "Honky-tonk"
+    ],
+    "favoriteTracks": [
+      "Cotton Eyed Joe",
+      "Fraulein",
+      "San Antonio Rose"
+    ],
+    "pressing": "",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "al-dean-mr-cotton-eyed-joe",
+    "title": "Mr. Cotton Eyed Joe",
+    "artist": "Al Dean & The All Stars",
+    "releaseYear": 1980,
+    "label": "Kik-R Records",
+    "catalogNumber": "LP-10013",
+    "frontCoverPath": "../../Batch 6/IMG_4917.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4918.jpg"
+  },
+  {
+    "genres": [
+      "Barbershop",
+      "Choral",
+      "A Cappella"
+    ],
+    "moods": [
+      "Celebratory",
+      "Harmonious",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Hallmarks quartet performances",
+      "Rampo Valley Chapter chorus"
+    ],
+    "pressing": "Official competition recording",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "sweet-adelines-meet-me-in-st-louis-33rd-international-convention",
+    "title": "Meet Me in St. Louis — 33rd International Convention",
+    "artist": "Sweet Adelines, Inc.",
+    "releaseYear": 1979,
+    "label": "Sweet Adelines, Inc.",
+    "frontCoverPath": "../../Batch 6/IMG_4920.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4921.jpg"
+  },
+  {
+    "genres": [
+      "Orchestral",
+      "Film Score"
+    ],
+    "moods": [
+      "Epic",
+      "Cinematic",
+      "Adventurous"
+    ],
+    "favoriteTracks": [
+      "Main Title",
+      "Princess Leia's Theme"
+    ],
+    "pressing": "1977 original double LP pressing",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "star-wars-original-soundtrack",
+    "title": "Star Wars (Original Soundtrack)",
+    "artist": "John Williams / London Symphony Orchestra",
+    "releaseYear": 1977,
+    "label": "20th Century Records",
+    "catalogNumber": "2T-541",
+    "frontCoverPath": "../../Batch 6/IMG_4922.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4923.JPG"
+  },
+  {
+    "genres": [
+      "Pop",
+      "Folk-Pop"
+    ],
+    "moods": [
+      "Romantic",
+      "Emotional",
+      "Upbeat"
+    ],
+    "favoriteTracks": [
+      "Castle on the Hill",
+      "Perfect",
+      "Galway Girl",
+      "Supermarket Flowers"
+    ],
+    "pressing": "EU pressing LC14666",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "divide-ed-sheeran",
+    "title": "÷ (Divide)",
+    "artist": "Ed Sheeran",
+    "releaseYear": 2017,
+    "label": "Asylum Records UK / Atlantic",
+    "catalogNumber": "0190295859015",
+    "frontCoverPath": "../../Batch 6/IMG_4924.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4925.jpg"
+  },
+  {
+    "genres": [
+      "Singer-Songwriter",
+      "Jazz-Pop",
+      "Soul"
+    ],
+    "moods": [
+      "Intimate",
+      "Late-night",
+      "Romantic"
+    ],
+    "favoriteTracks": [
+      "Wouldn't Mean a Thing",
+      "Places We Won't Walk",
+      "Nothing"
+    ],
+    "pressing": "EU pressing LC 50596",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "bruno-major-a-song-for-every-moon",
+    "title": "A Song for Every Moon",
+    "artist": "Bruno Major",
+    "releaseYear": 2017,
+    "label": "July Records / Kobalt",
+    "catalogNumber": "JULY001",
+    "frontCoverPath": "../../Batch 6/IMG_4926.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4927.jpg"
+  },
+  {
+    "genres": [
+      "Funk",
+      "Pop",
+      "R&B"
+    ],
+    "moods": [
+      "Seductive",
+      "Playful",
+      "Funky"
+    ],
+    "favoriteTracks": [
+      "Kiss"
+    ],
+    "pressing": "45 RPM; B-side is ♥ or $",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "kiss-7-inch-single",
+    "title": "Kiss (7\" single)",
+    "artist": "Prince and The Revolution",
+    "releaseYear": 1986,
+    "label": "Paisley Park / Warner Bros.",
+    "catalogNumber": "7599-20442-0",
+    "frontCoverPath": "../../Batch 6/IMG_4928.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4929.jpg"
+  },
+  {
+    "genres": [
+      "Orchestral",
+      "Soundtrack",
+      "Disney"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Whimsical",
+      "Family"
+    ],
+    "favoriteTracks": [
+      "Mary Poppins Medley",
+      "Snow White Fantasy",
+      "When You Wish Upon a Star"
+    ],
+    "pressing": "",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "salute-to-disney",
+    "title": "Salute to Disney",
+    "artist": "Arthur Fiedler & The Boston Pops Orchestra",
+    "releaseYear": 1973,
+    "label": "Polydor",
+    "catalogNumber": "PD 6021 / 2391 115",
+    "frontCoverPath": "../../Batch 6/IMG_4930.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4931.jpg"
+  },
+  {
+    "genres": [
+      "Jazz",
+      "Big Band",
+      "Swing"
+    ],
+    "moods": [
+      "Swinging",
+      "Sophisticated"
+    ],
+    "favoriteTracks": [
+      "Serenade in Blue",
+      "Autumn Leaves",
+      "Lush Life"
+    ],
+    "pressing": "MGM stereo pressing",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "the-solid-gold-trumpet-of-harry-james",
+    "title": "The Solid Gold Trumpet of Harry James",
+    "artist": "Harry James",
+    "releaseYear": 1962,
+    "label": "MGM High Fidelity",
+    "catalogNumber": "SE 4058",
+    "frontCoverPath": "../../Batch 6/IMG_4932.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4933.jpg"
+  },
+  {
+    "genres": [
+      "Indie Folk",
+      "Indie Pop"
+    ],
+    "moods": [
+      "Atmospheric",
+      "Cinematic",
+      "Introspective"
+    ],
+    "favoriteTracks": [
+      "Crystals",
+      "Wolves Without Teeth",
+      "Black Water"
+    ],
+    "pressing": "Double LP",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "beneath-the-skin",
+    "title": "Beneath the Skin",
+    "artist": "Of Monsters and Men",
+    "releaseYear": 2015,
+    "label": "Republic Records",
+    "catalogNumber": "602547274250",
+    "frontCoverPath": "../../Batch 6/IMG_4934.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4935.jpg"
+  },
+  {
+    "genres": [
+      "Children's",
+      "Soundtrack",
+      "Disney"
+    ],
+    "moods": [
+      "Playful",
+      "Nostalgic",
+      "Fun"
+    ],
+    "favoriteTracks": [
+      "The Bare Necessities",
+      "I Wan'na Be Like You",
+      "Trust in Me"
+    ],
+    "pressing": "Stereophonic; ©1967 Walt Disney Productions",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "songs-from-the-jungle-book-and-other-jungle-favorites",
+    "title": "Songs from The Jungle Book and Other Jungle Favorites",
+    "artist": "Walt Disney / The Jungle V.I.P.'s",
+    "releaseYear": 1967,
+    "label": "Disneyland Record",
+    "catalogNumber": "1304",
+    "frontCoverPath": "../../Batch 6/IMG_4937.JPG",
+    "backCoverPath": "../../Batch 6/IMG_4938.jpg"
+  },
+  {
+    "genres": [
+      "Film Score",
+      "Orchestral"
+    ],
+    "moods": [
+      "Romantic",
+      "Bittersweet",
+      "Cinematic"
+    ],
+    "favoriteTracks": [
+      "Symphonic Suite from The Umbrellas of Cherbourg"
+    ],
+    "pressing": "Recorded EMI Studios London, May 1979",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "michel-legrand-the-umbrellas-of-cherbourg-symphonic-suite-the-go-between-theme-and-variations",
+    "title": "The Umbrellas of Cherbourg (Symphonic Suite) / The Go-Between (Theme and Variations)",
+    "artist": "Michel Legrand / London Symphony Orchestra",
+    "releaseYear": 1979,
+    "label": "CBS Masterworks",
+    "catalogNumber": "M 35175",
+    "frontCoverPath": "../../Batch 6/IMG_4939.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4940.jpg"
+  },
+  {
+    "genres": [
+      "Rock",
+      "Arena Rock",
+      "Progressive Rock"
+    ],
+    "moods": [
+      "Dramatic",
+      "Anthemic",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "The Best of Times",
+      "Too Much Time on My Hands",
+      "Rockin' the Paradise"
+    ],
+    "pressing": "",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "styx-paradise-theater",
+    "title": "Paradise Theater",
+    "artist": "Styx",
+    "releaseYear": 1981,
+    "label": "A&M Records",
+    "frontCoverPath": "../../Batch 6/IMG_4941.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4942.jpg"
+  },
+  {
+    "genres": [
+      "Jazz",
+      "Big Band",
+      "Swing"
+    ],
+    "moods": [
+      "Sophisticated",
+      "Swinging",
+      "Historic"
+    ],
+    "favoriteTracks": [
+      "Golden Cress",
+      "Happy Go Lucky Local",
+      "Overture to a Jam Session"
+    ],
+    "pressing": "Made in Germany; previously unreleased radio transcriptions",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "duke-ellington-the-uncollected-1947-vol-4",
+    "title": "The Uncollected — Duke Ellington and His Orchestra 1947, Vol. 4",
+    "artist": "Duke Ellington and His Orchestra",
+    "releaseYear": 1978,
+    "originalReleaseYear": 1947,
+    "recordingYears": "1947",
+    "label": "Hindsight Records / Teldec",
+    "catalogNumber": "HSR-128 / 6.23578",
+    "frontCoverPath": "../../Batch 6/IMG_4943.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4944.jpg"
+  },
+  {
+    "genres": [
+      "Jazz",
+      "Dixieland",
+      "Traditional Jazz"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Swinging",
+      "Historic"
+    ],
+    "favoriteTracks": [
+      "Singin' the Blues",
+      "Clarinet Marmalade",
+      "Riverboat Shuffle"
+    ],
+    "pressing": "Columbia Golden Era LP reissue, mono; edited by George Avakian",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "bix-beiderbecke-story-vol-2-bix-and-tram",
+    "title": "The Bix Beiderbecke Story Vol. 2 — Bix and Tram",
+    "artist": "Bix Beiderbecke / Frankie Trumbauer",
+    "releaseYear": 1950,
+    "originalReleaseYear": 1928,
+    "recordingYears": "1927-1928",
+    "label": "Columbia",
+    "catalogNumber": "CL 845",
+    "frontCoverPath": "../../Batch 6/IMG_4945.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4946.jpg"
+  },
+  {
+    "genres": [
+      "Standards",
+      "Vocal Jazz",
+      "Great American Songbook"
+    ],
+    "moods": [
+      "Charming",
+      "Elegant",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "They Can't Take That Away from Me",
+      "A Foggy Day",
+      "Something's Gotta Give"
+    ],
+    "pressing": "Reissue of Kapp label; reissue produced by Steve Hoffman; orchestra by Pete King",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "fred-astaire-sings-collectibles",
+    "title": "Fred Astaire Sings (Collectibles)",
+    "artist": "Fred Astaire",
+    "releaseYear": 1983,
+    "originalReleaseYear": 1958,
+    "recordingYears": "1958",
+    "label": "MCA Records",
+    "catalogNumber": "MCA-1552",
+    "frontCoverPath": "../../Batch 6/IMG_4947.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4948.jpg"
+  },
+  {
+    "genres": [
+      "R&B",
+      "Soul",
+      "New Jack Swing"
+    ],
+    "moods": [
+      "Romantic",
+      "Smooth",
+      "Emotional"
+    ],
+    "favoriteTracks": [
+      "I'll Make Love to You",
+      "On Bended Knee",
+      "Water Runs Dry"
+    ],
+    "pressing": "2016 double LP reissue, 4 sides",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "boyz-ii-men-ii",
+    "title": "II",
+    "artist": "Boyz II Men",
+    "releaseYear": 2016,
+    "originalReleaseYear": 1994,
+    "label": "Motown / UMG",
+    "catalogNumber": "B0025089-01",
+    "frontCoverPath": "../../Batch 6/IMG_4949.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4950.jpg"
+  },
+  {
+    "genres": [
+      "R&B",
+      "Soul",
+      "Blues"
+    ],
+    "moods": [
+      "Soulful",
+      "Passionate",
+      "Romantic"
+    ],
+    "favoriteTracks": [
+      "At Last",
+      "All I Could Do Was Cry",
+      "Something's Got a Hold on Me"
+    ],
+    "pressing": "2015 EU compilation",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "the-best-of-etta-james",
+    "title": "The Best of Etta James",
+    "artist": "Etta James",
+    "releaseYear": 2015,
+    "originalReleaseYear": 1960,
+    "recordingYears": "1960-1962",
+    "label": "Not Now Music",
+    "catalogNumber": "5060397601100",
+    "frontCoverPath": "../../Batch 6/IMG_4951.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4952.jpg"
+  },
+  {
+    "genres": [
+      "Indie Pop",
+      "Alternative R&B",
+      "Electronic Pop"
+    ],
+    "moods": [
+      "Feel-good",
+      "Breezy",
+      "Emotional"
+    ],
+    "favoriteTracks": [
+      "Flare Guns (feat. Chelsea Cutler)",
+      "Straightjacket",
+      "Always Been You"
+    ],
+    "pressing": "",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "quinn-xcii-the-story-of-us",
+    "title": "The Story of Us",
+    "artist": "Quinn XCII",
+    "releaseYear": 2017,
+    "label": "Columbia Records",
+    "catalogNumber": "889854724016",
+    "frontCoverPath": "../../Batch 6/IMG_4953.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4954.jpg"
+  },
+  {
+    "genres": [
+      "Pop",
+      "Disco",
+      "Dance-Pop"
+    ],
+    "moods": [
+      "Upbeat",
+      "Nostalgic",
+      "Euphoric"
+    ],
+    "favoriteTracks": [
+      "Super Trouper",
+      "The Winner Takes It All",
+      "Happy New Year",
+      "Lay All Your Love on Me"
+    ],
+    "pressing": "US pressing via Columbia House; recorded at Polar Music Studios, Stockholm",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "abba-super-trouper",
+    "title": "Super Trouper",
+    "artist": "ABBA",
+    "releaseYear": 1980,
+    "label": "Atlantic / Polar Music",
+    "catalogNumber": "SD 16023",
+    "frontCoverPath": "../../Batch 6/IMG_4955.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4956.jpg"
+  },
+  {
+    "genres": [
+      "Musical Theater",
+      "Soundtrack",
+      "Pop"
+    ],
+    "moods": [
+      "Fun",
+      "Energetic",
+      "Feel-good"
+    ],
+    "favoriteTracks": [
+      "Good Morning Baltimore",
+      "You Can't Stop the Beat",
+      "I Know Where I've Been"
+    ],
+    "pressing": "2016 double LP reissue, 4 sides",
+    "vinylColor": "Black",
+    "condition": "Used; sleeve wear visible",
+    "source": "Personal collection",
+    "dateAdded": "2026-06-17",
+    "status": "owned",
+    "favorite": false,
+    "storageLocation": "Crate 2",
+    "id": "hairspray-original-motion-picture-soundtrack",
+    "title": "Hairspray — Soundtrack to the Motion Picture",
+    "artist": "Various Artists (Marc Shaiman)",
+    "releaseYear": 2016,
+    "originalReleaseYear": 2007,
+    "label": "WaterTower Music",
+    "catalogNumber": "794043190422",
+    "frontCoverPath": "../../Batch 6/IMG_4957.jpg",
+    "backCoverPath": "../../Batch 6/IMG_4958.jpg"
   }
 ]
