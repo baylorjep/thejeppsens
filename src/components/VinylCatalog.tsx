@@ -249,6 +249,18 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   }, [allRecords, sortKey]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const genre = params.get("genre");
+    const mood = params.get("mood");
+    const decade = params.get("decade");
+    const status = params.get("status");
+    if (genre) setActiveGenre(genre);
+    if (mood) setActiveMood(mood);
+    if (decade) setActiveDecade(decade);
+    if (status) setActiveStatus(status);
+  }, []);
+
+  useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 639px)");
     const update = () => setIsCompactCarousel(mediaQuery.matches);
 
@@ -677,7 +689,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           <h2 className="text-2xl font-semibold text-gray-950">Top patterns</h2>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
             ["Top decade", snapshot.topEra.value, `${snapshot.topEra.count} records`],
             ["Top genre", snapshot.topGenre.value, `${snapshot.topGenre.count} records`],
