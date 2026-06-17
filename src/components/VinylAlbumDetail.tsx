@@ -152,6 +152,7 @@ function CoverGallery({ record }: { record: VinylRecord }) {
 
 export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetailProps) {
   const [records, setRecords] = useState<VinylRecord[]>(staticRecords);
+  const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
   const [isEditingRecord, setIsEditingRecord] = useState(false);
   const [editForm, setEditForm] = useState<AlbumEditForm | null>(null);
@@ -173,7 +174,8 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       .then((response) => {
         setRecords(response.source === "supabase" ? response.records : [...response.records, ...queuedRecords]);
       })
-      .catch(() => setRecords([...staticRecords, ...queuedRecords]));
+      .catch(() => setRecords([...staticRecords, ...queuedRecords]))
+      .finally(() => setIsLoadingRecords(false));
   }, [staticRecords]);
 
   const record = records.find((item) => item.id === id);
@@ -346,6 +348,28 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
   };
 
   if (!record) {
+    if (isLoadingRecords) {
+      return (
+        <div className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 w-32 rounded-full bg-gray-200" />
+            <div className="grid gap-4 md:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.1fr)]">
+              <div className="aspect-square rounded-2xl bg-gray-100" />
+              <div className="space-y-4">
+                <div className="h-10 w-3/4 rounded bg-gray-100" />
+                <div className="h-6 w-1/2 rounded bg-gray-100" />
+                <div className="grid grid-cols-2 gap-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="h-16 rounded-2xl bg-gray-100" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
         <Disc3 className="mx-auto h-12 w-12 text-gray-300" />
@@ -371,7 +395,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             <div className="space-y-6">
               <CoverGallery record={record} />
 
-              <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
+              <div className="hidden space-y-5 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 md:block">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="space-y-1">
                     <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Album details</h2>
@@ -576,6 +600,39 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 >
                   <Star className={`h-5 w-5 ${record.favorite ? "fill-current" : ""}`} />
                 </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:hidden">
+              <button
+                type="button"
+                onClick={() => window.open(appleMusicUrl, "_blank", "noopener,noreferrer")}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open in Apple Music
+              </button>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(record)}
+                  disabled={favoriteRecordId === record.id}
+                  className={`inline-flex items-center justify-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors ${
+                    record.favorite
+                      ? "border-gray-950 bg-gray-950 text-white"
+                      : "border-gray-200 bg-white text-gray-600 hover:border-gray-500 hover:text-gray-950"
+                  }`}
+                  aria-label={record.favorite ? `Remove ${record.title} from favorites` : `Add ${record.title} to favorites`}
+                >
+                  <Star className={`h-4 w-4 ${record.favorite ? "fill-current" : ""}`} />
+                  Favorite
+                </button>
+                {record.storageLocation ? (
+                  <span className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-gray-50 px-3 py-2 text-center text-xs text-gray-600">
+                    {record.storageLocation}
+                  </span>
+                ) : null}
               </div>
             </div>
 
