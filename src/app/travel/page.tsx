@@ -93,8 +93,8 @@ export default function TravelPage() {
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-24">
+          <div className="text-center mb-10 sm:mb-16">
             <p className="text-teal-400 text-xs font-semibold tracking-widest uppercase mb-5">
               Baylor &amp; Isabel
             </p>
@@ -103,7 +103,7 @@ export default function TravelPage() {
             </h1>
           </div>
 
-          <div className="grid grid-cols-3 gap-8 max-w-xl mx-auto">
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-xl mx-auto">
             <div className="text-center">
               <div className="text-4xl sm:text-5xl font-bold text-teal-400 mb-1">
                 {countries ? countries.length : '—'}
@@ -127,24 +127,20 @@ export default function TravelPage() {
       {/* Map */}
       <section className="py-16 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             <h2 className="text-xl font-bold text-slate-900">Where we&apos;ve been</h2>
-            <div className="flex items-center gap-4 text-xs text-slate-500">
+            <div className="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-3 h-3 rounded-full bg-teal-500" />
-                Both
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-teal-500" />Both
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-3 h-3 rounded-full bg-blue-500" />
-                Baylor
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500" />Baylor
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-3 h-3 rounded-full bg-purple-500" />
-                Isabel
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-purple-500" />Isabel
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-3 h-3 rounded-full bg-slate-300" />
-                Not yet
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-slate-300" />Not yet
               </span>
             </div>
           </div>

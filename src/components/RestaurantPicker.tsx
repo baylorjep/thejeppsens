@@ -202,7 +202,7 @@ export default function RestaurantPicker() {
                   </div>
                   <button
                     onClick={() => handleDelete(r.id)}
-                    className="shrink-0 text-gray-200 hover:text-red-400 transition-colors mt-0.5 opacity-0 group-hover:opacity-100"
+                    className="shrink-0 text-gray-300 hover:text-red-400 transition-colors mt-0.5 sm:opacity-0 sm:group-hover:opacity-100"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -287,19 +287,19 @@ export default function RestaurantPicker() {
           onClick={() => setResult(null)}
         >
           <div
-            className="bg-white rounded-2xl p-10 shadow-2xl max-w-md w-full text-center"
+            className="bg-white rounded-2xl p-6 sm:p-10 shadow-2xl max-w-md w-full text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
               Tonight we&apos;re eating at
             </p>
-            <h2 className="text-4xl font-bold text-gray-900 mb-5">{result.name}</h2>
-            <div className="flex flex-wrap justify-center gap-2 mb-8">
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">{result.name}</h2>
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
               {[result.cuisine, result.price, result.distance].filter(Boolean).map((v) => (
                 <span key={v} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{v}</span>
               ))}
             </div>
-            <div className="flex gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center">
               <button
                 onClick={pickRandom}
                 className="px-5 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"

@@ -139,12 +139,12 @@ export default function MoviePicker() {
             {/* Length */}
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Length</p>
-              <div className="flex gap-1.5">
+              <div className="flex flex-wrap gap-1.5">
                 {(['', ...LENGTHS] as const).map((l) => (
                   <button
                     key={l || 'any'}
                     onClick={() => setFilterLength(l)}
-                    className={`flex-1 py-2 text-xs font-medium rounded-lg transition-colors ${
+                    className={`flex-1 min-w-[56px] py-2 text-xs font-medium rounded-lg transition-colors ${
                       filterLength === l ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
@@ -257,14 +257,14 @@ export default function MoviePicker() {
                       className={`p-1.5 rounded-lg transition-colors ${
                         m.watched
                           ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                          : 'text-gray-200 hover:text-green-500 hover:bg-green-50 opacity-0 group-hover:opacity-100'
+                          : 'text-gray-300 hover:text-green-500 hover:bg-green-50 sm:opacity-0 sm:group-hover:opacity-100'
                       }`}
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => removeMovie(m.id)}
-                      className="p-1.5 text-gray-200 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 rounded-lg"
+                      className="p-1.5 text-gray-300 hover:text-red-400 transition-colors sm:opacity-0 sm:group-hover:opacity-100 rounded-lg"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -352,17 +352,17 @@ export default function MoviePicker() {
           onClick={() => setResult(null)}
         >
           <div
-            className="bg-white rounded-2xl p-10 shadow-2xl max-w-md w-full text-center"
+            className="bg-white rounded-2xl p-6 sm:p-10 shadow-2xl max-w-md w-full text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Tonight we&apos;re watching</p>
-            <h2 className="text-4xl font-bold text-gray-900 mb-5">{result.title}</h2>
-            <div className="flex flex-wrap justify-center gap-2 mb-8">
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">{result.title}</h2>
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
               {[result.genre, result.length ? lengthLabel(result.length) : '', result.type?.replace('-', ' ')].filter(Boolean).map((v) => (
                 <span key={v} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm capitalize">{v}</span>
               ))}
             </div>
-            <div className="flex gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center">
               <button
                 onClick={() => { toggleWatched(result.id, true); setResult(null); }}
                 className="px-5 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
