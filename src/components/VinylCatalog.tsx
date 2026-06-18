@@ -638,13 +638,23 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         <section className="mb-10 overflow-hidden py-2">
           {isTouchDevice ? (
             <div className="space-y-4">
-              <div className="overflow-hidden">
-                <div className="vinyl-marquee flex w-max gap-4">
-                  {touchCarouselRecords.map((record, index) => (
+              <div
+                ref={mobileCarouselRef}
+                className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {touchCarouselRecords.map((record, index) => {
+                  const recordHref = `/vinyl/${record.id}`;
+                  const coverClasses =
+                    "relative h-28 w-28 shrink-0 snap-center overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
+
+                  return (
                     <Link
                       key={`${record.id}-touch-${index}`}
-                      href={`/vinyl/${record.id}`}
-                      className="relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm sm:h-48 sm:w-48 lg:h-56 lg:w-56"
+                      href={recordHref}
+                      ref={(node) => {
+                        mobileCarouselItemRefs.current[index] = node;
+                      }}
+                      className={coverClasses}
                       aria-label={`Open ${record.title} by ${record.artist}`}
                     >
                       <CoverArt
@@ -655,17 +665,27 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                         flipOnHover
                       />
                     </Link>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
               {touchCarouselReverseRecords.length ? (
-                <div className="overflow-hidden">
-                  <div className="vinyl-marquee-reverse flex w-max gap-4">
-                    {touchCarouselReverseRecords.map((record, index) => (
+                <div
+                  ref={mobileCarouselReverseRef}
+                  className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  {touchCarouselReverseRecords.map((record, index) => {
+                    const recordHref = `/vinyl/${record.id}`;
+                    const coverClasses =
+                      "relative h-28 w-28 shrink-0 snap-center overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
+
+                    return (
                       <Link
                         key={`${record.id}-touch-reverse-${index}`}
-                        href={`/vinyl/${record.id}`}
-                        className="relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm sm:h-48 sm:w-48 lg:h-56 lg:w-56"
+                        href={recordHref}
+                        ref={(node) => {
+                          mobileCarouselReverseItemRefs.current[index] = node;
+                        }}
+                        className={coverClasses}
                         aria-label={`Open ${record.title} by ${record.artist}`}
                       >
                         <CoverArt
@@ -676,8 +696,8 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                           flipOnHover
                         />
                       </Link>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
               ) : null}
             </div>
