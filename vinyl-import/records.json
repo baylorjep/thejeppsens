@@ -5552,5 +5552,653 @@
     "frontCoverPath": "../../Batch 7/IMG_5005.jpg",
     "backCoverPath": "../../Batch 7/IMG_5006.jpg",
     "format": "LP"
+  },
+  {
+    "title": "Prélude à l'après-midi d'un faune / Boléro / L'Apprenti Sorcier / España",
+    "artist": "Wiener Symphoniker, conducted by Eduard van Remoortel",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5007.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5008.jpg",
+    "id": "pr-lude-l-apr-s-midi-d-un-faune-bol-ro-l-apprenti-sorcier-espa-a"
+  },
+  {
+    "title": "Fell In Love Without You (Deluxe)",
+    "artist": "Motion City Soundtrack",
+    "releaseYear": 2017,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5009.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5010.jpg",
+    "id": "fell-in-love-without-you-deluxe"
+  },
+  {
+    "title": "La Familia Sinatra Les Desea Una Feliz Navidad",
+    "artist": "Frank Sinatra, Nancy Sinatra, Tina Sinatra, Frank Sinatra Jr.",
+    "releaseYear": 1980,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5011.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5012.jpg",
+    "id": "la-familia-sinatra-les-desea-una-feliz-navidad"
+  },
+  {
+    "title": "O Tannenbaum — Les plus beaux noëls allemands",
+    "artist": "Orchestre Saint Nicolas avec chœurs et cloches",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5013.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5014.jpg",
+    "id": "o-tannenbaum-les-plus-beaux-no-ls-allemands"
+  },
+  {
+    "title": "The Lux Radio Theater Presents \"To Have And Have Not\"",
+    "artist": "Humphrey Bogart & Lauren Bacall (radio drama)",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5016.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5017.jpg",
+    "id": "the-lux-radio-theater-presents-to-have-and-have-not"
+  },
+  {
+    "title": "Memories",
+    "artist": "Barbra Streisand",
+    "releaseYear": 1981,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5019.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5020.jpg",
+    "id": "memories"
+  },
+  {
+    "title": "Messiah",
+    "artist": "George Frideric Handel; The Philadelphia Orchestra; The Mormon Tabernacle Choir; Eileen Farrell; Martha Lipton; Davis Cunningham; William Warfield",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5021.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5022.jpg",
+    "id": "messiah"
+  },
+  {
+    "title": "Gigi (Original Motion Picture Soundtrack)",
+    "artist": "Various; MGM Studio Orchestra conducted by André Previn",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5023.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5024.jpg",
+    "id": "gigi-original-motion-picture-soundtrack"
+  },
+  {
+    "title": "More Music from Peter Gunn",
+    "artist": "Henry Mancini",
+    "releaseYear": 1959,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5025.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5026.jpg",
+    "id": "more-music-from-peter-gunn"
+  },
+  {
+    "title": "All the Hits with All the Stars, Vol. 3",
+    "artist": "Various",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5027.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5029.jpg",
+    "id": "all-the-hits-with-all-the-stars-vol-3"
+  },
+  {
+    "title": "The Original Hit Performances! Into the Fifties",
+    "artist": "Various",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5030.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5031.jpg",
+    "id": "the-original-hit-performances-into-the-fifties"
+  },
+  {
+    "title": "Marches from Operas",
+    "artist": "Virtuoso Symphony of London, conducted by Arthur Winograd",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5032.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5033.jpg",
+    "id": "marches-from-operas"
+  },
+  {
+    "title": "The Music of Christmas",
+    "artist": "The Hollywood Bowl Symphony Orchestra, conducted by Carmen Dragon",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5034.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5035.jpg",
+    "id": "the-music-of-christmas"
+  },
+  {
+    "title": "Henry Mancini — A Legendary Performer",
+    "artist": "Henry Mancini",
+    "releaseYear": 1976,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5036.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5037.jpg",
+    "id": "henry-mancini-a-legendary-performer"
+  },
+  {
+    "title": "Ice Castles (Original Soundtrack Album)",
+    "artist": "Marvin Hamlisch",
+    "releaseYear": 1979,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5038.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5039.jpg",
+    "id": "ice-castles-original-soundtrack-album"
+  },
+  {
+    "title": "Symphony No. 8 in B Minor (\"Unfinished\") / Symphony No. 8 in F Major, Op. 93",
+    "artist": "Schubert / Beethoven; Sir Thomas Beecham conducting the Royal Philharmonic Orchestra",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5040.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5041.jpg",
+    "id": "symphony-no-8-in-b-minor-unfinished-symphony-no-8-in-f-major-op-93"
+  },
+  {
+    "title": "Moscow Night",
+    "artist": "Dave Brubeck",
+    "releaseYear": 1988,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5043.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5044.jpg",
+    "id": "moscow-night"
+  },
+  {
+    "title": "La Mer / Rapsodie Espagnole",
+    "artist": "Claude Debussy / Maurice Ravel; Boston Symphony Orchestra, Charles Munch",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5048.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5051.jpg",
+    "id": "la-mer-rapsodie-espagnole"
+  },
+  {
+    "title": "Romeo and Juliet",
+    "artist": "Andre Kostelanetz and his Orchestra",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5052.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5053.jpg",
+    "id": "romeo-and-juliet"
+  },
+  {
+    "title": "Friends",
+    "artist": "Chick Corea",
+    "releaseYear": 1978,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5054.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5055.jpg",
+    "id": "friends"
+  },
+  {
+    "title": "Blue Skies (Original Soundtrack Recording)",
+    "artist": "Bing Crosby, Fred Astaire, Joan Caulfield",
+    "releaseYear": 1976,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5056.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5057.jpg",
+    "id": "blue-skies-original-soundtrack-recording"
+  },
+  {
+    "title": "Here's Guy Lombardo and The Royal Canadians",
+    "artist": "Guy Lombardo and The Royal Canadians",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5062.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5063.jpg",
+    "id": "here-s-guy-lombardo-and-the-royal-canadians"
+  },
+  {
+    "title": "Songs of the Fabulous Forties, Part 1",
+    "artist": "Roger Williams",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5064.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5065.jpg",
+    "id": "songs-of-the-fabulous-forties-part-1"
+  },
+  {
+    "title": "Beloved Mormon Hymns",
+    "artist": "Hollywood Symphonia, conducted by Crawford Gates",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5066.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5067.jpg",
+    "id": "beloved-mormon-hymns"
+  },
+  {
+    "title": "Baseball / Traveler / Warm Glow (EP)",
+    "artist": "Hippo Campus",
+    "releaseYear": 2017,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5068.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5069.jpg",
+    "id": "baseball-traveler-warm-glow-ep"
+  },
+  {
+    "title": "The World's Greatest Entertainer",
+    "artist": "Al Jolson",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5070.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5071.jpg",
+    "id": "the-world-s-greatest-entertainer"
+  },
+  {
+    "title": "Climb Every Mountain",
+    "artist": "The Mormon Tabernacle Choir",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5072.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5073.jpg",
+    "id": "climb-every-mountain"
+  },
+  {
+    "title": "Hello, Dolly! (New Broadway Cast Recording)",
+    "artist": "Bette Midler, David Hyde Pierce, and Company",
+    "releaseYear": 2017,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5074.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5075.jpg",
+    "id": "hello-dolly-new-broadway-cast-recording"
+  },
+  {
+    "title": "National Anthems / Nationalhymnen",
+    "artist": "The Central Band of the Royal Australian Air Force",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5076.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5077.jpg",
+    "id": "national-anthems-nationalhymnen"
+  },
+  {
+    "title": "don't smile at me",
+    "artist": "Billie Eilish",
+    "releaseYear": 2017,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5078.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5079.JPG",
+    "id": "don-t-smile-at-me"
+  },
+  {
+    "title": "Hawaii's Golden Voice",
+    "artist": "Eddie Kekaula",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5080.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5082.JPG",
+    "id": "hawaii-s-golden-voice"
+  },
+  {
+    "title": "Songs America Loves Best, Vol. III — The Twenties",
+    "artist": "Mormon Tabernacle Choir; Columbia Orchestra",
+    "releaseYear": 1982,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5083.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5084.jpg",
+    "id": "songs-america-loves-best-vol-iii-the-twenties"
+  },
+  {
+    "title": "The Apostle Paul and His Epistle to the Romans (L.P. No. 1 and 4, Parts I and IV)",
+    "artist": "Edyth Armstrong Hoyt",
+    "releaseYear": 1955,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5085.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5086.jpg",
+    "id": "the-apostle-paul-and-his-epistle-to-the-romans-l-p-no-1-and-4-parts-i-and-iv"
+  },
+  {
+    "title": "High Society (Original Soundtrack)",
+    "artist": "Bing Crosby, Grace Kelly, Frank Sinatra, Louis Armstrong and His Band",
+    "releaseYear": 1956,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5087.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5088.jpg",
+    "id": "high-society-original-soundtrack"
+  },
+  {
+    "title": "Onward Christian Soldiers",
+    "artist": "The Mormon Tabernacle Choir",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5089.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5090.jpg",
+    "id": "onward-christian-soldiers"
+  },
+  {
+    "title": "Song Seeds",
+    "artist": "The Lumineers",
+    "releaseYear": 2017,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5091.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5093.jpg",
+    "id": "song-seeds"
+  },
+  {
+    "title": "America's Top 20",
+    "artist": "Various",
+    "releaseYear": 1976,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5094.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5095.jpg",
+    "id": "america-s-top-20"
+  },
+  {
+    "title": "Moving Pictures",
+    "artist": "Rush",
+    "releaseYear": 1981,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5096.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5097.jpg",
+    "id": "moving-pictures"
+  },
+  {
+    "title": "Beauty and the Beast: The Songs",
+    "artist": "Various",
+    "releaseYear": 2017,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5098.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5099.jpg",
+    "id": "beauty-and-the-beast-the-songs"
+  },
+  {
+    "title": "On a Clear Day You Can See Forever (Original Soundtrack Recording)",
+    "artist": "Barbra Streisand, Yves Montand",
+    "releaseYear": 1970,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5100.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5101.jpg",
+    "id": "on-a-clear-day-you-can-see-forever-original-soundtrack-recording"
+  },
+  {
+    "title": "Summer of '42 (Original Motion Picture Score)",
+    "artist": "Michel Legrand",
+    "releaseYear": 1971,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5102.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5103.jpg",
+    "id": "summer-of-42-original-motion-picture-score"
+  },
+  {
+    "title": "The Beloved Choruses",
+    "artist": "The Mormon Tabernacle Choir",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5104.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5105.jpg",
+    "id": "the-beloved-choruses"
+  },
+  {
+    "title": "The Sound of Hollywood",
+    "artist": "The Medallion Strings",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5106.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5107.jpg",
+    "id": "the-sound-of-hollywood"
+  },
+  {
+    "title": "The Five Pennies (Original Soundtrack)",
+    "artist": "Danny Kaye, Louis Armstrong",
+    "releaseYear": 1959,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5108.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5109.jpg",
+    "id": "the-five-pennies-original-soundtrack"
+  },
+  {
+    "title": "The Smithsonian Collection of Classic Jazz",
+    "artist": "Various",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5110.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5111.jpg",
+    "id": "the-smithsonian-collection-of-classic-jazz"
+  },
+  {
+    "title": "Art Blakey and the Jazz Messengers — Recorded Live at Bubba's (featuring Wynton Marsalis)",
+    "artist": "Art Blakey and the Jazz Messengers",
+    "releaseYear": 1981,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5112.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5113.jpg",
+    "id": "art-blakey-and-the-jazz-messengers-recorded-live-at-bubba-s-featuring-wynton-mar"
+  },
+  {
+    "title": "Lullaby in Rhythm (featuring Charlie Parker)",
+    "artist": "Barry Ulanov's All Star Modern Jazz Musicians / Howard McGhee Quintet",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5115.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5116.jpg",
+    "id": "lullaby-in-rhythm-featuring-charlie-parker"
+  },
+  {
+    "title": "Strange Trails",
+    "artist": "Lord Huron",
+    "releaseYear": 2015,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5117.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5118.jpg",
+    "id": "strange-trails"
+  },
+  {
+    "title": "Cuba Canta y Baila",
+    "artist": "Fernando Albuerne / Julio Gutierrez / Olga Guillot",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5120.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5121.jpg",
+    "id": "cuba-canta-y-baila"
+  },
+  {
+    "title": "The Summit",
+    "artist": "Frank Sinatra, Dean Martin, Sammy Davis Jr., Bing Crosby",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5122.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5123.jpg",
+    "id": "the-summit"
+  },
+  {
+    "title": "Dance in the Moonlight",
+    "artist": "Guy Lombardo and His Royal Canadians",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5124.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5125.jpg",
+    "id": "dance-in-the-moonlight"
+  },
+  {
+    "title": "¡Merengue!",
+    "artist": "Francisco Ulloa",
+    "releaseYear": 1987,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5126.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5127.jpg",
+    "id": "merengue"
+  },
+  {
+    "title": "The Sting (Original Motion Picture Soundtrack)",
+    "artist": "Scott Joplin; conducted and adapted by Marvin Hamlisch",
+    "releaseYear": 1974,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5128.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5129.jpg",
+    "id": "the-sting-original-motion-picture-soundtrack"
+  },
+  {
+    "title": "The Sweetest Medleys This Side of Heaven",
+    "artist": "Guy Lombardo and His Royal Canadians",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5130.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5131.jpg",
+    "id": "the-sweetest-medleys-this-side-of-heaven"
+  },
+  {
+    "title": "Wonderful Day",
+    "artist": "Doris Day",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5132.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5133.jpg",
+    "id": "wonderful-day"
+  },
+  {
+    "title": "El Rey",
+    "artist": "Tito Puente and His Latin Ensemble",
+    "releaseYear": 1984,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5134.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5135.jpg",
+    "id": "el-rey"
+  },
+  {
+    "title": "Viva! The Music of Mexico",
+    "artist": "Percy Faith and His Orchestra",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5136.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5137.jpg",
+    "id": "viva-the-music-of-mexico"
+  },
+  {
+    "title": "Enoch Light and His Orchestra at Carnegie Hall Play Irving Berlin",
+    "artist": "Enoch Light and His Orchestra",
+    "releaseYear": 1962,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5138.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5139.jpg",
+    "id": "enoch-light-and-his-orchestra-at-carnegie-hall-play-irving-berlin"
+  },
+  {
+    "title": "Room 93",
+    "artist": "Halsey",
+    "releaseYear": 2015,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5140.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5141.jpg",
+    "id": "room-93"
+  },
+  {
+    "title": "In Between Dreams",
+    "artist": "Jack Johnson",
+    "releaseYear": 2005,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5142.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5143.jpg",
+    "id": "in-between-dreams"
+  },
+  {
+    "title": "Evolve",
+    "artist": "Imagine Dragons",
+    "releaseYear": 2017,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5144.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5145.jpg",
+    "id": "evolve"
+  },
+  {
+    "title": "All the Light Above It Too",
+    "artist": "Jack Johnson",
+    "releaseYear": 2017,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5146.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5147.jpg",
+    "id": "all-the-light-above-it-too"
+  },
+  {
+    "title": "Badlands",
+    "artist": "Halsey",
+    "releaseYear": 2015,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5148.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5149.jpg",
+    "id": "badlands"
+  },
+  {
+    "title": "In Between Dreams (second copy)",
+    "artist": "Jack Johnson",
+    "releaseYear": 2005,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5150.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5151.jpg",
+    "id": "in-between-dreams-second-copy"
+  },
+  {
+    "title": "Hamilton: An American Musical (Original Broadway Cast Recording)",
+    "artist": "Lin-Manuel Miranda / Original Broadway Cast",
+    "releaseYear": 2015,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5156.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5157.jpg",
+    "id": "hamilton-an-american-musical-original-broadway-cast-recording"
+  },
+  {
+    "title": "Let's Take a Sentimental Journey",
+    "artist": "Various Artists",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5158.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5159.JPG",
+    "id": "let-s-take-a-sentimental-journey"
+  },
+  {
+    "title": "Tchaikovsky Waltzes",
+    "artist": "Andre Kostelanetz and His Orchestra",
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5160.JPG",
+    "backCoverPath": "../../Batch 8/IMG_5161.JPG",
+    "id": "tchaikovsky-waltzes"
+  },
+  {
+    "title": "Parsley, Sage, Rosemary and Thyme",
+    "artist": "Simon and Garfunkel",
+    "releaseYear": 1966,
+    "storageLocation": "Crate 4 (Upstairs)",
+    "status": "owned",
+    "frontCoverPath": "../../Batch 8/IMG_5164.jpg",
+    "backCoverPath": "../../Batch 8/IMG_5165.jpg",
+    "id": "parsley-sage-rosemary-and-thyme"
   }
 ]
