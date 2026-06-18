@@ -445,57 +445,37 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     const reverseContainer = mobileCarouselReverseRef.current;
     let frame = 0;
     let reverseFrame = 0;
-    let pauseUntil = 0;
 
-    const pause = () => {
-      pauseUntil = performance.now() + 1200;
-    };
-
-    const tick = (now: number) => {
+    const tick = () => {
       const loopWidth = container.scrollWidth / 2;
-      if (loopWidth > 0 && now >= pauseUntil) {
+      if (loopWidth > 0) {
         container.scrollLeft += 1.1;
-        if (container.scrollLeft >= loopWidth) {
-          container.scrollLeft -= loopWidth;
-        }
+        if (container.scrollLeft >= loopWidth) container.scrollLeft -= loopWidth;
       }
       frame = window.requestAnimationFrame(tick);
     };
 
-    const reverseTick = (now: number) => {
+    const reverseTick = () => {
       const loopWidth = reverseContainer.scrollWidth / 2;
-      if (loopWidth > 0 && now >= pauseUntil) {
-        reverseContainer.scrollLeft += 0.9;
-        if (reverseContainer.scrollLeft >= loopWidth) {
-          reverseContainer.scrollLeft -= loopWidth;
-        }
+      if (loopWidth > 0) {
+        reverseContainer.scrollLeft -= 1.1;
+        if (reverseContainer.scrollLeft <= 0) reverseContainer.scrollLeft += loopWidth;
       }
       reverseFrame = window.requestAnimationFrame(reverseTick);
     };
 
-    // Delay start so images paint and scrollWidth is accurate before animating
     const startTimer = setTimeout(() => {
+      // Seed reverse carousel at midpoint so it has room to scroll backwards immediately
+      const loopWidth = reverseContainer.scrollWidth / 2;
+      if (loopWidth > 0) reverseContainer.scrollLeft = loopWidth;
       frame = window.requestAnimationFrame(tick);
       reverseFrame = window.requestAnimationFrame(reverseTick);
     }, 600);
-
-    container.addEventListener("touchstart", pause, { passive: true });
-    container.addEventListener("pointerdown", pause);
-    container.addEventListener("wheel", pause, { passive: true });
-    reverseContainer.addEventListener("touchstart", pause, { passive: true });
-    reverseContainer.addEventListener("pointerdown", pause);
-    reverseContainer.addEventListener("wheel", pause, { passive: true });
 
     return () => {
       clearTimeout(startTimer);
       window.cancelAnimationFrame(frame);
       window.cancelAnimationFrame(reverseFrame);
-      container.removeEventListener("touchstart", pause);
-      container.removeEventListener("pointerdown", pause);
-      container.removeEventListener("wheel", pause);
-      reverseContainer.removeEventListener("touchstart", pause);
-      reverseContainer.removeEventListener("pointerdown", pause);
-      reverseContainer.removeEventListener("wheel", pause);
     };
   }, [carouselRecords.length, isTouchDevice, touchCarouselReverseRecords.length]);
 
@@ -645,64 +625,46 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             <div className="space-y-4">
               <div
                 ref={mobileCarouselRef}
-                className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="flex gap-4 overflow-hidden"
               >
-                {touchCarouselRecords.map((record, index) => {
-                  const recordHref = `/vinyl/${record.id}`;
-                  const coverClasses =
-                    "relative h-28 w-28 shrink-0 snap-center overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
-
-                  return (
+                {touchCarouselRecords.map((record, index) => (
+                  <Link
+                    key={`${record.id}-touch-${index}`}
+                    href={`/vinyl/${record.id}`}
+                    className="relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm sm:h-48 sm:w-48 lg:h-56 lg:w-56"
+                    aria-label={`Open ${record.title} by ${record.artist}`}
+                  >
+                    <CoverArt
+                      record={record}
+                      backSrc={record.backCoverImage}
+                      priority={index < 2}
+                      sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
+                      flipOnHover
+                    />
+                  </Link>
+                ))}
+              </div>
+              {touchCarouselReverseRecords.length ? (
+                <div
+                  ref={mobileCarouselReverseRef}
+                  className="flex gap-4 overflow-hidden"
+                >
+                  {touchCarouselReverseRecords.map((record, index) => (
                     <Link
-                      key={`${record.id}-touch-${index}`}
-                      href={recordHref}
-                      ref={(node) => {
-                        mobileCarouselItemRefs.current[index] = node;
-                      }}
-                      className={coverClasses}
+                      key={`${record.id}-touch-reverse-${index}`}
+                      href={`/vinyl/${record.id}`}
+                      className="relative h-28 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm sm:h-48 sm:w-48 lg:h-56 lg:w-56"
                       aria-label={`Open ${record.title} by ${record.artist}`}
                     >
                       <CoverArt
                         record={record}
                         backSrc={record.backCoverImage}
-                        priority={index < 2}
+                        priority={false}
                         sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
                         flipOnHover
                       />
                     </Link>
-                  );
-                })}
-              </div>
-              {touchCarouselReverseRecords.length ? (
-                <div
-                  ref={mobileCarouselReverseRef}
-                  className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                >
-                  {touchCarouselReverseRecords.map((record, index) => {
-                    const recordHref = `/vinyl/${record.id}`;
-                    const coverClasses =
-                      "relative h-28 w-28 shrink-0 snap-center overflow-hidden rounded-md border border-gray-200 bg-gray-100 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md sm:h-48 sm:w-48 lg:h-56 lg:w-56";
-
-                    return (
-                      <Link
-                        key={`${record.id}-touch-reverse-${index}`}
-                        href={recordHref}
-                        ref={(node) => {
-                          mobileCarouselReverseItemRefs.current[index] = node;
-                        }}
-                        className={coverClasses}
-                        aria-label={`Open ${record.title} by ${record.artist}`}
-                      >
-                        <CoverArt
-                          record={record}
-                          backSrc={record.backCoverImage}
-                          priority={false}
-                          sizes="(max-width: 639px) 112px, (max-width: 1023px) 192px, 224px"
-                          flipOnHover
-                        />
-                      </Link>
-                    );
-                  })}
+                  ))}
                 </div>
               ) : null}
             </div>
