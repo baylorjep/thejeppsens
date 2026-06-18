@@ -473,8 +473,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       reverseFrame = window.requestAnimationFrame(reverseTick);
     };
 
-    frame = window.requestAnimationFrame(tick);
-    reverseFrame = window.requestAnimationFrame(reverseTick);
+    // Delay start so images paint and scrollWidth is accurate before animating
+    const startTimer = setTimeout(() => {
+      frame = window.requestAnimationFrame(tick);
+      reverseFrame = window.requestAnimationFrame(reverseTick);
+    }, 600);
+
     container.addEventListener("touchstart", pause, { passive: true });
     container.addEventListener("pointerdown", pause);
     container.addEventListener("wheel", pause, { passive: true });
@@ -483,6 +487,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     reverseContainer.addEventListener("wheel", pause, { passive: true });
 
     return () => {
+      clearTimeout(startTimer);
       window.cancelAnimationFrame(frame);
       window.cancelAnimationFrame(reverseFrame);
       container.removeEventListener("touchstart", pause);
