@@ -5560,7 +5560,26 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5007.jpg",
     "backCoverPath": "../../Batch 8/IMG_5008.jpg",
-    "id": "pr-lude-l-apr-s-midi-d-un-faune-bol-ro-l-apprenti-sorcier-espa-a"
+    "id": "pr-lude-l-apr-s-midi-d-un-faune-bol-ro-l-apprenti-sorcier-espa-a",
+    "releaseYear": 1960,
+    "label": "Vox (Ultra High Fidelity / Stereovox)",
+    "catalogNumber": "STPL 511.850",
+    "pressing": "US pressing, Vox Productions Inc., New York; stereo",
+    "genres": [
+      "Classical",
+      "Orchestral",
+      "Impressionism"
+    ],
+    "moods": [
+      "Dreamy",
+      "Dramatic",
+      "Sweeping",
+      "Energetic"
+    ],
+    "favoriteTracks": [
+      "Prélude à l'après-midi d'un faune (Debussy)",
+      "Boléro (Ravel)"
+    ]
   },
   {
     "title": "Fell In Love Without You (Deluxe)",
@@ -5570,7 +5589,26 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5009.jpg",
     "backCoverPath": "../../Batch 8/IMG_5010.jpg",
-    "id": "fell-in-love-without-you-deluxe"
+    "id": "fell-in-love-without-you-deluxe",
+    "label": "Epitaph",
+    "catalogNumber": "04977 8756215",
+    "pressing": "4-sided deluxe LP; includes live versions, acoustic versions, B-sides, demos, and a Daniel Johnston-style bedroom demo; 2017 Epitaph pressing",
+    "genres": [
+      "Pop-punk",
+      "Emo",
+      "Alternative Rock"
+    ],
+    "moods": [
+      "Bittersweet",
+      "Energetic",
+      "Nostalgic",
+      "Emotionally raw"
+    ],
+    "favoriteTracks": [
+      "Fell In Love Without You",
+      "It Had To Be You",
+      "Even If It Kills Me (Justin's Original Daniel Johnston Style Bedroom Demo)"
+    ]
   },
   {
     "title": "La Familia Sinatra Les Desea Una Feliz Navidad",
@@ -5580,7 +5618,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5011.jpg",
     "backCoverPath": "../../Batch 8/IMG_5012.jpg",
-    "id": "la-familia-sinatra-les-desea-una-feliz-navidad"
+    "id": "la-familia-sinatra-les-desea-una-feliz-navidad",
+    "originalReleaseYear": 1968,
+    "recordingYears": "1968",
+    "label": "Hispavox / Reprise",
+    "catalogNumber": "S 90.294",
+    "pressing": "Spanish pressing distributed by Hispavox, S.A., Madrid 1980; originally a US Reprise release; bilingual track titles (Spanish/English); produced by Sonny Burke; orchestra directed by Nelson Riddle",
+    "genres": [
+      "Holiday / Christmas",
+      "Pop",
+      "Easy Listening"
+    ],
+    "moods": [
+      "Festive",
+      "Warm",
+      "Nostalgic",
+      "Family-oriented"
+    ],
+    "favoriteTracks": [
+      "No Cambiaria La Navidad (I Wouldn't Trade Christmas)",
+      "Los 12 Días de la Navidad",
+      "El Vals de Navidad"
+    ]
   },
   {
     "title": "O Tannenbaum — Les plus beaux noëls allemands",
@@ -5589,7 +5648,27 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5013.jpg",
     "backCoverPath": "../../Batch 8/IMG_5014.jpg",
-    "id": "o-tannenbaum-les-plus-beaux-no-ls-allemands"
+    "id": "o-tannenbaum-les-plus-beaux-no-ls-allemands",
+    "releaseYear": 1973,
+    "label": "Deutsche Grammophon Privilege",
+    "catalogNumber": "2538 061",
+    "pressing": "French pressing (\"Imprimé en France\"); Gravure Universelle, Stéréo et Mono; sticker on back numbered \"46\"; personal inscription: \"À note papa — Joyeux Noël 1973, Benoît, Bruno, Jean & Christine\"",
+    "genres": [
+      "Classical",
+      "Holiday / Christmas",
+      "German Traditional"
+    ],
+    "moods": [
+      "Reverent",
+      "Cozy",
+      "Wintry",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Stille Nacht, Heilige Nacht",
+      "O Tannenbaum",
+      "Kling Glöckchen"
+    ]
   },
   {
     "title": "The Lux Radio Theater Presents \"To Have And Have Not\"",
@@ -5598,7 +5677,27 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5016.jpg",
     "backCoverPath": "../../Batch 8/IMG_5017.jpg",
-    "id": "the-lux-radio-theater-presents-to-have-and-have-not"
+    "id": "the-lux-radio-theater-presents-to-have-and-have-not",
+    "releaseYear": 1970,
+    "originalReleaseYear": 1946,
+    "recordingYears": "1946",
+    "label": "Radiola",
+    "catalogNumber": "MR-1007",
+    "pressing": "Archival radio broadcast reissue; \"not licensed for broadcast\"; one full hour of programming; some surface noise noted as inherent to original recording; Sandy Hook, Conn. pressing; Lauren Bacall's first radio appearance",
+    "genres": [
+      "Spoken Word",
+      "Radio Drama",
+      "Classic Hollywood"
+    ],
+    "moods": [
+      "Suspenseful",
+      "Romantic",
+      "Vintage",
+      "Cinematic"
+    ],
+    "favoriteTracks": [
+      "N/A (continuous radio drama)"
+    ]
   },
   {
     "title": "Memories",
@@ -5608,7 +5707,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5019.jpg",
     "backCoverPath": "../../Batch 8/IMG_5020.jpg",
-    "id": "memories"
+    "id": "memories",
+    "label": "Columbia",
+    "catalogNumber": "FC 37678 / 7464-37678-1",
+    "pressing": "US pressing, still in original shrink wrap; sticker on front noting two new hits (\"Comin' In and Out of Your Life\" and \"Memory\") plus previously released favorites; © 1981 CBS Inc.",
+    "genres": [
+      "Pop",
+      "Vocal",
+      "Soft Rock",
+      "Ballads"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Romantic",
+      "Lush",
+      "Sentimental"
+    ],
+    "favoriteTracks": [
+      "Memory",
+      "The Way We Were",
+      "No More Tears (Enough Is Enough) (Duet With Donna Summer)",
+      "Comin' In and Out of Your Life"
+    ]
   },
   {
     "title": "Messiah",
@@ -5617,7 +5737,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5021.jpg",
     "backCoverPath": "../../Batch 8/IMG_5022.jpg",
-    "id": "messiah"
+    "id": "messiah",
+    "releaseYear": 1961,
+    "originalReleaseYear": 1741,
+    "recordingYears": "1959–1962",
+    "label": "Columbia Masterworks",
+    "catalogNumber": "M2S 607",
+    "pressing": "2-LP stereo set; Columbia Guaranteed High Fidelity; Library of Congress catalogue card number R59-1290 applies",
+    "genres": [
+      "Classical",
+      "Oratorio",
+      "Choral"
+    ],
+    "moods": [
+      "Majestic",
+      "Reverent",
+      "Triumphant",
+      "Spiritual"
+    ],
+    "favoriteTracks": [
+      "Hallelujah Chorus",
+      "For Unto Us a Child Is Born",
+      "He Was Despised"
+    ]
   },
   {
     "title": "Gigi (Original Motion Picture Soundtrack)",
@@ -5626,7 +5768,30 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5023.JPG",
     "backCoverPath": "../../Batch 8/IMG_5024.jpg",
-    "id": "gigi-original-motion-picture-soundtrack"
+    "id": "gigi-original-motion-picture-soundtrack",
+    "releaseYear": 1958,
+    "originalReleaseYear": 1958,
+    "recordingYears": "1957–1958",
+    "label": "MGM Records",
+    "catalogNumber": "E/SE-3641 ST",
+    "pressing": "MGM Records stereo pressing; \"This record was previously released on E-2641 ST\"; Arthur Freed Production; directed by Vincente Minnelli",
+    "genres": [
+      "Soundtrack",
+      "Musical",
+      "Broadway/Hollywood"
+    ],
+    "moods": [
+      "Charming",
+      "Romantic",
+      "Playful",
+      "Elegant"
+    ],
+    "favoriteTracks": [
+      "Gigi",
+      "Thank Heaven for Little Girls",
+      "The Night They Invented Champagne",
+      "I Remember It Well"
+    ]
   },
   {
     "title": "More Music from Peter Gunn",
@@ -5636,25 +5801,95 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5025.jpg",
     "backCoverPath": "../../Batch 8/IMG_5026.jpg",
-    "id": "more-music-from-peter-gunn"
+    "id": "more-music-from-peter-gunn",
+    "recordingYears": "1959",
+    "label": "RCA Victor Living Stereo",
+    "catalogNumber": "LSP-2040",
+    "pressing": "RCA Living Stereo pressing; \"TRUE STEREOPHONIC RECORD\" designed for stereo playback only; recorded at RCA Music Center; from the NBC TV series Peter Gunn created by Blake Edwards",
+    "genres": [
+      "Jazz",
+      "Soundtrack",
+      "TV Score",
+      "Cool Jazz",
+      "Big Band"
+    ],
+    "moods": [
+      "Cool",
+      "Noir",
+      "Swinging",
+      "Mysterious",
+      "Cinematic"
+    ],
+    "favoriteTracks": [
+      "Walkin' Bass",
+      "Joanna",
+      "Goofin' at the Coffee House",
+      "Blue Steel"
+    ]
   },
   {
     "title": "All the Hits with All the Stars, Vol. 3",
-    "artist": "Various",
+    "artist": "Various Artists",
     "storageLocation": "Crate 4 (Upstairs)",
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5027.jpg",
     "backCoverPath": "../../Batch 8/IMG_5029.jpg",
-    "id": "all-the-hits-with-all-the-stars-vol-3"
+    "id": "all-the-hits-with-all-the-stars-vol-3",
+    "releaseYear": 1960,
+    "originalReleaseYear": 1960,
+    "recordingYears": "1950s",
+    "label": "Wyncote",
+    "catalogNumber": "W 9079 (Stereo SW-9079)",
+    "pressing": "Budget reissue compilation; original vault masters from Swingtime, Modern, and other labels; \"no attempt has been made to modernize this record\"",
+    "genres": [
+      "Rhythm & Blues",
+      "Blues",
+      "Early Rock & Roll"
+    ],
+    "moods": [
+      "Soulful",
+      "Driving",
+      "Late-night",
+      "Gritty"
+    ],
+    "favoriteTracks": [
+      "Rocking Chair Blues (Ray Charles)",
+      "Everyday I Have the Blues (Lowell Fulson)",
+      "Love Song (Jessie Belvin)",
+      "Alone in the City (Ray Charles)"
+    ]
   },
   {
     "title": "The Original Hit Performances! Into the Fifties",
-    "artist": "Various",
+    "artist": "Various Artists",
     "storageLocation": "Crate 4 (Upstairs)",
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5030.jpg",
     "backCoverPath": "../../Batch 8/IMG_5031.jpg",
-    "id": "the-original-hit-performances-into-the-fifties"
+    "id": "the-original-hit-performances-into-the-fifties",
+    "releaseYear": 1959,
+    "originalReleaseYear": 1951,
+    "recordingYears": "Late 1940s–early 1950s",
+    "label": "Decca",
+    "catalogNumber": "DL 4003",
+    "pressing": "Part of Decca's \"Original Hit Performances\" series; subtitled \"The Music Goes 'Round and Around\"",
+    "genres": [
+      "Pop",
+      "Big Band",
+      "Traditional Pop",
+      "Nostalgia"
+    ],
+    "moods": [
+      "Cheerful",
+      "Nostalgic",
+      "Upbeat",
+      "Wholesome"
+    ],
+    "favoriteTracks": [
+      "Heartaches (Ted Weems)",
+      "Blueberry Hill (Louis Armstrong & Gordon Jenkins)",
+      "Goodnight Irene (The Weavers & Gordon Jenkins)"
+    ]
   },
   {
     "title": "Marches from Operas",
@@ -5663,7 +5898,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5032.jpg",
     "backCoverPath": "../../Batch 8/IMG_5033.jpg",
-    "id": "marches-from-operas"
+    "id": "marches-from-operas",
+    "releaseYear": 1960,
+    "originalReleaseYear": 1959,
+    "recordingYears": "1959",
+    "label": "Audio Fidelity (First Component Series)",
+    "catalogNumber": "FCS 50,008",
+    "pressing": "Audio Fidelity Stereodisc; \"First Component Series\"; recorded in London on an Ampex 300-2; copyright 1959 by Audio Fidelity Inc.",
+    "genres": [
+      "Classical",
+      "Orchestral",
+      "Opera Excerpts"
+    ],
+    "moods": [
+      "Majestic",
+      "Grand",
+      "Dramatic",
+      "Ceremonial"
+    ],
+    "favoriteTracks": [
+      "March from Aida (Verdi)",
+      "Rakoczy March from \"Damnation of Faust\" (Berlioz)",
+      "March from Tannhäuser (Wagner)"
+    ]
   },
   {
     "title": "The Music of Christmas",
@@ -5672,7 +5929,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5034.jpg",
     "backCoverPath": "../../Batch 8/IMG_5035.jpg",
-    "id": "the-music-of-christmas"
+    "id": "the-music-of-christmas",
+    "releaseYear": 1958,
+    "label": "Capitol Classics",
+    "catalogNumber": "P8393",
+    "pressing": "Capitol Records High Fidelity Recording; mono pressing; factories: Scranton, PA and Los Angeles, CA",
+    "genres": [
+      "Classical",
+      "Holiday / Christmas",
+      "Orchestral"
+    ],
+    "moods": [
+      "Reverent",
+      "Warm",
+      "Festive",
+      "Grandly beautiful"
+    ],
+    "favoriteTracks": [
+      "Silent Night",
+      "The First Noel",
+      "O Tannenbaum",
+      "Carol of the Bells"
+    ]
   },
   {
     "title": "Henry Mancini — A Legendary Performer",
@@ -5682,7 +5960,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5036.jpg",
     "backCoverPath": "../../Batch 8/IMG_5037.jpg",
-    "id": "henry-mancini-a-legendary-performer"
+    "id": "henry-mancini-a-legendary-performer",
+    "label": "RCA",
+    "catalogNumber": "CPL1-1843",
+    "pressing": "Part of RCA's \"Legendary Performer\" series; includes illustrated booklet with 4-color picture suitable for framing; liner notes by Leonard Feather; © 1976 RCA Records",
+    "genres": [
+      "Easy Listening",
+      "Soundtrack",
+      "Jazz",
+      "Pop Orchestral"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Suave",
+      "Cinematic",
+      "Elegant"
+    ],
+    "favoriteTracks": [
+      "Three by Mancini (Days of Wine and Roses / Charade / Moon River)",
+      "Pink Panther Theme",
+      "Baby Elephant Walk",
+      "Peter Gunn (New Version)"
+    ]
   },
   {
     "title": "Ice Castles (Original Soundtrack Album)",
@@ -5692,7 +5991,26 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5038.jpg",
     "backCoverPath": "../../Batch 8/IMG_5039.jpg",
-    "id": "ice-castles-original-soundtrack-album"
+    "id": "ice-castles-original-soundtrack-album",
+    "recordingYears": "1978–1979",
+    "label": "Arista",
+    "catalogNumber": "AL 9504",
+    "pressing": "© 1979 Arista Records; © 1978 Columbia Pictures; US pressing; Savers thrift store price sticker ($0.99)",
+    "genres": [
+      "Soundtrack",
+      "Pop",
+      "Soft Rock"
+    ],
+    "moods": [
+      "Romantic",
+      "Soaring",
+      "Bittersweet",
+      "Cinematic"
+    ],
+    "favoriteTracks": [
+      "Looking Through the Eyes of Love (Melissa Manchester)",
+      "Voyager (Alan Parsons Project)"
+    ]
   },
   {
     "title": "Symphony No. 8 in B Minor (\"Unfinished\") / Symphony No. 8 in F Major, Op. 93",
@@ -5711,7 +6029,27 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5043.JPG",
     "backCoverPath": "../../Batch 8/IMG_5044.jpg",
-    "id": "moscow-night"
+    "id": "moscow-night",
+    "recordingYears": "March 1987",
+    "label": "Concord Jazz",
+    "catalogNumber": "CJ-353",
+    "pressing": "Live recording from Brubeck's 1987 USSR tour; recorded using Sony PCM 1610 system; remixed at Russian Hill Recording; © 1988 Concord Jazz, Inc.",
+    "genres": [
+      "Jazz",
+      "Contemporary Jazz",
+      "Live"
+    ],
+    "moods": [
+      "Adventurous",
+      "Swinging",
+      "Historic",
+      "Soulful"
+    ],
+    "favoriteTracks": [
+      "Three to Get Ready",
+      "Unsquare Dance",
+      "St. Louis Blues"
+    ]
   },
   {
     "title": "La Mer / Rapsodie Espagnole",
@@ -5720,7 +6058,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5048.jpg",
     "backCoverPath": "../../Batch 8/IMG_5051.jpg",
-    "id": "la-mer-rapsodie-espagnole"
+    "id": "la-mer-rapsodie-espagnole",
+    "releaseYear": 1968,
+    "originalReleaseYear": 1960,
+    "recordingYears": "Early 1960s",
+    "label": "RCA Victrola",
+    "catalogNumber": "VIC-1041 (Mono) / VICS-1041 (Stereo)",
+    "pressing": "Budget reissue on RCA's Victrola label; \"Printed in Canada\"; artwork features Giulio Romano's The Birth of Venus",
+    "genres": [
+      "Classical",
+      "Impressionist",
+      "Orchestral"
+    ],
+    "moods": [
+      "Oceanic",
+      "Sensuous",
+      "Shimmering",
+      "Vibrant"
+    ],
+    "favoriteTracks": [
+      "La Mer: De l'aube à midi sur la mer",
+      "Rapsodie Espagnole: Feria"
+    ]
   },
   {
     "title": "Romeo and Juliet",
@@ -5729,7 +6088,26 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5052.jpg",
     "backCoverPath": "../../Batch 8/IMG_5053.jpg",
-    "id": "romeo-and-juliet"
+    "id": "romeo-and-juliet",
+    "releaseYear": 1955,
+    "label": "Columbia",
+    "catalogNumber": "CL 747",
+    "pressing": "Columbia High Fidelity LP; US pressing; back cover includes full retelling of the Romeo and Juliet story alongside track notes",
+    "genres": [
+      "Classical",
+      "Romantic",
+      "Orchestral"
+    ],
+    "moods": [
+      "Passionate",
+      "Dramatic",
+      "Tragic",
+      "Sweeping"
+    ],
+    "favoriteTracks": [
+      "Romeo and Juliet, Overture-Fantasia",
+      "Waltz from \"The Sleeping Beauty\" Ballet, Op. 66"
+    ]
   },
   {
     "title": "Friends",
@@ -5739,7 +6117,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5054.jpg",
     "backCoverPath": "../../Batch 8/IMG_5055.jpg",
-    "id": "friends"
+    "id": "friends",
+    "recordingYears": "1978",
+    "label": "Polydor",
+    "catalogNumber": "PD-1-6160",
+    "pressing": "US pressing; dedicated to Dave Brubeck; Smurf figurines on cover art; recorded at Kendun Recorders, Burbank, CA; © 1978 Thalian Music ASCAP",
+    "genres": [
+      "Jazz",
+      "Fusion",
+      "Contemporary Jazz"
+    ],
+    "moods": [
+      "Joyful",
+      "Playful",
+      "Warm",
+      "Introspective"
+    ],
+    "favoriteTracks": [
+      "The One Step",
+      "Samba Song",
+      "Friends",
+      "Cappucino"
+    ]
   },
   {
     "title": "Blue Skies (Original Soundtrack Recording)",
@@ -5749,7 +6148,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5056.JPG",
     "backCoverPath": "../../Batch 8/IMG_5057.jpg",
-    "id": "blue-skies-original-soundtrack-recording"
+    "id": "blue-skies-original-soundtrack-recording",
+    "originalReleaseYear": 1946,
+    "recordingYears": "1946",
+    "label": "Sountrak / Sunbeam Records",
+    "catalogNumber": "STK-104",
+    "pressing": "Archival reissue of the 1946 Paramount film soundtrack; © 1976 Sunbeam Records Inc., Van Nuys, CA; illustrated cover art by Jeremy Kay",
+    "genres": [
+      "Soundtrack",
+      "Traditional Pop",
+      "Big Band",
+      "Swing"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Breezy",
+      "Romantic",
+      "Playful"
+    ],
+    "favoriteTracks": [
+      "Puttin' On the Ritz (Fred Astaire)",
+      "Blue Skies (Bing Crosby)",
+      "White Christmas (War Montage medley)"
+    ]
   },
   {
     "title": "Here's Guy Lombardo and The Royal Canadians",
@@ -5758,7 +6179,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5062.JPG",
     "backCoverPath": "../../Batch 8/IMG_5063.jpg",
-    "id": "here-s-guy-lombardo-and-the-royal-canadians"
+    "id": "here-s-guy-lombardo-and-the-royal-canadians",
+    "releaseYear": 1968,
+    "label": "Vocalion (a product of Decca Records / MCA)",
+    "catalogNumber": "VL 73833",
+    "pressing": "\"Enhanced for Stereo\" reissue; Vocalion budget label; recordings selected from Decca catalog; sticker price $1.00",
+    "genres": [
+      "Big Band",
+      "Swing",
+      "Ballroom Dance",
+      "Traditional Pop"
+    ],
+    "moods": [
+      "Smooth",
+      "Romantic",
+      "Danceable",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "The Moon of Manakoora",
+      "The Anniversary Waltz",
+      "Red Roses for a Blue Lady",
+      "If I Forget You"
+    ]
   },
   {
     "title": "Songs of the Fabulous Forties, Part 1",
@@ -5767,7 +6210,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5064.jpg",
     "backCoverPath": "../../Batch 8/IMG_5065.jpg",
-    "id": "songs-of-the-fabulous-forties-part-1"
+    "id": "songs-of-the-fabulous-forties-part-1",
+    "releaseYear": 1960,
+    "label": "Kapp Records",
+    "catalogNumber": "KS-3207",
+    "pressing": "Stereophonic; Kapp High Fidelity; Kapp Records Inc., New York 22, N.Y.",
+    "genres": [
+      "Easy Listening",
+      "Traditional Pop",
+      "Piano",
+      "1940s Nostalgia"
+    ],
+    "moods": [
+      "Romantic",
+      "Nostalgic",
+      "Elegant",
+      "Uplifting"
+    ],
+    "favoriteTracks": [
+      "As Time Goes By",
+      "Holiday for Strings",
+      "Some Enchanted Evening",
+      "Anniversary Song"
+    ]
   },
   {
     "title": "Beloved Mormon Hymns",
@@ -5776,7 +6241,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5066.jpg",
     "backCoverPath": "../../Batch 8/IMG_5067.jpg",
-    "id": "beloved-mormon-hymns"
+    "id": "beloved-mormon-hymns",
+    "releaseYear": 1970,
+    "label": "Covenant Recordings Inc.",
+    "catalogNumber": "Not visible",
+    "pressing": "Covenant Recordings Inc., 1345 Major Street, Salt Lake City, UT 84115; still in shrink wrap; orchestral arrangements of LDS hymns",
+    "genres": [
+      "Religious",
+      "Classical",
+      "Orchestral",
+      "LDS / Mormon"
+    ],
+    "moods": [
+      "Reverent",
+      "Peaceful",
+      "Uplifting",
+      "Spiritual"
+    ],
+    "favoriteTracks": [
+      "How Great the Wisdom and the Love",
+      "Redeemer of Israel",
+      "The Lord Is My Shepherd",
+      "Now the Day Is Over"
+    ]
   },
   {
     "title": "Baseball / Traveler / Warm Glow (EP)",
@@ -5786,7 +6273,25 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5068.jpg",
     "backCoverPath": "../../Batch 8/IMG_5069.jpg",
-    "id": "baseball-traveler-warm-glow-ep"
+    "id": "baseball-traveler-warm-glow-ep",
+    "label": "Grand Jury Music (distributed by Fat Possum Records)",
+    "catalogNumber": "8 55579 00600 3",
+    "pressing": "3-track EP; minimalist cover art featuring a baseball hovering over an air mattress in the woods; © 2017 Grand Jury Music",
+    "genres": [
+      "Indie Pop",
+      "Indie Rock",
+      "Alternative"
+    ],
+    "moods": [
+      "Dreamy",
+      "Melancholic",
+      "Introspective",
+      "Youthful"
+    ],
+    "favoriteTracks": [
+      "Baseball",
+      "Warm Glow"
+    ]
   },
   {
     "title": "The World's Greatest Entertainer",
@@ -5795,7 +6300,31 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5070.jpg",
     "backCoverPath": "../../Batch 8/IMG_5071.jpg",
-    "id": "the-world-s-greatest-entertainer"
+    "id": "the-world-s-greatest-entertainer",
+    "releaseYear": 1968,
+    "originalReleaseYear": 1951,
+    "recordingYears": "Early 1950s",
+    "label": "Decca",
+    "catalogNumber": "DL 79074",
+    "pressing": "\"Enhanced for Stereo\" reissue; selections originally recorded for Kraft Music Hall Broadcasts; printed in Canada; still in shrink wrap",
+    "genres": [
+      "Traditional Pop",
+      "Vocal",
+      "Vaudeville",
+      "Nostalgia"
+    ],
+    "moods": [
+      "Theatrical",
+      "Exuberant",
+      "Nostalgic",
+      "Sentimental"
+    ],
+    "favoriteTracks": [
+      "Toot Toot Tootsie Goodbye (Medley)",
+      "My Mammy",
+      "I'll Be Seeing You",
+      "Baby Face"
+    ]
   },
   {
     "title": "Climb Every Mountain",
@@ -5804,7 +6333,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5072.jpg",
     "backCoverPath": "../../Batch 8/IMG_5073.jpg",
-    "id": "climb-every-mountain"
+    "id": "climb-every-mountain",
+    "releaseYear": 1971,
+    "label": "Columbia Masterworks",
+    "catalogNumber": "M 30647",
+    "pressing": "Produced by Thomas Frost; Savers thrift store sticker ($0.99); © Columbia Records/CBS",
+    "genres": [
+      "Choral",
+      "Classical",
+      "Broadway/Inspirational",
+      "Religious"
+    ],
+    "moods": [
+      "Uplifting",
+      "Majestic",
+      "Hopeful",
+      "Inspirational"
+    ],
+    "favoriteTracks": [
+      "You'll Never Walk Alone",
+      "Somewhere",
+      "Over the Rainbow",
+      "Climb Ev'ry Mountain"
+    ]
   },
   {
     "title": "Hello, Dolly! (New Broadway Cast Recording)",
@@ -5814,7 +6365,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5074.jpg",
     "backCoverPath": "../../Batch 8/IMG_5075.jpg",
-    "id": "hello-dolly-new-broadway-cast-recording"
+    "id": "hello-dolly-new-broadway-cast-recording",
+    "originalReleaseYear": 1964,
+    "recordingYears": "2017",
+    "label": "Masterworks Broadway / Sony Music Entertainment",
+    "catalogNumber": "889854 05921 7",
+    "pressing": "New Broadway Cast Recording; © & ℗ 2017 Sony Music Entertainment; produced by Steven Epstein; executive producer Scott Farthing",
+    "genres": [
+      "Broadway Musical",
+      "Vocal",
+      "Theatrical"
+    ],
+    "moods": [
+      "Joyful",
+      "Theatrical",
+      "Romantic",
+      "Exuberant"
+    ],
+    "favoriteTracks": [
+      "Hello, Dolly!",
+      "Before the Parade Passes By",
+      "It Only Takes a Moment",
+      "So Long Dearie"
+    ]
   },
   {
     "title": "National Anthems / Nationalhymnen",
@@ -5823,7 +6396,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5076.jpg",
     "backCoverPath": "../../Batch 8/IMG_5077.jpg",
-    "id": "national-anthems-nationalhymnen"
+    "id": "national-anthems-nationalhymnen",
+    "releaseYear": 1960,
+    "label": "Fontana Spezial (Philips/Phonogram)",
+    "catalogNumber": "701 536 WPY",
+    "pressing": "German pressing (Phonogram GmbH, Hamburg; printed by Gerhard Stalling AG, Oldenburg); library deaccession sticker from Salt Lake County Library System / R.V. Tyler Library; 24 national anthems featured",
+    "genres": [
+      "Patriotic / Ceremonial",
+      "Wind Band",
+      "World"
+    ],
+    "moods": [
+      "Ceremonial",
+      "Solemn",
+      "Proud",
+      "International"
+    ],
+    "favoriteTracks": [
+      "God Save the Queen",
+      "La Marseillaise",
+      "Deutschland-Lied",
+      "The Star Spangled Banner"
+    ]
   },
   {
     "title": "don't smile at me",
@@ -5833,7 +6427,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5078.JPG",
     "backCoverPath": "../../Batch 8/IMG_5079.JPG",
-    "id": "don-t-smile-at-me"
+    "id": "don-t-smile-at-me",
+    "recordingYears": "2016–2017",
+    "label": "Darkroom / Interscope",
+    "catalogNumber": "B0027307-01 / 602567 01087 6",
+    "pressing": "US pressing; © 2017 Darkroom/Interscope Records; manufactured and distributed by Universal Music Distribution; 8-track debut EP on vinyl",
+    "genres": [
+      "Pop",
+      "Electropop",
+      "Dark Pop",
+      "Indie Pop"
+    ],
+    "moods": [
+      "Brooding",
+      "Introspective",
+      "Melancholic",
+      "Cool"
+    ],
+    "favoriteTracks": [
+      "ocean eyes",
+      "bellyache",
+      "hostage",
+      "idontwannabeyouanymore"
+    ]
   },
   {
     "title": "Hawaii's Golden Voice",
@@ -5842,7 +6458,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5080.JPG",
     "backCoverPath": "../../Batch 8/IMG_5082.JPG",
-    "id": "hawaii-s-golden-voice"
+    "id": "hawaii-s-golden-voice",
+    "releaseYear": 1970,
+    "label": "Kekaula Productions Limited (manufactured by Rada Records)",
+    "catalogNumber": "KPL-1001",
+    "pressing": "Recorded live in Hawaii; engineer: Herbert Ono / Sounds of Hawaii; arranger/director: Herbert Ono; cover signed by Eddie Kekaula to \"Sherins & Lorenzo\" dated 10/16; Vancouver, B.C. distribution address",
+    "genres": [
+      "Hawaiian",
+      "Traditional Pop",
+      "World"
+    ],
+    "moods": [
+      "Tropical",
+      "Romantic",
+      "Sentimental",
+      "Warm"
+    ],
+    "favoriteTracks": [
+      "Beyond the Reef",
+      "Ke Kali Nei Au (Hawaiian Wedding Song)",
+      "Waipio",
+      "Aloha Oe"
+    ]
   },
   {
     "title": "Songs America Loves Best, Vol. III — The Twenties",
@@ -5852,7 +6489,30 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5083.jpg",
     "backCoverPath": "../../Batch 8/IMG_5084.jpg",
-    "id": "songs-america-loves-best-vol-iii-the-twenties"
+    "id": "songs-america-loves-best-vol-iii-the-twenties",
+    "originalReleaseYear": 1920,
+    "recordingYears": "1982",
+    "label": "CBS / Columbia Masterworks",
+    "catalogNumber": "CBS 37286 / 7464-37286-1",
+    "pressing": "© 1982 CBS Inc.; produced by Thomas Frost; Savers thrift store sticker ($0.99); part of series (Vol. III); design: Christopher Austopchuk; art: Nancy Stahl",
+    "genres": [
+      "Choral",
+      "Traditional Pop",
+      "Nostalgia",
+      "1920s"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Cheerful",
+      "Warm",
+      "Roaring-20s energy"
+    ],
+    "favoriteTracks": [
+      "Always (Irving Berlin)",
+      "Blue Skies (Irving Berlin)",
+      "I'll Get By",
+      "I Want to Be Happy / Happy Days Are Here Again (medley)"
+    ]
   },
   {
     "title": "The Apostle Paul and His Epistle to the Romans (L.P. No. 1 and 4, Parts I and IV)",
@@ -5872,7 +6532,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5087.jpg",
     "backCoverPath": "../../Batch 8/IMG_5088.jpg",
-    "id": "high-society-original-soundtrack"
+    "id": "high-society-original-soundtrack",
+    "recordingYears": "1956",
+    "label": "Capitol Records",
+    "catalogNumber": "W 750",
+    "pressing": "Capitol High Fidelity Recording; US pressing; MGM/VistaVision production; Technicolor; directed by Charles Walters; music supervised by Johnny Green and Saul Chaplin; orchestrations by Conrad Salinger, Nelson Riddle, Skip Martin",
+    "genres": [
+      "Soundtrack",
+      "Traditional Pop",
+      "Jazz",
+      "Musical"
+    ],
+    "moods": [
+      "Witty",
+      "Romantic",
+      "Breezy",
+      "Sophisticated"
+    ],
+    "favoriteTracks": [
+      "True Love (Bing Crosby & Grace Kelly)",
+      "Now You Has Jazz (Bing Crosby & Louis Armstrong)",
+      "Well Did You Evah? (Bing Crosby & Frank Sinatra)",
+      "You're Sensational (Frank Sinatra)"
+    ]
   },
   {
     "title": "Onward Christian Soldiers",
@@ -5881,7 +6563,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5089.jpg",
     "backCoverPath": "../../Batch 8/IMG_5090.jpg",
-    "id": "onward-christian-soldiers"
+    "id": "onward-christian-soldiers",
+    "releaseYear": 1968,
+    "label": "Harmony (a product of Columbia Records)",
+    "catalogNumber": "HS 11272",
+    "pressing": "Stereo; \"can also be played on mono equipment\"; electronically re-channeled for stereo on some tracks; Savers thrift sticker ($0.99); manufactured by Columbia Records/CBS",
+    "genres": [
+      "Choral",
+      "Religious",
+      "Hymns",
+      "LDS / Mormon"
+    ],
+    "moods": [
+      "Stirring",
+      "Reverent",
+      "Triumphant",
+      "Peaceful"
+    ],
+    "favoriteTracks": [
+      "Onward Christian Soldiers",
+      "I Need Thee Every Hour",
+      "Sleepers, Awake (Bach)",
+      "Abide with Me"
+    ]
   },
   {
     "title": "Song Seeds",
@@ -5891,17 +6595,58 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5091.jpg",
     "backCoverPath": "../../Batch 8/IMG_5093.jpg",
-    "id": "song-seeds"
+    "id": "song-seeds",
+    "recordingYears": "2016–2017",
+    "label": "Dualtone Music Group",
+    "catalogNumber": "80302 01806 41",
+    "pressing": "6-track EP (3 per side); includes studio versions, live versions, and \"seed\" (demo) versions of \"Angela\" and \"Long Way From Home\"; © 2017 Dualtone Music Group; manufactured in the USA",
+    "genres": [
+      "Indie Folk",
+      "Folk Rock",
+      "Alternative"
+    ],
+    "moods": [
+      "Intimate",
+      "Nostalgic",
+      "Bittersweet",
+      "Raw"
+    ],
+    "favoriteTracks": [
+      "Angela",
+      "Long Way From Home",
+      "Angela Seed (For Fra)"
+    ]
   },
   {
     "title": "America's Top 20",
-    "artist": "Various",
+    "artist": "Various Artists",
     "releaseYear": 1976,
     "storageLocation": "Crate 4 (Upstairs)",
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5094.jpg",
     "backCoverPath": "../../Batch 8/IMG_5095.jpg",
-    "id": "america-s-top-20"
+    "id": "america-s-top-20",
+    "originalReleaseYear": 1960,
+    "recordingYears": "1960s–early 1970s",
+    "label": "Columbia Special Products / World Wide Marketing Corp.",
+    "catalogNumber": "P13075",
+    "pressing": "Budget compilation; © 1976 CBS Inc.; produced and distributed by World Wide Marketing Corp., Van Nuys, CA; original artist recordings licensed from multiple labels",
+    "genres": [
+      "Country",
+      "Classic Country"
+    ],
+    "moods": [
+      "Feel-good",
+      "Twangy",
+      "Sentimental",
+      "Driving"
+    ],
+    "favoriteTracks": [
+      "Ring of Fire (Johnny Cash)",
+      "El Paso (Marty Robbins)",
+      "Behind Closed Doors (Charlie Rich)",
+      "Stand By Your Man (Tammy Wynette)"
+    ]
   },
   {
     "title": "Moving Pictures",
@@ -5911,17 +6656,61 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5096.jpg",
     "backCoverPath": "../../Batch 8/IMG_5097.jpg",
-    "id": "moving-pictures"
+    "id": "moving-pictures",
+    "recordingYears": "1980–1981",
+    "label": "Mercury / PolyGram",
+    "catalogNumber": "SRM-1-4013",
+    "pressing": "US pressing; © 1981 PolyGram Records Inc.; produced by Rush and Terry Brown; also available on 8-track (MC-8-1-4013) and cassette (MCR-4-1-4013)",
+    "genres": [
+      "Progressive Rock",
+      "Hard Rock",
+      "Art Rock"
+    ],
+    "moods": [
+      "Epic",
+      "Cerebral",
+      "Driving",
+      "Intense"
+    ],
+    "favoriteTracks": [
+      "Tom Sawyer",
+      "YYZ",
+      "Limelight",
+      "Red Barchetta"
+    ]
   },
   {
     "title": "Beauty and the Beast: The Songs",
-    "artist": "Various",
+    "artist": "Various Artists",
     "releaseYear": 2017,
     "storageLocation": "Crate 4 (Upstairs)",
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5098.jpg",
     "backCoverPath": "../../Batch 8/IMG_5099.jpg",
-    "id": "beauty-and-the-beast-the-songs"
+    "id": "beauty-and-the-beast-the-songs",
+    "originalReleaseYear": 1991,
+    "recordingYears": "2016–2017",
+    "label": "Walt Disney Records",
+    "catalogNumber": "D002816401 / 50087 36735",
+    "pressing": "Songs from the 2017 live-action film; © & TM 2017 Disney; recorded at Abbey Road Studios and British Grove Studios, London; produced by Alan Menken, Matt Sullivan, Mitchell Leib",
+    "genres": [
+      "Soundtrack",
+      "Musical",
+      "Pop",
+      "Disney"
+    ],
+    "moods": [
+      "Romantic",
+      "Magical",
+      "Lush",
+      "Theatrical"
+    ],
+    "favoriteTracks": [
+      "Beauty and the Beast (Emma Thompson)",
+      "Evermore (Dan Stevens)",
+      "Be Our Guest",
+      "How Does a Moment Last Forever (Celine Dion)"
+    ]
   },
   {
     "title": "On a Clear Day You Can See Forever (Original Soundtrack Recording)",
@@ -5931,7 +6720,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5100.jpg",
     "backCoverPath": "../../Batch 8/IMG_5101.jpg",
-    "id": "on-a-clear-day-you-can-see-forever-original-soundtrack-recording"
+    "id": "on-a-clear-day-you-can-see-forever-original-soundtrack-recording",
+    "recordingYears": "1969–1970",
+    "label": "Columbia Masterworks",
+    "catalogNumber": "S 30086",
+    "pressing": "Columbia stereo; Paramount Pictures production; directed by Vincente Minnelli; gatefold sleeve — front features Streisand, back features Montand",
+    "genres": [
+      "Soundtrack",
+      "Musical",
+      "Traditional Pop",
+      "Vocal"
+    ],
+    "moods": [
+      "Romantic",
+      "Breezy",
+      "Whimsical",
+      "Lush"
+    ],
+    "favoriteTracks": [
+      "On a Clear Day (You Can See Forever)",
+      "What Did I Have That I Don't Have?",
+      "Come Back to Me"
+    ]
   },
   {
     "title": "Summer of '42 (Original Motion Picture Score)",
@@ -5941,7 +6751,27 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5102.jpg",
     "backCoverPath": "../../Batch 8/IMG_5103.jpg",
-    "id": "summer-of-42-original-motion-picture-score"
+    "id": "summer-of-42-original-motion-picture-score",
+    "recordingYears": "1971",
+    "label": "Warner Bros.",
+    "catalogNumber": "WS 1925",
+    "pressing": "© 1971 Warner Bros. Records Inc.; produced by Robert Mulligan and Richard A. Roth; directed by Robert Mulligan; screenplay by Herman Raucher",
+    "genres": [
+      "Soundtrack",
+      "Orchestral",
+      "Easy Listening"
+    ],
+    "moods": [
+      "Nostalgic",
+      "Bittersweet",
+      "Tender",
+      "Wistful"
+    ],
+    "favoriteTracks": [
+      "Theme from \"Summer of '42\"",
+      "The Summer Knows (End Title Theme)",
+      "Summer Song"
+    ]
   },
   {
     "title": "The Beloved Choruses",
@@ -5950,7 +6780,30 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5104.jpg",
     "backCoverPath": "../../Batch 8/IMG_5105.jpg",
-    "id": "the-beloved-choruses"
+    "id": "the-beloved-choruses",
+    "releaseYear": 1960,
+    "recordingYears": "Autumn 1958",
+    "label": "Columbia Masterworks",
+    "catalogNumber": "ML 5364",
+    "pressing": "Columbia Guaranteed High Fidelity mono LP; Library of Congress catalog card number R59-1040 applies; historic first recording collaboration between Mormon Tabernacle Choir and Philadelphia Orchestra",
+    "genres": [
+      "Classical",
+      "Choral",
+      "Religious",
+      "Orchestral"
+    ],
+    "moods": [
+      "Majestic",
+      "Reverent",
+      "Triumphant",
+      "Spiritual"
+    ],
+    "favoriteTracks": [
+      "Hallelujah Chorus from Messiah (Handel)",
+      "A Mighty Fortress (Bach)",
+      "The Heavens Are Telling (Haydn)",
+      "On Great Lone Hills (Sibelius)"
+    ]
   },
   {
     "title": "The Sound of Hollywood",
@@ -5959,7 +6812,30 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5106.jpg",
     "backCoverPath": "../../Batch 8/IMG_5107.jpg",
-    "id": "the-sound-of-hollywood"
+    "id": "the-sound-of-hollywood",
+    "releaseYear": 1961,
+    "recordingYears": "Early 1960s",
+    "label": "Medallion (a product of Kapp Records)",
+    "catalogNumber": "MS-7513",
+    "pressing": "Stereophonic; recorded at Fine Recording Studios, New York City; award sticker: \"For Highest Achievement in Blending Recorded Sound and Music\"",
+    "genres": [
+      "Easy Listening",
+      "Soundtrack",
+      "Orchestral",
+      "Film Themes"
+    ],
+    "moods": [
+      "Cinematic",
+      "Romantic",
+      "Lush",
+      "Nostalgic"
+    ],
+    "favoriteTracks": [
+      "Theme from A Summer Place",
+      "Never on Sunday",
+      "Spellbound",
+      "Theme from Black Orpheus (Carnival)"
+    ]
   },
   {
     "title": "The Five Pennies (Original Soundtrack)",
@@ -5969,16 +6845,66 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5108.jpg",
     "backCoverPath": "../../Batch 8/IMG_5109.jpg",
-    "id": "the-five-pennies-original-soundtrack"
+    "id": "the-five-pennies-original-soundtrack",
+    "recordingYears": "1959",
+    "label": "Dot",
+    "catalogNumber": "DLP 9500",
+    "pressing": "Paramount Pictures / VistaVision / Technicolor; Ultra High Fidelity; use RIAA curve position; prior owner notation on back: John M. Holick, Concord, CA, dated 18 Feb 1975; condition noted as \"E+, Plays 3-5\"",
+    "genres": [
+      "Soundtrack",
+      "Jazz",
+      "Traditional Pop",
+      "Dixieland"
+    ],
+    "moods": [
+      "Joyful",
+      "Swinging",
+      "Warm",
+      "Celebratory"
+    ],
+    "favoriteTracks": [
+      "Bill Bailey Won't You Please Come Home (Louis Armstrong)",
+      "Lullaby in Ragtime (Danny Kaye & Louis Armstrong)",
+      "The Five Pennies Saints",
+      "Indiana Radio Montage"
+    ]
   },
   {
     "title": "The Smithsonian Collection of Classic Jazz",
-    "artist": "Various",
+    "artist": "Various Artists",
     "storageLocation": "Crate 4 (Upstairs)",
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5110.jpg",
     "backCoverPath": "../../Batch 8/IMG_5111.jpg",
-    "id": "the-smithsonian-collection-of-classic-jazz"
+    "id": "the-smithsonian-collection-of-classic-jazz",
+    "releaseYear": 1975,
+    "originalReleaseYear": 1916,
+    "recordingYears": "1916–1961",
+    "label": "Smithsonian Institution / Columbia Special Products",
+    "catalogNumber": "P6 11891",
+    "pressing": "6-LP boxed set; produced in association with Columbia Special Products; available through Smithsonian Associates; ISBN 0-393-09300-X; comprehensive survey of jazz history from ragtime through free jazz",
+    "genres": [
+      "Jazz",
+      "Blues",
+      "Ragtime",
+      "Bebop",
+      "Cool Jazz",
+      "Swing",
+      "Free Jazz"
+    ],
+    "moods": [
+      "Educational",
+      "Historic",
+      "Celebratory",
+      "Diverse"
+    ],
+    "favoriteTracks": [
+      "West End Blues (Louis Armstrong)",
+      "Ko-Ko (Charlie Parker)",
+      "Body and Soul (Coleman Hawkins)",
+      "So What (Miles Davis)",
+      "Maple Leaf Rag (Scott Joplin)"
+    ]
   },
   {
     "title": "Art Blakey and the Jazz Messengers — Recorded Live at Bubba's (featuring Wynton Marsalis)",
@@ -5997,7 +6923,30 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5115.JPG",
     "backCoverPath": "../../Batch 8/IMG_5116.jpg",
-    "id": "lullaby-in-rhythm-featuring-charlie-parker"
+    "id": "lullaby-in-rhythm-featuring-charlie-parker",
+    "releaseYear": 1975,
+    "originalReleaseYear": 1947,
+    "recordingYears": "September 13 & 20, 1947; March 9, 1947",
+    "label": "Spotlite (UK)",
+    "catalogNumber": "Spotlite 107",
+    "pressing": "Archival reissue of rare and previously unissued recordings; some surface noise inherent to source; Spotlite Records (UK); documents the historic \"Moldy Figs vs. Moderns\" radio battle",
+    "genres": [
+      "Bebop",
+      "Jazz",
+      "Archival"
+    ],
+    "moods": [
+      "Intense",
+      "Historic",
+      "Exploratory",
+      "Raw"
+    ],
+    "favoriteTracks": [
+      "Hot House",
+      "Koko (theme)",
+      "Lullaby in Rhythm",
+      "Yardbird Suite"
+    ]
   },
   {
     "title": "Strange Trails",
@@ -6007,7 +6956,29 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5117.jpg",
     "backCoverPath": "../../Batch 8/IMG_5118.jpg",
-    "id": "strange-trails"
+    "id": "strange-trails",
+    "recordingYears": "2014–2015",
+    "label": "IAMSOUND Records",
+    "catalogNumber": "IAM066L / 766930 016114",
+    "pressing": "Double LP (4 sides, 14 tracks); © & ℗ 2015 IAMSOUND Records; US pressing",
+    "genres": [
+      "Indie Folk",
+      "Indie Rock",
+      "Americana",
+      "Dream Pop"
+    ],
+    "moods": [
+      "Atmospheric",
+      "Adventurous",
+      "Melancholic",
+      "Mysterious"
+    ],
+    "favoriteTracks": [
+      "The Night We Met",
+      "Love Like Ghosts",
+      "Dead Man's Hand",
+      "Meet Me in the Woods"
+    ]
   },
   {
     "title": "Cuba Canta y Baila",
@@ -6016,7 +6987,32 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5120.jpg",
     "backCoverPath": "../../Batch 8/IMG_5121.jpg",
-    "id": "cuba-canta-y-baila"
+    "id": "cuba-canta-y-baila",
+    "releaseYear": 1978,
+    "originalReleaseYear": 1958,
+    "recordingYears": "Late 1950s",
+    "label": "Panart",
+    "catalogNumber": "LPP-3138",
+    "pressing": "Stereo; manufactured and distributed by TH Records & Tapes Inc., Hialeah Gardens, FL; reissue of original Cuban Panart recordings",
+    "genres": [
+      "Cuban",
+      "Bolero",
+      "Cha-Cha",
+      "Latin",
+      "Tropical"
+    ],
+    "moods": [
+      "Romantic",
+      "Nostalgic",
+      "Sensual",
+      "Danceable"
+    ],
+    "favoriteTracks": [
+      "Hojas Muertas",
+      "Inolvidable (Julio Gutierrez)",
+      "Amado Mio (Olga Guillot)",
+      "Tu Vida y Mi Vida (Fernando Albuerne)"
+    ]
   },
   {
     "title": "The Summit",
@@ -6025,7 +7021,31 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5122.jpg",
     "backCoverPath": "../../Batch 8/IMG_5123.jpg",
-    "id": "the-summit"
+    "id": "the-summit",
+    "releaseYear": 1961,
+    "recordingYears": "Early 1960s",
+    "label": "Reprise (distributed by Pye Records, UK)",
+    "catalogNumber": "R 5031",
+    "pressing": "UK pressing; distributed by Pye Records (Sales) Ltd., London W.1; printed and made by Garrod & Lofthouse Ltd.; Rat Pack live and studio recordings",
+    "genres": [
+      "Traditional Pop",
+      "Vocal",
+      "Jazz",
+      "Easy Listening"
+    ],
+    "moods": [
+      "Witty",
+      "Swinging",
+      "Exuberant",
+      "Convivial"
+    ],
+    "favoriteTracks": [
+      "Style",
+      "We Open in Venice",
+      "Me and My Shadow",
+      "Well Did You Evah? (as \"The Summit\")",
+      "Guys and Dolls"
+    ]
   },
   {
     "title": "Dance in the Moonlight",
