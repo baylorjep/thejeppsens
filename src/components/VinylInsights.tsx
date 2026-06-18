@@ -37,7 +37,7 @@ function BreakdownSection({
           const pct = totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0;
           const inner = (
             <>
-              <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
+              <div className="mb-1.5 flex items-center justify-between gap-2 text-xs sm:text-sm">
                 <span className="truncate font-medium text-gray-900">{item.label}</span>
                 <span className="shrink-0 tabular-nums text-gray-500">
                   {item.count} · {pct}%

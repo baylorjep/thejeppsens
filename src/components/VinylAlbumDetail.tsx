@@ -470,14 +470,15 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                   </div>
 
                   <div className="md:hidden">
-                    <button
-                      type="button"
-                      onClick={() => window.open(appleMusicUrl, "_blank", "noopener,noreferrer")}
+                    <a
+                      href={appleMusicUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
                     >
                       <ExternalLink className="h-4 w-4" />
-                      Open in Apple Music
-                    </button>
+                      {appleMusicUrl.startsWith("https://music.apple.com") ? "Open in Apple Music" : "Find on Apple Music"}
+                    </a>
                   </div>
 
                   <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-6">
@@ -594,14 +595,15 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             </div>
 
             <div className="grid gap-2 md:hidden">
-              <button
-                type="button"
-                onClick={() => window.open(appleMusicUrl, "_blank", "noopener,noreferrer")}
+              <a
+                href={appleMusicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
               >
                 <ExternalLink className="h-4 w-4" />
-                Open in Apple Music
-              </button>
+                {appleMusicUrl.startsWith("https://music.apple.com") ? "Open in Apple Music" : "Find on Apple Music"}
+              </a>
 
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -626,14 +628,15 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => window.open(appleMusicUrl, "_blank", "noopener,noreferrer")}
+            <a
+              href={appleMusicUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="hidden items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 md:inline-flex"
             >
               <ExternalLink className="h-4 w-4" />
-              Open in Apple Music
-            </button>
+              {appleMusicUrl.startsWith("https://music.apple.com") ? "Open in Apple Music" : "Find on Apple Music"}
+            </a>
 
             {record.status !== "owned" && !isEditingRecord ? (
               <div className={`rounded-2xl border p-5 ${getStatusTone(record.status).card}`}>
