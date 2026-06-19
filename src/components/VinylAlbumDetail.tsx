@@ -164,6 +164,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [ownedStorageLocation, setOwnedStorageLocation] = useState("");
   const [appleMusicUrl, setAppleMusicUrl] = useState("");
   const inputClassName =
     "w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950";
@@ -198,10 +199,15 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
     }
   };
 
-  const markAsOwned = async (target: VinylRecord) => {
+  const markAsOwned = async (target: VinylRecord, storageLocation = ownedStorageLocation) => {
     if (target.status === "owned") return;
 
-    const nextRecord = { ...target, status: "owned" as const };
+    const trimmedStorageLocation = storageLocation.trim();
+    const nextRecord = {
+      ...target,
+      status: "owned" as const,
+      storageLocation: trimmedStorageLocation || target.storageLocation,
+    };
 
     try {
       const response = await saveVinylRecord(nextRecord);
@@ -226,6 +232,10 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
     setNotesDraft(record?.notes ?? "");
     setIsEditingNotes(false);
   }, [record?.id, record?.notes]);
+
+  useEffect(() => {
+    setOwnedStorageLocation(record?.storageLocation ?? "");
+  }, [record?.id, record?.storageLocation]);
 
   useEffect(() => {
     if (!record) return;
@@ -646,6 +656,17 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                     ? "This one is on Isabel's wishlist."
                     : "This copy is in the collection, but a better version is still on the radar."}
                 </p>
+                {record.status === "wishlist" ? (
+                  <label className="mt-4 block text-sm font-medium text-gray-950">
+                    Storage location
+                    <input
+                      value={ownedStorageLocation}
+                      onChange={(event) => setOwnedStorageLocation(event.target.value)}
+                      className={`${inputClassName} mt-2`}
+                      placeholder="Crate 3.2, upstairs shelf..."
+                    />
+                  </label>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => markAsOwned(record)}
@@ -689,6 +710,56 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ) : null,
               )}
             </dl>
+
+            <div className="space-y-3 md:hidden">
+              {record.genres?.length ? (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Genres</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {record.genres.map((genre) => (
+                      <span key={genre} className="rounded-full bg-white px-3 py-1 text-sm text-gray-700 border border-gray-200">
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {record.moods?.length ? (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Moods</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {record.moods.map((mood) => (
+                      <span key={mood} className="rounded-full bg-white px-3 py-1 text-sm text-gray-700 border border-gray-200">
+                        {mood}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {record.favoriteTracks?.length ? (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Favorite tracks</h3>
+                  <ol className="space-y-2 text-gray-700">
+                    {record.favoriteTracks.map((track, index) => (
+                      <li key={track} className="flex gap-3">
+                        <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
+                        <span>{track}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
+
+              {record.notes ? (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Notes</h3>
+                  <p className="leading-7 text-gray-700">{record.notes}</p>
+                </div>
+              ) : null}
+            </div>
+
             {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
               <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
