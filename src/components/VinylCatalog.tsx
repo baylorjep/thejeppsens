@@ -218,6 +218,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusCelebrationMessage, setStatusCelebrationMessage] = useState("");
+  const [ownedStorageLocation, setOwnedStorageLocation] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
   const [isCompactCarousel, setIsCompactCarousel] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -242,6 +243,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       })
       .catch(() => setAllRecords([...records, ...queuedRecords]));
   }, [records]);
+
+  useEffect(() => {
+    setOwnedStorageLocation(selectedRecord?.storageLocation ?? "");
+  }, [selectedRecord?.id, selectedRecord?.storageLocation]);
 
   useEffect(() => {
     const hasFavorites = allRecords.some((record) => record.favorite);
@@ -518,10 +523,15 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     }
   };
 
-  const markAsOwned = async (record: VinylRecord) => {
+  const markAsOwned = async (record: VinylRecord, storageLocation = ownedStorageLocation) => {
     if (record.status === "owned") return;
 
-    const nextRecord = { ...record, status: "owned" as const };
+    const trimmedStorageLocation = storageLocation.trim();
+    const nextRecord = {
+      ...record,
+      status: "owned" as const,
+      storageLocation: trimmedStorageLocation || record.storageLocation,
+    };
 
     try {
       const response = await saveVinylRecord(nextRecord);
@@ -1008,6 +1018,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                           Favorite
                         </span>
                       ) : null}
+                      {record.storageLocation ? (
+                        <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-600">
+                          {record.storageLocation}
+                        </span>
+                      ) : null}
                     </div>
                     <Link href={`/vinyl/${record.id}`} className="block text-xl font-semibold text-gray-950 hover:underline">
                       {record.title}
@@ -1253,6 +1268,17 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                           ? "This one is on Isabel's wishlist."
                           : "This copy is in the collection, but a better version is still on the radar."}
                       </p>
+                      {selectedRecord.status === "wishlist" ? (
+                        <label className="mt-4 block text-sm font-medium text-gray-950">
+                          Storage location
+                          <input
+                            value={ownedStorageLocation}
+                            onChange={(event) => setOwnedStorageLocation(event.target.value)}
+                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                            placeholder="Crate 3.2, upstairs shelf..."
+                          />
+                        </label>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => markAsOwned(selectedRecord)}

@@ -127,7 +127,7 @@
     "frontCoverPath": "../../Album covers/IMG_4587.JPG",
     "backCoverPath": "../../Album covers/IMG_4588.JPG",
     "favorite": true,
-    "label": "Columbia Nashville",
+    "label": "Columbia Records",
     "format": "LP",
     "discCount": 1,
     "storageLocation": "Crate 1"
@@ -1629,7 +1629,7 @@
     "label": "Verve Records",
     "format": "LP",
     "discCount": 1,
-    "storageLocation": "Crate 1"
+    "storageLocation": "Crate 3.1"
   },
   {
     "id": "jimmy-dorsey-and-his-orchestra-the-uncollected-jimmy-dorsey-vol-3-1949-1951",
@@ -4696,7 +4696,7 @@
     "releaseYear": 1950,
     "originalReleaseYear": 1928,
     "recordingYears": "1927-1928",
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "CL 845",
     "frontCoverPath": "../../Batch 6/IMG_4945.jpg",
     "backCoverPath": "../../Batch 6/IMG_4946.jpg",
@@ -4917,7 +4917,7 @@
     "title": "Day by Day",
     "artist": "Percy Faith, His Orchestra and Chorus",
     "releaseYear": 1972,
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "KC 31627",
     "genres": [
       "Easy Listening",
@@ -4946,7 +4946,7 @@
     "title": "Peg O' My Heart",
     "artist": "Jerry Murad's Harmonicats",
     "releaseYear": 1962,
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "CS 8437",
     "genres": [
       "Easy Listening",
@@ -5009,7 +5009,7 @@
     "title": "Angel of the Morning — Hit Themes for Young Lovers",
     "artist": "Percy Faith, His Orchestra and Chorus",
     "releaseYear": 1968,
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "CS 9706",
     "genres": [
       "Easy Listening",
@@ -5039,7 +5039,7 @@
     "title": "World of Favorites",
     "artist": "Ray Conniff",
     "releaseYear": 1966,
-    "label": "Columbia Record Club",
+    "label": "Columbia Records",
     "catalogNumber": "DS 267",
     "pressingNotes": "Columbia Record Club exclusive; stereo 360 Sound",
     "genres": [
@@ -5069,7 +5069,7 @@
     "title": "I Think I Love You",
     "artist": "Percy Faith, His Orchestra and Chorus",
     "releaseYear": 1971,
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "C 30502",
     "genres": [
       "Easy Listening",
@@ -5098,7 +5098,7 @@
     "title": "Leaving on a Jet Plane",
     "artist": "Percy Faith, His Orchestra and Chorus",
     "releaseYear": 1970,
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "CS 9983",
     "genres": [
       "Easy Listening",
@@ -5160,7 +5160,7 @@
     "title": "Our Best to You — Today's Great Hits, Today's Great Stars",
     "artist": "Various Artists (Tony Bennett, Ray Conniff, Percy Faith, Barbra Streisand, Andy Williams, et al.)",
     "releaseYear": 1967,
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "ABS 2",
     "pressingNotes": "Columbia Special Products compilation; Stereo 360 Sound",
     "genres": [
@@ -5438,7 +5438,7 @@
     "title": "Music — A Design for Listening, Third Edition (Side 7 / Side 18)",
     "artist": "Various (Berlioz / R. Strauss excerpts)",
     "releaseYear": 1960,
-    "label": "Columbia Special Products / Harcourt, Brace & World, Inc.",
+    "label": "Columbia Records",
     "catalogNumber": "CSM 1349",
     "pressingNotes": "Educational LP set for Harcourt, Brace & World; Side 7 = Berlioz excerpts; Side 18 = R. Strauss excerpts; single disc from multi-disc educational set",
     "genres": [
@@ -5708,7 +5708,7 @@
     "frontCoverPath": "../../Batch 8/IMG_5019.jpg",
     "backCoverPath": "../../Batch 8/IMG_5020.jpg",
     "id": "memories",
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "FC 37678 / 7464-37678-1",
     "pressing": "US pressing, still in original shrink wrap; sticker on front noting two new hits (\"Comin' In and Out of Your Life\" and \"Memory\") plus previously released favorites; © 1981 CBS Inc.",
     "genres": [
@@ -5741,7 +5741,7 @@
     "releaseYear": 1961,
     "originalReleaseYear": 1741,
     "recordingYears": "1959–1962",
-    "label": "Columbia Masterworks",
+    "label": "Columbia Records",
     "catalogNumber": "M2S 607",
     "pressing": "2-LP stereo set; Columbia Guaranteed High Fidelity; Library of Congress catalogue card number R59-1290 applies",
     "genres": [
@@ -6019,7 +6019,27 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5040.jpg",
     "backCoverPath": "../../Batch 8/IMG_5041.jpg",
-    "id": "symphony-no-8-in-b-minor-unfinished-symphony-no-8-in-f-major-op-93"
+    "id": "symphony-no-8-in-b-minor-unfinished-symphony-no-8-in-f-major-op-93",
+    "releaseYear": 1955,
+    "recordingYears": "Early-to-mid 1950s",
+    "label": "Columbia Records",
+    "catalogNumber": "CB-21 / Free Bonus CB-21 (internal Columbia catalog L-P 83271)",
+    "pressing": "Columbia Record Club limited edition bonus record; \"Not For Sale\"; available only to club members; back cover is a full Columbia Records catalog advertisement listing available titles; mono pressing",
+    "genres": [
+      "Classical",
+      "Orchestral",
+      "Romantic"
+    ],
+    "moods": [
+      "Lyrical",
+      "Dramatic",
+      "Contemplative",
+      "Elegant"
+    ],
+    "favoriteTracks": [
+      "Schubert: I. Allegro moderato",
+      "Schubert: II. Andante con moto"
+    ]
   },
   {
     "title": "Moscow Night",
@@ -6090,7 +6110,7 @@
     "backCoverPath": "../../Batch 8/IMG_5053.jpg",
     "id": "romeo-and-juliet",
     "releaseYear": 1955,
-    "label": "Columbia",
+    "label": "Columbia Records",
     "catalogNumber": "CL 747",
     "pressing": "Columbia High Fidelity LP; US pressing; back cover includes full retelling of the Romeo and Juliet story alongside track notes",
     "genres": [
@@ -6335,7 +6355,7 @@
     "backCoverPath": "../../Batch 8/IMG_5073.jpg",
     "id": "climb-every-mountain",
     "releaseYear": 1971,
-    "label": "Columbia Masterworks",
+    "label": "Columbia Records",
     "catalogNumber": "M 30647",
     "pressing": "Produced by Thomas Frost; Savers thrift store sticker ($0.99); © Columbia Records/CBS",
     "genres": [
@@ -6492,7 +6512,7 @@
     "id": "songs-america-loves-best-vol-iii-the-twenties",
     "originalReleaseYear": 1920,
     "recordingYears": "1982",
-    "label": "CBS / Columbia Masterworks",
+    "label": "Columbia Records",
     "catalogNumber": "CBS 37286 / 7464-37286-1",
     "pressing": "© 1982 CBS Inc.; produced by Thomas Frost; Savers thrift store sticker ($0.99); part of series (Vol. III); design: Christopher Austopchuk; art: Nancy Stahl",
     "genres": [
@@ -6522,7 +6542,25 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5085.jpg",
     "backCoverPath": "../../Batch 8/IMG_5086.jpg",
-    "id": "the-apostle-paul-and-his-epistle-to-the-romans-l-p-no-1-and-4-parts-i-and-iv"
+    "id": "the-apostle-paul-and-his-epistle-to-the-romans-l-p-no-1-and-4-parts-i-and-iv",
+    "recordingYears": "1955",
+    "label": "Bible Literature Recordings",
+    "catalogNumber": "L.P. No. 1 and 4",
+    "pressing": "Set of two records, 33⅓ RPM; Parts I and IV of a larger series; P.O. Box 384, Redwood City, California; copyright 1955; back cover is blank/plain; subtitle: \"From the Bible — An eloquent masterpiece on the Freedom and Dominion of the Christ Power\"",
+    "genres": [
+      "Spoken Word",
+      "Religious",
+      "Educational"
+    ],
+    "moods": [
+      "Reverent",
+      "Instructional",
+      "Contemplative",
+      "Devotional"
+    ],
+    "favoriteTracks": [
+      "N/A (continuous lecture)"
+    ]
   },
   {
     "title": "High Society (Original Soundtrack)",
@@ -6565,7 +6603,7 @@
     "backCoverPath": "../../Batch 8/IMG_5090.jpg",
     "id": "onward-christian-soldiers",
     "releaseYear": 1968,
-    "label": "Harmony (a product of Columbia Records)",
+    "label": "Columbia Records",
     "catalogNumber": "HS 11272",
     "pressing": "Stereo; \"can also be played on mono equipment\"; electronically re-channeled for stereo on some tracks; Savers thrift sticker ($0.99); manufactured by Columbia Records/CBS",
     "genres": [
@@ -6628,7 +6666,7 @@
     "id": "america-s-top-20",
     "originalReleaseYear": 1960,
     "recordingYears": "1960s–early 1970s",
-    "label": "Columbia Special Products / World Wide Marketing Corp.",
+    "label": "Columbia Records",
     "catalogNumber": "P13075",
     "pressing": "Budget compilation; © 1976 CBS Inc.; produced and distributed by World Wide Marketing Corp., Van Nuys, CA; original artist recordings licensed from multiple labels",
     "genres": [
@@ -6722,7 +6760,7 @@
     "backCoverPath": "../../Batch 8/IMG_5101.jpg",
     "id": "on-a-clear-day-you-can-see-forever-original-soundtrack-recording",
     "recordingYears": "1969–1970",
-    "label": "Columbia Masterworks",
+    "label": "Columbia Records",
     "catalogNumber": "S 30086",
     "pressing": "Columbia stereo; Paramount Pictures production; directed by Vincente Minnelli; gatefold sleeve — front features Streisand, back features Montand",
     "genres": [
@@ -6783,7 +6821,7 @@
     "id": "the-beloved-choruses",
     "releaseYear": 1960,
     "recordingYears": "Autumn 1958",
-    "label": "Columbia Masterworks",
+    "label": "Columbia Records",
     "catalogNumber": "ML 5364",
     "pressing": "Columbia Guaranteed High Fidelity mono LP; Library of Congress catalog card number R59-1040 applies; historic first recording collaboration between Mormon Tabernacle Choir and Philadelphia Orchestra",
     "genres": [
@@ -6880,7 +6918,7 @@
     "releaseYear": 1975,
     "originalReleaseYear": 1916,
     "recordingYears": "1916–1961",
-    "label": "Smithsonian Institution / Columbia Special Products",
+    "label": "Columbia Records",
     "catalogNumber": "P6 11891",
     "pressing": "6-LP boxed set; produced in association with Columbia Special Products; available through Smithsonian Associates; ISBN 0-393-09300-X; comprehensive survey of jazz history from ragtime through free jazz",
     "genres": [
@@ -6914,7 +6952,28 @@
     "status": "owned",
     "frontCoverPath": "../../Batch 8/IMG_5112.jpg",
     "backCoverPath": "../../Batch 8/IMG_5113.jpg",
-    "id": "art-blakey-and-the-jazz-messengers-recorded-live-at-bubba-s-featuring-wynton-mar"
+    "id": "art-blakey-and-the-jazz-messengers-recorded-live-at-bubba-s-featuring-wynton-mar",
+    "recordingYears": "October 11, 1980",
+    "label": "Who's Who in Jazz",
+    "catalogNumber": "WWLP-21019",
+    "pressing": "© 1981 Bubba's Live Recordings Inc.; distributed by Gemcom Inc., P.O. Box 5087, FDR Station, New York, NY 10150; produced by Robert Shelley for Bubba's Live Recordings in association with Crown Liquors, and Robert W. Schachner for Who's Who in Jazz; recording engineer Peter Yianilos at Artisan Recorders; mixed at Triiad Studios; mastered at Sound Cutting Inc.",
+    "genres": [
+      "Hard Bop",
+      "Jazz",
+      "Live Jazz"
+    ],
+    "moods": [
+      "Driving",
+      "Powerful",
+      "Electrifying",
+      "Soulful"
+    ],
+    "favoriteTracks": [
+      "Moanin'",
+      "Free For All",
+      "My Funny Valentine",
+      "Soulful Mister Timmons"
+    ]
   },
   {
     "title": "Lullaby in Rhythm (featuring Charlie Parker)",
@@ -7220,5 +7279,72 @@
     "frontCoverPath": "../../Batch 8/IMG_5164.jpg",
     "backCoverPath": "../../Batch 8/IMG_5165.jpg",
     "id": "parsley-sage-rosemary-and-thyme"
+  },
+  {
+    "id": "adele-25",
+    "title": "25",
+    "artist": "Adele",
+    "releaseYear": 2015,
+    "label": "XL Recordings (under exclusive license to Columbia Records, a division of Sony Music Entertainment)",
+    "catalogNumber": "Not visible",
+    "pressing": "Manufactured and distributed by Columbia Records; sound recording copyright owned by XL Recordings Ltd",
+    "genres": ["Pop", "Soul", "Adult Contemporary"],
+    "moods": ["Heartfelt", "Melancholic", "Powerful", "Introspective"],
+    "favoriteTracks": ["When We Were Young", "Send My Love (To Your New Lover)", "All I Ask"],
+    "status": "owned",
+    "storageLocation": "Crate 2",
+    "frontCoverPath": "../../batch 9/IMG_5169.jpg",
+    "backCoverPath": "../../batch 9/IMG_5170.JPG"
+  },
+  {
+    "id": "abba-gold-greatest-hits",
+    "title": "Gold: Greatest Hits",
+    "artist": "ABBA",
+    "releaseYear": 1992,
+    "originalReleaseYear": 1974,
+    "recordingYears": "1974–1981",
+    "label": "Polar / Polydor",
+    "catalogNumber": "LC 01846",
+    "pressing": "2×LP set (4 sides); compilation © 1992 Polar Music International AB; made in France; manufactured by Universal Music International B.V.; possible 2014 vinyl reissue based on barcode format",
+    "discCount": 2,
+    "genres": ["Pop", "Disco", "Europop"],
+    "moods": ["Joyful", "Danceable", "Nostalgic", "Anthemic"],
+    "favoriteTracks": ["Dancing Queen", "The Winner Takes It All", "Take a Chance on Me"],
+    "status": "owned",
+    "storageLocation": "Crate 2",
+    "frontCoverPath": "../../batch 9/IMG_5171.jpg",
+    "backCoverPath": "../../batch 9/IMG_5172.jpg"
+  },
+  {
+    "id": "the-head-and-the-heart-lets-be-still",
+    "title": "Let's Be Still",
+    "artist": "The Head and the Heart",
+    "releaseYear": 2013,
+    "label": "Sub Pop Records",
+    "catalogNumber": "SP913",
+    "pressing": "© 2013 Sub Pop Records; manufactured in Seattle, WA; Sub Pop is a registered trademark",
+    "genres": ["Indie Folk", "Folk Rock", "Americana"],
+    "moods": ["Warm", "Wistful", "Communal", "Gentle"],
+    "favoriteTracks": ["Rivers and Roads", "Lost in My Mind", "Winter Song"],
+    "status": "owned",
+    "storageLocation": "Crate 2",
+    "frontCoverPath": "../../batch 9/IMG_5173.jpg",
+    "backCoverPath": "../../batch 9/IMG_5174.jpg"
+  },
+  {
+    "id": "alessia-cara-know-it-all",
+    "title": "Know-It-All",
+    "artist": "Alessia Cara",
+    "releaseYear": 2015,
+    "label": "Def Jam Recordings / EP Entertainment",
+    "catalogNumber": "602547 69542 0",
+    "pressing": "Manufactured and distributed by Universal Music Distribution; executive produced by Robert \"Robeo\" Eleazer and Tony Perez; associate executive producer Sebastian Kole",
+    "genres": ["Pop", "R&B", "Soul"],
+    "moods": ["Confident", "Introspective", "Youthful", "Soulful"],
+    "favoriteTracks": ["Here", "Scars to Your Beautiful", "Wild Things"],
+    "status": "owned",
+    "storageLocation": "Crate 2",
+    "frontCoverPath": "../../batch 9/IMG_5175.jpg",
+    "backCoverPath": "../../batch 9/IMG_5176.jpg"
   }
 ]

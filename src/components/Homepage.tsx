@@ -84,7 +84,14 @@ export default function Homepage() {
       .catch(() => setCountries([]));
     fetch('/api/vinyl-records')
       .then((r) => r.json())
-      .then((d) => setVinyls((d.records ?? []).filter((r: VinylRecord) => r.status === 'owned')))
+      .then((d) => {
+        const owned: VinylRecord[] = (d.records ?? []).filter((r: VinylRecord) => r.status === 'owned');
+        for (let i = owned.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [owned[i], owned[j]] = [owned[j], owned[i]];
+        }
+        setVinyls(owned.slice(0, 40));
+      })
       .catch(() => {});
   }, []);
 
