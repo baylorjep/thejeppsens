@@ -214,7 +214,7 @@ export default function Homepage() {
           </div>
         ) : (
           <div className="py-2">
-            <div className="vinyl-marquee flex w-max gap-4">
+            <div className="vinyl-marquee flex w-max gap-4" style={{ animationDuration: '240s' }}>
               {[...vinyls, ...vinyls, ...vinyls].map((r, i) => (
                 <VinylCard key={`${r.id}-${i}`} record={r} />
               ))}
