@@ -15,6 +15,7 @@ export type VinylRecord = {
   genres: string[];
   moods: string[];
   favoriteTracks?: string[];
+  trackList?: string[];
   pressing?: string;
   vinylColor?: string;
   condition?: string;

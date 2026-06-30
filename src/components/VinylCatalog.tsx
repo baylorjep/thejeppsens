@@ -328,6 +328,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         ...record.genres,
         ...record.moods,
         ...(record.favoriteTracks ?? []),
+        ...(record.trackList ?? []),
       ]
         .filter(Boolean)
         .join(" ")
@@ -394,9 +395,15 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const shouldUseModal = !isTouchDevice;
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
+  const ownedShelfRecords = useMemo(
+    () => allRecords.filter((record) => record.status !== "wishlist"),
+    [allRecords],
+  );
 
   const pickRandomRecord = () => {
-    const pool = filteredRecords.length ? filteredRecords : allRecords;
+    const filteredOwnedPool = filteredRecords.filter((record) => record.status !== "wishlist");
+    const pool = filteredOwnedPool.length ? filteredOwnedPool : ownedShelfRecords;
+    if (!pool.length) return;
     const next = pool[Math.floor(Math.random() * pool.length)];
     setPickedRecordId(next.id);
   };
@@ -602,11 +609,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
   return (
     <div>
-      <div className="mb-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mb-10 grid grid-cols-2 gap-3 md:grid-cols-5">
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
           <p className="text-sm text-gray-500">Records</p>
           <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
-            <AnimatedNumber value={allRecords.length} />
+            <AnimatedNumber value={ownedShelfRecords.length} />
           </p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
@@ -625,6 +632,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           <p className="text-sm text-gray-500">Favorites</p>
           <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
             <AnimatedNumber value={snapshot.favorites} />
+          </p>
+        </div>
+        <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-3 text-center sm:p-5 sm:text-left">
+          <p className="text-sm text-amber-800">Wishlist</p>
+          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
+            <AnimatedNumber value={snapshot.wishlist} />
           </p>
         </div>
       </div>
@@ -943,7 +956,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       {filteredRecords.length > 0 ? (
         <div className="space-y-5">
           <div className="flex items-center justify-between gap-3 text-sm text-gray-600">
-            <p>{filteredRecords.length} of {allRecords.length} records</p>
+            <p>{filteredRecords.length} shown, {ownedShelfRecords.length} owned records</p>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -970,7 +983,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           <div
             className={
               viewMode === "grid"
-                ? "grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+                ? "grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3"
                 : "space-y-4"
             }
           >
@@ -1006,10 +1019,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 />
               </Link>
 
-              <div className="p-5">
+              <div className="p-3 sm:p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
                       <span className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusTone(record.status).badge}`}>
                         {statusLabel(record.status)}
                       </span>
@@ -1024,7 +1037,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                         </span>
                       ) : null}
                     </div>
-                    <Link href={`/vinyl/${record.id}`} className="block text-xl font-semibold text-gray-950 hover:underline">
+                    <Link href={`/vinyl/${record.id}`} className="block text-base font-semibold leading-tight text-gray-950 hover:underline sm:text-xl">
                       {record.title}
                     </Link>
                     <p className="mt-1 text-sm text-gray-600">{record.artist}</p>
@@ -1047,9 +1060,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
                 <RecordMeta record={record} />
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
                   {[...record.genres, ...record.moods].slice(0, 6).map((tag) => (
-                    <span key={tag} className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">
+                    <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-[11px] text-gray-700 sm:px-3 sm:text-xs">
                       {tag}
                     </span>
                   ))}
@@ -1072,6 +1085,13 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 {record.notes ? (
                   <p className="mt-4 border-t border-gray-100 pt-4 text-sm leading-6 text-gray-600">
                     {record.notes}
+                  </p>
+                ) : null}
+
+                {record.favoriteStories ? (
+                  <p className="mt-3 border-t border-gray-100 pt-3 text-sm leading-6 text-gray-600">
+                    <span className="font-medium text-gray-950">Story: </span>
+                    {record.favoriteStories}
                   </p>
                 ) : null}
 
@@ -1122,7 +1142,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="aspect-square bg-gray-100">
+            <Link
+              href={`/vinyl/${pickedRecord.id}`}
+              className="block aspect-square bg-gray-100"
+              onClick={(e) => e.stopPropagation()}
+              aria-label={`Open ${pickedRecord.title} by ${pickedRecord.artist}`}
+            >
               {pickedRecord.coverImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={pickedRecord.coverImage} alt={pickedRecord.title} className="h-full w-full object-cover" />
@@ -1131,12 +1156,18 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                   <Disc3 className="h-16 w-16 text-gray-300" />
                 </div>
               )}
-            </div>
+            </Link>
             <div className="p-6">
               <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-400">
                 Tonight&apos;s pick
               </p>
-              <p className="text-2xl font-semibold text-gray-950">{pickedRecord.title}</p>
+              <Link
+                href={`/vinyl/${pickedRecord.id}`}
+                className="block text-2xl font-semibold text-gray-950 hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {pickedRecord.title}
+              </Link>
               <p className="mt-1 text-gray-500">{pickedRecord.artist}</p>
               {pickedRecord.storageLocation && (
                 <p className="mt-2 text-sm text-gray-400">📍 {pickedRecord.storageLocation}</p>
@@ -1150,13 +1181,13 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                   <Shuffle className="h-4 w-4" />
                   Pick again
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setPickedRecordId(null)}
-                  className="flex-1 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400"
+                <Link
+                  href={`/vinyl/${pickedRecord.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 rounded-lg border border-gray-200 py-3 text-center text-sm font-medium text-gray-700 transition-colors hover:border-gray-400"
                 >
-                  Done
-                </button>
+                  Details
+                </Link>
               </div>
             </div>
           </div>
@@ -1327,6 +1358,20 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       <p className="text-sm leading-6 text-gray-600">
                         {selectedRecord.favoriteTracks.join(", ")}
                       </p>
+                    </div>
+                  ) : null}
+
+                  {selectedRecord.trackList?.length ? (
+                    <div>
+                      <p className="mb-2 text-sm font-medium text-gray-950">Track list</p>
+                      <ol className="grid gap-2 text-sm leading-6 text-gray-600 sm:grid-cols-2">
+                        {selectedRecord.trackList.map((track, index) => (
+                          <li key={`${track}-${index}`} className="flex gap-2">
+                            <span className="w-6 shrink-0 text-gray-400">{index + 1}</span>
+                            <span>{track}</span>
+                          </li>
+                        ))}
+                      </ol>
                     </div>
                   ) : null}
 

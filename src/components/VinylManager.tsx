@@ -5,7 +5,7 @@ import { optimizeImageFile } from "@/lib/vinylImage";
 import { deleteVinylRecord, fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylApi";
 import { readQueuedVinyls, writeQueuedVinyls } from "@/lib/vinylQueue";
 import { slugifyVinylId, splitList, statusLabel } from "@/lib/vinylRecordUtils";
-import { CheckCircle2, Copy, Download, Edit3, ImagePlus, Trash2, X } from "lucide-react";
+import { CheckCircle2, Copy, Download, Edit3, ImagePlus, Search, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
@@ -26,6 +26,7 @@ type FormState = {
   genres: string;
   moods: string;
   favoriteTracks: string;
+  trackList: string;
   pressing: string;
   vinylColor: string;
   condition: string;
@@ -39,6 +40,22 @@ type FormState = {
   favorite: boolean;
   coverImage: string;
   backCoverImage: string;
+};
+
+type AppleAlbumSearchResult = {
+  collectionId: number;
+  collectionName: string;
+  artistName: string;
+  releaseDate?: string;
+  primaryGenreName?: string;
+  artworkUrl100?: string;
+};
+
+type AppleTrackLookupResult = {
+  wrapperType?: string;
+  kind?: string;
+  trackName?: string;
+  trackNumber?: number;
 };
 
 const emptyForm: FormState = {
@@ -57,6 +74,7 @@ const emptyForm: FormState = {
   genres: "",
   moods: "",
   favoriteTracks: "",
+  trackList: "",
   pressing: "",
   vinylColor: "",
   condition: "",
@@ -89,6 +107,7 @@ function recordToForm(record: VinylRecord): FormState {
     genres: record.genres.join(", "),
     moods: record.moods.join(", "),
     favoriteTracks: record.favoriteTracks?.join(", ") ?? "",
+    trackList: record.trackList?.join("\n") ?? "",
     pressing: record.pressing ?? "",
     vinylColor: record.vinylColor ?? "",
     condition: record.condition ?? "",
@@ -118,6 +137,17 @@ function inputClassName() {
   return "w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950";
 }
 
+function getLargeAppleArtworkUrl(url?: string) {
+  return url?.replace(/\/100x100bb\./, "/600x600bb.");
+}
+
+function splitTrackList(value: string) {
+  return value
+    .split(/\n+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export default function VinylManager() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [records, setRecords] = useState<VinylRecord[]>([]);
@@ -130,6 +160,9 @@ export default function VinylManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [savedRecord, setSavedRecord] = useState<VinylRecord | null>(null);
   const [recordsPage, setRecordsPage] = useState(1);
+  const [albumSearchQuery, setAlbumSearchQuery] = useState("");
+  const [albumSearchResults, setAlbumSearchResults] = useState<AppleAlbumSearchResult[]>([]);
+  const [isSearchingAlbums, setIsSearchingAlbums] = useState(false);
   const recordsPerPage = 12;
 
   useEffect(() => {
@@ -164,6 +197,67 @@ export default function VinylManager() {
 
   const updateForm = <Key extends keyof FormState>(key: Key, value: FormState[Key]) => {
     setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const searchAppleAlbums = async () => {
+    const term = albumSearchQuery.trim();
+    if (!term) {
+      setMessage("Search by album, artist, or both.");
+      return;
+    }
+
+    setIsSearchingAlbums(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=album&limit=8&country=US`,
+      );
+      if (!response.ok) throw new Error("Search failed");
+
+      const data = (await response.json()) as { results?: AppleAlbumSearchResult[] };
+      setAlbumSearchResults(data.results ?? []);
+      if (!data.results?.length) setMessage("No album matches found.");
+    } catch {
+      setMessage("Could not search Apple Music right now.");
+    } finally {
+      setIsSearchingAlbums(false);
+    }
+  };
+
+  const fetchAppleTrackList = async (collectionId: number) => {
+    const response = await fetch(
+      `https://itunes.apple.com/lookup?id=${collectionId}&entity=song&country=US`,
+    );
+    if (!response.ok) return [];
+
+    const data = (await response.json()) as { results?: AppleTrackLookupResult[] };
+    return (data.results ?? [])
+      .filter((item) => item.wrapperType === "track" && item.kind === "song" && item.trackName)
+      .sort((a, b) => (a.trackNumber ?? 999) - (b.trackNumber ?? 999))
+      .map((item) => item.trackName!)
+      .filter((track, index, tracks) => tracks.indexOf(track) === index);
+  };
+
+  const applyAppleAlbum = async (album: AppleAlbumSearchResult) => {
+    const releaseYear = album.releaseDate ? new Date(album.releaseDate).getFullYear().toString() : "";
+    const coverImage = getLargeAppleArtworkUrl(album.artworkUrl100) ?? "";
+    const trackList = await fetchAppleTrackList(album.collectionId);
+
+    setForm((current) => ({
+      ...current,
+      title: album.collectionName,
+      artist: album.artistName,
+      releaseYear: Number.isNaN(Number(releaseYear)) ? current.releaseYear : releaseYear,
+      originalReleaseYear: Number.isNaN(Number(releaseYear)) ? current.originalReleaseYear : releaseYear,
+      genres: album.primaryGenreName || current.genres,
+      trackList: trackList.length ? trackList.join("\n") : current.trackList,
+      status: "wishlist",
+      source: current.source || "Apple Music search",
+      coverImage: coverImage || current.coverImage,
+    }));
+    setImageFile(undefined);
+    setMessage(`${album.collectionName} filled in as a wishlist record.`);
   };
 
   const syncLocalQueue = (nextRecords: VinylRecord[]) => {
@@ -232,6 +326,7 @@ export default function VinylManager() {
       genres: splitList(form.genres),
       moods: splitList(form.moods),
       favoriteTracks: splitList(form.favoriteTracks),
+      trackList: splitTrackList(form.trackList),
       pressing: form.pressing.trim() || undefined,
       vinylColor: form.vinylColor.trim() || undefined,
       condition: form.condition.trim() || undefined,
@@ -381,13 +476,69 @@ export default function VinylManager() {
           ) : null}
         </div>
 
+        <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">
+            Add from Apple Music
+          </h3>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <label className="relative block flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                value={albumSearchQuery}
+                onChange={(event) => setAlbumSearchQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    searchAppleAlbums();
+                  }
+                }}
+                className="w-full rounded-md border border-gray-300 bg-white py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                placeholder="Search album or artist"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={searchAppleAlbums}
+              disabled={isSearchingAlbums}
+              className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSearchingAlbums ? "Searching..." : "Search"}
+            </button>
+          </div>
+
+          {albumSearchResults.length ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {albumSearchResults.map((album) => (
+                <button
+                  key={album.collectionId}
+                  type="button"
+                  onClick={() => applyAppleAlbum(album)}
+                  className="grid grid-cols-[56px_minmax(0,1fr)] gap-3 rounded-md border border-gray-200 bg-white p-2 text-left transition-colors hover:border-gray-500"
+                >
+                  <div className="relative aspect-square overflow-hidden rounded bg-gray-100">
+                    {album.artworkUrl100 ? (
+                      <Image src={album.artworkUrl100} alt="" fill className="object-cover" unoptimized />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-950">{album.collectionName}</p>
+                    <p className="truncate text-sm text-gray-600">{album.artistName}</p>
+                    <p className="mt-1 text-xs text-gray-400">
+                      {album.releaseDate ? new Date(album.releaseDate).getFullYear() : "Album"}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
         <div className="mb-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
           <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">
-            Start With Photos
+            Cover Photos
           </h3>
           <p className="mt-2 text-sm text-gray-600">
-            Drop in the front and back cover first. Images are automatically resized before upload
-            so the vinyl pages stay faster on mobile.
+            Add front and back cover photos when you have them. Uploaded images are resized before storage.
           </p>
         </div>
 
@@ -484,8 +635,28 @@ export default function VinylManager() {
           </label>
 
           <label className="block sm:col-span-2">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Full track list</span>
+            <textarea
+              value={form.trackList}
+              onChange={(event) => updateForm("trackList", event.target.value)}
+              className={`${inputClassName()} min-h-28`}
+              placeholder={"Song one\nSong two\nSong three"}
+            />
+          </label>
+
+          <label className="block sm:col-span-2">
             <span className="mb-2 block text-sm font-medium text-gray-700">Notes</span>
             <textarea value={form.notes} onChange={(event) => updateForm("notes", event.target.value)} className={`${inputClassName()} min-h-28`} placeholder="Anything personal, condition notes, why she loves it..." />
+          </label>
+
+          <label className="block sm:col-span-2">
+            <span className="mb-2 block text-sm font-medium text-gray-700">Favorite stories / memories</span>
+            <textarea
+              value={form.favoriteStories}
+              onChange={(event) => updateForm("favoriteStories", event.target.value)}
+              className={`${inputClassName()} min-h-32`}
+              placeholder="Where she found it, who gave it to her, when you played it together, why it is special..."
+            />
           </label>
 
           <div className="sm:col-span-2">
@@ -582,16 +753,6 @@ export default function VinylManager() {
                 <label className="block sm:col-span-2">
                   <span className="mb-2 block text-sm font-medium text-gray-700">Best for</span>
                   <input value={form.bestFor} onChange={(event) => updateForm("bestFor", event.target.value)} className={inputClassName()} placeholder="Dinner, road trip, rainy night, background music..." />
-                </label>
-
-                <label className="block sm:col-span-2">
-                  <span className="mb-2 block text-sm font-medium text-gray-700">Favorite stories / memories</span>
-                  <textarea
-                    value={form.favoriteStories}
-                    onChange={(event) => updateForm("favoriteStories", event.target.value)}
-                    className={`${inputClassName()} min-h-32`}
-                    placeholder="Where she found it, who gave it to her, when you played it together, why it is special..."
-                  />
                 </label>
 
                 <label className="flex items-center gap-3 sm:col-span-2">

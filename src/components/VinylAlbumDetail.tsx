@@ -33,6 +33,7 @@ type AlbumEditForm = {
   genres: string;
   moods: string;
   favoriteTracks: string;
+  trackList: string;
   pressing: string;
   vinylColor: string;
   condition: string;
@@ -65,6 +66,7 @@ function recordToEditForm(record: VinylRecord): AlbumEditForm {
     genres: record.genres.join(", "),
     moods: record.moods.join(", "),
     favoriteTracks: record.favoriteTracks?.join(", ") ?? "",
+    trackList: record.trackList?.join("\n") ?? "",
     pressing: record.pressing ?? "",
     vinylColor: record.vinylColor ?? "",
     condition: record.condition ?? "",
@@ -79,6 +81,13 @@ function recordToEditForm(record: VinylRecord): AlbumEditForm {
     coverImage: record.coverImage ?? "",
     backCoverImage: record.backCoverImage ?? "",
   };
+}
+
+function splitTrackList(value: string) {
+  return value
+    .split(/\n+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function CoverImage({
@@ -305,6 +314,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean),
+      trackList: splitTrackList(editForm.trackList),
       pressing: editForm.pressing.trim() || undefined,
       vinylColor: editForm.vinylColor.trim() || undefined,
       condition: editForm.condition.trim() || undefined,
@@ -461,6 +471,22 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                         {record.favoriteTracks.map((track, index) => (
                           <li key={track} className="flex gap-3">
                             <span className="w-5 shrink-0 text-sm text-gray-400">{index + 1}</span>
+                            <span>{track}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  ) : null}
+
+                  {record.trackList?.length ? (
+                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                      <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                        Track list
+                      </h3>
+                      <ol className="space-y-2 text-gray-700">
+                        {record.trackList.map((track, index) => (
+                          <li key={`${track}-${index}`} className="flex gap-3">
+                            <span className="w-6 shrink-0 text-sm text-gray-400">{index + 1}</span>
                             <span>{track}</span>
                           </li>
                         ))}
@@ -752,10 +778,31 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 </div>
               ) : null}
 
+              {record.trackList?.length ? (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Track list</h3>
+                  <ol className="space-y-2 text-gray-700">
+                    {record.trackList.map((track, index) => (
+                      <li key={`${track}-${index}`} className="flex gap-3">
+                        <span className="w-6 shrink-0 text-sm text-gray-400">{index + 1}</span>
+                        <span>{track}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
+
               {record.notes ? (
                 <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Notes</h3>
                   <p className="leading-7 text-gray-700">{record.notes}</p>
+                </div>
+              ) : null}
+
+              {record.favoriteStories ? (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Favorite stories</h3>
+                  <p className="leading-7 text-gray-700">{record.favoriteStories}</p>
                 </div>
               ) : null}
             </div>
@@ -865,6 +912,16 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                   </label>
                 );
               })}
+
+              <label className="block sm:col-span-2">
+                <span className="mb-2 block text-sm font-medium text-gray-700">Full track list</span>
+                <textarea
+                  value={editForm?.trackList ?? ""}
+                  onChange={(event) => updateEditForm("trackList", event.target.value)}
+                  className={`${inputClassName} min-h-32`}
+                  placeholder={"Song one\nSong two\nSong three"}
+                />
+              </label>
 
               <label className="block sm:col-span-2">
                 <span className="mb-2 block text-sm font-medium text-gray-700">Notes</span>
