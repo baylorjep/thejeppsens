@@ -10,10 +10,12 @@ import {
 } from "@/lib/vinylAnalytics";
 import { fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylApi";
 import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
-import { readQueuedVinyls } from "@/lib/vinylQueue";
-import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
+import { optimizeImageFile } from "@/lib/vinylImage";
+import { readQueuedVinyls, writeQueuedVinyls } from "@/lib/vinylQueue";
+import { getDecade, slugifyVinylId, statusLabel } from "@/lib/vinylRecordUtils";
 import {
   X,
+  AlertCircle,
   ArrowUpDown,
   Disc3,
   Grid3X3,
@@ -36,6 +38,22 @@ type VinylCatalogProps = {
 type ViewMode = "grid" | "list";
 type FilterKey = "genres" | "moods" | "status" | "decades";
 type QuickFilter = "all" | "favorites" | "wishlist" | "upgrade";
+
+type AppleAlbumSearchResult = {
+  collectionId: number;
+  collectionName: string;
+  artistName: string;
+  artworkUrl100?: string;
+  primaryGenreName?: string;
+  releaseDate?: string;
+};
+
+type AppleTrackLookupResult = {
+  wrapperType?: string;
+  kind?: string;
+  trackName?: string;
+  trackNumber?: number;
+};
 
 function CoverArt({
   record,
@@ -201,9 +219,33 @@ function seededShuffle<T>(items: T[], seed: number) {
   return result;
 }
 
+function getLargeAppleArtworkUrl(url?: string) {
+  return url?.replace(/\/100x100bb\./, "/600x600bb.");
+}
+
+function normalizeRecordMatch(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function findDuplicateRecords(records: VinylRecord[], title: string, artist: string) {
+  const normalizedTitle = normalizeRecordMatch(title);
+  const normalizedArtist = normalizeRecordMatch(artist);
+
+  return records.filter((record) => {
+    const recordTitle = normalizeRecordMatch(record.title);
+    const recordArtist = normalizeRecordMatch(record.artist);
+    return recordTitle === normalizedTitle && recordArtist === normalizedArtist;
+  });
+}
+
 export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [allRecords, setAllRecords] = useState<VinylRecord[]>(records);
-  const [, setApiSource] = useState<VinylApiStatus>("local");
+  const [apiSource, setApiSource] = useState<VinylApiStatus>("local");
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
   const [activeMood, setActiveMood] = useState("All");
@@ -216,9 +258,22 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [selectedRecord, setSelectedRecord] = useState<VinylRecord | null>(null);
   const [selectedRecordAppleMusicUrl, setSelectedRecordAppleMusicUrl] = useState("");
   const [favoriteRecordId, setFavoriteRecordId] = useState<string | null>(null);
+  const [quickWishlistOpen, setQuickWishlistOpen] = useState(false);
+  const [quickWishlistQuery, setQuickWishlistQuery] = useState("");
+  const [quickWishlistResults, setQuickWishlistResults] = useState<AppleAlbumSearchResult[]>([]);
+  const [quickWishlistTitle, setQuickWishlistTitle] = useState("");
+  const [quickWishlistArtist, setQuickWishlistArtist] = useState("");
+  const [quickWishlistMessage, setQuickWishlistMessage] = useState("");
+  const [quickWishlistDuplicate, setQuickWishlistDuplicate] = useState<VinylRecord | null>(null);
+  const [quickWishlistPendingAlbum, setQuickWishlistPendingAlbum] = useState<AppleAlbumSearchResult | null>(null);
+  const [isSearchingWishlist, setIsSearchingWishlist] = useState(false);
+  const [isSavingWishlist, setIsSavingWishlist] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusCelebrationMessage, setStatusCelebrationMessage] = useState("");
   const [ownedStorageLocation, setOwnedStorageLocation] = useState("");
+  const [ownedFrontCoverFile, setOwnedFrontCoverFile] = useState<File | undefined>();
+  const [ownedBackCoverFile, setOwnedBackCoverFile] = useState<File | undefined>();
+  const [isMarkingOwned, setIsMarkingOwned] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isCompactCarousel, setIsCompactCarousel] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -246,6 +301,8 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
   useEffect(() => {
     setOwnedStorageLocation(selectedRecord?.storageLocation ?? "");
+    setOwnedFrontCoverFile(undefined);
+    setOwnedBackCoverFile(undefined);
   }, [selectedRecord?.id, selectedRecord?.storageLocation]);
 
   useEffect(() => {
@@ -508,23 +565,185 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     };
   }, [selectedRecord]);
 
+  const replaceRecordInState = (record: VinylRecord, source: VinylApiStatus = apiSource) => {
+    setAllRecords((current) => {
+      const exists = current.some((item) => item.id === record.id);
+      const next = exists
+        ? current.map((item) => (item.id === record.id ? record : item))
+        : [record, ...current];
+
+      if (source === "local") {
+        const staticIds = new Set(records.map((item) => item.id));
+        writeQueuedVinyls(next.filter((item) => !staticIds.has(item.id)));
+      }
+
+      return next;
+    });
+    setSelectedRecord((current) => (current?.id === record.id ? record : current));
+  };
+
+  const saveRecordAndSync = async (record: VinylRecord, imageFile?: File, backImageFile?: File) => {
+    try {
+      const response = await saveVinylRecord(record, imageFile, backImageFile);
+      setApiSource(response.source);
+      replaceRecordInState(response.record, response.source);
+      return response.record;
+    } catch {
+      replaceRecordInState(record);
+      return record;
+    }
+  };
+
+  const fetchAppleTrackList = async (collectionId: number) => {
+    const response = await fetch(
+      `https://itunes.apple.com/lookup?id=${collectionId}&entity=song&country=US`,
+    );
+    if (!response.ok) return [];
+
+    const data = (await response.json()) as { results?: AppleTrackLookupResult[] };
+    return (data.results ?? [])
+      .filter((item) => item.wrapperType === "track" && item.kind === "song" && item.trackName)
+      .sort((a, b) => (a.trackNumber ?? 999) - (b.trackNumber ?? 999))
+      .map((item) => item.trackName!)
+      .filter((track, index, tracks) => tracks.indexOf(track) === index);
+  };
+
+  const searchQuickWishlist = async () => {
+    const term = quickWishlistQuery.trim();
+    if (!term) {
+      setQuickWishlistMessage("Search by album, artist, or both.");
+      return;
+    }
+
+    setIsSearchingWishlist(true);
+    setQuickWishlistMessage("");
+    setQuickWishlistDuplicate(null);
+    setQuickWishlistPendingAlbum(null);
+
+    try {
+      const response = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=album&limit=8&country=US`,
+      );
+      if (!response.ok) throw new Error("Search failed");
+
+      const data = (await response.json()) as { results?: AppleAlbumSearchResult[] };
+      setQuickWishlistResults(data.results ?? []);
+      if (!data.results?.length) setQuickWishlistMessage("No album matches found. Add it manually below.");
+    } catch {
+      setQuickWishlistMessage("Could not search right now. Add it manually below.");
+    } finally {
+      setIsSearchingWishlist(false);
+    }
+  };
+
+  const resetQuickWishlist = () => {
+    setQuickWishlistQuery("");
+    setQuickWishlistResults([]);
+    setQuickWishlistTitle("");
+    setQuickWishlistArtist("");
+    setQuickWishlistMessage("");
+    setQuickWishlistDuplicate(null);
+    setQuickWishlistPendingAlbum(null);
+    setIsSearchingWishlist(false);
+    setIsSavingWishlist(false);
+  };
+
+  const closeQuickWishlist = () => {
+    setQuickWishlistOpen(false);
+    resetQuickWishlist();
+  };
+
+  const saveWishlistRecord = async (record: VinylRecord) => {
+    const duplicate = findDuplicateRecords(allRecords, record.title, record.artist)[0];
+    if (duplicate && duplicate.id !== record.id) {
+      setQuickWishlistDuplicate(duplicate);
+      return false;
+    }
+
+    setIsSavingWishlist(true);
+    setQuickWishlistMessage("");
+
+    try {
+      const savedRecord = await saveRecordAndSync(record);
+      setQuickFilter("wishlist");
+      setSelectedRecord(savedRecord);
+      setQuickWishlistMessage(`${savedRecord.title} was added to the wishlist.`);
+      setQuickWishlistOpen(false);
+      resetQuickWishlist();
+      return true;
+    } finally {
+      setIsSavingWishlist(false);
+    }
+  };
+
+  const addAppleAlbumToWishlist = async (album: AppleAlbumSearchResult, allowDuplicate = false) => {
+    const duplicate = findDuplicateRecords(allRecords, album.collectionName, album.artistName)[0];
+    if (duplicate && !allowDuplicate) {
+      setQuickWishlistDuplicate(duplicate);
+      setQuickWishlistPendingAlbum(album);
+      return;
+    }
+
+    setIsSavingWishlist(true);
+    setQuickWishlistMessage("");
+
+    const releaseYear = album.releaseDate ? new Date(album.releaseDate).getFullYear() : undefined;
+    const trackList = await fetchAppleTrackList(album.collectionId);
+    const record: VinylRecord = {
+      id: slugifyVinylId(album.collectionName, album.artistName),
+      title: album.collectionName,
+      artist: album.artistName,
+      releaseYear: typeof releaseYear === "number" && Number.isFinite(releaseYear) ? releaseYear : undefined,
+      originalReleaseYear: typeof releaseYear === "number" && Number.isFinite(releaseYear) ? releaseYear : undefined,
+      genres: album.primaryGenreName ? [album.primaryGenreName] : [],
+      moods: [],
+      trackList: trackList.length ? trackList : undefined,
+      status: "wishlist",
+      source: "Catalog quick add",
+      coverImage: getLargeAppleArtworkUrl(album.artworkUrl100),
+      dateAdded: new Date().toISOString().slice(0, 10),
+    };
+
+    try {
+      const savedRecord = await saveRecordAndSync(record);
+      setQuickFilter("wishlist");
+      setSelectedRecord(savedRecord);
+      setQuickWishlistOpen(false);
+      resetQuickWishlist();
+    } finally {
+      setIsSavingWishlist(false);
+    }
+  };
+
+  const addManualWishlist = async () => {
+    const title = quickWishlistTitle.trim();
+    const artist = quickWishlistArtist.trim();
+
+    if (!title || !artist) {
+      setQuickWishlistMessage("Add at least the album title and artist.");
+      return;
+    }
+
+    const record: VinylRecord = {
+      id: slugifyVinylId(title, artist),
+      title,
+      artist,
+      genres: [],
+      moods: [],
+      status: "wishlist",
+      source: "Manual wishlist add",
+      dateAdded: new Date().toISOString().slice(0, 10),
+    };
+
+    await saveWishlistRecord(record);
+  };
+
   const toggleFavorite = async (record: VinylRecord) => {
     const nextRecord = { ...record, favorite: !record.favorite };
     setFavoriteRecordId(record.id);
 
     try {
-      const response = await saveVinylRecord(nextRecord);
-      const savedRecord = response.record;
-      setApiSource(response.source);
-      setAllRecords((current) =>
-        current.map((item) => (item.id === savedRecord.id ? savedRecord : item)),
-      );
-      setSelectedRecord((current) => (current?.id === savedRecord.id ? savedRecord : current));
-    } catch {
-      setAllRecords((current) =>
-        current.map((item) => (item.id === nextRecord.id ? nextRecord : item)),
-      );
-      setSelectedRecord((current) => (current?.id === nextRecord.id ? nextRecord : current));
+      await saveRecordAndSync(nextRecord);
     } finally {
       setFavoriteRecordId(null);
     }
@@ -534,6 +753,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     if (record.status === "owned") return;
 
     const trimmedStorageLocation = storageLocation.trim();
+    setIsMarkingOwned(true);
+
+    const frontCoverFile = ownedFrontCoverFile ? await optimizeImageFile(ownedFrontCoverFile) : undefined;
+    const backCoverFile = ownedBackCoverFile ? await optimizeImageFile(ownedBackCoverFile) : undefined;
     const nextRecord = {
       ...record,
       status: "owned" as const,
@@ -541,26 +764,33 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     };
 
     try {
-      const response = await saveVinylRecord(nextRecord);
-      const savedRecord = response.record;
-      setApiSource(response.source);
-      setAllRecords((current) =>
-        current.map((item) => (item.id === savedRecord.id ? savedRecord : item)),
-      );
-      setSelectedRecord((current) => (current?.id === savedRecord.id ? savedRecord : current));
-    } catch {
-      setAllRecords((current) =>
-        current.map((item) => (item.id === nextRecord.id ? nextRecord : item)),
-      );
-      setSelectedRecord((current) => (current?.id === nextRecord.id ? nextRecord : current));
+      await saveRecordAndSync(nextRecord, frontCoverFile, backCoverFile);
+    } finally {
+      setIsMarkingOwned(false);
     }
 
+    setOwnedFrontCoverFile(undefined);
+    setOwnedBackCoverFile(undefined);
     setStatusCelebrationMessage(`Nice. ${record.title} is now on the owned shelf.`);
     setShowConfetti(true);
     window.setTimeout(() => {
       setShowConfetti(false);
       setStatusCelebrationMessage("");
     }, 3000);
+  };
+
+  const moveNotesToStories = async (record: VinylRecord) => {
+    const notes = record.notes?.trim();
+    if (!notes) return;
+
+    const existingStory = record.favoriteStories?.trim();
+    const nextRecord = {
+      ...record,
+      favoriteStories: existingStory ? `${existingStory}\n\n${notes}` : notes,
+      notes: undefined,
+    };
+
+    await saveRecordAndSync(nextRecord);
   };
 
   const filterGroups: Array<{
@@ -771,6 +1001,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           </label>
 
           <div className="flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => setQuickWishlistOpen(true)}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-amber-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-amber-600 sm:w-auto"
+            >
+              <Heart className="h-4 w-4" />
+              Add wishlist
+            </button>
             <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
               {quickFilterOptions.map(([value, label]) => (
                 <button
@@ -957,8 +1195,30 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
       {filteredRecords.length > 0 ? (
         <div className="space-y-5">
+          {quickFilter === "wishlist" ? (
+            <section className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-base font-semibold text-amber-950">Wishlist</h2>
+                  <p className="mt-1 text-sm text-amber-800">
+                    {snapshot.wishlist} records she wants, ready to mark owned when they join the shelf.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setQuickWishlistOpen(true)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-amber-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-amber-700 sm:w-auto"
+                >
+                  <Heart className="h-4 w-4" />
+                  Add wishlist
+                </button>
+              </div>
+            </section>
+          ) : null}
           <div className="flex items-center justify-between gap-3 text-sm text-gray-600">
-            <p>{filteredRecords.length} shown, {ownedShelfRecords.length} owned records</p>
+            <p>
+              {filteredRecords.length} shown, {quickFilter === "wishlist" ? `${snapshot.wishlist} wishlist records` : `${ownedShelfRecords.length} owned records`}
+            </p>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -990,79 +1250,81 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             }
           >
             {paginatedRecords.map((record, index) => (
-            <article
-              key={record.id}
-              className={
-                viewMode === "grid"
-                  ? `overflow-hidden rounded-lg border ${getStatusTone(record.status).card}`
-                  : `grid overflow-hidden rounded-lg border ${getStatusTone(record.status).card} sm:grid-cols-[180px_minmax(0,1fr)]`
-              }
-            >
-              <Link
-                href={`/vinyl/${record.id}`}
+              <article
+                key={record.id}
                 className={
                   viewMode === "grid"
-                    ? "relative block aspect-square w-full"
-                    : "relative block aspect-square w-full sm:aspect-auto"
+                    ? `overflow-hidden rounded-lg border ${getStatusTone(record.status).card}`
+                    : `grid overflow-hidden rounded-lg border ${getStatusTone(record.status).card} sm:grid-cols-[180px_minmax(0,1fr)]`
                 }
               >
-                <CoverArt
-                  record={record}
-                  backSrc={record.backCoverImage}
-                  priority={index < (isCompactCarousel ? 2 : 4)}
-                  loading={index < (isCompactCarousel ? 2 : 4) ? "eager" : "lazy"}
-                  fetchPriority={index < (isCompactCarousel ? 2 : 4) ? "high" : "low"}
-                  sizes={
+                <Link
+                  href={`/vinyl/${record.id}`}
+                  className={
                     viewMode === "grid"
-                      ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                      : "(max-width: 639px) 100vw, 180px"
+                      ? "relative block aspect-square w-full"
+                      : "relative block aspect-square w-full sm:aspect-auto"
                   }
-                  flipOnHover
-                />
-              </Link>
+                >
+                  <CoverArt
+                    record={record}
+                    backSrc={record.backCoverImage}
+                    priority={index < (isCompactCarousel ? 2 : 4)}
+                    loading={index < (isCompactCarousel ? 2 : 4) ? "eager" : "lazy"}
+                    fetchPriority={index < (isCompactCarousel ? 2 : 4) ? "high" : "low"}
+                    sizes={
+                      viewMode === "grid"
+                        ? "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                        : "(max-width: 639px) 100vw, 180px"
+                    }
+                    flipOnHover
+                  />
+                </Link>
 
-              <div className="p-3 sm:p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                      <span className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusTone(record.status).badge}`}>
-                        {statusLabel(record.status)}
-                      </span>
-                      {record.favorite ? (
-                        <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-700">
-                          Favorite
+                <div className="p-3 sm:p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <span className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusTone(record.status).badge}`}>
+                          {statusLabel(record.status)}
                         </span>
-                      ) : null}
-                      {record.storageLocation ? (
-                        <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-600">
-                          {record.storageLocation}
-                        </span>
-                      ) : null}
+                        {record.favorite ? (
+                          <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-medium text-rose-700">
+                            Favorite
+                          </span>
+                        ) : null}
+                        {record.storageLocation ? (
+                          <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-600">
+                            {record.storageLocation}
+                          </span>
+                        ) : null}
+                      </div>
+                      <Link href={`/vinyl/${record.id}`} className="block text-base font-semibold leading-tight text-gray-950 hover:underline sm:text-xl">
+                        {record.title}
+                      </Link>
+                      <p className="mt-1 text-sm text-gray-600">{record.artist}</p>
                     </div>
-                    <Link href={`/vinyl/${record.id}`} className="block text-base font-semibold leading-tight text-gray-950 hover:underline sm:text-xl">
-                      {record.title}
-                    </Link>
-                    <p className="mt-1 text-sm text-gray-600">{record.artist}</p>
+                    <button
+                      type="button"
+                      onClick={() => toggleFavorite(record)}
+                      disabled={favoriteRecordId === record.id}
+                      className={`rounded-full border p-2 transition-colors ${
+                        record.favorite
+                          ? "border-gray-950 bg-gray-950 text-white"
+                          : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
+                      }`}
+                      title={record.favorite ? "Remove favorite" : "Add favorite"}
+                      aria-label={record.favorite ? `Remove ${record.title} from favorites` : `Add ${record.title} to favorites`}
+                    >
+                      <Star className={`h-4 w-4 ${record.favorite ? "fill-current" : ""}`} />
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => toggleFavorite(record)}
-                    disabled={favoriteRecordId === record.id}
-                    className={`rounded-full border p-2 transition-colors ${
-                      record.favorite
-                        ? "border-gray-950 bg-gray-950 text-white"
-                        : "border-gray-200 bg-white text-gray-500 hover:border-gray-500 hover:text-gray-950"
-                    }`}
-                    title={record.favorite ? "Remove favorite" : "Add favorite"}
-                    aria-label={record.favorite ? `Remove ${record.title} from favorites` : `Add ${record.title} to favorites`}
-                  >
-                    <Star className={`h-4 w-4 ${record.favorite ? "fill-current" : ""}`} />
-                  </button>
+
+                <div className="hidden sm:block">
+                  <RecordMeta record={record} />
                 </div>
 
-                <RecordMeta record={record} />
-
-                <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
+                <div className="mt-3 hidden flex-wrap gap-1.5 sm:mt-4 sm:flex sm:gap-2">
                   {[...record.genres, ...record.moods].slice(0, 6).map((tag) => (
                     <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-[11px] text-gray-700 sm:px-3 sm:text-xs">
                       {tag}
@@ -1071,7 +1333,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 </div>
 
                 {record.favoriteTracks?.length ? (
-                  <p className="mt-4 text-sm text-gray-600">
+                  <p className="mt-4 hidden text-sm text-gray-600 sm:block">
                     Tracks: {record.favoriteTracks.join(", ")}
                   </p>
                 ) : null}
@@ -1085,15 +1347,17 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 ) : null}
 
                 {record.notes ? (
-                  <p className="mt-4 border-t border-gray-100 pt-4 text-sm leading-6 text-gray-600">
+                  <p className="mt-4 hidden border-t border-gray-100 pt-4 text-sm leading-6 text-gray-600 sm:block">
                     {record.notes}
                   </p>
                 ) : null}
 
                 {record.favoriteStories ? (
                   <p className="mt-3 border-t border-gray-100 pt-3 text-sm leading-6 text-gray-600">
-                    <span className="font-medium text-gray-950">Story: </span>
-                    {record.favoriteStories}
+                    <span className="font-medium text-gray-950">{viewMode === "grid" ? "Story saved" : "Story: "}</span>
+                    <span className={viewMode === "grid" ? "hidden sm:inline" : ""}>
+                      {viewMode === "grid" ? ` ${record.favoriteStories}` : record.favoriteStories}
+                    </span>
                   </p>
                 ) : null}
 
@@ -1122,9 +1386,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}
               disabled={currentPage === totalPages}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Next
-              </button>
+            >
+              Next
+            </button>
           </div>
         </div>
       ) : (
@@ -1134,6 +1398,165 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           <p className="mt-2 text-gray-600">Try clearing filters or changing the search.</p>
         </div>
       )}
+
+      {quickWishlistOpen ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 px-0 py-0 sm:items-center sm:px-4 sm:py-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quick-wishlist-title"
+          onClick={closeQuickWishlist}
+        >
+          <div
+            className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="p-5 sm:p-6">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">Wishlist</p>
+                  <h2 id="quick-wishlist-title" className="text-2xl font-semibold text-gray-950">
+                    Add a record fast
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeQuickWishlist}
+                  className="rounded-full border border-gray-200 p-2 text-gray-600 transition-colors hover:border-gray-500 hover:text-gray-950"
+                  aria-label="Close wishlist add"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <label className="relative block flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      value={quickWishlistQuery}
+                      onChange={(event) => setQuickWishlistQuery(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          searchQuickWishlist();
+                        }
+                      }}
+                      className="w-full rounded-md border border-gray-300 bg-white py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                      placeholder="Search album or artist"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={searchQuickWishlist}
+                    disabled={isSearchingWishlist}
+                    className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSearchingWishlist ? "Searching..." : "Search"}
+                  </button>
+                </div>
+
+                {quickWishlistMessage ? (
+                  <p className="mt-3 text-sm text-gray-600">{quickWishlistMessage}</p>
+                ) : null}
+
+                {quickWishlistDuplicate ? (
+                  <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                    <div className="flex gap-2">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <div>
+                        <p className="font-medium">
+                          This looks like {quickWishlistDuplicate.status === "wishlist" ? "an existing wishlist record" : "a record already in the collection"}.
+                        </p>
+                        <Link
+                          href={`/vinyl/${quickWishlistDuplicate.id}`}
+                          className="mt-1 inline-flex font-medium underline-offset-4 hover:underline"
+                        >
+                          Open {quickWishlistDuplicate.title}
+                        </Link>
+                      </div>
+                    </div>
+                    {quickWishlistPendingAlbum ? (
+                      <button
+                        type="button"
+                        onClick={() => addAppleAlbumToWishlist(quickWishlistPendingAlbum, true)}
+                        disabled={isSavingWishlist}
+                        className="mt-3 rounded-md bg-amber-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Add another copy anyway
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {quickWishlistResults.length ? (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {quickWishlistResults.map((album) => (
+                      <button
+                        key={album.collectionId}
+                        type="button"
+                        onClick={() => addAppleAlbumToWishlist(album)}
+                        disabled={isSavingWishlist}
+                        className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 rounded-md border border-gray-200 bg-white p-2 text-left transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <div className="relative aspect-square overflow-hidden rounded bg-gray-100">
+                          {album.artworkUrl100 ? (
+                            <Image src={album.artworkUrl100} alt="" fill className="object-cover" unoptimized />
+                          ) : (
+                            <div className="flex h-full items-center justify-center">
+                              <Disc3 className="h-6 w-6 text-gray-300" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-gray-950">{album.collectionName}</p>
+                          <p className="truncate text-sm text-gray-600">{album.artistName}</p>
+                          <p className="mt-1 text-xs text-gray-400">
+                            {album.releaseDate ? new Date(album.releaseDate).getFullYear() : "Album"}
+                            {album.primaryGenreName ? ` · ${album.primaryGenreName}` : ""}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="mt-5 rounded-lg border border-gray-200 p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Add manually</h3>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-gray-700">Album title</span>
+                    <input
+                      value={quickWishlistTitle}
+                      onChange={(event) => setQuickWishlistTitle(event.target.value)}
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                      placeholder="Blue"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-gray-700">Artist</span>
+                    <input
+                      value={quickWishlistArtist}
+                      onChange={(event) => setQuickWishlistArtist(event.target.value)}
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                      placeholder="Joni Mitchell"
+                    />
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={addManualWishlist}
+                  disabled={isSavingWishlist}
+                  className="mt-4 inline-flex rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSavingWishlist ? "Saving..." : "Save manual wishlist"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {pickedRecord ? (
         <div
@@ -1302,22 +1725,48 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                           : "This copy is in the collection, but a better version is still on the radar."}
                       </p>
                       {selectedRecord.status === "wishlist" ? (
-                        <label className="mt-4 block text-sm font-medium text-gray-950">
-                          Storage location
-                          <input
-                            value={ownedStorageLocation}
-                            onChange={(event) => setOwnedStorageLocation(event.target.value)}
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
-                            placeholder="Crate 3.2, upstairs shelf..."
-                          />
-                        </label>
+                        <div className="mt-4 grid gap-3">
+                          <label className="block text-sm font-medium text-gray-950">
+                            Storage location
+                            <input
+                              value={ownedStorageLocation}
+                              onChange={(event) => setOwnedStorageLocation(event.target.value)}
+                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950"
+                              placeholder="Crate 3.2, upstairs shelf..."
+                            />
+                          </label>
+                          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                            Wishlist artwork can stay for now. Add real front/back photos when this copy joins the shelf.
+                          </div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="block text-sm font-medium text-gray-950">
+                              Front cover photo
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => setOwnedFrontCoverFile(event.target.files?.[0])}
+                                className="mt-2 block w-full rounded-md border border-dashed border-gray-300 bg-white px-3 py-3 text-sm text-gray-600"
+                              />
+                            </label>
+                            <label className="block text-sm font-medium text-gray-950">
+                              Back cover photo
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => setOwnedBackCoverFile(event.target.files?.[0])}
+                                className="mt-2 block w-full rounded-md border border-dashed border-gray-300 bg-white px-3 py-3 text-sm text-gray-600"
+                              />
+                            </label>
+                          </div>
+                        </div>
                       ) : null}
                       <button
                         type="button"
                         onClick={() => markAsOwned(selectedRecord)}
-                        className="mt-4 inline-flex rounded-md bg-gray-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                        disabled={isMarkingOwned}
+                        className="mt-4 inline-flex rounded-md bg-gray-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        Mark as owned
+                        {isMarkingOwned ? "Saving..." : "Mark as owned"}
                       </button>
                     </div>
                   ) : null}
@@ -1381,6 +1830,13 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     <div>
                       <p className="mb-2 text-sm font-medium text-gray-950">Notes</p>
                       <p className="text-sm leading-6 text-gray-600">{selectedRecord.notes}</p>
+                      <button
+                        type="button"
+                        onClick={() => moveNotesToStories(selectedRecord)}
+                        className="mt-3 inline-flex rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+                      >
+                        {selectedRecord.favoriteStories ? "Append notes to stories" : "Move notes to stories"}
+                      </button>
                     </div>
                   ) : null}
 
