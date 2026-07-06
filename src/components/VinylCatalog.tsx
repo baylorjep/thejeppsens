@@ -243,6 +243,53 @@ function findDuplicateRecords(records: VinylRecord[], title: string, artist: str
   });
 }
 
+function findFieldMatch(values: string[] | undefined, query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery || !values?.length) return null;
+  return values.find((value) => value.toLowerCase().includes(normalizedQuery)) ?? null;
+}
+
+function getSearchMatchReason(record: VinylRecord, query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return null;
+
+  const trackMatch =
+    findFieldMatch(record.trackList, query) ??
+    findFieldMatch(record.favoriteTracks, query);
+  if (trackMatch) return { label: "Matched track", value: trackMatch };
+
+  if (record.title.toLowerCase().includes(normalizedQuery)) {
+    return { label: "Matched title", value: record.title };
+  }
+
+  if (record.artist.toLowerCase().includes(normalizedQuery)) {
+    return { label: "Matched artist", value: record.artist };
+  }
+
+  const metadataMatch = findFieldMatch([
+    ...(record.genres ?? []),
+    ...(record.moods ?? []),
+    record.label ?? "",
+    record.format ?? "",
+    record.storageLocation ?? "",
+  ], query);
+  if (metadataMatch) return { label: "Matched detail", value: metadataMatch };
+
+  if (record.favoriteStories?.toLowerCase().includes(normalizedQuery)) {
+    return { label: "Matched story", value: record.favoriteStories };
+  }
+
+  if (record.notes?.toLowerCase().includes(normalizedQuery)) {
+    return { label: "Matched notes", value: record.notes };
+  }
+
+  return null;
+}
+
+function isCarouselReadyRecord(record: VinylRecord) {
+  return record.status !== "wishlist" && Boolean(record.coverImage) && Boolean(record.backCoverImage);
+}
+
 export default function VinylCatalog({ records }: VinylCatalogProps) {
   const [allRecords, setAllRecords] = useState<VinylRecord[]>(records);
   const [apiSource, setApiSource] = useState<VinylApiStatus>("local");
@@ -414,7 +461,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   }, [currentPage, filteredRecords]);
 
   const carouselPool = useMemo(
-    () => allRecords.filter((record) => record.status !== "wishlist"),
+    () => allRecords.filter(isCarouselReadyRecord),
     [allRecords],
   );
   const shuffledCarouselRecords = useMemo(
@@ -456,10 +503,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     () => allRecords.filter((record) => record.status !== "wishlist"),
     [allRecords],
   );
+  const pickableRecords = useMemo(
+    () => ownedShelfRecords.filter((record) => Boolean(record.coverImage) && Boolean(record.backCoverImage)),
+    [ownedShelfRecords],
+  );
 
   const pickRandomRecord = () => {
-    const filteredOwnedPool = filteredRecords.filter((record) => record.status !== "wishlist");
-    const pool = filteredOwnedPool.length ? filteredOwnedPool : ownedShelfRecords;
+    const filteredOwnedPool = filteredRecords.filter(isCarouselReadyRecord);
+    const pool = filteredOwnedPool.length ? filteredOwnedPool : pickableRecords;
     if (!pool.length) return;
     const next = pool[Math.floor(Math.random() * pool.length)];
     setPickedRecordId(next.id);
@@ -651,6 +702,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const closeQuickWishlist = () => {
     setQuickWishlistOpen(false);
     resetQuickWishlist();
+  };
+
+  const openQuickWishlist = (prefill = "") => {
+    setQuickWishlistOpen(true);
+    setQuickWishlistDuplicate(null);
+    setQuickWishlistPendingAlbum(null);
+    setQuickWishlistMessage("");
+    if (prefill) setQuickWishlistQuery(prefill);
   };
 
   const saveWishlistRecord = async (record: VinylRecord) => {
@@ -1003,7 +1062,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
           <div className="flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
-              onClick={() => setQuickWishlistOpen(true)}
+              onClick={() => openQuickWishlist()}
               className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-amber-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-amber-600 sm:w-auto"
             >
               <Heart className="h-4 w-4" />
@@ -1206,7 +1265,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setQuickWishlistOpen(true)}
+                  onClick={() => openQuickWishlist()}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-amber-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-amber-700 sm:w-auto"
                 >
                   <Heart className="h-4 w-4" />
@@ -1249,7 +1308,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 : "space-y-4"
             }
           >
-            {paginatedRecords.map((record, index) => (
+            {paginatedRecords.map((record, index) => {
+              const searchMatchReason = getSearchMatchReason(record, query);
+
+              return (
               <article
                 key={record.id}
                 className={
@@ -1298,6 +1360,16 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                             {record.storageLocation}
                           </span>
                         ) : null}
+                        {record.status !== "wishlist" && !record.coverImage ? (
+                          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs text-amber-800">
+                            Needs front photo
+                          </span>
+                        ) : null}
+                        {record.status !== "wishlist" && !record.backCoverImage ? (
+                          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs text-amber-800">
+                            Needs back photo
+                          </span>
+                        ) : null}
                       </div>
                       <Link href={`/vinyl/${record.id}`} className="block text-base font-semibold leading-tight text-gray-950 hover:underline sm:text-xl">
                         {record.title}
@@ -1320,9 +1392,16 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     </button>
                   </div>
 
-                <div className="hidden sm:block">
-                  <RecordMeta record={record} />
-                </div>
+                  {searchMatchReason ? (
+                    <p className="mt-3 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                      <span className="font-medium text-gray-950">{searchMatchReason.label}: </span>
+                      {searchMatchReason.value}
+                    </p>
+                  ) : null}
+
+                  <div className="hidden sm:block">
+                    <RecordMeta record={record} />
+                  </div>
 
                 <div className="mt-3 hidden flex-wrap gap-1.5 sm:mt-4 sm:flex sm:gap-2">
                   {[...record.genres, ...record.moods].slice(0, 6).map((tag) => (
@@ -1367,9 +1446,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 >
                   Album details
                 </Link>
-              </div>
-            </article>
-            ))}
+                </div>
+              </article>
+              );
+            })}
           </div>
 
           <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-gray-600">
@@ -1395,7 +1475,24 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         <div className="rounded-lg border border-dashed border-gray-300 p-12 text-center">
           <Disc3 className="mx-auto h-12 w-12 text-gray-300" />
           <h2 className="mt-4 text-xl font-semibold text-gray-950">No matching records</h2>
-          <p className="mt-2 text-gray-600">Try clearing filters or changing the search.</p>
+          <p className="mt-2 text-gray-600">Try clearing filters or add it to the wishlist from the same search.</p>
+          <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="inline-flex rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+            >
+              Clear filters
+            </button>
+            <button
+              type="button"
+              onClick={() => openQuickWishlist(query)}
+              className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-amber-700"
+            >
+              <Heart className="h-4 w-4" />
+              Search wishlist sources
+            </button>
+          </div>
         </div>
       )}
 
@@ -1694,8 +1791,22 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                         </div>
                         <p className="mt-3 text-sm font-medium text-gray-500">Back cover</p>
                       </div>
+                    ) : selectedRecord.status !== "wishlist" ? (
+                      <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-amber-300 bg-amber-50 p-4 text-center">
+                        <Disc3 className="h-10 w-10 text-amber-300" />
+                        <p className="mt-3 text-sm font-medium text-amber-950">Back cover photo needed</p>
+                        <p className="mt-1 text-sm text-amber-800">
+                          Add the real back cover from the album edit page or when marking a wishlist record owned.
+                        </p>
+                      </div>
                     ) : null}
                   </div>
+
+                  {selectedRecord.status !== "wishlist" && !selectedRecord.coverImage ? (
+                    <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                      Front cover photo is missing for this owned record.
+                    </div>
+                  ) : null}
 
                   <div className="grid gap-3 text-sm sm:grid-cols-2">
                     {[
