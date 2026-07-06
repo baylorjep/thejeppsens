@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 import { createClient } from "@supabase/supabase-js";
-import { readFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 
+const execFileAsync = promisify(execFile);
 const BUCKET = "vinyl-covers";
+const MAX_COVER_DIMENSION = 1400;
+const JPEG_QUALITY = 78;
 const VALID_STATUSES = new Set(["owned", "wishlist", "upgrade"]);
 
 function loadEnvFile(filePath) {
@@ -40,15 +46,6 @@ function asList(value) {
   if (Array.isArray(value)) return value.map(String).map((item) => item.trim()).filter(Boolean);
   if (typeof value === "string") return value.split(",").map((item) => item.trim()).filter(Boolean);
   return [];
-}
-
-function contentTypeFor(filePath) {
-  const extension = path.extname(filePath).toLowerCase();
-  if (extension === ".png") return "image/png";
-  if (extension === ".webp") return "image/webp";
-  if (extension === ".gif") return "image/gif";
-  if (extension === ".svg") return "image/svg+xml";
-  return "image/jpeg";
 }
 
 function validateRecord(input) {
@@ -105,14 +102,39 @@ function validateRecord(input) {
   return record;
 }
 
+async function optimizeCoverFile(absolutePath) {
+  const workDir = await mkdtemp(path.join(os.tmpdir(), "jeppsen-vinyl-import-"));
+  const inputPath = path.join(workDir, `source${path.extname(absolutePath).toLowerCase() || ".jpg"}`);
+  const outputPath = path.join(workDir, "optimized.jpg");
+
+  try {
+    await writeFile(inputPath, await readFile(absolutePath));
+    await execFileAsync("sips", [
+      "-s",
+      "format",
+      "jpeg",
+      "-s",
+      "formatOptions",
+      String(JPEG_QUALITY),
+      "-Z",
+      String(MAX_COVER_DIMENSION),
+      inputPath,
+      "--out",
+      outputPath,
+    ]);
+    return await readFile(outputPath);
+  } finally {
+    await rm(workDir, { recursive: true, force: true });
+  }
+}
+
 async function uploadCover(supabase, record, coverPath, manifestDir, side) {
   const absolutePath = path.resolve(manifestDir, coverPath);
-  const file = await readFile(absolutePath);
-  const extension = path.extname(absolutePath).toLowerCase() || ".jpg";
-  const storagePath = `${record.id}-${side}-${Date.now()}${extension}`;
+  const file = await optimizeCoverFile(absolutePath);
+  const storagePath = `optimized/${record.id}/${side}.jpg`;
 
   const { error } = await supabase.storage.from(BUCKET).upload(storagePath, file, {
-    contentType: contentTypeFor(absolutePath),
+    contentType: "image/jpeg",
     upsert: true,
   });
 

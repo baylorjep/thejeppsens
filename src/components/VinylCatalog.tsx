@@ -609,36 +609,38 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
   return (
     <div>
-      <div className="mb-10 grid grid-cols-2 gap-3 md:grid-cols-5">
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
-          <p className="text-sm text-gray-500">Records</p>
-          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
-            <AnimatedNumber value={ownedShelfRecords.length} />
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
-          <p className="text-sm text-gray-500">Artists</p>
-          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
-            <AnimatedNumber value={snapshot.artists} />
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
-          <p className="text-sm text-gray-500">Genres</p>
-          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
-            <AnimatedNumber value={snapshot.genres} />
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:p-5 sm:text-left">
-          <p className="text-sm text-gray-500">Favorites</p>
-          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
-            <AnimatedNumber value={snapshot.favorites} />
-          </p>
-        </div>
-        <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-3 text-center sm:p-5 sm:text-left">
-          <p className="text-sm text-amber-800">Wishlist</p>
-          <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
-            <AnimatedNumber value={snapshot.wishlist} />
-          </p>
+      <div className="mb-10 overflow-x-auto pb-1">
+        <div className="grid w-max grid-cols-5 gap-3 md:w-auto">
+          <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
+            <p className="text-sm text-gray-500">Records</p>
+            <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
+              <AnimatedNumber value={ownedShelfRecords.length} />
+            </p>
+          </div>
+          <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
+            <p className="text-sm text-gray-500">Artists</p>
+            <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
+              <AnimatedNumber value={snapshot.artists} />
+            </p>
+          </div>
+          <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
+            <p className="text-sm text-gray-500">Genres</p>
+            <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
+              <AnimatedNumber value={snapshot.genres} />
+            </p>
+          </div>
+          <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
+            <p className="text-sm text-gray-500">Favorites</p>
+            <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
+              <AnimatedNumber value={snapshot.favorites} />
+            </p>
+          </div>
+          <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
+            <p className="text-sm text-gray-500">Wishlist</p>
+            <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
+              <AnimatedNumber value={snapshot.wishlist} />
+            </p>
+          </div>
         </div>
       </div>
 

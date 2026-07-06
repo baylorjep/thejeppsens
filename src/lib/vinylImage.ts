@@ -1,4 +1,4 @@
-export async function optimizeImageFile(file: File, maxDimension = 1600, quality = 0.82) {
+export async function optimizeImageFile(file: File, maxDimension = 1400, quality = 0.78) {
   const imageUrl = URL.createObjectURL(file);
 
   try {

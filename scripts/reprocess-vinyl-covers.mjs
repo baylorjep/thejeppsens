@@ -8,7 +8,8 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const BUCKET = "vinyl-covers";
-const MAX_DIMENSION = 1600;
+const MAX_DIMENSION = 1400;
+const JPEG_QUALITY = 78;
 
 function loadEnvFile(filePath) {
   return readFile(filePath, "utf8")
@@ -56,6 +57,14 @@ function fileExtensionFromUrl(url) {
   return ".jpg";
 }
 
+function isOptimizedCoverUrl(url) {
+  try {
+    return new URL(url).pathname.includes(`/storage/v1/object/public/${BUCKET}/optimized/`);
+  } catch {
+    return false;
+  }
+}
+
 async function optimizeImageFromUrl(imageUrl) {
   const response = await fetch(imageUrl);
   if (!response.ok) {
@@ -69,7 +78,19 @@ async function optimizeImageFromUrl(imageUrl) {
 
   try {
     await writeFile(inputPath, inputBuffer);
-    await execFileAsync("sips", ["-s", "format", "jpeg", "-Z", String(MAX_DIMENSION), inputPath, "--out", outputPath]);
+    await execFileAsync("sips", [
+      "-s",
+      "format",
+      "jpeg",
+      "-s",
+      "formatOptions",
+      String(JPEG_QUALITY),
+      "-Z",
+      String(MAX_DIMENSION),
+      inputPath,
+      "--out",
+      outputPath,
+    ]);
     return await readFile(outputPath);
   } finally {
     await rm(workDir, { recursive: true, force: true });
@@ -110,13 +131,13 @@ async function main() {
     let nextRecord = { ...record };
     let changed = false;
 
-    if (record.coverImage && !record.coverImage.startsWith("data:")) {
+    if (record.coverImage && !record.coverImage.startsWith("data:") && !isOptimizedCoverUrl(record.coverImage)) {
       const nextUrl = await uploadOptimizedCover(supabase, record.id, "front", record.coverImage);
       nextRecord.coverImage = nextUrl;
       changed = true;
     }
 
-    if (record.backCoverImage && !record.backCoverImage.startsWith("data:")) {
+    if (record.backCoverImage && !record.backCoverImage.startsWith("data:") && !isOptimizedCoverUrl(record.backCoverImage)) {
       const nextUrl = await uploadOptimizedCover(supabase, record.id, "back", record.backCoverImage);
       nextRecord.backCoverImage = nextUrl;
       changed = true;

@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "cleanup:vinyl-covers": "node scripts/cleanup-vinyl-original-covers.mjs",
     "import:vinyl": "node scripts/import-vinyls.mjs",
+    "reprocess:vinyl-covers": "node scripts/reprocess-vinyl-covers.mjs",
     "start": "next start",
     "lint": "next lint"
   },
