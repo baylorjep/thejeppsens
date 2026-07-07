@@ -1063,7 +1063,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             <button
               type="button"
               onClick={() => openQuickWishlist()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-amber-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-amber-600 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 sm:w-auto"
             >
               <Heart className="h-4 w-4" />
               Add wishlist
@@ -1266,7 +1266,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                 <button
                   type="button"
                   onClick={() => openQuickWishlist()}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-amber-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-amber-700 sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 sm:w-auto"
                 >
                   <Heart className="h-4 w-4" />
                   Add wishlist
