@@ -155,11 +155,11 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
         </Geographies>
         {statePhotoMarkers.map(({ stateName, photo, coordinates, href }) => (
           <Marker key={photo.state_id} coordinates={coordinates}>
-            <foreignObject x={-19} y={-36} width={38} height={44}>
+            <foreignObject x={-16} y={-30} width={32} height={38}>
               <button
                 type="button"
                 aria-label={`Open ${stateName} photos`}
-                className="group relative block h-[38px] w-[38px] origin-center overflow-hidden rounded-lg border border-white/80 bg-white/70 p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="group relative block h-[32px] w-[26px] origin-center overflow-hidden rounded-[13px_13px_13px_5px] border border-white/70 bg-white/60 p-px shadow-sm ring-1 ring-slate-950/15 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 onClick={() => {
                   if (href) window.location.href = href;
                 }}
@@ -175,7 +175,7 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
                 onMouseLeave={() => setTooltip(null)}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[7px] object-cover" />
+                <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[11px_11px_11px_4px] object-cover" />
                 {photo.photo_count > 1 && (
                   <span className="absolute right-[-1px] top-[-1px] flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-950 px-1 text-[9px] font-bold leading-none text-white ring-1 ring-white">
                     {photo.photo_count}
