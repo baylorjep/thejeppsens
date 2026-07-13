@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import USStatesTracker from '@/components/USStatesTracker';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import {
   countrySlug,
@@ -7,6 +8,7 @@ import {
   type Country,
   type TravelFavorite,
   type TravelPhoto,
+  type TravelState,
   type TravelTrip,
 } from '@/lib/travel';
 import { ArrowLeft, CalendarDays, Camera, MapPin, Utensils, Waves } from 'lucide-react';
@@ -75,6 +77,13 @@ export default async function CountryTravelPage({ params }: PageProps) {
   const activities = favoriteRows.filter((favorite) => favorite.type !== 'restaurant');
   const hasPinnedFavorites = favoriteRows.some((favorite) => favorite.latitude && favorite.longitude);
   const isUnitedStates = countrySlug(country) === 'united-states';
+  const { data: states } = isUnitedStates
+    ? await supabase
+        .from('visited_states')
+        .select('id, state_name, abbreviation, baylor_visited, isabel_visited')
+        .order('state_name')
+    : { data: null };
+  const stateRows = (states ?? []) as TravelState[];
 
   return (
     <main className="min-h-screen bg-white">
@@ -104,19 +113,14 @@ export default async function CountryTravelPage({ params }: PageProps) {
                 {favoriteRows.length} favorite spots.
               </p>
             </div>
-
-            {isUnitedStates && (
-              <Link
-                href="/travel/united-states/states"
-                className="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-teal-50"
-              >
-                View 50 states
-              </Link>
-            )}
           </div>
         </div>
       </section>
 
+      {isUnitedStates && <USStatesTracker states={stateRows} showHeading={false} />}
+
+      {!isUnitedStates && (
+        <>
       <section className="bg-slate-50 py-12">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
           <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -276,6 +280,8 @@ export default async function CountryTravelPage({ params }: PageProps) {
           </aside>
         </div>
       </section>
+        </>
+      )}
     </main>
   );
 }
