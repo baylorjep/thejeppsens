@@ -7,7 +7,10 @@ import type { TravelStatePhotoPreview } from '@/lib/travel';
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
 
-type Tooltip = { name: string; x: number; y: number } | null;
+type Tooltip =
+  | { type: 'text'; name: string; x: number; y: number }
+  | { type: 'photo'; name: string; x: number; y: number; photo: TravelStatePhotoPreview }
+  | null;
 type GeographyItem = {
   rsmKey: string;
   properties: { name: string };
@@ -99,10 +102,27 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
     <div className="relative w-full select-none overflow-hidden rounded-xl bg-sky-50">
       {tooltip && (
         <div
-          className="fixed z-50 rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg pointer-events-none"
-          style={{ left: tooltip.x + 14, top: tooltip.y - 12 }}
+          className={
+            tooltip.type === 'photo'
+              ? 'pointer-events-none fixed z-50 w-40 overflow-hidden rounded-lg bg-white text-slate-900 shadow-xl ring-1 ring-slate-950/10'
+              : 'pointer-events-none fixed z-50 rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg'
+          }
+          style={{ left: tooltip.x + 14, top: tooltip.type === 'photo' ? tooltip.y - 92 : tooltip.y - 12 }}
         >
-          {tooltip.name}
+          {tooltip.type === 'photo' ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={tooltip.photo.image_url} alt="" className="h-24 w-full object-cover" />
+              <div className="px-2 py-1.5">
+                <p className="truncate text-xs font-semibold">{tooltip.name}</p>
+                <p className="text-[11px] text-slate-500">
+                  {tooltip.photo.photo_count} {tooltip.photo.photo_count === 1 ? 'photo' : 'photos'}
+                </p>
+              </div>
+            </>
+          ) : (
+            tooltip.name
+          )}
         </div>
       )}
       <ComposableMap projection="geoAlbersUsa" height={440} style={{ width: '100%', height: 'auto' }}>
@@ -120,7 +140,7 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
                     if (href) window.location.href = href;
                   }}
                   onMouseMove={(e: React.MouseEvent) =>
-                    setTooltip({ name: geo.properties.name, x: e.clientX, y: e.clientY })
+                    setTooltip({ type: 'text', name: geo.properties.name, x: e.clientX, y: e.clientY })
                   }
                   onMouseLeave={() => setTooltip(null)}
                   style={{
@@ -135,19 +155,35 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
         </Geographies>
         {statePhotoMarkers.map(({ stateName, photo, coordinates, href }) => (
           <Marker key={photo.state_id} coordinates={coordinates}>
-            <foreignObject x={-16} y={-30} width={32} height={38}>
+            <foreignObject x={-22} y={-46} width={44} height={50}>
               <button
                 type="button"
                 aria-label={`Open ${stateName} photos`}
-                className="group block h-[32px] w-[26px] origin-center overflow-hidden rounded-[13px_13px_13px_5px] border border-white/70 bg-white/60 p-px shadow-sm ring-1 ring-slate-950/15 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="group relative mx-auto block h-[42px] w-[34px] origin-bottom overflow-visible transition-transform hover:scale-110 focus:outline-none"
                 onClick={() => {
                   if (href) window.location.href = href;
                 }}
-                onMouseMove={(e) => setTooltip({ name: photo.caption ?? photo.location_name ?? stateName, x: e.clientX, y: e.clientY })}
+                onMouseMove={(e) =>
+                  setTooltip({
+                    type: 'photo',
+                    name: photo.caption ?? photo.location_name ?? stateName,
+                    x: e.clientX,
+                    y: e.clientY,
+                    photo,
+                  })
+                }
                 onMouseLeave={() => setTooltip(null)}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[11px_11px_11px_4px] object-cover" />
+                <span className="absolute left-1/2 top-0 block h-[30px] w-[28px] -translate-x-1/2 overflow-hidden rounded-md border border-white/75 bg-white/70 p-px shadow-md ring-1 ring-slate-950/15 group-focus:ring-2 group-focus:ring-teal-500">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[5px] object-cover" />
+                </span>
+                <span className="absolute left-1/2 top-[27px] block h-3.5 w-3.5 -translate-x-1/2 rotate-45 rounded-[2px] border-b border-r border-white/75 bg-white shadow-sm ring-1 ring-slate-950/10" />
+                {photo.photo_count > 1 && (
+                  <span className="absolute right-0 top-[-4px] flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-950 px-1 text-[9px] font-bold leading-none text-white ring-1 ring-white">
+                    {photo.photo_count}
+                  </span>
+                )}
               </button>
             </foreignObject>
           </Marker>

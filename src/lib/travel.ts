@@ -31,6 +31,7 @@ export interface TravelPhoto {
   location_name: string | null;
   taken_on: string | null;
   sort_order: number;
+  created_at?: string | null;
 }
 
 export type TravelFavoriteType = 'restaurant' | 'activity' | 'place';
@@ -63,6 +64,7 @@ export interface TravelStatePhotoPreview {
   image_url: string;
   caption: string | null;
   location_name: string | null;
+  photo_count: number;
 }
 
 export function countrySlug(country: Pick<Country, 'display_name'>) {

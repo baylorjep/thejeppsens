@@ -34,13 +34,18 @@ export default async function UnitedStatesStatesPage({ params }: PageProps) {
   const { data: statePhotos } = unitedStates
     ? await supabase
         .from('travel_photos')
-        .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order')
+        .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order, created_at')
         .eq('country_id', unitedStates.id)
         .not('state_id', 'is', null)
-        .order('sort_order')
         .order('taken_on', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .order('sort_order')
     : { data: null };
   const stateById = new Map(states.map((state) => [state.id, state]));
+  const statePhotoCounts = ((statePhotos ?? []) as TravelPhoto[]).reduce<Record<string, number>>((acc, photo) => {
+    if (photo.state_id) acc[photo.state_id] = (acc[photo.state_id] ?? 0) + 1;
+    return acc;
+  }, {});
   const statePhotoPreviews = ((statePhotos ?? []) as TravelPhoto[]).reduce<TravelStatePhotoPreview[]>((acc, photo) => {
     if (!photo.state_id || acc.some((preview) => preview.state_id === photo.state_id)) return acc;
     const state = stateById.get(photo.state_id);
@@ -51,6 +56,7 @@ export default async function UnitedStatesStatesPage({ params }: PageProps) {
       image_url: photo.image_url,
       caption: photo.caption,
       location_name: photo.location_name,
+      photo_count: statePhotoCounts[state.id] ?? 1,
     });
     return acc;
   }, []);

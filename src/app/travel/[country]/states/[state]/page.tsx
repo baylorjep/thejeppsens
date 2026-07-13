@@ -68,11 +68,12 @@ export default async function StateTravelPage({ params }: PageProps) {
       .order('started_on', { ascending: false, nullsFirst: false }),
     supabase
       .from('travel_photos')
-      .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order')
+      .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order, created_at')
       .eq('country_id', unitedStates.id)
       .eq('state_id', state.id)
-      .order('sort_order')
-      .order('taken_on', { ascending: false, nullsFirst: false }),
+      .order('taken_on', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('sort_order'),
     supabase
       .from('travel_favorites')
       .select('id, country_id, state_id, trip_id, type, name, location_name, latitude, longitude, notes, sort_order')
@@ -87,13 +88,21 @@ export default async function StateTravelPage({ params }: PageProps) {
   const favoriteRows = (favorites ?? []) as TravelFavorite[];
   const restaurants = favoriteRows.filter((favorite) => favorite.type === 'restaurant');
   const activities = favoriteRows.filter((favorite) => favorite.type !== 'restaurant');
+  const heroPhoto = photoRows[0];
 
   return (
     <main className="min-h-screen bg-white">
       <Header />
 
-      <section className="border-b border-slate-100 bg-slate-950 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden border-b border-slate-100 bg-slate-950 text-white">
+        {heroPhoto && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={heroPhoto.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+            <div className="absolute inset-0 bg-slate-950/70" />
+          </>
+        )}
+        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
           <Link
             href="/travel/united-states"
             className="mb-10 inline-flex items-center gap-2 text-sm font-medium text-slate-300 transition-colors hover:text-white"
