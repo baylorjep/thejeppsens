@@ -2,7 +2,7 @@
 
 import { optimizeImageFile } from "@/lib/vinylImage";
 import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip } from "@/lib/travel";
-import { Edit3, ImagePlus, Plus, Trash2, X } from "lucide-react";
+import { Edit3, ImagePlus, LocateFixed, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 
@@ -72,6 +72,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
   const [photoFile, setPhotoFile] = useState<File | undefined>();
   const [photoPreview, setPhotoPreview] = useState("");
   const [message, setMessage] = useState("");
+  const [isGeocoding, setIsGeocoding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const restaurants = useMemo(() => favorites.filter((favorite) => favorite.type === "restaurant"), [favorites]);
@@ -171,6 +172,50 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     formData.set("notes", favoriteForm.notes);
     formData.set("sort_order", favoriteForm.sort_order);
     await submitFormData(formData);
+  };
+
+  const findCoordinates = async () => {
+    const parts = [
+      favoriteForm.name,
+      favoriteForm.location_name,
+      state?.state_name,
+      country.display_name,
+    ]
+      .filter((part): part is string => Boolean(part))
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    if (!parts.length) {
+      setMessage("Add a name or location first.");
+      return;
+    }
+
+    setIsGeocoding(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(`/api/travel/geocode?q=${encodeURIComponent(parts.join(", "))}`);
+      if (!response.ok) throw new Error("Search failed");
+      const data = (await response.json()) as {
+        results?: { latitude: number; longitude: number; label: string }[];
+      };
+      const result = data.results?.[0];
+      if (!result) {
+        setMessage("No map match found.");
+        return;
+      }
+      setFavoriteForm((current) => ({
+        ...current,
+        latitude: String(result.latitude),
+        longitude: String(result.longitude),
+        location_name: current.location_name || result.label.split(",").slice(0, 2).join(", "),
+      }));
+      setMessage("Coordinates filled from map search.");
+    } catch {
+      setMessage("Could not search the map.");
+    } finally {
+      setIsGeocoding(false);
+    }
   };
 
   const deleteItem = async (type: EditorMode, id: string) => {
@@ -281,8 +326,14 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
               <form onSubmit={saveTrip} className="grid gap-3 md:grid-cols-2">
                 <input className={inputClassName()} value={tripForm.title} onChange={(e) => setTripForm({ ...tripForm, title: e.target.value })} placeholder="Trip title" required />
                 <input className={inputClassName()} value={tripForm.location_name} onChange={(e) => setTripForm({ ...tripForm, location_name: e.target.value })} placeholder="City or area" />
-                <input className={inputClassName()} type="date" value={tripForm.started_on} onChange={(e) => setTripForm({ ...tripForm, started_on: e.target.value })} />
-                <input className={inputClassName()} type="date" value={tripForm.ended_on} onChange={(e) => setTripForm({ ...tripForm, ended_on: e.target.value })} />
+                <label className="space-y-1">
+                  <span className="block text-xs font-semibold text-slate-500">Start date</span>
+                  <input className={inputClassName()} type="date" value={tripForm.started_on} onChange={(e) => setTripForm({ ...tripForm, started_on: e.target.value })} />
+                </label>
+                <label className="space-y-1">
+                  <span className="block text-xs font-semibold text-slate-500">End date</span>
+                  <input className={inputClassName()} type="date" value={tripForm.ended_on} onChange={(e) => setTripForm({ ...tripForm, ended_on: e.target.value })} />
+                </label>
                 <textarea className={`${inputClassName()} md:col-span-2`} value={tripForm.notes} onChange={(e) => setTripForm({ ...tripForm, notes: e.target.value })} placeholder="Notes" rows={3} />
                 <div className="flex gap-4 text-sm text-slate-600">
                   <label className="inline-flex items-center gap-2"><input type="checkbox" checked={tripForm.baylor_went} onChange={(e) => setTripForm({ ...tripForm, baylor_went: e.target.checked })} />Baylor</label>
@@ -298,7 +349,10 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                   <option value="">No trip</option>
                   {trips.map((trip) => <option key={trip.id} value={trip.id}>{trip.title}</option>)}
                 </select>
-                <input className={inputClassName()} type="date" value={photoForm.taken_on} onChange={(e) => setPhotoForm({ ...photoForm, taken_on: e.target.value })} />
+                <label className="space-y-1">
+                  <span className="block text-xs font-semibold text-slate-500">Photo date</span>
+                  <input className={inputClassName()} type="date" value={photoForm.taken_on} onChange={(e) => setPhotoForm({ ...photoForm, taken_on: e.target.value })} />
+                </label>
                 <input className={inputClassName()} value={photoForm.caption} onChange={(e) => setPhotoForm({ ...photoForm, caption: e.target.value })} placeholder="Caption" />
                 <input className={inputClassName()} value={photoForm.location_name} onChange={(e) => setPhotoForm({ ...photoForm, location_name: e.target.value })} placeholder="Location" />
                 <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500 md:col-span-2">
@@ -329,8 +383,19 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                 </select>
                 <input className={inputClassName()} value={favoriteForm.name} onChange={(e) => setFavoriteForm({ ...favoriteForm, name: e.target.value })} placeholder="Name" required />
                 <input className={inputClassName()} value={favoriteForm.location_name} onChange={(e) => setFavoriteForm({ ...favoriteForm, location_name: e.target.value })} placeholder="City or area" />
-                <input className={inputClassName()} value={favoriteForm.latitude} onChange={(e) => setFavoriteForm({ ...favoriteForm, latitude: e.target.value })} placeholder="Latitude" />
-                <input className={inputClassName()} value={favoriteForm.longitude} onChange={(e) => setFavoriteForm({ ...favoriteForm, longitude: e.target.value })} placeholder="Longitude" />
+                <div className="grid gap-3 md:col-span-2 md:grid-cols-[1fr_1fr_auto]">
+                  <input className={inputClassName()} value={favoriteForm.latitude} onChange={(e) => setFavoriteForm({ ...favoriteForm, latitude: e.target.value })} placeholder="Latitude" />
+                  <input className={inputClassName()} value={favoriteForm.longitude} onChange={(e) => setFavoriteForm({ ...favoriteForm, longitude: e.target.value })} placeholder="Longitude" />
+                  <button
+                    type="button"
+                    onClick={findCoordinates}
+                    disabled={isGeocoding}
+                    className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950 disabled:cursor-not-allowed disabled:text-slate-300"
+                  >
+                    <LocateFixed className="h-4 w-4" />
+                    {isGeocoding ? "Finding..." : "Find"}
+                  </button>
+                </div>
                 <textarea className={`${inputClassName()} md:col-span-2`} value={favoriteForm.notes} onChange={(e) => setFavoriteForm({ ...favoriteForm, notes: e.target.value })} placeholder="Notes" rows={3} />
                 <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300" disabled={isSaving}>{isSaving ? "Saving..." : "Save favorite"}</button>
               </form>

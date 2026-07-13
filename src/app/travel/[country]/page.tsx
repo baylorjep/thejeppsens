@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import TravelCountryEditor from '@/components/TravelCountryEditor';
+import TravelFavoriteMap from '@/components/TravelFavoriteMap';
 import USStatesTracker from '@/components/USStatesTracker';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import {
@@ -79,7 +80,6 @@ export default async function CountryTravelPage({ params }: PageProps) {
   const favoriteRows = (favorites ?? []) as TravelFavorite[];
   const restaurants = favoriteRows.filter((favorite) => favorite.type === 'restaurant');
   const activities = favoriteRows.filter((favorite) => favorite.type !== 'restaurant');
-  const hasPinnedFavorites = favoriteRows.some((favorite) => favorite.latitude && favorite.longitude);
   const isUnitedStates = countrySlug(country) === 'united-states';
   const { data: states } = isUnitedStates
     ? await supabase
@@ -164,30 +164,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
               <MapPin className="h-5 w-5 text-slate-400" />
             </div>
 
-            <div className="relative mb-4 h-64 overflow-hidden rounded-lg border border-slate-100 bg-gradient-to-br from-sky-50 via-emerald-50 to-amber-50">
-              <div className="absolute inset-x-6 top-1/2 h-px bg-white/80" />
-              <div className="absolute inset-y-6 left-1/2 w-px bg-white/80" />
-              {hasPinnedFavorites ? (
-                favoriteRows
-                  .filter((favorite) => favorite.latitude && favorite.longitude)
-                  .slice(0, 12)
-                  .map((favorite, index) => (
-                    <div
-                      key={favorite.id}
-                      className="absolute flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white shadow-lg"
-                      style={{
-                        left: `${20 + ((index * 23) % 60)}%`,
-                        top: `${22 + ((index * 31) % 56)}%`,
-                      }}
-                      title={favorite.name}
-                    >
-                      {index + 1}
-                    </div>
-                  ))
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-slate-400">No pinned favorites yet.</div>
-              )}
-            </div>
+            <TravelFavoriteMap favorites={favoriteRows} />
 
             <div className="space-y-3">
               {favoriteRows.slice(0, 6).map((favorite, index) => (
