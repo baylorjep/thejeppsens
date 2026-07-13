@@ -11,6 +11,7 @@ import {
   type TravelFavorite,
   type TravelPhoto,
   type TravelState,
+  type TravelStatePhotoPreview,
   type TravelTrip,
 } from '@/lib/travel';
 import { ArrowLeft, CalendarDays, Camera, MapPin, Utensils, Waves } from 'lucide-react';
@@ -81,13 +82,36 @@ export default async function CountryTravelPage({ params }: PageProps) {
   const restaurants = favoriteRows.filter((favorite) => favorite.type === 'restaurant');
   const activities = favoriteRows.filter((favorite) => favorite.type !== 'restaurant');
   const isUnitedStates = countrySlug(country) === 'united-states';
-  const { data: states } = isUnitedStates
-    ? await supabase
-        .from('visited_states')
-        .select('id, state_name, abbreviation, baylor_visited, isabel_visited')
-        .order('state_name')
-    : { data: null };
+  const [{ data: states }, { data: statePhotos }] = isUnitedStates
+    ? await Promise.all([
+        supabase
+          .from('visited_states')
+          .select('id, state_name, abbreviation, baylor_visited, isabel_visited')
+          .order('state_name'),
+        supabase
+          .from('travel_photos')
+          .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order')
+          .eq('country_id', country.id)
+          .not('state_id', 'is', null)
+          .order('sort_order')
+          .order('taken_on', { ascending: false, nullsFirst: false }),
+      ])
+    : [{ data: null }, { data: null }];
   const stateRows = (states ?? []) as TravelState[];
+  const stateById = new Map(stateRows.map((state) => [state.id, state]));
+  const statePhotoPreviews = ((statePhotos ?? []) as TravelPhoto[]).reduce<TravelStatePhotoPreview[]>((acc, photo) => {
+    if (!photo.state_id || acc.some((preview) => preview.state_id === photo.state_id)) return acc;
+    const state = stateById.get(photo.state_id);
+    if (!state) return acc;
+    acc.push({
+      state_id: state.id,
+      state_name: state.state_name,
+      image_url: photo.image_url,
+      caption: photo.caption,
+      location_name: photo.location_name,
+    });
+    return acc;
+  }, []);
 
   return (
     <main className="min-h-screen bg-white">
@@ -121,7 +145,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
         </div>
       </section>
 
-      {isUnitedStates && <USStatesTracker states={stateRows} showHeading={false} />}
+      {isUnitedStates && <USStatesTracker states={stateRows} photoPreviews={statePhotoPreviews} showHeading={false} />}
 
       {!isUnitedStates && (
         <>

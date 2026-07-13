@@ -1,7 +1,7 @@
 import Header from '@/components/Header';
 import USStatesTracker from '@/components/USStatesTracker';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
-import type { TravelState } from '@/lib/travel';
+import type { Country, TravelPhoto, TravelState, TravelStatePhotoPreview } from '@/lib/travel';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -17,12 +17,43 @@ export default async function UnitedStatesStatesPage({ params }: PageProps) {
   const supabase = getSupabaseServerClient();
   if (!supabase) notFound();
 
-  const { data } = await supabase
-    .from('visited_states')
-    .select('id, state_name, abbreviation, baylor_visited, isabel_visited')
-    .order('state_name');
+  const [{ data }, { data: countryRows }] = await Promise.all([
+    supabase
+      .from('visited_states')
+      .select('id, state_name, abbreviation, baylor_visited, isabel_visited')
+      .order('state_name'),
+    supabase
+      .from('visited_countries')
+      .select('id')
+      .eq('geo_name', 'United States of America')
+      .single(),
+  ]);
 
   const states = (data ?? []) as TravelState[];
+  const unitedStates = countryRows as Pick<Country, 'id'> | null;
+  const { data: statePhotos } = unitedStates
+    ? await supabase
+        .from('travel_photos')
+        .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order')
+        .eq('country_id', unitedStates.id)
+        .not('state_id', 'is', null)
+        .order('sort_order')
+        .order('taken_on', { ascending: false, nullsFirst: false })
+    : { data: null };
+  const stateById = new Map(states.map((state) => [state.id, state]));
+  const statePhotoPreviews = ((statePhotos ?? []) as TravelPhoto[]).reduce<TravelStatePhotoPreview[]>((acc, photo) => {
+    if (!photo.state_id || acc.some((preview) => preview.state_id === photo.state_id)) return acc;
+    const state = stateById.get(photo.state_id);
+    if (!state) return acc;
+    acc.push({
+      state_id: state.id,
+      state_name: state.state_name,
+      image_url: photo.image_url,
+      caption: photo.caption,
+      location_name: photo.location_name,
+    });
+    return acc;
+  }, []);
 
   return (
     <main className="min-h-screen bg-white">
@@ -40,7 +71,7 @@ export default async function UnitedStatesStatesPage({ params }: PageProps) {
         </div>
       </section>
 
-      <USStatesTracker states={states} />
+      <USStatesTracker states={states} photoPreviews={statePhotoPreviews} />
     </main>
   );
 }

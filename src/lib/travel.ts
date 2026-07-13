@@ -57,6 +57,14 @@ export interface TravelState {
   isabel_visited: boolean;
 }
 
+export interface TravelStatePhotoPreview {
+  state_id: string;
+  state_name: string;
+  image_url: string;
+  caption: string | null;
+  location_name: string | null;
+}
+
 export function countrySlug(country: Pick<Country, 'display_name'>) {
   return country.display_name
     .toLowerCase()

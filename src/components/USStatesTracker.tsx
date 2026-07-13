@@ -1,6 +1,6 @@
 import type { VisitType } from '@/components/WorldMap';
 import USStatesMap from '@/components/USStatesMap';
-import { stateSlug, type TravelState } from '@/lib/travel';
+import { stateSlug, type TravelState, type TravelStatePhotoPreview } from '@/lib/travel';
 import Link from 'next/link';
 
 function visitType(state: TravelState): VisitType | null {
@@ -26,10 +26,11 @@ const PILL_LABEL: Record<VisitType | 'none', string> = {
 
 interface USStatesTrackerProps {
   states: TravelState[];
+  photoPreviews?: TravelStatePhotoPreview[];
   showHeading?: boolean;
 }
 
-export default function USStatesTracker({ states, showHeading = true }: USStatesTrackerProps) {
+export default function USStatesTracker({ states, photoPreviews = [], showHeading = true }: USStatesTrackerProps) {
   const visitedByState = states.reduce<Record<string, VisitType>>((acc, state) => {
     const type = visitType(state);
     if (type) acc[state.state_name] = type;
@@ -37,6 +38,10 @@ export default function USStatesTracker({ states, showHeading = true }: USStates
   }, {});
   const hrefByState = states.reduce<Record<string, string>>((acc, state) => {
     acc[state.state_name] = `/travel/united-states/states/${stateSlug(state)}`;
+    return acc;
+  }, {});
+  const photoPreviewByState = photoPreviews.reduce<Record<string, TravelStatePhotoPreview>>((acc, photo) => {
+    acc[photo.state_name] = photo;
     return acc;
   }, {});
   const visitedCount = states.filter((state) => state.baylor_visited || state.isabel_visited).length;
@@ -104,7 +109,7 @@ export default function USStatesTracker({ states, showHeading = true }: USStates
             </div>
           </div>
           <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm sm:p-5">
-            <USStatesMap visitedByState={visitedByState} hrefByState={hrefByState} />
+            <USStatesMap visitedByState={visitedByState} hrefByState={hrefByState} photoPreviewByState={photoPreviewByState} />
           </div>
         </div>
       </section>
