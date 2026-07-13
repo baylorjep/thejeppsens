@@ -2,9 +2,10 @@
 
 import { optimizeImageFile } from "@/lib/vinylImage";
 import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip } from "@/lib/travel";
+import type { TravelQuickAddDetail } from "@/components/TravelQuickAddButton";
 import { Edit3, ImagePlus, LocateFixed, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type EditorMode = "trip" | "photo" | "favorite";
 
@@ -64,6 +65,7 @@ function inputClassName() {
 
 export default function TravelCountryEditor({ country, state, trips, photos, favorites }: TravelCountryEditorProps) {
   const router = useRouter();
+  const sectionRef = useRef<HTMLElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<EditorMode>("trip");
   const [tripForm, setTripForm] = useState(emptyTrip);
@@ -78,6 +80,22 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
   const restaurants = useMemo(() => favorites.filter((favorite) => favorite.type === "restaurant"), [favorites]);
   const activities = useMemo(() => favorites.filter((favorite) => favorite.type === "activity"), [favorites]);
   const places = useMemo(() => favorites.filter((favorite) => favorite.type === "place"), [favorites]);
+
+  useEffect(() => {
+    const handleQuickAdd = (event: Event) => {
+      const { mode: nextMode, favoriteType } = (event as CustomEvent<TravelQuickAddDetail>).detail;
+      resetForms();
+      setMode(nextMode);
+      if (nextMode === "favorite" && favoriteType) {
+        setFavoriteForm({ ...emptyFavorite, type: favoriteType });
+      }
+      setIsOpen(true);
+      window.setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+    };
+
+    window.addEventListener("travel:quick-add", handleQuickAdd);
+    return () => window.removeEventListener("travel:quick-add", handleQuickAdd);
+  }, []);
 
   const resetForms = () => {
     setTripForm(emptyTrip);
@@ -279,7 +297,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
   };
 
   return (
-    <section className="border-t border-slate-100 bg-white py-12">
+    <section ref={sectionRef} className="border-t border-slate-100 bg-white py-12">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

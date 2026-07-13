@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import TravelCountryEditor from '@/components/TravelCountryEditor';
 import TravelFavoriteMap from '@/components/TravelFavoriteMap';
+import TravelQuickAddButton from '@/components/TravelQuickAddButton';
 import USStatesTracker from '@/components/USStatesTracker';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import {
@@ -14,7 +15,7 @@ import {
   type TravelStatePhotoPreview,
   type TravelTrip,
 } from '@/lib/travel';
-import { ArrowLeft, CalendarDays, Camera, MapPin, Utensils, Waves } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -157,7 +158,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
                 <h2 className="text-lg font-bold text-slate-950">Photo Log</h2>
                 <p className="text-sm text-slate-500">Saved moments by place and trip.</p>
               </div>
-              <Camera className="h-5 w-5 text-slate-400" />
+              <TravelQuickAddButton kind="photo" />
             </div>
 
             {photoRows.length > 0 ? (
@@ -185,7 +186,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
                 <h2 className="text-lg font-bold text-slate-950">Favorite Map</h2>
                 <p className="text-sm text-slate-500">Restaurants, activities, and memorable places.</p>
               </div>
-              <MapPin className="h-5 w-5 text-slate-400" />
+              <TravelQuickAddButton kind="favorite" />
             </div>
 
             <TravelFavoriteMap favorites={favoriteRows} />
@@ -214,7 +215,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
         <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
           <div className="lg:col-span-2">
             <div className="mb-5 flex items-center gap-3">
-              <CalendarDays className="h-5 w-5 text-teal-600" />
+              <TravelQuickAddButton kind="trip" />
               <h2 className="text-lg font-bold text-slate-950">Trips</h2>
             </div>
 
@@ -247,7 +248,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
           <aside className="space-y-6">
             <div className="rounded-xl border border-slate-200 bg-white p-5">
               <div className="mb-4 flex items-center gap-3">
-                <Utensils className="h-5 w-5 text-teal-600" />
+                <TravelQuickAddButton kind="restaurant" />
                 <h2 className="text-lg font-bold text-slate-950">Restaurants</h2>
               </div>
               {restaurants.length > 0 ? (
@@ -266,7 +267,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
 
             <div className="rounded-xl border border-slate-200 bg-white p-5">
               <div className="mb-4 flex items-center gap-3">
-                <Waves className="h-5 w-5 text-teal-600" />
+                <TravelQuickAddButton kind="activity" />
                 <h2 className="text-lg font-bold text-slate-950">Activities</h2>
               </div>
               {activities.length > 0 ? (
