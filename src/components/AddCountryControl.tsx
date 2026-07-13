@@ -1,30 +1,34 @@
 "use client";
 
+import { COUNTRY_CONTINENTS, COUNTRY_OPTIONS } from "@/lib/countryOptions";
+import type { Country } from "@/lib/travel";
 import { Plus, X } from "lucide-react";
-import { FormEvent, useState } from "react";
-
-const CONTINENTS = ["North America", "South America", "Europe", "Asia", "Africa", "Oceania"];
+import { FormEvent, useMemo, useState } from "react";
 
 interface AddCountryControlProps {
+  countries: Country[];
   onSaved: () => void;
 }
 
-export default function AddCountryControl({ onSaved }: AddCountryControlProps) {
+export default function AddCountryControl({ countries, onSaved }: AddCountryControlProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [displayName, setDisplayName] = useState("");
-  const [geoName, setGeoName] = useState("");
-  const [flag, setFlag] = useState("");
   const [continent, setContinent] = useState("Europe");
+  const [selectedGeoName, setSelectedGeoName] = useState("");
   const [baylorVisited, setBaylorVisited] = useState(true);
   const [isabelVisited, setIsabelVisited] = useState(true);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  const existingGeoNames = useMemo(() => new Set(countries.map((country) => country.geo_name)), [countries]);
+  const options = useMemo(
+    () => COUNTRY_OPTIONS.filter((country) => country.continent === continent && !existingGeoNames.has(country.geoName)),
+    [continent, existingGeoNames],
+  );
+  const selectedCountry = options.find((country) => country.geoName === selectedGeoName) ?? options[0] ?? null;
+
   const reset = () => {
-    setDisplayName("");
-    setGeoName("");
-    setFlag("");
     setContinent("Europe");
+    setSelectedGeoName("");
     setBaylorVisited(true);
     setIsabelVisited(true);
   };
@@ -34,15 +38,21 @@ export default function AddCountryControl({ onSaved }: AddCountryControlProps) {
     setIsSaving(true);
     setMessage("");
 
+    if (!selectedCountry) {
+      setMessage("No countries available for that continent.");
+      setIsSaving(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/travel/countries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          display_name: displayName,
-          geo_name: geoName || displayName,
-          flag,
-          continent,
+          display_name: selectedCountry.displayName,
+          geo_name: selectedCountry.geoName,
+          flag: selectedCountry.flag,
+          continent: selectedCountry.continent,
           baylor_visited: baylorVisited,
           isabel_visited: isabelVisited,
         }),
@@ -85,38 +95,38 @@ export default function AddCountryControl({ onSaved }: AddCountryControlProps) {
           <X className="h-4 w-4" />
         </button>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <input
-          value={displayName}
-          onChange={(event) => setDisplayName(event.target.value)}
-          placeholder="Country"
-          className="rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-900"
-          required
-        />
-        <input
-          value={geoName}
-          onChange={(event) => setGeoName(event.target.value)}
-          placeholder="Map name"
-          className="rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-900"
-        />
-        <input
-          value={flag}
-          onChange={(event) => setFlag(event.target.value)}
-          placeholder="Flag"
-          className="rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-900"
-        />
+      <div className="grid gap-3 sm:grid-cols-[0.9fr_1.5fr_auto]">
         <select
           value={continent}
-          onChange={(event) => setContinent(event.target.value)}
+          onChange={(event) => {
+            setContinent(event.target.value);
+            setSelectedGeoName("");
+          }}
           className="rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-900"
         >
-          {CONTINENTS.map((item) => (
+          {COUNTRY_CONTINENTS.map((item) => (
             <option key={item}>{item}</option>
           ))}
         </select>
+        <select
+          value={selectedCountry?.geoName ?? ""}
+          onChange={(event) => setSelectedGeoName(event.target.value)}
+          className="rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-900"
+          disabled={!options.length}
+        >
+          {options.length ? (
+            options.map((country) => (
+              <option key={country.geoName} value={country.geoName}>
+                {country.flag} {country.displayName}
+              </option>
+            ))
+          ) : (
+            <option>No countries left</option>
+          )}
+        </select>
         <button
           type="submit"
-          disabled={isSaving}
+          disabled={isSaving || !selectedCountry}
           className="rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           {isSaving ? "Saving..." : "Save"}

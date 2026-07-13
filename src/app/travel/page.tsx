@@ -170,7 +170,7 @@ export default function TravelPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <h2 className="text-xl font-bold text-slate-900">Countries we&apos;ve explored</h2>
-            <AddCountryControl onSaved={loadCountries} />
+            <AddCountryControl countries={countries ?? []} onSaved={loadCountries} />
           </div>
           {countries === null ? (
             <div className="flex justify-center py-12">
