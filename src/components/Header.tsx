@@ -53,7 +53,7 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            {/* Mini Games Dropdown — first */}
+            {/* Games Dropdown — first */}
             <div className="relative mini-games-dropdown">
               <button
                 onClick={() => setIsMiniGamesOpen(!isMiniGamesOpen)}
@@ -63,7 +63,7 @@ export default function Header() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <span>Mini Games</span>
+                <span>Games</span>
                 <ChevronDown className={`h-4 w-4 transition-transform ${isMiniGamesOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -132,9 +132,9 @@ export default function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Mobile Mini Games — first */}
+              {/* Mobile Games — first */}
               <div className="px-3 py-2">
-                <div className="text-base font-medium text-gray-600 mb-2">Mini Games</div>
+                <div className="text-base font-medium text-gray-600 mb-2">Games</div>
                 <div className="pl-4 space-y-1">
                   {miniGames.map((game) => {
                     const className = `block px-3 py-2 text-sm transition-colors rounded ${
