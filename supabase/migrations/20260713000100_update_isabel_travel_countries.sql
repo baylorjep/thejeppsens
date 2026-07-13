@@ -1,0 +1,36 @@
+INSERT INTO public.visited_countries (
+  geo_name,
+  display_name,
+  flag,
+  continent,
+  baylor_visited,
+  isabel_visited
+) VALUES
+  ('Luxembourg',               'Luxembourg',                   '🇱🇺', 'Europe',        false, true),
+  ('Netherlands',              'Netherlands',                  '🇳🇱', 'Europe',        false, true),
+  ('Austria',                  'Austria',                      '🇦🇹', 'Europe',        false, true),
+  ('France',                   'France',                       '🇫🇷', 'Europe',        false, true),
+  ('Germany',                  'Germany',                      '🇩🇪', 'Europe',        false, true),
+  ('United Kingdom',           'England',                      '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Europe',        false, true),
+  ('Belgium',                  'Belgium',                      '🇧🇪', 'Europe',        false, true),
+  ('Bahamas',                  'Bahamas',                      '🇧🇸', 'North America', false, true),
+  ('Vatican',                  'Vatican City',                 '🇻🇦', 'Europe',        false, true),
+  ('U.S. Virgin Is.',          'United States Virgin Islands', '🇻🇮', 'North America', false, true),
+  ('British Virgin Is.',       'British Virgin Islands',       '🇻🇬', 'North America', false, true),
+  ('Cuba',                     'Cuba',                         '🇨🇺', 'North America', false, true),
+  ('Italy',                    'Italy',                        '🇮🇹', 'Europe',        false, true),
+  ('Switzerland',              'Switzerland',                  '🇨🇭', 'Europe',        false, true),
+  ('Thailand',                 'Thailand',                     '🇹🇭', 'Asia',          false, true),
+  ('Australia',                'Australia',                    '🇦🇺', 'Oceania',       false, true),
+  ('Spain',                    'Spain',                        '🇪🇸', 'Europe',        false, true),
+  ('Czechia',                  'Czech Republic',               '🇨🇿', 'Europe',        false, true),
+  ('Peru',                     'Peru',                         '🇵🇪', 'South America', false, true),
+  ('Scotland',                 'Scotland',                     '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'Europe',        false, true),
+  ('Dominican Rep.',           'Dominican Republic',           '🇩🇴', 'North America', false, true),
+  ('Japan',                    'Japan',                        '🇯🇵', 'Asia',          false, true),
+  ('Iceland',                  'Iceland',                      '🇮🇸', 'Europe',        false, true)
+ON CONFLICT (geo_name) DO UPDATE SET
+  display_name = EXCLUDED.display_name,
+  flag = EXCLUDED.flag,
+  continent = EXCLUDED.continent,
+  isabel_visited = true;

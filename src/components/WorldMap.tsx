@@ -23,9 +23,10 @@ const FILL: Record<VisitType, { default: string; hover: string }> = {
 
 interface WorldMapProps {
   visitedMap: Map<string, VisitType>;
+  onCountryClick?: (geoName: string) => void;
 }
 
-export default function WorldMap({ visitedMap }: WorldMapProps) {
+export default function WorldMap({ visitedMap, onCountryClick }: WorldMapProps) {
   const [tooltip, setTooltip] = useState<Tooltip>(null);
 
   return (
@@ -53,13 +54,28 @@ export default function WorldMap({ visitedMap }: WorldMapProps) {
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
+                  onClick={() => {
+                    if (visit) onCountryClick?.(geo.properties.name);
+                  }}
                   onMouseMove={(e: React.MouseEvent) =>
                     setTooltip({ name: geo.properties.name, x: e.clientX, y: e.clientY })
                   }
                   onMouseLeave={() => setTooltip(null)}
                   style={{
-                    default: { fill: colors.default, stroke: '#ffffff', strokeWidth: 0.5, outline: 'none' },
-                    hover:   { fill: colors.hover,   stroke: '#ffffff', strokeWidth: 0.5, outline: 'none' },
+                    default: {
+                      fill: colors.default,
+                      stroke: '#ffffff',
+                      strokeWidth: 0.5,
+                      outline: 'none',
+                      cursor: visit ? 'pointer' : 'default',
+                    },
+                    hover: {
+                      fill: colors.hover,
+                      stroke: '#ffffff',
+                      strokeWidth: 0.5,
+                      outline: 'none',
+                      cursor: visit ? 'pointer' : 'default',
+                    },
                     pressed: { outline: 'none' },
                   }}
                 />

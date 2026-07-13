@@ -2,8 +2,11 @@
 
 import Header from '@/components/Header';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import type { VisitType } from '@/components/WorldMap';
+import { countrySlug, type Country } from '@/lib/travel';
 
 const WorldMap = dynamic(() => import('@/components/WorldMap'), { ssr: false });
 
@@ -17,16 +20,6 @@ const CONTINENT_TOTALS: Record<string, number> = {
   Africa: 54,
   Oceania: 14,
 };
-
-interface Country {
-  id: string;
-  geo_name: string;
-  display_name: string;
-  flag: string;
-  continent: string;
-  baylor_visited: boolean;
-  isabel_visited: boolean;
-}
 
 function visitType(c: Country): VisitType {
   if (c.baylor_visited && c.isabel_visited) return 'both';
@@ -62,6 +55,7 @@ const MAP_LOADING = (
 );
 
 export default function TravelPage() {
+  const router = useRouter();
   const [countries, setCountries] = useState<Country[] | null>(null);
 
   useEffect(() => {
@@ -74,6 +68,12 @@ export default function TravelPage() {
   const visitedMap = useMemo<Map<string, VisitType>>(() => {
     const m = new Map<string, VisitType>();
     for (const c of countries ?? []) m.set(c.geo_name, visitType(c));
+    return m;
+  }, [countries]);
+
+  const countrySlugByGeoName = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const c of countries ?? []) m.set(c.geo_name, countrySlug(c));
     return m;
   }, [countries]);
 
@@ -145,7 +145,17 @@ export default function TravelPage() {
             </div>
           </div>
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 sm:p-5">
-            {countries === null ? MAP_LOADING : <WorldMap visitedMap={visitedMap} />}
+            {countries === null ? (
+              MAP_LOADING
+            ) : (
+              <WorldMap
+                visitedMap={visitedMap}
+                onCountryClick={(geoName) => {
+                  const slug = countrySlugByGeoName.get(geoName);
+                  if (slug) router.push(`/travel/${slug}`);
+                }}
+              />
+            )}
           </div>
         </div>
       </section>
@@ -153,7 +163,7 @@ export default function TravelPage() {
       {/* Country grid */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-12">Countries we&apos;ve both explored</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-12">Countries we&apos;ve explored</h2>
           {countries === null ? (
             <div className="flex justify-center py-12">
               <div className="h-6 w-6 rounded-full border-2 border-slate-200 border-t-teal-500 animate-spin" />
@@ -161,8 +171,6 @@ export default function TravelPage() {
           ) : (
             <div className="space-y-12">
               {continents.map((continent) => {
-                const shared = continent.countries.filter((c) => c.baylor_visited && c.isabel_visited);
-                if (!shared.length) return null;
                 return (
                   <div key={continent.name}>
                     <div className="flex items-center gap-3 mb-6">
@@ -176,17 +184,24 @@ export default function TravelPage() {
                       </span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                      {shared.map((country) => (
-                        <div
-                          key={country.id}
-                          className="flex flex-col items-center gap-2.5 bg-teal-50 hover:bg-teal-100 border border-teal-100 hover:border-teal-200 rounded-xl p-4 transition-colors cursor-default"
-                        >
-                          <span className="text-3xl leading-none">{country.flag}</span>
-                          <span className="text-xs font-medium text-slate-600 text-center leading-tight">
-                            {country.display_name}
-                          </span>
-                        </div>
-                      ))}
+                      {continent.countries.map((country) => {
+                        const type = visitType(country);
+                        return (
+                          <Link
+                            key={country.id}
+                            href={`/travel/${countrySlug(country)}`}
+                            className={`flex flex-col items-center gap-2.5 border rounded-xl p-4 transition-colors ${CARD_STYLE[type]}`}
+                          >
+                            <span className="text-3xl leading-none">{country.flag}</span>
+                            <span className="text-xs font-medium text-slate-600 text-center leading-tight">
+                              {country.display_name}
+                            </span>
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${PILL_STYLE[type]}`}>
+                              {PILL_LABEL[type]}
+                            </span>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 );
