@@ -135,11 +135,11 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
         </Geographies>
         {statePhotoMarkers.map(({ stateName, photo, coordinates, href }) => (
           <Marker key={photo.state_id} coordinates={coordinates}>
-            <foreignObject x={-31} y={-58} width={62} height={70}>
+            <foreignObject x={-19} y={-36} width={38} height={44}>
               <button
                 type="button"
                 aria-label={`Open ${stateName} photos`}
-                className="group block h-[62px] w-[62px] overflow-hidden rounded-xl border-2 border-white bg-white p-0.5 shadow-lg ring-1 ring-slate-950/10 transition-transform hover:-translate-y-0.5 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="group block h-[38px] w-[38px] overflow-hidden rounded-lg border border-white/80 bg-white/70 p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:-translate-y-0.5 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 onClick={() => {
                   if (href) window.location.href = href;
                 }}
@@ -147,7 +147,7 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
                 onMouseLeave={() => setTooltip(null)}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[9px] object-cover" />
+                <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[7px] object-cover" />
               </button>
             </foreignObject>
           </Marker>
