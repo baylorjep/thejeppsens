@@ -1,7 +1,7 @@
 "use client";
 
 import { optimizeImageFile } from "@/lib/vinylImage";
-import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelTrip } from "@/lib/travel";
+import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip } from "@/lib/travel";
 import { Edit3, ImagePlus, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
@@ -10,6 +10,7 @@ type EditorMode = "trip" | "photo" | "favorite";
 
 interface TravelCountryEditorProps {
   country: Country;
+  state?: TravelState;
   trips: TravelTrip[];
   photos: TravelPhoto[];
   favorites: TravelFavorite[];
@@ -61,7 +62,7 @@ function inputClassName() {
   return "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-900";
 }
 
-export default function TravelCountryEditor({ country, trips, photos, favorites }: TravelCountryEditorProps) {
+export default function TravelCountryEditor({ country, state, trips, photos, favorites }: TravelCountryEditorProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<EditorMode>("trip");
@@ -125,6 +126,7 @@ export default function TravelCountryEditor({ country, trips, photos, favorites 
     const formData = new FormData();
     formData.set("type", "trip");
     formData.set("country_id", country.id);
+    if (state) formData.set("state_id", state.id);
     if (tripForm.id) formData.set("id", tripForm.id);
     formData.set("title", tripForm.title);
     formData.set("location_name", tripForm.location_name);
@@ -141,6 +143,7 @@ export default function TravelCountryEditor({ country, trips, photos, favorites 
     const formData = new FormData();
     formData.set("type", "photo");
     formData.set("country_id", country.id);
+    if (state) formData.set("state_id", state.id);
     if (photoForm.id) formData.set("id", photoForm.id);
     formData.set("trip_id", photoForm.trip_id);
     formData.set("image_url", photoForm.image_url);
@@ -157,6 +160,7 @@ export default function TravelCountryEditor({ country, trips, photos, favorites 
     const formData = new FormData();
     formData.set("type", "favorite");
     formData.set("country_id", country.id);
+    if (state) formData.set("state_id", state.id);
     if (favoriteForm.id) formData.set("id", favoriteForm.id);
     formData.set("trip_id", favoriteForm.trip_id);
     formData.set("favorite_type", favoriteForm.type);
@@ -234,8 +238,8 @@ export default function TravelCountryEditor({ country, trips, photos, favorites 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-950">Edit Travel Log</h2>
-            <p className="text-sm text-slate-500">Add trips, photos, restaurants, activities, and locations.</p>
+              <h2 className="text-lg font-bold text-slate-950">Edit Travel Log</h2>
+              <p className="text-sm text-slate-500">Add trips, photos, restaurants, activities, and locations.</p>
           </div>
           <button
             type="button"
@@ -335,8 +339,8 @@ export default function TravelCountryEditor({ country, trips, photos, favorites 
         )}
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <ItemList title="Trips" items={trips.map((trip) => ({ id: trip.id, title: trip.title, detail: trip.location_name ?? country.display_name, onEdit: () => editTrip(trip), onDelete: () => deleteItem("trip", trip.id) }))} />
-          <ItemList title="Photos" items={photos.map((photo) => ({ id: photo.id, title: photo.caption ?? photo.location_name ?? "Photo", detail: photo.taken_on ?? country.display_name, onEdit: () => editPhoto(photo), onDelete: () => deleteItem("photo", photo.id) }))} />
+          <ItemList title="Trips" items={trips.map((trip) => ({ id: trip.id, title: trip.title, detail: trip.location_name ?? state?.state_name ?? country.display_name, onEdit: () => editTrip(trip), onDelete: () => deleteItem("trip", trip.id) }))} />
+          <ItemList title="Photos" items={photos.map((photo) => ({ id: photo.id, title: photo.caption ?? photo.location_name ?? "Photo", detail: photo.taken_on ?? state?.state_name ?? country.display_name, onEdit: () => editPhoto(photo), onDelete: () => deleteItem("photo", photo.id) }))} />
           <ItemList
             title="Favorites"
             items={[...restaurants, ...activities, ...places].map((favorite) => ({

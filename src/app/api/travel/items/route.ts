@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     const type = formData.get("type");
     const id = nullableText(formData.get("id"));
     const countryId = nullableText(formData.get("country_id"));
+    const stateId = nullableText(formData.get("state_id"));
 
     if (type !== "trip" && type !== "photo" && type !== "favorite") {
       return NextResponse.json({ error: "Invalid type" }, { status: 400 });
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
       const row = {
         ...(id ? { id } : {}),
         country_id: countryId,
+        state_id: stateId,
         title,
         location_name: nullableText(formData.get("location_name")),
         started_on: nullableText(formData.get("started_on")),
@@ -68,6 +70,7 @@ export async function POST(request: Request) {
       const row = {
         ...(id ? { id } : {}),
         country_id: countryId,
+        state_id: stateId,
         trip_id: nullableText(formData.get("trip_id")),
         image_url: imageUrl,
         caption: nullableText(formData.get("caption")),
@@ -91,6 +94,7 @@ export async function POST(request: Request) {
     const row = {
       ...(id ? { id } : {}),
       country_id: countryId,
+      state_id: stateId,
       trip_id: nullableText(formData.get("trip_id")),
       type: favoriteType,
       name,

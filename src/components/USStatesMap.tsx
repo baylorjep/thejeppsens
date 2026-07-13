@@ -20,9 +20,10 @@ const FILL: Record<VisitType, { default: string; hover: string }> = {
 
 interface USStatesMapProps {
   visitedByState: Record<string, VisitType>;
+  hrefByState?: Record<string, string>;
 }
 
-export default function USStatesMap({ visitedByState }: USStatesMapProps) {
+export default function USStatesMap({ visitedByState, hrefByState = {} }: USStatesMapProps) {
   const [tooltip, setTooltip] = useState<Tooltip>(null);
 
   return (
@@ -40,18 +41,22 @@ export default function USStatesMap({ visitedByState }: USStatesMapProps) {
           {({ geographies }: { geographies: GeographyItem[] }) =>
             geographies.map((geo) => {
               const visit = visitedByState[geo.properties.name];
+              const href = hrefByState[geo.properties.name];
               const colors = visit ? FILL[visit] : { default: '#cbd5e1', hover: '#94a3b8' };
               return (
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
+                  onClick={() => {
+                    if (href) window.location.href = href;
+                  }}
                   onMouseMove={(e: React.MouseEvent) =>
                     setTooltip({ name: geo.properties.name, x: e.clientX, y: e.clientY })
                   }
                   onMouseLeave={() => setTooltip(null)}
                   style={{
-                    default: { fill: colors.default, stroke: '#ffffff', strokeWidth: 0.75, outline: 'none' },
-                    hover: { fill: colors.hover, stroke: '#ffffff', strokeWidth: 0.75, outline: 'none' },
+                    default: { fill: colors.default, stroke: '#ffffff', strokeWidth: 0.75, outline: 'none', cursor: href ? 'pointer' : 'default' },
+                    hover: { fill: colors.hover, stroke: '#ffffff', strokeWidth: 0.75, outline: 'none', cursor: href ? 'pointer' : 'default' },
                     pressed: { outline: 'none' },
                   }}
                 />

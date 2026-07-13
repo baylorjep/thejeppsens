@@ -1,6 +1,7 @@
 import type { VisitType } from '@/components/WorldMap';
 import USStatesMap from '@/components/USStatesMap';
-import type { TravelState } from '@/lib/travel';
+import { stateSlug, type TravelState } from '@/lib/travel';
+import Link from 'next/link';
 
 function visitType(state: TravelState): VisitType | null {
   if (state.baylor_visited && state.isabel_visited) return 'both';
@@ -32,6 +33,10 @@ export default function USStatesTracker({ states, showHeading = true }: USStates
   const visitedByState = states.reduce<Record<string, VisitType>>((acc, state) => {
     const type = visitType(state);
     if (type) acc[state.state_name] = type;
+    return acc;
+  }, {});
+  const hrefByState = states.reduce<Record<string, string>>((acc, state) => {
+    acc[state.state_name] = `/travel/united-states/states/${stateSlug(state)}`;
     return acc;
   }, {});
   const visitedCount = states.filter((state) => state.baylor_visited || state.isabel_visited).length;
@@ -99,7 +104,7 @@ export default function USStatesTracker({ states, showHeading = true }: USStates
             </div>
           </div>
           <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm sm:p-5">
-            <USStatesMap visitedByState={visitedByState} />
+            <USStatesMap visitedByState={visitedByState} hrefByState={hrefByState} />
           </div>
         </div>
       </section>
@@ -111,7 +116,11 @@ export default function USStatesTracker({ states, showHeading = true }: USStates
             {states.map((state) => {
               const type = visitType(state) ?? 'none';
               return (
-                <div key={state.id} className={`rounded-xl border p-4 transition-colors ${CARD_STYLE[type]}`}>
+                <Link
+                  key={state.id}
+                  href={`/travel/united-states/states/${stateSlug(state)}`}
+                  className={`rounded-xl border p-4 transition-colors hover:border-slate-300 ${CARD_STYLE[type]}`}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-bold">{state.state_name}</p>
@@ -121,7 +130,7 @@ export default function USStatesTracker({ states, showHeading = true }: USStates
                       {PILL_LABEL[type]}
                     </span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

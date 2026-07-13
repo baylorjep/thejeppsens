@@ -1,10 +1,8 @@
 import Header from '@/components/Header';
 import TravelCountryEditor from '@/components/TravelCountryEditor';
-import USStatesTracker from '@/components/USStatesTracker';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import {
-  countrySlug,
-  findCountryBySlug,
+  findStateBySlug,
   travelerLabel,
   type Country,
   type TravelFavorite,
@@ -17,7 +15,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 interface PageProps {
-  params: Promise<{ country: string }>;
+  params: Promise<{ country: string; state: string }>;
 }
 
 function formatDateRange(trip: TravelTrip) {
@@ -36,40 +34,48 @@ function favoriteLabel(type: TravelFavorite['type']) {
   return 'Place';
 }
 
-export default async function CountryTravelPage({ params }: PageProps) {
-  const { country: slug } = await params;
+export default async function StateTravelPage({ params }: PageProps) {
+  const { country, state: stateParam } = await params;
+  if (country !== 'united-states') notFound();
+
   const supabase = getSupabaseServerClient();
   if (!supabase) notFound();
 
-  const { data: countries, error: countryError } = await supabase
-    .from('visited_countries')
-    .select('id, geo_name, display_name, flag, continent, baylor_visited, isabel_visited')
-    .order('display_name');
+  const [{ data: countryRows }, { data: states }] = await Promise.all([
+    supabase
+      .from('visited_countries')
+      .select('id, geo_name, display_name, flag, continent, baylor_visited, isabel_visited')
+      .eq('geo_name', 'United States of America')
+      .single(),
+    supabase
+      .from('visited_states')
+      .select('id, state_name, abbreviation, baylor_visited, isabel_visited')
+      .order('state_name'),
+  ]);
 
-  if (countryError || !countries) notFound();
-
-  const country = findCountryBySlug(countries as Country[], slug);
-  if (!country) notFound();
+  const unitedStates = countryRows as Country | null;
+  const state = findStateBySlug((states ?? []) as TravelState[], stateParam);
+  if (!unitedStates || !state) notFound();
 
   const [{ data: trips }, { data: photos }, { data: favorites }] = await Promise.all([
     supabase
       .from('travel_trips')
       .select('id, country_id, state_id, title, location_name, started_on, ended_on, notes, baylor_went, isabel_went')
-      .eq('country_id', country.id)
-      .is('state_id', null)
+      .eq('country_id', unitedStates.id)
+      .eq('state_id', state.id)
       .order('started_on', { ascending: false, nullsFirst: false }),
     supabase
       .from('travel_photos')
       .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order')
-      .eq('country_id', country.id)
-      .is('state_id', null)
+      .eq('country_id', unitedStates.id)
+      .eq('state_id', state.id)
       .order('sort_order')
       .order('taken_on', { ascending: false, nullsFirst: false }),
     supabase
       .from('travel_favorites')
       .select('id, country_id, state_id, trip_id, type, name, location_name, latitude, longitude, notes, sort_order')
-      .eq('country_id', country.id)
-      .is('state_id', null)
+      .eq('country_id', unitedStates.id)
+      .eq('state_id', state.id)
       .order('sort_order')
       .order('name'),
   ]);
@@ -80,14 +86,6 @@ export default async function CountryTravelPage({ params }: PageProps) {
   const restaurants = favoriteRows.filter((favorite) => favorite.type === 'restaurant');
   const activities = favoriteRows.filter((favorite) => favorite.type !== 'restaurant');
   const hasPinnedFavorites = favoriteRows.some((favorite) => favorite.latitude && favorite.longitude);
-  const isUnitedStates = countrySlug(country) === 'united-states';
-  const { data: states } = isUnitedStates
-    ? await supabase
-        .from('visited_states')
-        .select('id, state_name, abbreviation, baylor_visited, isabel_visited')
-        .order('state_name')
-    : { data: null };
-  const stateRows = (states ?? []) as TravelState[];
 
   return (
     <main className="min-h-screen bg-white">
@@ -96,35 +94,24 @@ export default async function CountryTravelPage({ params }: PageProps) {
       <section className="border-b border-slate-100 bg-slate-950 text-white">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
           <Link
-            href="/travel"
+            href="/travel/united-states"
             className="mb-10 inline-flex items-center gap-2 text-sm font-medium text-slate-300 transition-colors hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
-            Travel
+            United States
           </Link>
 
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="mb-5 flex items-center gap-4">
-                <span className="text-5xl leading-none">{country.flag}</span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-teal-300">{country.continent}</p>
-                  <h1 className="mt-1 text-5xl font-bold tracking-tight sm:text-6xl">{country.display_name}</h1>
-                </div>
-              </div>
-              <p className="max-w-2xl text-base leading-7 text-slate-300">
-                {travelerLabel(country)} visited. {tripRows.length} trips logged, {photoRows.length} photos saved,{' '}
-                {favoriteRows.length} favorite spots.
-              </p>
-            </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-teal-300">United States</p>
+            <h1 className="mt-2 text-5xl font-bold tracking-tight sm:text-6xl">{state.state_name}</h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
+              {travelerLabel({ baylor_visited: state.baylor_visited, isabel_visited: state.isabel_visited })} visited.{' '}
+              {tripRows.length} trips logged, {photoRows.length} photos saved, {favoriteRows.length} favorite spots.
+            </p>
           </div>
         </div>
       </section>
 
-      {isUnitedStates && <USStatesTracker states={stateRows} showHeading={false} />}
-
-      {!isUnitedStates && (
-        <>
       <section className="bg-slate-50 py-12">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
           <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -141,9 +128,9 @@ export default async function CountryTravelPage({ params }: PageProps) {
                 {photoRows.map((photo) => (
                   <figure key={photo.id} className="overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photo.image_url} alt={photo.caption ?? country.display_name} className="h-52 w-full object-cover" />
+                    <img src={photo.image_url} alt={photo.caption ?? state.state_name} className="h-52 w-full object-cover" />
                     <figcaption className="px-3 py-2 text-sm text-slate-600">
-                      {photo.caption ?? photo.location_name ?? country.display_name}
+                      {photo.caption ?? photo.location_name ?? state.state_name}
                     </figcaption>
                   </figure>
                 ))}
@@ -188,23 +175,6 @@ export default async function CountryTravelPage({ params }: PageProps) {
                 <div className="flex h-full items-center justify-center text-sm text-slate-400">No pinned favorites yet.</div>
               )}
             </div>
-
-            <div className="space-y-3">
-              {favoriteRows.slice(0, 6).map((favorite, index) => (
-                <div key={favorite.id} className="flex items-start gap-3 rounded-lg bg-slate-50 p-3">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">{favorite.name}</p>
-                    <p className="text-xs text-slate-500">
-                      {favoriteLabel(favorite.type)}
-                      {favorite.location_name ? ` · ${favorite.location_name}` : ''}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -224,7 +194,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h3 className="text-base font-bold text-slate-900">{trip.title}</h3>
-                        <p className="mt-1 text-sm text-slate-500">{trip.location_name ?? country.display_name}</p>
+                        <p className="mt-1 text-sm text-slate-500">{trip.location_name ?? state.state_name}</p>
                       </div>
                       {formatDateRange(trip) && (
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
@@ -254,7 +224,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
                   {restaurants.map((restaurant) => (
                     <div key={restaurant.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
                       <p className="text-sm font-semibold text-slate-800">{restaurant.name}</p>
-                      <p className="text-xs text-slate-500">{restaurant.location_name ?? country.display_name}</p>
+                      <p className="text-xs text-slate-500">{restaurant.location_name ?? state.state_name}</p>
                     </div>
                   ))}
                 </div>
@@ -273,7 +243,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
                   {activities.map((activity) => (
                     <div key={activity.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
                       <p className="text-sm font-semibold text-slate-800">{activity.name}</p>
-                      <p className="text-xs text-slate-500">{activity.location_name ?? country.display_name}</p>
+                      <p className="text-xs text-slate-500">{activity.location_name ?? state.state_name}</p>
                     </div>
                   ))}
                 </div>
@@ -284,9 +254,8 @@ export default async function CountryTravelPage({ params }: PageProps) {
           </aside>
         </div>
       </section>
-      <TravelCountryEditor country={country} trips={tripRows} photos={photoRows} favorites={favoriteRows} />
-        </>
-      )}
+
+      <TravelCountryEditor country={unitedStates} state={state} trips={tripRows} photos={photoRows} favorites={favoriteRows} />
     </main>
   );
 }

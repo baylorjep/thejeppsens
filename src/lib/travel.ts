@@ -11,6 +11,7 @@ export interface Country {
 export interface TravelTrip {
   id: string;
   country_id: string;
+  state_id: string | null;
   title: string;
   location_name: string | null;
   started_on: string | null;
@@ -23,6 +24,7 @@ export interface TravelTrip {
 export interface TravelPhoto {
   id: string;
   country_id: string;
+  state_id: string | null;
   trip_id: string | null;
   image_url: string;
   caption: string | null;
@@ -36,6 +38,7 @@ export type TravelFavoriteType = 'restaurant' | 'activity' | 'place';
 export interface TravelFavorite {
   id: string;
   country_id: string;
+  state_id: string | null;
   trip_id: string | null;
   type: TravelFavoriteType;
   name: string;
@@ -60,6 +63,17 @@ export function countrySlug(country: Pick<Country, 'display_name'>) {
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+export function stateSlug(state: Pick<TravelState, 'state_name'>) {
+  return state.state_name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function findStateBySlug(states: TravelState[], slug: string) {
+  return states.find((state) => stateSlug(state) === slug) ?? null;
 }
 
 export function findCountryBySlug(countries: Country[], slug: string) {
