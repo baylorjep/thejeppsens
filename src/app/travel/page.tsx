@@ -1,6 +1,7 @@
 'use client';
 
 import Header from '@/components/Header';
+import AddCountryControl from '@/components/AddCountryControl';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -58,11 +59,15 @@ export default function TravelPage() {
   const router = useRouter();
   const [countries, setCountries] = useState<Country[] | null>(null);
 
-  useEffect(() => {
+  const loadCountries = () => {
     fetch('/api/travel/countries')
       .then((r) => r.json())
       .then((d) => setCountries(d.countries ?? []))
       .catch(() => setCountries([]));
+  };
+
+  useEffect(() => {
+    loadCountries();
   }, []);
 
   const visitedMap = useMemo<Map<string, VisitType>>(() => {
@@ -163,7 +168,10 @@ export default function TravelPage() {
       {/* Country grid */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-12">Countries we&apos;ve explored</h2>
+          <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <h2 className="text-xl font-bold text-slate-900">Countries we&apos;ve explored</h2>
+            <AddCountryControl onSaved={loadCountries} />
+          </div>
           {countries === null ? (
             <div className="flex justify-center py-12">
               <div className="h-6 w-6 rounded-full border-2 border-slate-200 border-t-teal-500 animate-spin" />

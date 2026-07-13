@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import TravelCountryEditor from '@/components/TravelCountryEditor';
 import USStatesTracker from '@/components/USStatesTracker';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import {
@@ -280,6 +281,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
           </aside>
         </div>
       </section>
+      <TravelCountryEditor country={country} trips={tripRows} photos={photoRows} favorites={favoriteRows} />
         </>
       )}
     </main>
