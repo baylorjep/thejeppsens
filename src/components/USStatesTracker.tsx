@@ -1,3 +1,4 @@
+import AddStateControl from '@/components/AddStateControl';
 import type { VisitType } from '@/components/WorldMap';
 import USStatesMap from '@/components/USStatesMap';
 import { stateSlug, type TravelState, type TravelStatePhotoPreview } from '@/lib/travel';
@@ -74,13 +75,16 @@ export default function USStatesTracker({ states, photoPreviews = [], showHeadin
       {!showHeading && (
         <section className="border-b border-slate-100 bg-white">
           <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-            <StateStats
-              visitedCount={visitedCount}
-              sharedCount={sharedCount}
-              baylorCount={baylorCount}
-              isabelCount={isabelCount}
-              light
-            />
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <StateStats
+                visitedCount={visitedCount}
+                sharedCount={sharedCount}
+                baylorCount={baylorCount}
+                isabelCount={isabelCount}
+                light
+              />
+              <AddStateControl states={states} />
+            </div>
           </div>
         </section>
       )}
@@ -108,6 +112,11 @@ export default function USStatesTracker({ states, photoPreviews = [], showHeadin
               </span>
             </div>
           </div>
+          {showHeading && (
+            <div className="mb-5 flex justify-end">
+              <AddStateControl states={states} />
+            </div>
+          )}
           <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm sm:p-5">
             <USStatesMap visitedByState={visitedByState} hrefByState={hrefByState} photoPreviewByState={photoPreviewByState} />
           </div>
