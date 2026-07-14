@@ -1,6 +1,8 @@
 import Header from '@/components/Header';
+import TravelEditButton from '@/components/TravelEditButton';
 import TravelCountryEditor from '@/components/TravelCountryEditor';
 import TravelFavoriteMap from '@/components/TravelFavoriteMap';
+import TravelPhotoLog from '@/components/TravelPhotoLog';
 import TravelQuickAddButton from '@/components/TravelQuickAddButton';
 import USStatesTracker from '@/components/USStatesTracker';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
@@ -15,7 +17,7 @@ import {
   type TravelStatePhotoPreview,
   type TravelTrip,
 } from '@/lib/travel';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Utensils } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -63,9 +65,10 @@ export default async function CountryTravelPage({ params }: PageProps) {
       .order('started_on', { ascending: false, nullsFirst: false }),
     supabase
       .from('travel_photos')
-      .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order, created_at')
+      .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order, is_featured, created_at')
       .eq('country_id', country.id)
       .is('state_id', null)
+      .order('is_featured', { ascending: false })
       .order('taken_on', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .order('sort_order'),
@@ -92,9 +95,10 @@ export default async function CountryTravelPage({ params }: PageProps) {
           .order('state_name'),
         supabase
           .from('travel_photos')
-          .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order, created_at')
+          .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order, is_featured, created_at')
           .eq('country_id', country.id)
           .not('state_id', 'is', null)
+          .order('is_featured', { ascending: false })
           .order('taken_on', { ascending: false, nullsFirst: false })
           .order('created_at', { ascending: false })
           .order('sort_order'),
@@ -121,6 +125,16 @@ export default async function CountryTravelPage({ params }: PageProps) {
     return acc;
   }, []);
   const heroPhoto = photoRows[0];
+  const photosByTrip = new Map<string, TravelPhoto[]>();
+  photoRows.forEach((photo) => {
+    if (!photo.trip_id) return;
+    photosByTrip.set(photo.trip_id, [...(photosByTrip.get(photo.trip_id) ?? []), photo]);
+  });
+  const favoritesByTrip = new Map<string, TravelFavorite[]>();
+  favoriteRows.forEach((favorite) => {
+    if (!favorite.trip_id) return;
+    favoritesByTrip.set(favorite.trip_id, [...(favoritesByTrip.get(favorite.trip_id) ?? []), favorite]);
+  });
 
   return (
     <main className="min-h-screen bg-white">
@@ -176,23 +190,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
               <TravelQuickAddButton kind="photo" />
             </div>
 
-            {photoRows.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {photoRows.map((photo) => (
-                  <figure key={photo.id} className="overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photo.image_url} alt={photo.caption ?? country.display_name} className="h-52 w-full object-cover" />
-                    <figcaption className="px-3 py-2 text-sm text-slate-600">
-                      {photo.caption ?? photo.location_name ?? country.display_name}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            ) : (
-              <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-400">
-                No photos yet.
-              </div>
-            )}
+            <TravelPhotoLog photos={photoRows} fallbackName={country.display_name} />
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -205,23 +203,6 @@ export default async function CountryTravelPage({ params }: PageProps) {
             </div>
 
             <TravelFavoriteMap favorites={favoriteRows} />
-
-            <div className="space-y-3">
-              {favoriteRows.slice(0, 6).map((favorite, index) => (
-                <div key={favorite.id} className="flex items-start gap-3 rounded-lg bg-slate-50 p-3">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">{favorite.name}</p>
-                    <p className="text-xs text-slate-500">
-                      {favoriteLabel(favorite.type)}
-                      {favorite.location_name ? ` · ${favorite.location_name}` : ''}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -243,19 +224,40 @@ export default async function CountryTravelPage({ params }: PageProps) {
                         <h3 className="text-base font-bold text-slate-900">{trip.title}</h3>
                         <p className="mt-1 text-sm text-slate-500">{trip.location_name ?? country.display_name}</p>
                       </div>
-                      {formatDateRange(trip) && (
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-                          {formatDateRange(trip)}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {formatDateRange(trip) && (
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                            {formatDateRange(trip)}
+                          </span>
+                        )}
+                        <TravelEditButton type="trip" item={trip} label={`Edit ${trip.title}`} />
+                      </div>
                     </div>
                     {trip.notes && <p className="mt-4 text-sm leading-6 text-slate-600">{trip.notes}</p>}
+                    {(photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length) && (
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        {(photosByTrip.get(trip.id) ?? []).slice(0, 2).map((photo) => (
+                          <div key={photo.id} className="overflow-hidden rounded-lg bg-slate-50">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={photo.image_url} alt={photo.caption ?? trip.title} className="h-28 w-full object-cover" />
+                          </div>
+                        ))}
+                        {(favoritesByTrip.get(trip.id) ?? []).slice(0, 3).map((favorite) => (
+                          <div key={favorite.id} className="flex items-center gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+                            <MapPinned className="h-4 w-4 text-teal-600" />
+                            <span>{favorite.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </article>
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-sm text-slate-400">
-                No trips logged yet.
+              <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center">
+                <CalendarDays className="h-7 w-7 text-slate-300" />
+                <p className="text-sm text-slate-400">No trips logged yet.</p>
+                <TravelQuickAddButton kind="trip" label="Add first trip" />
               </div>
             )}
           </div>
@@ -269,14 +271,21 @@ export default async function CountryTravelPage({ params }: PageProps) {
               {restaurants.length > 0 ? (
                 <div className="space-y-3">
                   {restaurants.map((restaurant) => (
-                    <div key={restaurant.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                      <p className="text-sm font-semibold text-slate-800">{restaurant.name}</p>
-                      <p className="text-xs text-slate-500">{restaurant.location_name ?? country.display_name}</p>
+                    <div key={restaurant.id} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{restaurant.name}</p>
+                        <p className="text-xs text-slate-500">{restaurant.location_name ?? country.display_name}</p>
+                      </div>
+                      <TravelEditButton type="favorite" item={restaurant} label={`Edit ${restaurant.name}`} />
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">No restaurants yet.</p>
+                <div className="flex flex-col items-start gap-3">
+                  <Utensils className="h-6 w-6 text-slate-300" />
+                  <p className="text-sm text-slate-400">No restaurants yet.</p>
+                  <TravelQuickAddButton kind="restaurant" label="Add first restaurant" />
+                </div>
               )}
             </div>
 
@@ -288,14 +297,21 @@ export default async function CountryTravelPage({ params }: PageProps) {
               {activities.length > 0 ? (
                 <div className="space-y-3">
                   {activities.map((activity) => (
-                    <div key={activity.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                      <p className="text-sm font-semibold text-slate-800">{activity.name}</p>
-                      <p className="text-xs text-slate-500">{activity.location_name ?? country.display_name}</p>
+                    <div key={activity.id} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{activity.name}</p>
+                        <p className="text-xs text-slate-500">{activity.location_name ?? country.display_name}</p>
+                      </div>
+                      <TravelEditButton type="favorite" item={activity} label={`Edit ${activity.name}`} />
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">No activities yet.</p>
+                <div className="flex flex-col items-start gap-3">
+                  <Sparkles className="h-6 w-6 text-slate-300" />
+                  <p className="text-sm text-slate-400">No activities yet.</p>
+                  <TravelQuickAddButton kind="activity" label="Add first activity" />
+                </div>
               )}
             </div>
           </aside>

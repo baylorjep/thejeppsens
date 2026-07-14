@@ -31,6 +31,7 @@ export interface TravelPhoto {
   location_name: string | null;
   taken_on: string | null;
   sort_order: number;
+  is_featured?: boolean;
   created_at?: string | null;
 }
 

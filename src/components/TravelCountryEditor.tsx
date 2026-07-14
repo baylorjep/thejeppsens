@@ -36,6 +36,7 @@ const emptyPhoto = {
   location_name: "",
   taken_on: "",
   sort_order: "0",
+  is_featured: false,
 };
 
 const emptyFavorite = {
@@ -95,6 +96,19 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
 
     window.addEventListener("travel:quick-add", handleQuickAdd);
     return () => window.removeEventListener("travel:quick-add", handleQuickAdd);
+  }, []);
+
+  useEffect(() => {
+    const handleEditItem = (event: Event) => {
+      const detail = (event as CustomEvent<{ type: EditorMode; item: TravelTrip | TravelPhoto | TravelFavorite }>).detail;
+      if (detail.type === "trip") editTrip(detail.item as TravelTrip);
+      if (detail.type === "photo") editPhoto(detail.item as TravelPhoto);
+      if (detail.type === "favorite") editFavorite(detail.item as TravelFavorite);
+      window.setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+    };
+
+    window.addEventListener("travel:edit-item", handleEditItem);
+    return () => window.removeEventListener("travel:edit-item", handleEditItem);
   }, []);
 
   const resetForms = () => {
@@ -170,6 +184,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     formData.set("location_name", photoForm.location_name);
     formData.set("taken_on", photoForm.taken_on);
     formData.set("sort_order", photoForm.sort_order);
+    formData.set("is_featured", String(photoForm.is_featured));
     if (photoFile) formData.set("image", photoFile);
     await submitFormData(formData);
   };
@@ -275,6 +290,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       location_name: photo.location_name ?? "",
       taken_on: photo.taken_on ?? "",
       sort_order: String(photo.sort_order),
+      is_featured: Boolean(photo.is_featured),
     });
     setPhotoPreview(photo.image_url);
     setPhotoFile(undefined);
@@ -373,6 +389,10 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                 </label>
                 <input className={inputClassName()} value={photoForm.caption} onChange={(e) => setPhotoForm({ ...photoForm, caption: e.target.value })} placeholder="Caption" />
                 <input className={inputClassName()} value={photoForm.location_name} onChange={(e) => setPhotoForm({ ...photoForm, location_name: e.target.value })} placeholder="Location" />
+                <label className="inline-flex items-center gap-2 text-sm text-slate-600 md:col-span-2">
+                  <input type="checkbox" checked={photoForm.is_featured} onChange={(e) => setPhotoForm({ ...photoForm, is_featured: e.target.checked })} />
+                  Featured photo for this page
+                </label>
                 <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500 md:col-span-2">
                   <ImagePlus className="mb-2 h-5 w-5" />
                   Upload optimized photo

@@ -32,14 +32,15 @@ export interface TravelQuickAddDetail {
   favoriteType?: TravelFavoriteType;
 }
 
-export default function TravelQuickAddButton({ kind }: { kind: QuickAddKind }) {
+export default function TravelQuickAddButton({ kind, label }: { kind: QuickAddKind; label?: string }) {
   const Icon = ICONS[kind];
+  const visibleLabel = label ?? LABELS[kind];
 
   return (
     <button
       type="button"
-      aria-label={LABELS[kind]}
-      title={LABELS[kind]}
+      aria-label={visibleLabel}
+      title={visibleLabel}
       onClick={() => {
         const mode = kind === "trip" || kind === "photo" ? kind : "favorite";
         window.dispatchEvent(
@@ -48,9 +49,14 @@ export default function TravelQuickAddButton({ kind }: { kind: QuickAddKind }) {
           })
         );
       }}
-      className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+      className={
+        label
+          ? "inline-flex items-center justify-center gap-2 rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          : "rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+      }
     >
       <Icon className="h-5 w-5" />
+      {label && <span>{label}</span>}
     </button>
   );
 }

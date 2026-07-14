@@ -64,8 +64,16 @@ export async function POST(request: Request) {
       const file = formData.get("image");
       const existingUrl = nullableText(formData.get("image_url"));
       const imageUrl = file instanceof File && file.size > 0 ? await uploadTravelPhoto(countryId, file) : existingUrl;
+      const isFeatured = booleanValue(formData.get("is_featured"));
 
       if (!imageUrl) return NextResponse.json({ error: "Missing image" }, { status: 400 });
+
+      if (isFeatured) {
+        let query = supabase.from("travel_photos").update({ is_featured: false }).eq("country_id", countryId);
+        query = stateId ? query.eq("state_id", stateId) : query.is("state_id", null);
+        const { error } = await query;
+        if (error) throw error;
+      }
 
       const row = {
         ...(id ? { id } : {}),
@@ -77,6 +85,7 @@ export async function POST(request: Request) {
         location_name: nullableText(formData.get("location_name")),
         taken_on: nullableText(formData.get("taken_on")),
         sort_order: numberValue(formData.get("sort_order")) ?? 0,
+        is_featured: isFeatured,
       };
 
       const { data, error } = await supabase.from("travel_photos").upsert(row).select().single();
