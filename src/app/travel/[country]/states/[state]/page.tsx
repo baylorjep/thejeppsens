@@ -4,7 +4,9 @@ import TravelCountryEditor from '@/components/TravelCountryEditor';
 import TravelFavoriteMap from '@/components/TravelFavoriteMap';
 import TravelPhotoLog from '@/components/TravelPhotoLog';
 import TravelQuickAddButton from '@/components/TravelQuickAddButton';
+import TravelVideoEmbed from '@/components/TravelVideoEmbed';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
+import { stateMapCenter } from '@/lib/travelMapCenters';
 import {
   findStateBySlug,
   travelerLabel,
@@ -13,6 +15,7 @@ import {
   type TravelPhoto,
   type TravelState,
   type TravelTrip,
+  type TravelVideo,
 } from '@/lib/travel';
 import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Utensils } from 'lucide-react';
 import Link from 'next/link';
@@ -61,7 +64,7 @@ export default async function StateTravelPage({ params }: PageProps) {
   const state = findStateBySlug((states ?? []) as TravelState[], stateParam);
   if (!unitedStates || !state) notFound();
 
-  const [{ data: trips }, { data: photos }, { data: favorites }] = await Promise.all([
+  const [{ data: trips }, { data: photos }, { data: favorites }, { data: videos }] = await Promise.all([
     supabase
       .from('travel_trips')
       .select('id, country_id, state_id, title, location_name, started_on, ended_on, notes, baylor_went, isabel_went')
@@ -84,14 +87,23 @@ export default async function StateTravelPage({ params }: PageProps) {
       .eq('state_id', state.id)
       .order('sort_order')
       .order('name'),
+    supabase
+      .from('travel_videos')
+      .select('id, country_id, state_id, trip_id, title, url, provider, notes, sort_order')
+      .eq('country_id', unitedStates.id)
+      .eq('state_id', state.id)
+      .order('sort_order')
+      .order('created_at', { ascending: false }),
   ]);
 
   const tripRows = (trips ?? []) as TravelTrip[];
   const photoRows = (photos ?? []) as TravelPhoto[];
   const favoriteRows = (favorites ?? []) as TravelFavorite[];
+  const videoRows = (videos ?? []) as TravelVideo[];
   const restaurants = favoriteRows.filter((favorite) => favorite.type === 'restaurant');
   const activities = favoriteRows.filter((favorite) => favorite.type !== 'restaurant');
   const heroPhoto = photoRows[0];
+  const mapCenter = stateMapCenter(state);
   const photosByTrip = new Map<string, TravelPhoto[]>();
   photoRows.forEach((photo) => {
     if (!photo.trip_id) return;
@@ -101,6 +113,11 @@ export default async function StateTravelPage({ params }: PageProps) {
   favoriteRows.forEach((favorite) => {
     if (!favorite.trip_id) return;
     favoritesByTrip.set(favorite.trip_id, [...(favoritesByTrip.get(favorite.trip_id) ?? []), favorite]);
+  });
+  const videosByTrip = new Map<string, TravelVideo[]>();
+  videoRows.forEach((video) => {
+    if (!video.trip_id) return;
+    videosByTrip.set(video.trip_id, [...(videosByTrip.get(video.trip_id) ?? []), video]);
   });
 
   return (
@@ -158,7 +175,7 @@ export default async function StateTravelPage({ params }: PageProps) {
               <TravelQuickAddButton kind="favorite" />
             </div>
 
-            <TravelFavoriteMap favorites={favoriteRows} />
+            <TravelFavoriteMap favorites={favoriteRows} fallbackCenter={mapCenter} />
           </div>
         </div>
       </section>
@@ -190,7 +207,7 @@ export default async function StateTravelPage({ params }: PageProps) {
                       </div>
                     </div>
                     {trip.notes && <p className="mt-4 text-sm leading-6 text-slate-600">{trip.notes}</p>}
-                    {(photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length) && (
+                    {(photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length || videosByTrip.get(trip.id)?.length) && (
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
                         {(photosByTrip.get(trip.id) ?? []).slice(0, 2).map((photo) => (
                           <div key={photo.id} className="overflow-hidden rounded-lg bg-slate-50">
@@ -203,6 +220,9 @@ export default async function StateTravelPage({ params }: PageProps) {
                             <MapPinned className="h-4 w-4 text-teal-600" />
                             <span>{favorite.name}</span>
                           </div>
+                        ))}
+                        {(videosByTrip.get(trip.id) ?? []).map((video) => (
+                          <TravelVideoEmbed key={video.id} video={video} />
                         ))}
                       </div>
                     )}
@@ -274,7 +294,7 @@ export default async function StateTravelPage({ params }: PageProps) {
         </div>
       </section>
 
-      <TravelCountryEditor country={unitedStates} state={state} trips={tripRows} photos={photoRows} favorites={favoriteRows} />
+      <TravelCountryEditor country={unitedStates} state={state} trips={tripRows} photos={photoRows} favorites={favoriteRows} videos={videoRows} />
     </main>
   );
 }

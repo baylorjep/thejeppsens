@@ -1,13 +1,13 @@
 "use client";
 
 import { optimizeImageFile } from "@/lib/vinylImage";
-import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip } from "@/lib/travel";
+import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip, TravelVideo } from "@/lib/travel";
 import type { TravelQuickAddDetail } from "@/components/TravelQuickAddButton";
 import { Edit3, ImagePlus, LocateFixed, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
-type EditorMode = "trip" | "photo" | "favorite";
+type EditorMode = "trip" | "photo" | "favorite" | "video";
 
 interface TravelCountryEditorProps {
   country: Country;
@@ -15,6 +15,7 @@ interface TravelCountryEditorProps {
   trips: TravelTrip[];
   photos: TravelPhoto[];
   favorites: TravelFavorite[];
+  videos: TravelVideo[];
 }
 
 const emptyTrip = {
@@ -51,6 +52,15 @@ const emptyFavorite = {
   sort_order: "0",
 };
 
+const emptyVideo = {
+  id: "",
+  trip_id: "",
+  title: "",
+  url: "",
+  notes: "",
+  sort_order: "0",
+};
+
 function imageToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -64,7 +74,7 @@ function inputClassName() {
   return "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-900";
 }
 
-export default function TravelCountryEditor({ country, state, trips, photos, favorites }: TravelCountryEditorProps) {
+export default function TravelCountryEditor({ country, state, trips, photos, favorites, videos }: TravelCountryEditorProps) {
   const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -72,6 +82,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
   const [tripForm, setTripForm] = useState(emptyTrip);
   const [photoForm, setPhotoForm] = useState(emptyPhoto);
   const [favoriteForm, setFavoriteForm] = useState(emptyFavorite);
+  const [videoForm, setVideoForm] = useState(emptyVideo);
   const [photoFile, setPhotoFile] = useState<File | undefined>();
   const [photoPreview, setPhotoPreview] = useState("");
   const [message, setMessage] = useState("");
@@ -100,10 +111,11 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
 
   useEffect(() => {
     const handleEditItem = (event: Event) => {
-      const detail = (event as CustomEvent<{ type: EditorMode; item: TravelTrip | TravelPhoto | TravelFavorite }>).detail;
+      const detail = (event as CustomEvent<{ type: EditorMode; item: TravelTrip | TravelPhoto | TravelFavorite | TravelVideo }>).detail;
       if (detail.type === "trip") editTrip(detail.item as TravelTrip);
       if (detail.type === "photo") editPhoto(detail.item as TravelPhoto);
       if (detail.type === "favorite") editFavorite(detail.item as TravelFavorite);
+      if (detail.type === "video") editVideo(detail.item as TravelVideo);
       window.setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
     };
 
@@ -115,6 +127,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     setTripForm(emptyTrip);
     setPhotoForm(emptyPhoto);
     setFavoriteForm(emptyFavorite);
+    setVideoForm(emptyVideo);
     setPhotoFile(undefined);
     setPhotoPreview("");
   };
@@ -204,6 +217,21 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     formData.set("longitude", favoriteForm.longitude);
     formData.set("notes", favoriteForm.notes);
     formData.set("sort_order", favoriteForm.sort_order);
+    await submitFormData(formData);
+  };
+
+  const saveVideo = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.set("type", "video");
+    formData.set("country_id", country.id);
+    if (state) formData.set("state_id", state.id);
+    if (videoForm.id) formData.set("id", videoForm.id);
+    formData.set("trip_id", videoForm.trip_id);
+    formData.set("title", videoForm.title);
+    formData.set("url", videoForm.url);
+    formData.set("notes", videoForm.notes);
+    formData.set("sort_order", videoForm.sort_order);
     await submitFormData(formData);
   };
 
@@ -312,6 +340,19 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     });
   };
 
+  const editVideo = (video: TravelVideo) => {
+    setMode("video");
+    setIsOpen(true);
+    setVideoForm({
+      id: video.id,
+      trip_id: video.trip_id ?? "",
+      title: video.title,
+      url: video.url,
+      notes: video.notes ?? "",
+      sort_order: String(video.sort_order),
+    });
+  };
+
   return (
     <section ref={sectionRef} className="border-t border-slate-100 bg-white py-12">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -342,6 +383,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                 ["trip", "Trip"],
                 ["photo", "Photo"],
                 ["favorite", "Favorite"],
+                ["video", "Video"],
               ].map(([value, label]) => (
                 <button
                   key={value}
@@ -438,12 +480,26 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                 <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300" disabled={isSaving}>{isSaving ? "Saving..." : "Save favorite"}</button>
               </form>
             )}
+
+            {mode === "video" && (
+              <form onSubmit={saveVideo} className="grid gap-3 md:grid-cols-2">
+                <select className={inputClassName()} value={videoForm.trip_id} onChange={(e) => setVideoForm({ ...videoForm, trip_id: e.target.value })}>
+                  <option value="">No trip</option>
+                  {trips.map((trip) => <option key={trip.id} value={trip.id}>{trip.title}</option>)}
+                </select>
+                <input className={inputClassName()} value={videoForm.title} onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })} placeholder="Video title" required />
+                <input className={`${inputClassName()} md:col-span-2`} value={videoForm.url} onChange={(e) => setVideoForm({ ...videoForm, url: e.target.value })} placeholder="YouTube URL" required />
+                <textarea className={`${inputClassName()} md:col-span-2`} value={videoForm.notes} onChange={(e) => setVideoForm({ ...videoForm, notes: e.target.value })} placeholder="Notes" rows={3} />
+                <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300" disabled={isSaving}>{isSaving ? "Saving..." : "Save video"}</button>
+              </form>
+            )}
           </div>
         )}
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-4">
           <ItemList title="Trips" items={trips.map((trip) => ({ id: trip.id, title: trip.title, detail: trip.location_name ?? state?.state_name ?? country.display_name, onEdit: () => editTrip(trip), onDelete: () => deleteItem("trip", trip.id) }))} />
           <ItemList title="Photos" items={photos.map((photo) => ({ id: photo.id, title: photo.caption ?? photo.location_name ?? "Photo", detail: photo.taken_on ?? state?.state_name ?? country.display_name, onEdit: () => editPhoto(photo), onDelete: () => deleteItem("photo", photo.id) }))} />
+          <ItemList title="Videos" items={videos.map((video) => ({ id: video.id, title: video.title, detail: video.notes ?? "YouTube", onEdit: () => editVideo(video), onDelete: () => deleteItem("video", video.id) }))} />
           <ItemList
             title="Favorites"
             items={[...restaurants, ...activities, ...places].map((favorite) => ({

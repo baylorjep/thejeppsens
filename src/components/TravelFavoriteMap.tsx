@@ -3,6 +3,7 @@
 import TravelEditButton from "@/components/TravelEditButton";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 import type { TravelFavorite } from "@/lib/travel";
+import type { TravelMapCenter } from "@/lib/travelMapCenters";
 import { MapPin, Sparkles, Utensils } from "lucide-react";
 import { useState } from "react";
 
@@ -39,9 +40,10 @@ function pickZoom(points: { latitude: number; longitude: number }[]) {
 
 interface TravelFavoriteMapProps {
   favorites: TravelFavorite[];
+  fallbackCenter: TravelMapCenter;
 }
 
-export default function TravelFavoriteMap({ favorites }: TravelFavoriteMapProps) {
+export default function TravelFavoriteMap({ favorites, fallbackCenter }: TravelFavoriteMapProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
@@ -51,19 +53,13 @@ export default function TravelFavoriteMap({ favorites }: TravelFavoriteMapProps)
       longitude: favorite.longitude as number,
     }));
 
-  if (!pinned.length) {
-    return (
-      <div className="relative mb-4 flex h-64 flex-col items-center justify-center gap-3 overflow-hidden rounded-lg border border-dashed border-slate-200 bg-sky-50 text-center">
-        <MapPin className="h-7 w-7 text-slate-300" />
-        <p className="text-sm text-slate-400">No pinned favorites yet.</p>
-        <TravelQuickAddButton kind="favorite" label="Add first favorite" />
-      </div>
-    );
-  }
-
-  const centerLatitude = pinned.reduce((sum, favorite) => sum + favorite.latitude, 0) / pinned.length;
-  const centerLongitude = pinned.reduce((sum, favorite) => sum + favorite.longitude, 0) / pinned.length;
-  const zoom = pickZoom(pinned);
+  const centerLatitude = pinned.length
+    ? pinned.reduce((sum, favorite) => sum + favorite.latitude, 0) / pinned.length
+    : fallbackCenter.latitude;
+  const centerLongitude = pinned.length
+    ? pinned.reduce((sum, favorite) => sum + favorite.longitude, 0) / pinned.length
+    : fallbackCenter.longitude;
+  const zoom = pinned.length ? pickZoom(pinned) : fallbackCenter.zoom;
   const centerX = lonToX(centerLongitude, zoom);
   const centerY = latToY(centerLatitude, zoom);
   const topLeftX = centerX - MAP_WIDTH / 2;
@@ -96,8 +92,8 @@ export default function TravelFavoriteMap({ favorites }: TravelFavoriteMapProps)
 
   return (
     <div className="space-y-4">
-    <div className="relative h-80 overflow-hidden rounded-lg border border-slate-100 bg-sky-50">
-      <div className="absolute left-1/2 top-1/2 h-80 w-[768px] -translate-x-1/2 -translate-y-1/2 overflow-hidden">
+      <div className="relative h-80 overflow-hidden rounded-lg border border-slate-100 bg-sky-50">
+        <div className="absolute left-1/2 top-1/2 h-80 w-[768px] -translate-x-1/2 -translate-y-1/2 overflow-hidden">
         {tiles.map((tile) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -127,12 +123,22 @@ export default function TravelFavoriteMap({ favorites }: TravelFavoriteMapProps)
             </div>
           );
         })}
+        </div>
+        {!pinned.length && (
+          <div className="absolute inset-0 flex items-center justify-center bg-sky-50/15 p-4">
+            <div className="rounded-lg bg-white/95 px-4 py-3 text-center shadow-sm ring-1 ring-slate-950/10">
+              <MapPin className="mx-auto mb-2 h-6 w-6 text-slate-300" />
+              <p className="text-sm font-semibold text-slate-700">{fallbackCenter.label}</p>
+              <p className="mb-3 text-xs text-slate-400">No pinned favorites yet.</p>
+              <TravelQuickAddButton kind="favorite" label="Add first favorite" />
+            </div>
+          </div>
+        )}
+        <div className="absolute bottom-2 right-2 rounded bg-white/90 px-2 py-1 text-[10px] text-slate-500 shadow-sm">
+          © OpenStreetMap contributors
+        </div>
       </div>
-      <div className="absolute bottom-2 right-2 rounded bg-white/90 px-2 py-1 text-[10px] text-slate-500 shadow-sm">
-        © OpenStreetMap contributors
-      </div>
-    </div>
-      <div className="space-y-2">
+      {!!favorites.length && <div className="space-y-2">
         {favorites.slice(0, 8).map((favorite) => {
           const Icon = IconForFavorite(favorite.type);
           const isActive = activeId === favorite.id;
@@ -159,7 +165,7 @@ export default function TravelFavoriteMap({ favorites }: TravelFavoriteMapProps)
             </div>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }

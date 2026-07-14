@@ -51,6 +51,18 @@ export interface TravelFavorite {
   sort_order: number;
 }
 
+export interface TravelVideo {
+  id: string;
+  country_id: string;
+  state_id: string | null;
+  trip_id: string | null;
+  title: string;
+  url: string;
+  provider: string;
+  notes: string | null;
+  sort_order: number;
+}
+
 export interface TravelState {
   id: string;
   state_name: string;
@@ -95,4 +107,15 @@ export function travelerLabel(country: Pick<Country, 'baylor_visited' | 'isabel_
   if (country.baylor_visited && country.isabel_visited) return 'Baylor and Isabel';
   if (country.baylor_visited) return 'Baylor';
   return 'Isabel';
+}
+
+export function youtubeEmbedUrl(url: string) {
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtube\.com\/shorts\/([^?]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+  ];
+  const match = patterns.map((pattern) => url.match(pattern)?.[1]).find(Boolean);
+  return match ? `https://www.youtube.com/embed/${match}` : null;
 }

@@ -1,7 +1,7 @@
 import { getTravelSupabaseClient, uploadTravelPhoto } from "@/lib/travelServer";
 import { NextResponse } from "next/server";
 
-type ItemType = "trip" | "photo" | "favorite";
+type ItemType = "trip" | "photo" | "favorite" | "video";
 
 function nullableText(value: FormDataEntryValue | null) {
   if (typeof value !== "string") return null;
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const countryId = nullableText(formData.get("country_id"));
     const stateId = nullableText(formData.get("state_id"));
 
-    if (type !== "trip" && type !== "photo" && type !== "favorite") {
+    if (type !== "trip" && type !== "photo" && type !== "favorite" && type !== "video") {
       return NextResponse.json({ error: "Invalid type" }, { status: 400 });
     }
 
@@ -93,6 +93,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ item: data });
     }
 
+    if (type === "video") {
+      const title = nullableText(formData.get("title"));
+      const url = nullableText(formData.get("url"));
+      if (!title || !url) return NextResponse.json({ error: "Missing video" }, { status: 400 });
+
+      const row = {
+        ...(id ? { id } : {}),
+        country_id: countryId,
+        state_id: stateId,
+        trip_id: nullableText(formData.get("trip_id")),
+        title,
+        url,
+        provider: "youtube",
+        notes: nullableText(formData.get("notes")),
+        sort_order: numberValue(formData.get("sort_order")) ?? 0,
+      };
+
+      const { data, error } = await supabase.from("travel_videos").upsert(row).select().single();
+      if (error) throw error;
+      return NextResponse.json({ item: data });
+    }
+
     const name = nullableText(formData.get("name"));
     const favoriteType = nullableText(formData.get("favorite_type"));
     if (!name) return NextResponse.json({ error: "Missing name" }, { status: 400 });
@@ -132,7 +154,15 @@ export async function DELETE(request: Request) {
     const type = searchParams.get("type") as ItemType | null;
     const id = searchParams.get("id");
     const table =
-      type === "trip" ? "travel_trips" : type === "photo" ? "travel_photos" : type === "favorite" ? "travel_favorites" : null;
+      type === "trip"
+        ? "travel_trips"
+        : type === "photo"
+          ? "travel_photos"
+          : type === "favorite"
+            ? "travel_favorites"
+            : type === "video"
+              ? "travel_videos"
+              : null;
 
     if (!table || !id) return NextResponse.json({ error: "Invalid delete" }, { status: 400 });
 

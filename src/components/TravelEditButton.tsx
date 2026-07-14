@@ -1,12 +1,13 @@
 "use client";
 
-import type { TravelFavorite, TravelPhoto, TravelTrip } from "@/lib/travel";
+import type { TravelFavorite, TravelPhoto, TravelTrip, TravelVideo } from "@/lib/travel";
 import { Edit3 } from "lucide-react";
 
 type EditItem =
   | { type: "trip"; item: TravelTrip }
   | { type: "photo"; item: TravelPhoto }
-  | { type: "favorite"; item: TravelFavorite };
+  | { type: "favorite"; item: TravelFavorite }
+  | { type: "video"; item: TravelVideo };
 
 export default function TravelEditButton({ type, item, label = "Edit" }: EditItem & { label?: string }) {
   return (

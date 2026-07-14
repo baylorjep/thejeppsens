@@ -1,9 +1,9 @@
 "use client";
 
-import { CalendarDays, Camera, MapPin, Utensils, Waves } from "lucide-react";
+import { CalendarDays, Camera, MapPin, Utensils, Waves, Youtube } from "lucide-react";
 import type { TravelFavoriteType } from "@/lib/travel";
 
-type QuickAddKind = "trip" | "photo" | "favorite" | "restaurant" | "activity";
+type QuickAddKind = "trip" | "photo" | "favorite" | "restaurant" | "activity" | "video";
 
 const ICONS = {
   trip: CalendarDays,
@@ -11,6 +11,7 @@ const ICONS = {
   favorite: MapPin,
   restaurant: Utensils,
   activity: Waves,
+  video: Youtube,
 };
 
 const LABELS = {
@@ -19,6 +20,7 @@ const LABELS = {
   favorite: "Add favorite",
   restaurant: "Add restaurant",
   activity: "Add activity",
+  video: "Add video",
 };
 
 const FAVORITE_TYPE_BY_KIND: Partial<Record<QuickAddKind, TravelFavoriteType>> = {
@@ -28,7 +30,7 @@ const FAVORITE_TYPE_BY_KIND: Partial<Record<QuickAddKind, TravelFavoriteType>> =
 };
 
 export interface TravelQuickAddDetail {
-  mode: "trip" | "photo" | "favorite";
+  mode: "trip" | "photo" | "favorite" | "video";
   favoriteType?: TravelFavoriteType;
 }
 
@@ -42,7 +44,7 @@ export default function TravelQuickAddButton({ kind, label }: { kind: QuickAddKi
       aria-label={visibleLabel}
       title={visibleLabel}
       onClick={() => {
-        const mode = kind === "trip" || kind === "photo" ? kind : "favorite";
+        const mode = kind === "trip" || kind === "photo" || kind === "video" ? kind : "favorite";
         window.dispatchEvent(
           new CustomEvent<TravelQuickAddDetail>("travel:quick-add", {
             detail: { mode, favoriteType: FAVORITE_TYPE_BY_KIND[kind] },
