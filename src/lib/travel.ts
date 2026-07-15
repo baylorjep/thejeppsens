@@ -29,6 +29,8 @@ export interface TravelPhoto {
   image_url: string;
   caption: string | null;
   location_name: string | null;
+  latitude: number | null;
+  longitude: number | null;
   taken_on: string | null;
   sort_order: number;
   is_featured?: boolean;
@@ -59,6 +61,8 @@ export interface TravelVideo {
   title: string;
   url: string;
   provider: string;
+  thumbnail_url: string | null;
+  visibility: 'unlisted' | 'public' | 'private' | 'unknown';
   notes: string | null;
   sort_order: number;
 }
@@ -110,12 +114,21 @@ export function travelerLabel(country: Pick<Country, 'baylor_visited' | 'isabel_
 }
 
 export function youtubeEmbedUrl(url: string) {
+  const id = youtubeVideoId(url);
+  return id ? `https://www.youtube.com/embed/${id}` : null;
+}
+
+export function youtubeVideoId(url: string) {
   const patterns = [
     /youtube\.com\/watch\?v=([^&]+)/,
     /youtube\.com\/shorts\/([^?]+)/,
     /youtu\.be\/([^?]+)/,
     /youtube\.com\/embed\/([^?]+)/,
   ];
-  const match = patterns.map((pattern) => url.match(pattern)?.[1]).find(Boolean);
-  return match ? `https://www.youtube.com/embed/${match}` : null;
+  return patterns.map((pattern) => url.match(pattern)?.[1]).find(Boolean) ?? null;
+}
+
+export function youtubeThumbnailUrl(url: string) {
+  const id = youtubeVideoId(url);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
 }

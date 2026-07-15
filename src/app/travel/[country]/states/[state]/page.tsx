@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import TravelDataNudges from '@/components/TravelDataNudges';
 import TravelEditButton from '@/components/TravelEditButton';
 import TravelCountryEditor from '@/components/TravelCountryEditor';
 import TravelFavoriteMap from '@/components/TravelFavoriteMap';
@@ -73,7 +74,7 @@ export default async function StateTravelPage({ params }: PageProps) {
       .order('started_on', { ascending: false, nullsFirst: false }),
     supabase
       .from('travel_photos')
-      .select('id, country_id, state_id, trip_id, image_url, caption, location_name, taken_on, sort_order, is_featured, created_at')
+      .select('id, country_id, state_id, trip_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, created_at')
       .eq('country_id', unitedStates.id)
       .eq('state_id', state.id)
       .order('is_featured', { ascending: false })
@@ -89,7 +90,7 @@ export default async function StateTravelPage({ params }: PageProps) {
       .order('name'),
     supabase
       .from('travel_videos')
-      .select('id, country_id, state_id, trip_id, title, url, provider, notes, sort_order')
+      .select('id, country_id, state_id, trip_id, title, url, provider, thumbnail_url, visibility, notes, sort_order')
       .eq('country_id', unitedStates.id)
       .eq('state_id', state.id)
       .order('sort_order')
@@ -152,6 +153,8 @@ export default async function StateTravelPage({ params }: PageProps) {
         </div>
       </section>
 
+      <TravelDataNudges photos={photoRows} favorites={favoriteRows} trips={tripRows} videos={videoRows} />
+
       <section className="bg-slate-50 py-12">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
           <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -175,7 +178,7 @@ export default async function StateTravelPage({ params }: PageProps) {
               <TravelQuickAddButton kind="favorite" />
             </div>
 
-            <TravelFavoriteMap favorites={favoriteRows} fallbackCenter={mapCenter} />
+            <TravelFavoriteMap favorites={favoriteRows} photos={photoRows} fallbackCenter={mapCenter} />
           </div>
         </div>
       </section>

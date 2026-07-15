@@ -1,6 +1,7 @@
 "use client";
 
 import { optimizeImageFile } from "@/lib/vinylImage";
+import { youtubeThumbnailUrl } from "@/lib/travel";
 import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip, TravelVideo } from "@/lib/travel";
 import type { TravelQuickAddDetail } from "@/components/TravelQuickAddButton";
 import { Edit3, ImagePlus, LocateFixed, Plus, Trash2, X } from "lucide-react";
@@ -35,6 +36,8 @@ const emptyPhoto = {
   image_url: "",
   caption: "",
   location_name: "",
+  latitude: "",
+  longitude: "",
   taken_on: "",
   sort_order: "0",
   is_featured: false,
@@ -57,6 +60,8 @@ const emptyVideo = {
   trip_id: "",
   title: "",
   url: "",
+  thumbnail_url: "",
+  visibility: "unlisted" as TravelVideo["visibility"],
   notes: "",
   sort_order: "0",
 };
@@ -195,6 +200,8 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     formData.set("image_url", photoForm.image_url);
     formData.set("caption", photoForm.caption);
     formData.set("location_name", photoForm.location_name);
+    formData.set("latitude", photoForm.latitude);
+    formData.set("longitude", photoForm.longitude);
     formData.set("taken_on", photoForm.taken_on);
     formData.set("sort_order", photoForm.sort_order);
     formData.set("is_featured", String(photoForm.is_featured));
@@ -230,6 +237,8 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     formData.set("trip_id", videoForm.trip_id);
     formData.set("title", videoForm.title);
     formData.set("url", videoForm.url);
+    formData.set("thumbnail_url", videoForm.thumbnail_url);
+    formData.set("visibility", videoForm.visibility);
     formData.set("notes", videoForm.notes);
     formData.set("sort_order", videoForm.sort_order);
     await submitFormData(formData);
@@ -279,6 +288,49 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     }
   };
 
+  const findPhotoCoordinates = async () => {
+    const parts = [
+      photoForm.location_name,
+      state?.state_name,
+      country.display_name,
+    ]
+      .filter((part): part is string => Boolean(part))
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    if (!parts.length) {
+      setMessage("Add a photo location first.");
+      return;
+    }
+
+    setIsGeocoding(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(`/api/travel/geocode?q=${encodeURIComponent(parts.join(", "))}`);
+      if (!response.ok) throw new Error("Search failed");
+      const data = (await response.json()) as {
+        results?: { latitude: number; longitude: number; label: string }[];
+      };
+      const result = data.results?.[0];
+      if (!result) {
+        setMessage("No map match found.");
+        return;
+      }
+      setPhotoForm((current) => ({
+        ...current,
+        latitude: String(result.latitude),
+        longitude: String(result.longitude),
+        location_name: current.location_name || result.label.split(",").slice(0, 2).join(", "),
+      }));
+      setMessage("Photo location added to map.");
+    } catch {
+      setMessage("Could not search the map.");
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
   const deleteItem = async (type: EditorMode, id: string) => {
     if (!window.confirm("Delete this item?")) return;
 
@@ -316,6 +368,8 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       image_url: photo.image_url,
       caption: photo.caption ?? "",
       location_name: photo.location_name ?? "",
+      latitude: photo.latitude?.toString() ?? "",
+      longitude: photo.longitude?.toString() ?? "",
       taken_on: photo.taken_on ?? "",
       sort_order: String(photo.sort_order),
       is_featured: Boolean(photo.is_featured),
@@ -348,6 +402,8 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       trip_id: video.trip_id ?? "",
       title: video.title,
       url: video.url,
+      thumbnail_url: video.thumbnail_url ?? youtubeThumbnailUrl(video.url) ?? "",
+      visibility: video.visibility ?? "unlisted",
       notes: video.notes ?? "",
       sort_order: String(video.sort_order),
     });
@@ -377,7 +433,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
         {message && <p className="mb-4 text-sm text-slate-500">{message}</p>}
 
         {isOpen && (
-          <div className="mb-8 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="fixed inset-x-0 bottom-0 z-50 max-h-[86vh] overflow-y-auto rounded-t-2xl border border-slate-200 bg-slate-50 p-4 shadow-2xl md:static md:mb-8 md:max-h-none md:rounded-xl md:shadow-none">
             <div className="mb-4 flex flex-wrap gap-2">
               {[
                 ["trip", "Trip"],
@@ -431,6 +487,22 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                 </label>
                 <input className={inputClassName()} value={photoForm.caption} onChange={(e) => setPhotoForm({ ...photoForm, caption: e.target.value })} placeholder="Caption" />
                 <input className={inputClassName()} value={photoForm.location_name} onChange={(e) => setPhotoForm({ ...photoForm, location_name: e.target.value })} placeholder="Location" />
+                <div className="grid gap-3 md:col-span-2 md:grid-cols-[1fr_1fr_auto]">
+                  <input className={inputClassName()} value={photoForm.latitude} onChange={(e) => setPhotoForm({ ...photoForm, latitude: e.target.value })} placeholder="Latitude" />
+                  <input className={inputClassName()} value={photoForm.longitude} onChange={(e) => setPhotoForm({ ...photoForm, longitude: e.target.value })} placeholder="Longitude" />
+                  <button
+                    type="button"
+                    onClick={findPhotoCoordinates}
+                    disabled={isGeocoding}
+                    className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950 disabled:cursor-not-allowed disabled:text-slate-300"
+                  >
+                    <LocateFixed className="h-4 w-4" />
+                    {isGeocoding ? "Finding..." : "Find"}
+                  </button>
+                </div>
+                {photoForm.location_name && (!photoForm.latitude || !photoForm.longitude) && (
+                  <p className="text-xs text-amber-700 md:col-span-2">Find this location to show the photo on the map.</p>
+                )}
                 <label className="inline-flex items-center gap-2 text-sm text-slate-600 md:col-span-2">
                   <input type="checkbox" checked={photoForm.is_featured} onChange={(e) => setPhotoForm({ ...photoForm, is_featured: e.target.checked })} />
                   Featured photo for this page
@@ -488,7 +560,32 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                   {trips.map((trip) => <option key={trip.id} value={trip.id}>{trip.title}</option>)}
                 </select>
                 <input className={inputClassName()} value={videoForm.title} onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })} placeholder="Video title" required />
-                <input className={`${inputClassName()} md:col-span-2`} value={videoForm.url} onChange={(e) => setVideoForm({ ...videoForm, url: e.target.value })} placeholder="YouTube URL" required />
+                <input
+                  className={`${inputClassName()} md:col-span-2`}
+                  value={videoForm.url}
+                  onChange={(e) => {
+                    const url = e.target.value;
+                    setVideoForm({ ...videoForm, url, thumbnail_url: youtubeThumbnailUrl(url) ?? videoForm.thumbnail_url });
+                  }}
+                  placeholder="YouTube URL"
+                  required
+                />
+                <select className={inputClassName()} value={videoForm.visibility} onChange={(e) => setVideoForm({ ...videoForm, visibility: e.target.value as TravelVideo["visibility"] })}>
+                  <option value="unlisted">Unlisted</option>
+                  <option value="public">Public</option>
+                  <option value="private">Private / limited access</option>
+                  <option value="unknown">Unknown</option>
+                </select>
+                <input className={inputClassName()} value={videoForm.thumbnail_url} onChange={(e) => setVideoForm({ ...videoForm, thumbnail_url: e.target.value })} placeholder="Thumbnail URL" />
+                {videoForm.thumbnail_url && (
+                  <div className="md:col-span-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={videoForm.thumbnail_url} alt="" className="h-36 w-full rounded-lg object-cover" />
+                  </div>
+                )}
+                {videoForm.visibility === "private" && (
+                  <p className="text-xs text-amber-700 md:col-span-2">Private YouTube videos may not embed for other viewers.</p>
+                )}
                 <textarea className={`${inputClassName()} md:col-span-2`} value={videoForm.notes} onChange={(e) => setVideoForm({ ...videoForm, notes: e.target.value })} placeholder="Notes" rows={3} />
                 <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:bg-slate-300" disabled={isSaving}>{isSaving ? "Saving..." : "Save video"}</button>
               </form>

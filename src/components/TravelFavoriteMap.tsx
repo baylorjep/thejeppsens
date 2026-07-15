@@ -2,7 +2,7 @@
 
 import TravelEditButton from "@/components/TravelEditButton";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
-import type { TravelFavorite } from "@/lib/travel";
+import type { TravelFavorite, TravelPhoto } from "@/lib/travel";
 import type { TravelMapCenter } from "@/lib/travelMapCenters";
 import { MapPin, Sparkles, Utensils } from "lucide-react";
 import { useState } from "react";
@@ -40,10 +40,11 @@ function pickZoom(points: { latitude: number; longitude: number }[]) {
 
 interface TravelFavoriteMapProps {
   favorites: TravelFavorite[];
+  photos?: TravelPhoto[];
   fallbackCenter: TravelMapCenter;
 }
 
-export default function TravelFavoriteMap({ favorites, fallbackCenter }: TravelFavoriteMapProps) {
+export default function TravelFavoriteMap({ favorites, photos = [], fallbackCenter }: TravelFavoriteMapProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
@@ -52,14 +53,25 @@ export default function TravelFavoriteMap({ favorites, fallbackCenter }: TravelF
       latitude: favorite.latitude as number,
       longitude: favorite.longitude as number,
     }));
+  const mappedPhotos = photos
+    .filter((photo) => photo.latitude !== null && photo.longitude !== null)
+    .map((photo) => ({
+      ...photo,
+      latitude: photo.latitude as number,
+      longitude: photo.longitude as number,
+    }));
+  const mapPoints = [
+    ...pinned.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
+    ...mappedPhotos.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
+  ];
 
-  const centerLatitude = pinned.length
-    ? pinned.reduce((sum, favorite) => sum + favorite.latitude, 0) / pinned.length
+  const centerLatitude = mapPoints.length
+    ? mapPoints.reduce((sum, point) => sum + point.latitude, 0) / mapPoints.length
     : fallbackCenter.latitude;
-  const centerLongitude = pinned.length
-    ? pinned.reduce((sum, favorite) => sum + favorite.longitude, 0) / pinned.length
+  const centerLongitude = mapPoints.length
+    ? mapPoints.reduce((sum, point) => sum + point.longitude, 0) / mapPoints.length
     : fallbackCenter.longitude;
-  const zoom = pinned.length ? pickZoom(pinned) : fallbackCenter.zoom;
+  const zoom = mapPoints.length ? pickZoom(mapPoints) : fallbackCenter.zoom;
   const centerX = lonToX(centerLongitude, zoom);
   const centerY = latToY(centerLatitude, zoom);
   const topLeftX = centerX - MAP_WIDTH / 2;
@@ -123,13 +135,28 @@ export default function TravelFavoriteMap({ favorites, fallbackCenter }: TravelF
             </div>
           );
         })}
+        {mappedPhotos.map((photo) => {
+          const left = lonToX(photo.longitude, zoom) - topLeftX;
+          const top = latToY(photo.latitude, zoom) - topLeftY;
+          return (
+            <div
+              key={photo.id}
+              className="absolute h-9 w-7 -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15"
+              style={{ left, top }}
+              title={photo.caption ?? photo.location_name ?? "Photo"}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
+            </div>
+          );
+        })}
         </div>
-        {!pinned.length && (
+        {!mapPoints.length && (
           <div className="absolute inset-0 flex items-center justify-center bg-sky-50/15 p-4">
             <div className="rounded-lg bg-white/95 px-4 py-3 text-center shadow-sm ring-1 ring-slate-950/10">
               <MapPin className="mx-auto mb-2 h-6 w-6 text-slate-300" />
               <p className="text-sm font-semibold text-slate-700">{fallbackCenter.label}</p>
-              <p className="mb-3 text-xs text-slate-400">No pinned favorites yet.</p>
+              <p className="mb-3 text-xs text-slate-400">No mapped photos or pinned favorites yet.</p>
               <TravelQuickAddButton kind="favorite" label="Add first favorite" />
             </div>
           </div>

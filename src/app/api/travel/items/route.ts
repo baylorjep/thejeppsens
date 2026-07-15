@@ -1,3 +1,4 @@
+import { youtubeThumbnailUrl } from "@/lib/travel";
 import { getTravelSupabaseClient, uploadTravelPhoto } from "@/lib/travelServer";
 import { NextResponse } from "next/server";
 
@@ -83,6 +84,8 @@ export async function POST(request: Request) {
         image_url: imageUrl,
         caption: nullableText(formData.get("caption")),
         location_name: nullableText(formData.get("location_name")),
+        latitude: numberValue(formData.get("latitude")),
+        longitude: numberValue(formData.get("longitude")),
         taken_on: nullableText(formData.get("taken_on")),
         sort_order: numberValue(formData.get("sort_order")) ?? 0,
         is_featured: isFeatured,
@@ -97,6 +100,7 @@ export async function POST(request: Request) {
       const title = nullableText(formData.get("title"));
       const url = nullableText(formData.get("url"));
       if (!title || !url) return NextResponse.json({ error: "Missing video" }, { status: 400 });
+      const visibility = nullableText(formData.get("visibility")) ?? "unlisted";
 
       const row = {
         ...(id ? { id } : {}),
@@ -106,6 +110,8 @@ export async function POST(request: Request) {
         title,
         url,
         provider: "youtube",
+        thumbnail_url: nullableText(formData.get("thumbnail_url")) ?? youtubeThumbnailUrl(url),
+        visibility: ["unlisted", "public", "private", "unknown"].includes(visibility) ? visibility : "unknown",
         notes: nullableText(formData.get("notes")),
         sort_order: numberValue(formData.get("sort_order")) ?? 0,
       };
