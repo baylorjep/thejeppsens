@@ -810,12 +810,14 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
           <ItemList title="Trips" items={trips.map((trip) => ({ id: trip.id, title: trip.title, detail: trip.location_name ?? state?.state_name ?? country.display_name, onEdit: () => editTrip(trip), onDelete: () => deleteItem("trip", trip.id) }))} />
           <ItemList
             title="Photos"
+            limit={8}
             items={photos.map((photo) => ({
               id: photo.id,
               title: photo.caption ?? photo.location_name ?? "Photo",
               detail: [photo.taken_on ?? state?.state_name ?? country.display_name, photo.favorite_id ? `linked: ${favoritesById.get(photo.favorite_id)?.name ?? "favorite"}` : null]
                 .filter(Boolean)
                 .join(" · "),
+              thumbnail: photo.image_url,
               onEdit: () => editPhoto(photo),
               onDelete: () => deleteItem("photo", photo.id),
             }))}
@@ -840,22 +842,33 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
 function ItemList({
   title,
   items,
+  limit,
 }: {
   title: string;
-  items: { id: string; title: string; detail: string; onEdit: () => void; onDelete: () => void }[];
+  items: { id: string; title: string; detail: string; thumbnail?: string; onEdit: () => void; onDelete: () => void }[];
+  limit?: number;
 }) {
+  const [showAll, setShowAll] = useState(false);
+  const visibleItems = limit && !showAll ? items.slice(0, limit) : items;
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <h3 className="mb-3 text-sm font-bold text-slate-950">{title}</h3>
       {items.length ? (
         <div className="space-y-2">
-          {items.map((item) => (
+          {visibleItems.map((item) => (
             <div key={item.id} className="flex items-start justify-between gap-3 rounded-lg bg-slate-50 p-3">
-              <div>
-                <p className="text-sm font-semibold text-slate-800">{item.title}</p>
-                <p className="text-xs text-slate-500">{item.detail}</p>
+              <div className="flex min-w-0 items-start gap-3">
+                {item.thumbnail && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={item.thumbnail} alt="" className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                )}
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-800">{item.title}</p>
+                  <p className="truncate text-xs text-slate-500">{item.detail}</p>
+                </div>
               </div>
-              <div className="flex gap-1">
+              <div className="flex shrink-0 gap-1">
                 <button
                   type="button"
                   onClick={item.onEdit}
@@ -875,6 +888,15 @@ function ItemList({
               </div>
             </div>
           ))}
+          {limit && items.length > limit && (
+            <button
+              type="button"
+              onClick={() => setShowAll((current) => !current)}
+              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-950"
+            >
+              {showAll ? "Show less" : `Show all ${items.length}`}
+            </button>
+          )}
         </div>
       ) : (
         <p className="text-sm text-slate-400">Nothing yet.</p>
