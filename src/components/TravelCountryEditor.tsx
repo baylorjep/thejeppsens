@@ -2,6 +2,7 @@
 
 import { optimizeImageFile } from "@/lib/vinylImage";
 import { extractPhotoMetadata } from "@/lib/photoMetadata";
+import type { PhotoMetadata } from "@/lib/photoMetadata";
 import { youtubeThumbnailUrl } from "@/lib/travel";
 import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip, TravelVideo } from "@/lib/travel";
 import type { TravelQuickAddDetail } from "@/components/TravelQuickAddButton";
@@ -92,6 +93,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
   const [photoFile, setPhotoFile] = useState<File | undefined>();
   const [photoPreview, setPhotoPreview] = useState("");
   const [message, setMessage] = useState("");
+  const [importProgress, setImportProgress] = useState("");
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -136,6 +138,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     setVideoForm(emptyVideo);
     setPhotoFile(undefined);
     setPhotoPreview("");
+    setImportProgress("");
   };
 
   const handlePhotoChange = async (file?: File) => {
@@ -155,11 +158,13 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     if (latitude === undefined || longitude === undefined) return "";
 
     try {
+      const controller = new AbortController();
+      window.setTimeout(() => controller.abort(), 4000);
       const params = new URLSearchParams({
         lat: String(latitude),
         lon: String(longitude),
       });
-      const response = await fetch(`/api/travel/geocode?${params.toString()}`);
+      const response = await fetch(`/api/travel/geocode?${params.toString()}`, { signal: controller.signal });
       if (!response.ok) return "";
       const data = (await response.json()) as { label?: string | null };
       return data.label?.split(",").slice(0, 2).join(", ").trim() ?? "";
@@ -174,17 +179,38 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
 
     setIsSaving(true);
     setMessage(`Importing 0 / ${files.length} photos...`);
+    setImportProgress(`Selected ${files.length} ${files.length === 1 ? "photo" : "photos"}. Starting import...`);
 
-    try {
-      for (const [index, file] of files.entries()) {
-        setMessage(`Importing ${index + 1} / ${files.length}: reading photo data...`);
-        const metadata = await extractPhotoMetadata(file);
-        const locationName =
-          (await reverseGeocodePhoto(metadata.latitude, metadata.longitude)) ||
-          state?.state_name ||
-          country.display_name;
+    let imported = 0;
+    let skipped = 0;
+    const locationCache = new Map<string, string>();
+
+    for (const [index, file] of files.entries()) {
+      try {
+        const currentStatus = `Importing ${index + 1} / ${files.length}`;
+        setMessage(`${currentStatus}: reading photo data...`);
+        setImportProgress(`${currentStatus}: reading photo data...`);
+
+        const metadata: PhotoMetadata = await extractPhotoMetadata(file).catch(() => ({}));
+        const cacheKey =
+          metadata.latitude !== undefined && metadata.longitude !== undefined
+            ? `${metadata.latitude.toFixed(3)},${metadata.longitude.toFixed(3)}`
+            : "";
+        let locationName = "";
+
+        if (cacheKey) {
+          locationName = locationCache.get(cacheKey) ?? "";
+          if (!locationName) {
+            setImportProgress(`${currentStatus}: looking up location...`);
+            locationName = await reverseGeocodePhoto(metadata.latitude, metadata.longitude);
+            if (locationName) locationCache.set(cacheKey, locationName);
+          }
+        }
+
+        setImportProgress(`${currentStatus}: optimizing image...`);
         const optimizedFile = await optimizeImageFile(file, 1600, 0.76);
 
+        setImportProgress(`${currentStatus}: uploading...`);
         const formData = new FormData();
         formData.set("type", "photo");
         formData.set("country_id", country.id);
@@ -192,7 +218,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
         formData.set("trip_id", photoForm.trip_id);
         formData.set("image_url", "");
         formData.set("caption", "");
-        formData.set("location_name", locationName);
+        formData.set("location_name", locationName || state?.state_name || country.display_name);
         formData.set("latitude", metadata.latitude !== undefined ? String(metadata.latitude) : "");
         formData.set("longitude", metadata.longitude !== undefined ? String(metadata.longitude) : "");
         formData.set("taken_on", metadata.takenOn ?? "");
@@ -206,13 +232,20 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
         });
 
         if (!response.ok) throw new Error("Import failed");
+        imported += 1;
+        setImportProgress(`Imported ${imported} / ${files.length}${skipped ? `, skipped ${skipped}` : ""}.`);
+      } catch {
+        skipped += 1;
+        setImportProgress(`Imported ${imported} / ${files.length}, skipped ${skipped}.`);
       }
+    }
 
+    try {
       resetForms();
-      setMessage(`Imported ${files.length} ${files.length === 1 ? "photo" : "photos"}.`);
+      const summary = `Imported ${imported} ${imported === 1 ? "photo" : "photos"}${skipped ? `, skipped ${skipped}` : ""}.`;
+      setMessage(summary);
+      setImportProgress(summary);
       router.refresh();
-    } catch {
-      setMessage("Could not finish importing those photos.");
     } finally {
       setIsSaving(false);
     }
@@ -586,8 +619,9 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                   <span className="mt-1 text-xs text-slate-400">Uses photo date and GPS when available, then uploads optimized copies.</span>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     multiple
+                    disabled={isSaving}
                     onChange={(event) => {
                       void importPhotoFiles(event.target.files);
                       event.target.value = "";
@@ -595,6 +629,11 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                     className="sr-only"
                   />
                 </label>
+                {importProgress && (
+                  <p className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 md:col-span-2">
+                    {importProgress}
+                  </p>
+                )}
                 {photoPreview && (
                   <div className="md:col-span-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
