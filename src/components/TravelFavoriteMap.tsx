@@ -169,26 +169,42 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
         {favorites.slice(0, 8).map((favorite) => {
           const Icon = IconForFavorite(favorite.type);
           const isActive = activeId === favorite.id;
+          const favoritePhotos = photos.filter((photo) => photo.favorite_id === favorite.id).slice(0, 4);
           return (
             <div
               key={favorite.id}
               onMouseEnter={() => setActiveId(favorite.id)}
               onMouseLeave={() => setActiveId(null)}
-              className={`flex items-start justify-between gap-3 rounded-lg p-3 transition-colors ${isActive ? "bg-slate-100" : "bg-slate-50"}`}
+              className={`rounded-lg p-3 transition-colors ${isActive ? "bg-slate-100" : "bg-slate-50"}`}
             >
-              <div className="flex min-w-0 items-start gap-3">
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-800">{favorite.name}</p>
-                  <p className="text-xs text-slate-500">
-                    {favorite.type}
-                    {favorite.location_name ? ` · ${favorite.location_name}` : ""}
-                  </p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-800">{favorite.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {favorite.type}
+                      {favorite.location_name ? ` · ${favorite.location_name}` : ""}
+                    </p>
+                  </div>
                 </div>
+                <TravelEditButton type="favorite" item={favorite} label={`Edit ${favorite.name}`} />
               </div>
-              <TravelEditButton type="favorite" item={favorite} label={`Edit ${favorite.name}`} />
+              {favoritePhotos.length > 0 && (
+                <div className="mt-2 flex gap-1.5 pl-10">
+                  {favoritePhotos.map((photo) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={photo.id}
+                      src={photo.image_url}
+                      alt=""
+                      className="h-9 w-9 rounded-md border border-white object-cover shadow-sm"
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

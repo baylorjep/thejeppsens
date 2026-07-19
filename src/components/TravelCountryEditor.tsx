@@ -35,6 +35,7 @@ const emptyTrip = {
 const emptyPhoto = {
   id: "",
   trip_id: "",
+  favorite_id: "",
   image_url: "",
   caption: "",
   location_name: "",
@@ -81,6 +82,12 @@ function inputClassName() {
   return "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-900";
 }
 
+function favoriteLabel(type: TravelFavoriteType) {
+  if (type === "restaurant") return "Restaurant";
+  if (type === "activity") return "Activity";
+  return "Place";
+}
+
 export default function TravelCountryEditor({ country, state, trips, photos, favorites, videos }: TravelCountryEditorProps) {
   const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -96,10 +103,21 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
   const [importProgress, setImportProgress] = useState("");
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [attachPhotoId, setAttachPhotoId] = useState("");
+  const [isLinking, setIsLinking] = useState(false);
 
   const restaurants = useMemo(() => favorites.filter((favorite) => favorite.type === "restaurant"), [favorites]);
   const activities = useMemo(() => favorites.filter((favorite) => favorite.type === "activity"), [favorites]);
   const places = useMemo(() => favorites.filter((favorite) => favorite.type === "place"), [favorites]);
+  const favoritesById = useMemo(() => new Map(favorites.map((favorite) => [favorite.id, favorite])), [favorites]);
+  const attachedPhotos = useMemo(
+    () => photos.filter((photo) => photo.favorite_id === favoriteForm.id),
+    [photos, favoriteForm.id],
+  );
+  const unattachedPhotos = useMemo(
+    () => photos.filter((photo) => photo.favorite_id !== favoriteForm.id),
+    [photos, favoriteForm.id],
+  );
 
   useEffect(() => {
     const handleQuickAdd = (event: Event) => {
@@ -245,6 +263,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       const summary = `Imported ${imported} ${imported === 1 ? "photo" : "photos"}${skipped ? `, skipped ${skipped}` : ""}.`;
       setMessage(summary);
       setImportProgress(summary);
+      setIsOpen(false);
       router.refresh();
     } finally {
       setIsSaving(false);
@@ -298,6 +317,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     if (state) formData.set("state_id", state.id);
     if (photoForm.id) formData.set("id", photoForm.id);
     formData.set("trip_id", photoForm.trip_id);
+    formData.set("favorite_id", photoForm.favorite_id);
     formData.set("image_url", photoForm.image_url);
     formData.set("caption", photoForm.caption);
     formData.set("location_name", photoForm.location_name);
@@ -432,6 +452,24 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     }
   };
 
+  const linkPhotoToFavorite = async (photoId: string, favoriteId: string | null) => {
+    setIsLinking(true);
+    try {
+      const response = await fetch("/api/travel/items", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "photo", id: photoId, favorite_id: favoriteId }),
+      });
+      if (!response.ok) throw new Error("Link failed");
+      setAttachPhotoId("");
+      router.refresh();
+    } catch {
+      setMessage("Could not update that photo link.");
+    } finally {
+      setIsLinking(false);
+    }
+  };
+
   const deleteItem = async (type: EditorMode, id: string) => {
     if (!window.confirm("Delete this item?")) return;
 
@@ -466,6 +504,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     setPhotoForm({
       id: photo.id,
       trip_id: photo.trip_id ?? "",
+      favorite_id: photo.favorite_id ?? "",
       image_url: photo.image_url,
       caption: photo.caption ?? "",
       location_name: photo.location_name ?? "",
@@ -582,6 +621,10 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                   <option value="">No trip</option>
                   {trips.map((trip) => <option key={trip.id} value={trip.id}>{trip.title}</option>)}
                 </select>
+                <select className={inputClassName()} value={photoForm.favorite_id} onChange={(e) => setPhotoForm({ ...photoForm, favorite_id: e.target.value })}>
+                  <option value="">Not linked to a favorite</option>
+                  {favorites.map((favorite) => <option key={favorite.id} value={favorite.id}>{favoriteLabel(favorite.type)}: {favorite.name}</option>)}
+                </select>
                 <label className="space-y-1">
                   <span className="block text-xs font-semibold text-slate-500">Photo date</span>
                   <input className={inputClassName()} type="date" value={photoForm.taken_on} onChange={(e) => setPhotoForm({ ...photoForm, taken_on: e.target.value })} />
@@ -675,6 +718,54 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
               </form>
             )}
 
+            {mode === "favorite" && favoriteForm.id && (
+              <div className="mt-4 rounded-lg border border-slate-200 bg-white p-3">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Attached photos</p>
+                {attachedPhotos.length > 0 ? (
+                  <div className="mb-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+                    {attachedPhotos.map((photo) => (
+                      <div key={photo.id} className="group relative overflow-hidden rounded-md border border-slate-100 bg-slate-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={photo.image_url} alt={photo.caption ?? ""} className="aspect-square w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => void linkPhotoToFavorite(photo.id, null)}
+                          disabled={isLinking}
+                          aria-label="Detach photo"
+                          title="Detach photo"
+                          className="absolute right-1 top-1 rounded-full bg-slate-950/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 disabled:cursor-wait"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mb-3 text-sm text-slate-400">No photos attached yet.</p>
+                )}
+                {unattachedPhotos.length > 0 && (
+                  <div className="flex gap-2">
+                    <select className={inputClassName()} value={attachPhotoId} onChange={(e) => setAttachPhotoId(e.target.value)}>
+                      <option value="">Choose a photo to attach...</option>
+                      {unattachedPhotos.map((photo) => (
+                        <option key={photo.id} value={photo.id}>
+                          {photo.caption ?? photo.location_name ?? photo.taken_on ?? "Photo"}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => attachPhotoId && void linkPhotoToFavorite(attachPhotoId, favoriteForm.id)}
+                      disabled={!attachPhotoId || isLinking}
+                      className="shrink-0 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950 disabled:cursor-not-allowed disabled:text-slate-300"
+                    >
+                      Attach
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {mode === "video" && (
               <form onSubmit={saveVideo} className="grid gap-3 md:grid-cols-2">
                 <select className={inputClassName()} value={videoForm.trip_id} onChange={(e) => setVideoForm({ ...videoForm, trip_id: e.target.value })}>
@@ -717,7 +808,18 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
 
         <div className="grid gap-4 lg:grid-cols-4">
           <ItemList title="Trips" items={trips.map((trip) => ({ id: trip.id, title: trip.title, detail: trip.location_name ?? state?.state_name ?? country.display_name, onEdit: () => editTrip(trip), onDelete: () => deleteItem("trip", trip.id) }))} />
-          <ItemList title="Photos" items={photos.map((photo) => ({ id: photo.id, title: photo.caption ?? photo.location_name ?? "Photo", detail: photo.taken_on ?? state?.state_name ?? country.display_name, onEdit: () => editPhoto(photo), onDelete: () => deleteItem("photo", photo.id) }))} />
+          <ItemList
+            title="Photos"
+            items={photos.map((photo) => ({
+              id: photo.id,
+              title: photo.caption ?? photo.location_name ?? "Photo",
+              detail: [photo.taken_on ?? state?.state_name ?? country.display_name, photo.favorite_id ? `linked: ${favoritesById.get(photo.favorite_id)?.name ?? "favorite"}` : null]
+                .filter(Boolean)
+                .join(" · "),
+              onEdit: () => editPhoto(photo),
+              onDelete: () => deleteItem("photo", photo.id),
+            }))}
+          />
           <ItemList title="Videos" items={videos.map((video) => ({ id: video.id, title: video.title, detail: video.notes ?? "YouTube", onEdit: () => editVideo(video), onDelete: () => deleteItem("video", video.id) }))} />
           <ItemList
             title="Favorites"

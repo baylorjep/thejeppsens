@@ -69,7 +69,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
       .order('started_on', { ascending: false, nullsFirst: false }),
     supabase
       .from('travel_photos')
-      .select('id, country_id, state_id, trip_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, created_at')
+      .select('id, country_id, state_id, trip_id, favorite_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, created_at')
       .eq('country_id', country.id)
       .is('state_id', null)
       .order('is_featured', { ascending: false })
@@ -107,7 +107,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
           .order('state_name'),
         supabase
           .from('travel_photos')
-          .select('id, country_id, state_id, trip_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, created_at')
+          .select('id, country_id, state_id, trip_id, favorite_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, created_at')
           .eq('country_id', country.id)
           .not('state_id', 'is', null)
           .order('is_featured', { ascending: false })

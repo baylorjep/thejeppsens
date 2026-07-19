@@ -3,7 +3,7 @@
 import type { TravelPhoto } from "@/lib/travel";
 import { Camera, ChevronLeft, ChevronRight, Star, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import TravelEditButton from "@/components/TravelEditButton";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 
@@ -14,9 +14,12 @@ interface TravelPhotoLogProps {
 
 export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogProps) {
   const router = useRouter();
+  const touchStartX = useRef<number | null>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState("");
   const activePhoto = activeIndex === null ? null : photos[activeIndex] ?? null;
+  const previewPhotos = photos.slice(0, 6);
+  const remainingCount = Math.max(0, photos.length - previewPhotos.length);
 
   const move = (direction: -1 | 1) => {
     if (activeIndex === null || !photos.length) return;
@@ -39,18 +42,33 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
     }
   };
 
+  const handleTouchEnd = (clientX: number) => {
+    if (touchStartX.current === null) return;
+    const distance = clientX - touchStartX.current;
+    touchStartX.current = null;
+
+    if (Math.abs(distance) < 45) return;
+    move(distance > 0 ? -1 : 1);
+  };
+
   return (
     <>
       {photos.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {photos.map((photo, index) => (
+        <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-2">
+          {previewPhotos.map((photo, index) => (
             <figure key={photo.id} className="group overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
-              <button type="button" onClick={() => setActiveIndex(index)} className="block w-full text-left">
+              <button type="button" onClick={() => setActiveIndex(index)} className="relative block w-full text-left">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.image_url} alt={photo.caption ?? fallbackName} className="h-52 w-full object-cover transition-transform group-hover:scale-[1.02]" />
+                <img src={photo.image_url} alt={photo.caption ?? fallbackName} className="aspect-square w-full object-cover transition-transform group-hover:scale-[1.02]" />
+                {index === previewPhotos.length - 1 && remainingCount > 0 && (
+                  <span className="absolute inset-0 flex items-center justify-center bg-slate-950/60 text-lg font-bold text-white">
+                    +{remainingCount}
+                  </span>
+                )}
               </button>
               <figcaption className="flex items-start justify-between gap-3 px-3 py-2 text-sm text-slate-600">
-                <span>
+                <span className="min-w-0 truncate">
                   {photo.is_featured && <Star className="mr-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" />}
                   {photo.caption ?? photo.location_name ?? fallbackName}
                 </span>
@@ -70,6 +88,14 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
               </figcaption>
             </figure>
           ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveIndex(0)}
+            className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
+          >
+            View all {photos.length} photos
+          </button>
         </div>
       ) : (
         <div className="flex h-64 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-slate-200 bg-slate-50 text-center">
@@ -80,7 +106,18 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
       )}
 
       {activePhoto && activeIndex !== null && (
-        <div className="fixed inset-0 z-[80] bg-slate-950/90 p-4 text-white" role="dialog" aria-modal="true">
+        <div
+          className="fixed inset-0 z-[80] bg-slate-950/90 p-4 text-white"
+          role="dialog"
+          aria-modal="true"
+          onTouchStart={(event) => {
+            touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+          }}
+          onTouchEnd={(event) => {
+            const touch = event.changedTouches[0];
+            if (touch) handleTouchEnd(touch.clientX);
+          }}
+        >
           <button
             type="button"
             onClick={() => setActiveIndex(null)}

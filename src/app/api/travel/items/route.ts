@@ -90,6 +90,7 @@ export async function POST(request: Request) {
         country_id: countryId,
         state_id: stateId,
         trip_id: nullableText(formData.get("trip_id")),
+        favorite_id: nullableText(formData.get("favorite_id")),
         image_url: imageUrl,
         caption: nullableText(formData.get("caption")),
         location_name: nullableText(formData.get("location_name")),
@@ -157,6 +158,31 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Could not save travel item", error);
     return NextResponse.json({ error: "Could not save travel item" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const supabase = getTravelSupabaseClient();
+    if (!supabase) return NextResponse.json({ error: "No DB" }, { status: 503 });
+
+    const body = (await request.json()) as { type?: ItemType; id?: string; favorite_id?: string | null };
+    if (body.type !== "photo" || !body.id) {
+      return NextResponse.json({ error: "Invalid update" }, { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from("travel_photos")
+      .update({ favorite_id: body.favorite_id ?? null })
+      .eq("id", body.id)
+      .select()
+      .single();
+    if (error) throw error;
+
+    return NextResponse.json({ item: data });
+  } catch (error) {
+    console.error("Could not update travel item", error);
+    return NextResponse.json({ error: "Could not update travel item" }, { status: 500 });
   }
 }
 

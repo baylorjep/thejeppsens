@@ -26,6 +26,7 @@ export interface TravelPhoto {
   country_id: string;
   state_id: string | null;
   trip_id: string | null;
+  favorite_id: string | null;
   image_url: string;
   caption: string | null;
   location_name: string | null;
