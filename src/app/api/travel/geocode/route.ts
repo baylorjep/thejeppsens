@@ -6,10 +6,40 @@ type NominatimResult = {
   display_name: string;
 };
 
+type NominatimReverseResult = {
+  display_name?: string;
+};
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q")?.trim();
+    const latitude = searchParams.get("lat")?.trim();
+    const longitude = searchParams.get("lon")?.trim();
+
+    if (latitude && longitude) {
+      const params = new URLSearchParams({
+        lat: latitude,
+        lon: longitude,
+        format: "jsonv2",
+        zoom: "10",
+        addressdetails: "1",
+      });
+
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`, {
+        headers: {
+          "User-Agent": "thejeppsens-travel-log/1.0",
+          "Accept-Language": "en",
+        },
+      });
+
+      if (!response.ok) {
+        return NextResponse.json({ error: "Could not search locations" }, { status: 502 });
+      }
+
+      const result = (await response.json()) as NominatimReverseResult;
+      return NextResponse.json({ label: result.display_name ?? null });
+    }
 
     if (!query) return NextResponse.json({ results: [] });
 

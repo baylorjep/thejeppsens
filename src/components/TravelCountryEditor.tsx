@@ -1,6 +1,7 @@
 "use client";
 
 import { optimizeImageFile } from "@/lib/vinylImage";
+import { extractPhotoMetadata } from "@/lib/photoMetadata";
 import { youtubeThumbnailUrl } from "@/lib/travel";
 import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip, TravelVideo } from "@/lib/travel";
 import type { TravelQuickAddDetail } from "@/components/TravelQuickAddButton";
@@ -147,6 +148,73 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       setMessage("Photo optimized.");
     } catch {
       setMessage("Could not load that photo.");
+    }
+  };
+
+  const reverseGeocodePhoto = async (latitude?: number, longitude?: number) => {
+    if (latitude === undefined || longitude === undefined) return "";
+
+    try {
+      const params = new URLSearchParams({
+        lat: String(latitude),
+        lon: String(longitude),
+      });
+      const response = await fetch(`/api/travel/geocode?${params.toString()}`);
+      if (!response.ok) return "";
+      const data = (await response.json()) as { label?: string | null };
+      return data.label?.split(",").slice(0, 2).join(", ").trim() ?? "";
+    } catch {
+      return "";
+    }
+  };
+
+  const importPhotoFiles = async (fileList?: FileList | null) => {
+    const files = Array.from(fileList ?? []);
+    if (!files.length) return;
+
+    setIsSaving(true);
+    setMessage(`Importing 0 / ${files.length} photos...`);
+
+    try {
+      for (const [index, file] of files.entries()) {
+        setMessage(`Importing ${index + 1} / ${files.length}: reading photo data...`);
+        const metadata = await extractPhotoMetadata(file);
+        const locationName =
+          (await reverseGeocodePhoto(metadata.latitude, metadata.longitude)) ||
+          state?.state_name ||
+          country.display_name;
+        const optimizedFile = await optimizeImageFile(file, 1600, 0.76);
+
+        const formData = new FormData();
+        formData.set("type", "photo");
+        formData.set("country_id", country.id);
+        if (state) formData.set("state_id", state.id);
+        formData.set("trip_id", photoForm.trip_id);
+        formData.set("image_url", "");
+        formData.set("caption", "");
+        formData.set("location_name", locationName);
+        formData.set("latitude", metadata.latitude !== undefined ? String(metadata.latitude) : "");
+        formData.set("longitude", metadata.longitude !== undefined ? String(metadata.longitude) : "");
+        formData.set("taken_on", metadata.takenOn ?? "");
+        formData.set("sort_order", String(photos.length + index));
+        formData.set("is_featured", "false");
+        formData.set("image", optimizedFile);
+
+        const response = await fetch("/api/travel/items", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error("Import failed");
+      }
+
+      resetForms();
+      setMessage(`Imported ${files.length} ${files.length === 1 ? "photo" : "photos"}.`);
+      router.refresh();
+    } catch {
+      setMessage("Could not finish importing those photos.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -511,6 +579,21 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                   <ImagePlus className="mb-2 h-5 w-5" />
                   Upload optimized photo
                   <input type="file" accept="image/*" onChange={(event) => handlePhotoChange(event.target.files?.[0])} className="sr-only" />
+                </label>
+                <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-4 py-5 text-center text-sm text-slate-500 md:col-span-2">
+                  <ImagePlus className="mb-2 h-5 w-5" />
+                  Bulk import from iPhone photos
+                  <span className="mt-1 text-xs text-slate-400">Uses photo date and GPS when available, then uploads optimized copies.</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(event) => {
+                      void importPhotoFiles(event.target.files);
+                      event.target.value = "";
+                    }}
+                    className="sr-only"
+                  />
                 </label>
                 {photoPreview && (
                   <div className="md:col-span-2">
