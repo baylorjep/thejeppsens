@@ -3,6 +3,7 @@ import { getTravelSupabaseClient, uploadTravelPhoto } from "@/lib/travelServer";
 import { NextResponse } from "next/server";
 
 type ItemType = "trip" | "photo" | "favorite" | "video";
+const TRAVEL_PHOTOS_BUCKET = "travel-photos";
 
 function nullableText(value: FormDataEntryValue | null) {
   if (typeof value !== "string") return null;
@@ -18,6 +19,14 @@ function numberValue(value: FormDataEntryValue | null) {
   if (typeof value !== "string" || !value.trim()) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function travelPhotoStoragePath(imageUrl: string | null | undefined) {
+  if (!imageUrl) return null;
+  const marker = `/storage/v1/object/public/${TRAVEL_PHOTOS_BUCKET}/`;
+  const markerIndex = imageUrl.indexOf(marker);
+  if (markerIndex === -1) return null;
+  return decodeURIComponent(imageUrl.slice(markerIndex + marker.length).split("?")[0]);
 }
 
 export async function POST(request: Request) {
@@ -171,6 +180,15 @@ export async function DELETE(request: Request) {
               : null;
 
     if (!table || !id) return NextResponse.json({ error: "Invalid delete" }, { status: 400 });
+
+    if (type === "photo") {
+      const { data: photo } = await supabase.from("travel_photos").select("image_url").eq("id", id).maybeSingle();
+      const storagePath = travelPhotoStoragePath(photo?.image_url);
+      if (storagePath) {
+        const { error } = await supabase.storage.from(TRAVEL_PHOTOS_BUCKET).remove([storagePath]);
+        if (error) console.warn("Could not remove travel photo from storage", error);
+      }
+    }
 
     const { error } = await supabase.from(table).delete().eq("id", id);
     if (error) throw error;

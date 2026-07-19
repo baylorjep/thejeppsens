@@ -1,7 +1,8 @@
 "use client";
 
 import type { TravelPhoto } from "@/lib/travel";
-import { Camera, ChevronLeft, ChevronRight, Star, X } from "lucide-react";
+import { Camera, ChevronLeft, ChevronRight, Star, Trash2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import TravelEditButton from "@/components/TravelEditButton";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
@@ -12,12 +13,30 @@ interface TravelPhotoLogProps {
 }
 
 export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogProps) {
+  const router = useRouter();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState("");
   const activePhoto = activeIndex === null ? null : photos[activeIndex] ?? null;
 
   const move = (direction: -1 | 1) => {
     if (activeIndex === null || !photos.length) return;
     setActiveIndex((activeIndex + direction + photos.length) % photos.length);
+  };
+
+  const deletePhoto = async (photo: TravelPhoto) => {
+    if (!window.confirm("Delete this photo?")) return;
+
+    setDeletingId(photo.id);
+    try {
+      const response = await fetch(`/api/travel/items?type=photo&id=${encodeURIComponent(photo.id)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Delete failed");
+      setActiveIndex(null);
+      router.refresh();
+    } catch {
+      window.alert("Could not delete that photo.");
+    } finally {
+      setDeletingId("");
+    }
   };
 
   return (
@@ -35,7 +54,19 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
                   {photo.is_featured && <Star className="mr-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" />}
                   {photo.caption ?? photo.location_name ?? fallbackName}
                 </span>
-                <TravelEditButton type="photo" item={photo} label="Edit photo" />
+                <span className="flex shrink-0 items-center gap-1">
+                  <TravelEditButton type="photo" item={photo} label="Edit photo" />
+                  <button
+                    type="button"
+                    aria-label="Delete photo"
+                    title="Delete photo"
+                    disabled={deletingId === photo.id}
+                    onClick={() => void deletePhoto(photo)}
+                    className="inline-flex items-center justify-center rounded-md p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:cursor-wait disabled:text-slate-300"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </span>
               </figcaption>
             </figure>
           ))}
@@ -87,9 +118,20 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
                     </p>
                   )}
                 </div>
-                <span className="text-xs text-slate-400">
-                  {activeIndex + 1} / {photos.length}
-                </span>
+                <div className="flex shrink-0 items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => void deletePhoto(activePhoto)}
+                    disabled={deletingId === activePhoto.id}
+                    className="inline-flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-red-500/80 disabled:cursor-wait disabled:text-slate-300"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                  <span className="text-xs text-slate-400">
+                    {activeIndex + 1} / {photos.length}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
