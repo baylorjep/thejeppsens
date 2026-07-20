@@ -204,9 +204,13 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             <button
               key={favorite.id}
               type="button"
-              className={`absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center overflow-hidden rounded-full text-white shadow-lg transition-transform ${
-                pinPhoto ? (activeId === favorite.id ? "scale-125 ring-4 ring-white" : "ring-2 ring-white") : markerStyle(favorite.type, activeId === favorite.id)
-              }`}
+              className={
+                pinPhoto
+                  ? `absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 ${
+                      activeId === favorite.id ? "scale-125 ring-4 ring-white" : ""
+                    }`
+                  : `absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`
+              }
               style={{ left, top }}
               title={favorite.name}
               onClick={(event) => {
@@ -218,7 +222,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             >
               {pinPhoto ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={pinPhoto.image_url} alt="" className="h-full w-full object-cover" />
+                <img src={pinPhoto.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
               ) : (
                 <Icon className={iconSize} />
               )}
