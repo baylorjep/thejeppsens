@@ -104,18 +104,20 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
                   </div>
                   <p className="text-sm leading-6 text-slate-600">{selectedFavorite.notes?.trim() || "No notes saved yet."}</p>
                   {selectedPhotos.length > 0 && (
-                    <div className="grid grid-cols-4 gap-2">
-                      {selectedPhotos.slice(0, 8).map((photo, index) => (
-                        <button
-                          key={photo.id}
-                          type="button"
-                          onClick={() => setSelectedPhotoIndex(index)}
-                          className={`overflow-hidden rounded-md ring-offset-2 ${index === selectedPhotoIndex ? "ring-2 ring-teal-500" : ""}`}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
-                        </button>
-                      ))}
+                    <div className="max-h-32 overflow-y-auto pr-1">
+                      <div className="grid grid-cols-4 gap-2">
+                        {selectedPhotos.map((photo, index) => (
+                          <button
+                            key={photo.id}
+                            type="button"
+                            onClick={() => setSelectedPhotoIndex(index)}
+                            className={`overflow-hidden rounded-md ring-offset-2 ${index === selectedPhotoIndex ? "ring-2 ring-teal-500" : ""}`}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {mapsUrl && (

@@ -566,18 +566,20 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                         {selectedFavorite.notes?.trim() || "No notes saved yet."}
                       </p>
                       {selectedFavoritePhotos.length > 1 && (
-                        <div className="grid grid-cols-4 gap-2">
-                          {selectedFavoritePhotos.slice(0, 8).map((photo, index) => (
-                            <button
-                              key={photo.id}
-                              type="button"
-                              onClick={() => setSelectedFavoritePhotoIndex(index)}
-                              className={`overflow-hidden rounded-md ring-offset-2 ${index === selectedFavoritePhotoIndex ? "ring-2 ring-teal-500" : ""}`}
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
-                            </button>
-                          ))}
+                        <div className="max-h-32 overflow-y-auto pr-1">
+                          <div className="grid grid-cols-4 gap-2">
+                            {selectedFavoritePhotos.map((photo, index) => (
+                              <button
+                                key={photo.id}
+                                type="button"
+                                onClick={() => setSelectedFavoritePhotoIndex(index)}
+                                className={`overflow-hidden rounded-md ring-offset-2 ${index === selectedFavoritePhotoIndex ? "ring-2 ring-teal-500" : ""}`}
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                       {selectedFavoriteMapsUrl && (
