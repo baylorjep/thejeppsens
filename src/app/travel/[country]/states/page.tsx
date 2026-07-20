@@ -34,7 +34,7 @@ export default async function UnitedStatesStatesPage({ params }: PageProps) {
   const { data: statePhotos } = unitedStates
     ? await supabase
         .from('travel_photos')
-        .select('id, country_id, state_id, trip_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, created_at')
+        .select('id, country_id, state_id, trip_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, is_favorite_featured, created_at')
         .eq('country_id', unitedStates.id)
         .not('state_id', 'is', null)
         .order('is_featured', { ascending: false })

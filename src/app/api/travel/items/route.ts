@@ -209,14 +209,34 @@ export async function PATCH(request: Request) {
     const supabase = getTravelSupabaseClient();
     if (!supabase) return NextResponse.json({ error: "No DB" }, { status: 503 });
 
-    const body = (await request.json()) as { type?: ItemType; id?: string; favorite_id?: string | null };
+    const body = (await request.json()) as { type?: ItemType; id?: string; favorite_id?: string | null; is_favorite_featured?: boolean };
     if (body.type !== "photo" || !body.id) {
       return NextResponse.json({ error: "Invalid update" }, { status: 400 });
     }
 
+    if (body.is_favorite_featured) {
+      const { data: photo } = await supabase.from("travel_photos").select("favorite_id").eq("id", body.id).maybeSingle();
+      const targetFavoriteId = body.favorite_id ?? photo?.favorite_id ?? null;
+      if (!targetFavoriteId) {
+        return NextResponse.json({ error: "Favorite featured photos must be linked to a favorite" }, { status: 400 });
+      }
+      if (targetFavoriteId) {
+        const { error } = await supabase
+          .from("travel_photos")
+          .update({ is_favorite_featured: false })
+          .eq("favorite_id", targetFavoriteId);
+        if (error) throw error;
+      }
+    }
+
+    const updateRow: { favorite_id?: string | null; is_favorite_featured?: boolean } = {};
+    if ("favorite_id" in body) updateRow.favorite_id = body.favorite_id ?? null;
+    if ("is_favorite_featured" in body) updateRow.is_favorite_featured = Boolean(body.is_favorite_featured);
+    if ("favorite_id" in body && body.favorite_id === null && !("is_favorite_featured" in body)) updateRow.is_favorite_featured = false;
+
     const { data, error } = await supabase
       .from("travel_photos")
-      .update({ favorite_id: body.favorite_id ?? null })
+      .update(updateRow)
       .eq("id", body.id)
       .select()
       .single();

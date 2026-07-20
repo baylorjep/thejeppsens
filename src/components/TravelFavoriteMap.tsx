@@ -116,7 +116,12 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   };
   const IconForFavorite = (type: TravelFavorite["type"]) => (type === "restaurant" ? Utensils : type === "activity" ? Sparkles : MapPin);
   const selectedFavorite = selectedFavoriteId ? favorites.find((favorite) => favorite.id === selectedFavoriteId) ?? null : null;
-  const selectedFavoritePhotos = selectedFavorite ? photos.filter((photo) => photo.favorite_id === selectedFavorite.id) : [];
+  const favoritePhotosFor = (favoriteId: string) => photos.filter((photo) => photo.favorite_id === favoriteId);
+  const favoritePinPhotoFor = (favoriteId: string) => {
+    const favoritePhotos = favoritePhotosFor(favoriteId);
+    return favoritePhotos.find((photo) => photo.is_favorite_featured) ?? favoritePhotos[0] ?? null;
+  };
+  const selectedFavoritePhotos = selectedFavorite ? favoritePhotosFor(selectedFavorite.id) : [];
   const selectedFavoriteHeroPhoto = selectedFavoritePhotos[selectedFavoritePhotoIndex] ?? selectedFavoritePhotos[0] ?? null;
   const SelectedFavoriteIcon = selectedFavorite ? IconForFavorite(selectedFavorite.type) : null;
   const selectedPhoto = selectedPhotoId ? photos.find((photo) => photo.id === selectedPhotoId) ?? null : null;
@@ -194,11 +199,14 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
           const left = lonToX(favorite.longitude, zoom) - topLeftX;
           const top = latToY(favorite.latitude, zoom) - topLeftY;
           const Icon = IconForFavorite(favorite.type);
+          const pinPhoto = favoritePinPhotoFor(favorite.id);
           return (
             <button
               key={favorite.id}
               type="button"
-              className={`absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`}
+              className={`absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center overflow-hidden rounded-full text-white shadow-lg transition-transform ${
+                pinPhoto ? (activeId === favorite.id ? "scale-125 ring-4 ring-white" : "ring-2 ring-white") : markerStyle(favorite.type, activeId === favorite.id)
+              }`}
               style={{ left, top }}
               title={favorite.name}
               onClick={(event) => {
@@ -208,7 +216,12 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
               onMouseEnter={() => setActiveId(favorite.id)}
               onMouseLeave={() => setActiveId(null)}
             >
-              <Icon className={iconSize} />
+              {pinPhoto ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={pinPhoto.image_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <Icon className={iconSize} />
+              )}
               <span className="sr-only">{index + 1}</span>
             </button>
           );
@@ -314,7 +327,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
         {favorites.slice(0, 8).map((favorite) => {
           const Icon = IconForFavorite(favorite.type);
           const isActive = activeId === favorite.id;
-          const favoritePhotos = photos.filter((photo) => photo.favorite_id === favorite.id).slice(0, 4);
+          const favoritePhotos = favoritePhotosFor(favorite.id).slice(0, 4);
           return (
             <div
               key={favorite.id}
@@ -359,6 +372,26 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
 
       {(selectedFavorite || selectedPhoto) && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true">
+          {mapDetailItems.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => moveMapItem(-1)}
+                aria-label="Previous map item"
+                className="fixed left-3 top-1/2 z-10 rounded-full bg-white/90 p-3 text-slate-700 shadow-lg transition-colors hover:bg-white sm:left-6"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={() => moveMapItem(1)}
+                aria-label="Next map item"
+                className="fixed right-3 top-1/2 z-10 rounded-full bg-white/90 p-3 text-slate-700 shadow-lg transition-colors hover:bg-white sm:right-6"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
           <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-2xl">
             <button
               type="button"
@@ -379,26 +412,6 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                     <div className="flex aspect-video items-center justify-center bg-slate-100 text-slate-300">
                       {SelectedFavoriteIcon && <SelectedFavoriteIcon className="h-10 w-10" />}
                     </div>
-                  )}
-                  {mapDetailItems.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => moveMapItem(-1)}
-                        aria-label="Previous map item"
-                        className="absolute left-3 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveMapItem(1)}
-                        aria-label="Next map item"
-                        className="absolute right-14 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                    </>
                   )}
                   {selectedFavoritePhotos.length > 1 && (
                     <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-slate-950/70 px-2 py-1 text-xs font-semibold text-white">
@@ -444,26 +457,6 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                 <div className="relative bg-slate-950">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={selectedPhoto.image_url} alt="" className="max-h-[52vh] w-full object-contain" />
-                  {mapDetailItems.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => moveMapItem(-1)}
-                        aria-label="Previous map item"
-                        className="absolute left-3 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveMapItem(1)}
-                        aria-label="Next map item"
-                        className="absolute right-14 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                    </>
-                  )}
                 </div>
                 <div className="space-y-4 p-5">
                   <div>

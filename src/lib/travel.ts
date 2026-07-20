@@ -35,6 +35,7 @@ export interface TravelPhoto {
   taken_on: string | null;
   sort_order: number;
   is_featured?: boolean;
+  is_favorite_featured?: boolean;
   created_at?: string | null;
 }
 

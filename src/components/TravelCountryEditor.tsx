@@ -7,7 +7,7 @@ import type { PhotoMetadata } from "@/lib/photoMetadata";
 import { youtubeThumbnailUrl } from "@/lib/travel";
 import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip, TravelVideo } from "@/lib/travel";
 import type { TravelQuickAddDetail } from "@/components/TravelQuickAddButton";
-import { Edit3, ImagePlus, LocateFixed, Plus, Trash2, X } from "lucide-react";
+import { Edit3, ImagePlus, LocateFixed, Plus, Star, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
@@ -492,6 +492,24 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     }
   };
 
+  const setFavoriteFeaturedPhoto = async (photoId: string) => {
+    setIsLinking(true);
+    try {
+      const response = await fetch("/api/travel/items", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "photo", id: photoId, is_favorite_featured: true }),
+      });
+      if (!response.ok) throw new Error("Featured photo update failed");
+      setMessage("Favorite pin photo updated.");
+      router.refresh();
+    } catch {
+      setMessage("Could not update the favorite pin photo.");
+    } finally {
+      setIsLinking(false);
+    }
+  };
+
   const deleteItem = async (type: EditorMode, id: string) => {
     if (!window.confirm("Delete this item?")) return;
 
@@ -775,6 +793,18 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                       <div key={photo.id} className="group relative overflow-hidden rounded-md border border-slate-100 bg-slate-50">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={photo.image_url} alt={photo.caption ?? ""} className="aspect-square w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => void setFavoriteFeaturedPhoto(photo.id)}
+                          disabled={isLinking}
+                          aria-label="Use as pin photo"
+                          title="Use as pin photo"
+                          className={`absolute left-1 top-1 rounded-full p-1 text-white shadow-sm transition-colors disabled:cursor-wait ${
+                            photo.is_favorite_featured ? "bg-amber-500" : "bg-slate-950/70 hover:bg-amber-500"
+                          }`}
+                        >
+                          <Star className={`h-3 w-3 ${photo.is_favorite_featured ? "fill-current" : ""}`} />
+                        </button>
                         <button
                           type="button"
                           onClick={() => void linkPhotoToFavorite(photo.id, null)}
