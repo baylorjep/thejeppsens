@@ -155,11 +155,11 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
         </Geographies>
         {statePhotoMarkers.map(({ stateName, photo, coordinates, href }) => (
           <Marker key={photo.state_id} coordinates={coordinates}>
-            <foreignObject x={-16} y={-30} width={32} height={38}>
+            <foreignObject x={-16} y={-36} width={32} height={44}>
               <button
                 type="button"
                 aria-label={`Open ${stateName} photos`}
-                className="group relative block h-[32px] w-[26px] origin-center transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="group relative mt-1.5 block h-[32px] w-[26px] origin-center transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 onClick={() => {
                   if (href) window.location.href = href;
                 }}
