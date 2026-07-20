@@ -5,7 +5,7 @@ import { TravelFavoriteModalEditForm, TravelPhotoModalEditForm } from "@/compone
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 import { travelFavoriteMapsUrl, type TravelFavorite, type TravelPhoto } from "@/lib/travel";
 import type { TravelMapCenter } from "@/lib/travelMapCenters";
-import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Maximize2, MapPin, Sparkles, Utensils, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Maximize2, MapPin, Sparkles, Trash2, Utensils, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -98,6 +98,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const [selectedFavoritePhotoIndex, setSelectedFavoritePhotoIndex] = useState(0);
   const [editingDetail, setEditingDetail] = useState<"favorite" | "photo" | null>(null);
   const [featuringId, setFeaturingId] = useState("");
+  const [deletingPhotoId, setDeletingPhotoId] = useState("");
   const [mapView, setMapView] = useState<MapView | null>(null);
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
@@ -232,6 +233,22 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
       window.alert("Could not feature that photo.");
     } finally {
       setFeaturingId("");
+    }
+  };
+
+  const deletePhoto = async (photo: TravelPhoto) => {
+    if (!window.confirm("Delete this photo?")) return;
+
+    setDeletingPhotoId(photo.id);
+    try {
+      const response = await fetch(`/api/travel/items?type=photo&id=${encodeURIComponent(photo.id)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Delete failed");
+      closeDetails();
+      router.refresh();
+    } catch {
+      window.alert("Could not delete that photo.");
+    } finally {
+      setDeletingPhotoId("");
     }
   };
 
@@ -603,12 +620,23 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                 </div>
                 <div className="space-y-4 p-5">
                   {editingDetail === "photo" ? (
-                    <TravelPhotoModalEditForm
-                      photo={selectedPhoto}
-                      favorites={favorites}
-                      onDone={() => setEditingDetail(null)}
-                      onCancel={() => setEditingDetail(null)}
-                    />
+                    <div className="space-y-3">
+                      <TravelPhotoModalEditForm
+                        photo={selectedPhoto}
+                        favorites={favorites}
+                        onDone={() => setEditingDetail(null)}
+                        onCancel={() => setEditingDetail(null)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void deletePhoto(selectedPhoto)}
+                        disabled={deletingPhotoId === selectedPhoto.id}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition-colors hover:border-red-300 hover:bg-red-100 disabled:cursor-wait disabled:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {deletingPhotoId === selectedPhoto.id ? "Deleting..." : "Delete photo"}
+                      </button>
+                    </div>
                   ) : (
                     <>
                       <div>
