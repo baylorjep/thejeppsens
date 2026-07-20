@@ -327,53 +327,6 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
         </div>
       )}
 
-      {!!favorites.length && <div className="space-y-2">
-        {favorites.slice(0, 8).map((favorite) => {
-          const Icon = IconForFavorite(favorite.type);
-          const isActive = activeId === favorite.id;
-          const favoritePhotos = favoritePhotosFor(favorite.id).slice(0, 4);
-          return (
-            <div
-              key={favorite.id}
-              onMouseEnter={() => setActiveId(favorite.id)}
-              onMouseLeave={() => setActiveId(null)}
-              className={`rounded-lg p-3 transition-colors ${isActive ? "bg-slate-100" : "bg-slate-50"}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-start gap-3">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-slate-200">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-800">{favorite.name}</p>
-                    <p className="text-xs text-slate-500">
-                      {favorite.type}
-                      {favorite.location_name ? ` · ${favorite.location_name}` : ""}
-                    </p>
-                  </div>
-                </div>
-                <TravelEditButton type="favorite" item={favorite} label={`Edit ${favorite.name}`} />
-              </div>
-              {favoritePhotos.length > 0 && (
-                <div className="mt-2 flex gap-1.5 pl-10">
-                  {favoritePhotos.map((photo) => (
-                    <button
-                      key={photo.id}
-                      type="button"
-                      onClick={() => openPhoto(photo)}
-                      className="h-9 w-9 overflow-hidden rounded-md border border-white shadow-sm"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={photo.image_url} alt="" className="h-full w-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>}
-
       {(selectedFavorite || selectedPhoto) && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true">
           {mapDetailItems.length > 1 && (
