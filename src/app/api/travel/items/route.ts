@@ -71,6 +71,58 @@ async function backfillFavoriteCoordinatesFromPhoto(
   if (error) throw error;
 }
 
+async function backfillPhotoCoordinatesFromFavorite(
+  supabase: NonNullable<ReturnType<typeof getTravelSupabaseClient>>,
+  photo: {
+    id: string;
+    favorite_id: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    location_name: string | null;
+  },
+) {
+  if (!photo.favorite_id || (photo.latitude !== null && photo.longitude !== null)) return;
+
+  const { data: linkedPhotos, error: linkedPhotosError } = await supabase
+    .from("travel_photos")
+    .select("latitude, longitude, location_name, is_favorite_featured, sort_order, taken_on, created_at")
+    .eq("favorite_id", photo.favorite_id)
+    .neq("id", photo.id)
+    .not("latitude", "is", null)
+    .not("longitude", "is", null)
+    .order("is_favorite_featured", { ascending: false })
+    .order("sort_order", { ascending: true })
+    .order("taken_on", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(1);
+  if (linkedPhotosError) throw linkedPhotosError;
+
+  const linkedPhoto = linkedPhotos?.[0];
+  const { data: favorite, error: favoriteError } = linkedPhoto
+    ? { data: null, error: null }
+    : await supabase
+        .from("travel_favorites")
+        .select("latitude, longitude, location_name")
+        .eq("id", photo.favorite_id)
+        .maybeSingle();
+  if (favoriteError) throw favoriteError;
+
+  const source = linkedPhoto ?? favorite;
+  if (source?.latitude === null || source?.latitude === undefined || source.longitude === null || source.longitude === undefined) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("travel_photos")
+    .update({
+      latitude: source.latitude,
+      longitude: source.longitude,
+      location_name: photo.location_name || source.location_name || null,
+    })
+    .eq("id", photo.id);
+  if (error) throw error;
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = getTravelSupabaseClient();
@@ -146,6 +198,7 @@ export async function POST(request: Request) {
       const { data, error } = await supabase.from("travel_photos").upsert(row).select().single();
       if (error) throw error;
       await backfillFavoriteCoordinatesFromPhoto(supabase, data.id, data.favorite_id);
+      await backfillPhotoCoordinatesFromFavorite(supabase, data);
       return NextResponse.json({ item: data });
     }
 
@@ -249,10 +302,11 @@ export async function PATCH(request: Request) {
       .from("travel_photos")
       .update(updateRow)
       .eq("id", body.id)
-      .select()
+      .select("id, favorite_id, latitude, longitude, location_name")
       .single();
     if (error) throw error;
     await backfillFavoriteCoordinatesFromPhoto(supabase, data.id, data.favorite_id);
+    await backfillPhotoCoordinatesFromFavorite(supabase, data);
 
     return NextResponse.json({ item: data });
   } catch (error) {
