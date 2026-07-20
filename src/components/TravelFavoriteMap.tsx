@@ -352,7 +352,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     const handleNativeWheel = (event: globalThis.WheelEvent) => {
       event.preventDefault();
       event.stopPropagation();
-      const magnitude = event.ctrlKey ? 0.35 : 0.6;
+      const magnitude = event.ctrlKey ? 0.14 : 0.22;
       const zoomDelta = event.deltaY < 0 ? magnitude : -magnitude;
       const nextZoom = clampZoom(zoom + zoomDelta);
       if (nextZoom === zoom) return;
