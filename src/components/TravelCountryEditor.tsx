@@ -89,6 +89,19 @@ function favoriteLabel(type: TravelFavoriteType) {
   return "Place";
 }
 
+function distanceInMeters(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
+  const earthRadiusMeters = 6371000;
+  const toRadians = (value: number) => (value * Math.PI) / 180;
+  const latDelta = toRadians(b.latitude - a.latitude);
+  const lonDelta = toRadians(b.longitude - a.longitude);
+  const lat1 = toRadians(a.latitude);
+  const lat2 = toRadians(b.latitude);
+  const haversine =
+    Math.sin(latDelta / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(lonDelta / 2) ** 2;
+  return 2 * earthRadiusMeters * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
 export default function TravelCountryEditor({ country, state, trips, photos, favorites, videos }: TravelCountryEditorProps) {
   const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -138,6 +151,28 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       is_featured: photoForm.is_featured,
     };
   }, [country.id, photoForm, state?.id]);
+  const sortedPhotoFavorites = useMemo(() => {
+    if (!activeEditorPhoto || activeEditorPhoto.latitude === null || activeEditorPhoto.longitude === null) return favorites;
+    const photoPoint = { latitude: activeEditorPhoto.latitude, longitude: activeEditorPhoto.longitude };
+
+    return favorites
+      .map((favorite) => {
+        const candidatePoints = [
+          favorite.latitude !== null && favorite.longitude !== null
+            ? { latitude: favorite.latitude, longitude: favorite.longitude }
+            : null,
+          ...photos
+            .filter((photo) => photo.id !== activeEditorPhoto.id && photo.favorite_id === favorite.id && photo.latitude !== null && photo.longitude !== null)
+            .map((photo) => ({ latitude: photo.latitude as number, longitude: photo.longitude as number })),
+        ].filter((point): point is { latitude: number; longitude: number } => Boolean(point));
+        const nearestDistance = candidatePoints.length
+          ? Math.min(...candidatePoints.map((point) => distanceInMeters(photoPoint, point)))
+          : Number.POSITIVE_INFINITY;
+        return { favorite, nearestDistance };
+      })
+      .sort((a, b) => a.nearestDistance - b.nearestDistance || a.favorite.name.localeCompare(b.favorite.name))
+      .map(({ favorite }) => favorite);
+  }, [activeEditorPhoto, favorites, photos]);
 
   useEffect(() => {
     const handleQuickAdd = (event: Event) => {
@@ -664,7 +699,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                 </select>
                 <select className={inputClassName()} value={photoForm.favorite_id} onChange={(e) => setPhotoForm({ ...photoForm, favorite_id: e.target.value })}>
                   <option value="">Not linked to a favorite</option>
-                  {favorites.map((favorite) => <option key={favorite.id} value={favorite.id}>{favoriteLabel(favorite.type)}: {favorite.name}</option>)}
+                  {sortedPhotoFavorites.map((favorite) => <option key={favorite.id} value={favorite.id}>{favoriteLabel(favorite.type)}: {favorite.name}</option>)}
                 </select>
                 {activeEditorPhoto && !photoForm.favorite_id && (
                   <div className="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2">
@@ -672,6 +707,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                       <CreateFavoriteFromPhoto
                         photo={activeEditorPhoto}
                         favorites={favorites}
+                        photos={photos}
                         onDone={() => {
                           setIsCreatingFavoriteFromPhoto(false);
                           setMessage("Experience updated for this photo.");

@@ -245,6 +245,7 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
                     <CreateFavoriteFromPhoto
                       photo={activePhoto}
                       favorites={favorites}
+                      photos={photos}
                       variant="dark"
                       onDone={() => {
                         setIsAddingFavorite(false);

@@ -2,20 +2,58 @@
 
 import type { TravelFavorite, TravelFavoriteType, TravelPhoto } from "@/lib/travel";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 
 interface CreateFavoriteFromPhotoProps {
   photo: TravelPhoto;
   favorites?: TravelFavorite[];
+  photos?: TravelPhoto[];
   onDone: () => void;
   onCancel: () => void;
   variant?: "light" | "dark";
 }
 
-export default function CreateFavoriteFromPhoto({ photo, favorites = [], onDone, onCancel, variant = "light" }: CreateFavoriteFromPhotoProps) {
+function distanceInMeters(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
+  const earthRadiusMeters = 6371000;
+  const toRadians = (value: number) => (value * Math.PI) / 180;
+  const latDelta = toRadians(b.latitude - a.latitude);
+  const lonDelta = toRadians(b.longitude - a.longitude);
+  const lat1 = toRadians(a.latitude);
+  const lat2 = toRadians(b.latitude);
+  const haversine =
+    Math.sin(latDelta / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(lonDelta / 2) ** 2;
+  return 2 * earthRadiusMeters * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos = [], onDone, onCancel, variant = "light" }: CreateFavoriteFromPhotoProps) {
   const router = useRouter();
-  const [mode, setMode] = useState<"existing" | "new">(favorites.length ? "existing" : "new");
-  const [favoriteId, setFavoriteId] = useState(favorites[0]?.id ?? "");
+  const sortedFavorites = useMemo(() => {
+    if (photo.latitude === null || photo.longitude === null) return favorites;
+    const photoPoint = { latitude: photo.latitude, longitude: photo.longitude };
+
+    return favorites
+      .map((favorite) => {
+        const candidatePoints = [
+          favorite.latitude !== null && favorite.longitude !== null
+            ? { latitude: favorite.latitude, longitude: favorite.longitude }
+            : null,
+          ...photos
+            .filter((linkedPhoto) => linkedPhoto.id !== photo.id && linkedPhoto.favorite_id === favorite.id && linkedPhoto.latitude !== null && linkedPhoto.longitude !== null)
+            .map((linkedPhoto) => ({ latitude: linkedPhoto.latitude as number, longitude: linkedPhoto.longitude as number })),
+        ].filter((point): point is { latitude: number; longitude: number } => Boolean(point));
+
+        const nearestDistance = candidatePoints.length
+          ? Math.min(...candidatePoints.map((point) => distanceInMeters(photoPoint, point)))
+          : Number.POSITIVE_INFINITY;
+
+        return { favorite, nearestDistance };
+      })
+      .sort((a, b) => a.nearestDistance - b.nearestDistance || a.favorite.name.localeCompare(b.favorite.name))
+      .map(({ favorite }) => favorite);
+  }, [favorites, photo.id, photo.latitude, photo.longitude, photos]);
+  const [mode, setMode] = useState<"existing" | "new">(sortedFavorites.length ? "existing" : "new");
+  const [favoriteId, setFavoriteId] = useState(sortedFavorites[0]?.id ?? "");
   const [name, setName] = useState("");
   const [type, setType] = useState<TravelFavoriteType>("place");
   const [isSaving, setIsSaving] = useState(false);
@@ -103,14 +141,14 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], onDone,
           ))}
         </div>
       )}
-      {mode === "existing" && favorites.length > 0 ? (
+      {mode === "existing" && sortedFavorites.length > 0 ? (
         <select
           autoFocus
           value={favoriteId}
           onChange={(event) => setFavoriteId(event.target.value)}
           className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-xs font-semibold outline-none ${isDark ? "bg-white/10 text-white" : "border border-slate-200 bg-white text-slate-700"}`}
         >
-          {favorites.map((favorite) => (
+          {sortedFavorites.map((favorite) => (
             <option key={favorite.id} value={favorite.id}>
               {favorite.type}: {favorite.name}
             </option>

@@ -494,6 +494,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                       <CreateFavoriteFromPhoto
                         photo={selectedPhoto}
                         favorites={favorites}
+                        photos={photos}
                         onDone={closeDetails}
                         onCancel={closeDetails}
                       />
