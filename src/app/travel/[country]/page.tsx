@@ -216,7 +216,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold text-slate-950">Favorite Map</h2>
-                <p className="text-sm text-slate-500">Restaurants, activities, and memorable places.</p>
+                <p className="text-sm text-slate-500">Food, activities, and memorable places.</p>
               </div>
               <TravelQuickAddButton kind="favorite" />
             </div>
@@ -295,15 +295,15 @@ export default async function CountryTravelPage({ params }: PageProps) {
             <div className="rounded-xl border border-slate-200 bg-white p-5">
               <div className="mb-4 flex items-center gap-3">
                 <TravelQuickAddButton kind="restaurant" />
-                <h2 className="text-lg font-bold text-slate-950">Restaurants</h2>
+                <h2 className="text-lg font-bold text-slate-950">Food</h2>
               </div>
               {restaurants.length > 0 ? (
                 <TravelFavoriteChips favorites={restaurants} photos={photoRows} />
               ) : (
                 <div className="flex flex-col items-start gap-3">
                   <Utensils className="h-6 w-6 text-slate-300" />
-                  <p className="text-sm text-slate-400">No restaurants yet.</p>
-                  <TravelQuickAddButton kind="restaurant" label="Add first restaurant" />
+                  <p className="text-sm text-slate-400">No food spots yet.</p>
+                  <TravelQuickAddButton kind="restaurant" label="Add first food spot" />
                 </div>
               )}
             </div>

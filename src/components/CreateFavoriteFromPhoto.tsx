@@ -161,7 +161,7 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos 
             onChange={(event) => setType(event.target.value as TravelFavoriteType)}
             className={`rounded-md px-2 py-1.5 text-xs font-semibold outline-none ${isDark ? "bg-white/10 text-white" : "border border-slate-200 bg-white text-slate-700"}`}
           >
-            <option value="restaurant">Restaurant</option>
+            <option value="restaurant">Food</option>
             <option value="activity">Activity</option>
             <option value="place">Place</option>
           </select>

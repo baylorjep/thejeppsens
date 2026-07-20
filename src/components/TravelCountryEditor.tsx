@@ -84,7 +84,7 @@ function inputClassName() {
 }
 
 function favoriteLabel(type: TravelFavoriteType) {
-  if (type === "restaurant") return "Restaurant";
+  if (type === "restaurant") return "Food";
   if (type === "activity") return "Activity";
   return "Place";
 }
@@ -631,7 +631,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
               <h2 className="text-lg font-bold text-slate-950">Edit Travel Log</h2>
-              <p className="text-sm text-slate-500">Add trips, photos, restaurants, activities, and locations.</p>
+              <p className="text-sm text-slate-500">Add trips, photos, food, activities, and locations.</p>
           </div>
           <button
             type="button"
@@ -792,7 +792,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
             {mode === "favorite" && (
               <form onSubmit={saveFavorite} className="grid gap-3 md:grid-cols-2">
                 <select className={inputClassName()} value={favoriteForm.type} onChange={(e) => setFavoriteForm({ ...favoriteForm, type: e.target.value as TravelFavoriteType })}>
-                  <option value="restaurant">Restaurant</option>
+                  <option value="restaurant">Food</option>
                   <option value="activity">Activity</option>
                   <option value="place">Location</option>
                 </select>

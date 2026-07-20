@@ -169,7 +169,7 @@ export function TravelFavoriteModalEditForm({ favorite, variant = "light", onDon
   return (
     <form onSubmit={save} className={`grid gap-3 rounded-lg p-3 ${variant === "dark" ? "bg-white/10" : "border border-slate-200 bg-slate-50"}`}>
       <select className={inputClassName(variant)} value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value as TravelFavoriteType })}>
-        <option value="restaurant">Restaurant</option>
+        <option value="restaurant">Food</option>
         <option value="activity">Activity</option>
         <option value="place">Place</option>
       </select>

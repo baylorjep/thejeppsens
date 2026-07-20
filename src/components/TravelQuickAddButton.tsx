@@ -18,7 +18,7 @@ const LABELS = {
   trip: "Add trip",
   photo: "Add photo",
   favorite: "Add favorite",
-  restaurant: "Add restaurant",
+  restaurant: "Add food",
   activity: "Add activity",
   video: "Add video",
 };
