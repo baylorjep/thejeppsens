@@ -14,6 +14,7 @@ const MAP_WIDTH = 768;
 const MAP_HEIGHT = 320;
 const EXPANDED_MAP_WIDTH = 1600;
 const EXPANDED_MAP_HEIGHT = 900;
+const MAP_FIT_PADDING = 72;
 
 type MapDetailItem =
   | { kind: "favorite"; id: string }
@@ -34,22 +35,51 @@ function latToY(latitude: number, zoom: number) {
   return ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * TILE_SIZE * 2 ** zoom;
 }
 
-function pickZoom(points: { latitude: number; longitude: number }[]) {
-  if (points.length <= 1) return 11;
+function fitMapView(points: { latitude: number; longitude: number }[], fallbackCenter: TravelMapCenter, width: number, height: number): MapView {
+  if (!points.length) {
+    return {
+      latitude: fallbackCenter.latitude,
+      longitude: fallbackCenter.longitude,
+      zoom: fallbackCenter.zoom,
+    };
+  }
 
-  const latitudes = points.map((point) => point.latitude);
-  const longitudes = points.map((point) => point.longitude);
-  const latSpan = Math.max(...latitudes) - Math.min(...latitudes);
-  const lonSpan = Math.max(...longitudes) - Math.min(...longitudes);
-  const span = Math.max(latSpan, lonSpan);
+  if (points.length === 1) {
+    return {
+      latitude: points[0].latitude,
+      longitude: points[0].longitude,
+      zoom: 11,
+    };
+  }
 
-  if (span < 0.08) return 12;
-  if (span < 0.2) return 11;
-  if (span < 0.6) return 10;
-  if (span < 1.5) return 9;
-  if (span < 3) return 8;
-  if (span < 7) return 7;
-  return 5;
+  let bestZoom = 3;
+  const fitWidth = Math.max(width - MAP_FIT_PADDING * 2, width * 0.55);
+  const fitHeight = Math.max(height - MAP_FIT_PADDING * 2, height * 0.55);
+
+  for (let candidateZoom = 16; candidateZoom >= 3; candidateZoom -= 1) {
+    const xs = points.map((point) => lonToX(point.longitude, candidateZoom));
+    const ys = points.map((point) => latToY(point.latitude, candidateZoom));
+    const xSpan = Math.max(...xs) - Math.min(...xs);
+    const ySpan = Math.max(...ys) - Math.min(...ys);
+    if (xSpan <= fitWidth && ySpan <= fitHeight) {
+      bestZoom = candidateZoom;
+      break;
+    }
+  }
+
+  const xs = points.map((point) => lonToX(point.longitude, bestZoom));
+  const ys = points.map((point) => latToY(point.latitude, bestZoom));
+  const centerX = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const centerY = (Math.min(...ys) + Math.max(...ys)) / 2;
+  const worldSize = TILE_SIZE * 2 ** bestZoom;
+  const longitude = (centerX / worldSize) * 360 - 180;
+  const latitudeRadians = Math.atan(Math.sinh(Math.PI * (1 - (2 * centerY) / worldSize)));
+
+  return {
+    latitude: (latitudeRadians * 180) / Math.PI,
+    longitude,
+    zoom: bestZoom,
+  };
 }
 
 function clusterPrecisionForZoom(zoom: number) {
@@ -119,16 +149,11 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     ...mappedPhotos.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
   ];
 
-  const baseCenterLatitude = mapPoints.length
-    ? mapPoints.reduce((sum, point) => sum + point.latitude, 0) / mapPoints.length
-    : fallbackCenter.latitude;
-  const baseCenterLongitude = mapPoints.length
-    ? mapPoints.reduce((sum, point) => sum + point.longitude, 0) / mapPoints.length
-    : fallbackCenter.longitude;
-  const baseZoom = mapPoints.length ? pickZoom(mapPoints) : fallbackCenter.zoom;
-  const centerLatitude = mapView?.latitude ?? baseCenterLatitude;
-  const centerLongitude = mapView?.longitude ?? baseCenterLongitude;
-  const zoom = mapView?.zoom ?? baseZoom;
+  const baseMapView = fitMapView(mapPoints, fallbackCenter, MAP_WIDTH, MAP_HEIGHT);
+  const effectiveMapView = mapView ?? baseMapView;
+  const centerLatitude = effectiveMapView.latitude;
+  const centerLongitude = effectiveMapView.longitude;
+  const zoom = effectiveMapView.zoom;
   const centerX = lonToX(centerLongitude, zoom);
   const centerY = latToY(centerLatitude, zoom);
 
