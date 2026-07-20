@@ -42,6 +42,10 @@ function favoriteLabel(type: TravelFavorite['type']) {
   return 'Place';
 }
 
+function countLabel(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 export default async function StateTravelPage({ params }: PageProps) {
   const { country, state: stateParam } = await params;
   if (country !== 'united-states') notFound();
@@ -147,7 +151,7 @@ export default async function StateTravelPage({ params }: PageProps) {
             <h1 className="mt-2 text-5xl font-bold tracking-tight sm:text-6xl">{state.state_name}</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
               {travelerLabel({ baylor_visited: state.baylor_visited, isabel_visited: state.isabel_visited })} visited.{' '}
-              {tripRows.length} trips logged, {photoRows.length} photos saved, {favoriteRows.length} favorite spots.
+              {countLabel(tripRows.length, 'trip')} logged, {countLabel(photoRows.length, 'photo')} saved, {countLabel(favoriteRows.length, 'favorite spot')}.
             </p>
           </div>
         </div>

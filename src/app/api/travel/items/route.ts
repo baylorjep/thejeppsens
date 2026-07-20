@@ -29,6 +29,48 @@ function travelPhotoStoragePath(imageUrl: string | null | undefined) {
   return decodeURIComponent(imageUrl.slice(markerIndex + marker.length).split("?")[0]);
 }
 
+async function backfillFavoriteCoordinatesFromPhoto(
+  supabase: NonNullable<ReturnType<typeof getTravelSupabaseClient>>,
+  photoId: string,
+  favoriteId: string | null | undefined,
+) {
+  if (!favoriteId) return;
+
+  const [{ data: photo }, { data: favorite }] = await Promise.all([
+    supabase
+      .from("travel_photos")
+      .select("latitude, longitude, location_name")
+      .eq("id", photoId)
+      .maybeSingle(),
+    supabase
+      .from("travel_favorites")
+      .select("latitude, longitude, location_name")
+      .eq("id", favoriteId)
+      .maybeSingle(),
+  ]);
+
+  if (
+    photo?.latitude === null ||
+    photo?.latitude === undefined ||
+    photo.longitude === null ||
+    photo.longitude === undefined ||
+    favorite?.latitude !== null ||
+    favorite?.longitude !== null
+  ) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("travel_favorites")
+    .update({
+      latitude: photo.latitude,
+      longitude: photo.longitude,
+      location_name: favorite?.location_name || photo.location_name || null,
+    })
+    .eq("id", favoriteId);
+  if (error) throw error;
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = getTravelSupabaseClient();
@@ -103,6 +145,7 @@ export async function POST(request: Request) {
 
       const { data, error } = await supabase.from("travel_photos").upsert(row).select().single();
       if (error) throw error;
+      await backfillFavoriteCoordinatesFromPhoto(supabase, data.id, data.favorite_id);
       return NextResponse.json({ item: data });
     }
 
@@ -178,6 +221,7 @@ export async function PATCH(request: Request) {
       .select()
       .single();
     if (error) throw error;
+    await backfillFavoriteCoordinatesFromPhoto(supabase, data.id, data.favorite_id);
 
     return NextResponse.json({ item: data });
   } catch (error) {

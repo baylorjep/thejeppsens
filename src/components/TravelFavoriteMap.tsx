@@ -5,7 +5,7 @@ import TravelEditButton from "@/components/TravelEditButton";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 import type { TravelFavorite, TravelPhoto } from "@/lib/travel";
 import type { TravelMapCenter } from "@/lib/travelMapCenters";
-import { CalendarDays, Maximize2, MapPin, Sparkles, Utensils, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Maximize2, MapPin, Sparkles, Utensils, X } from "lucide-react";
 import { useState } from "react";
 
 const TILE_SIZE = 256;
@@ -76,6 +76,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedFavoriteId, setSelectedFavoriteId] = useState<string | null>(null);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
+  const [selectedFavoritePhotoIndex, setSelectedFavoritePhotoIndex] = useState(0);
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
     .map((favorite) => ({
@@ -84,7 +85,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
       longitude: favorite.longitude as number,
     }));
   const mappedPhotos = photos
-    .filter((photo) => photo.latitude !== null && photo.longitude !== null)
+    .filter((photo) => photo.favorite_id === null && photo.latitude !== null && photo.longitude !== null)
     .map((photo) => ({
       ...photo,
       latitude: photo.latitude as number,
@@ -112,7 +113,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const IconForFavorite = (type: TravelFavorite["type"]) => (type === "restaurant" ? Utensils : type === "activity" ? Sparkles : MapPin);
   const selectedFavorite = selectedFavoriteId ? favorites.find((favorite) => favorite.id === selectedFavoriteId) ?? null : null;
   const selectedFavoritePhotos = selectedFavorite ? photos.filter((photo) => photo.favorite_id === selectedFavorite.id) : [];
-  const selectedFavoriteHeroPhoto = selectedFavoritePhotos[0] ?? null;
+  const selectedFavoriteHeroPhoto = selectedFavoritePhotos[selectedFavoritePhotoIndex] ?? selectedFavoritePhotos[0] ?? null;
   const SelectedFavoriteIcon = selectedFavorite ? IconForFavorite(selectedFavorite.type) : null;
   const selectedPhoto = selectedPhotoId ? photos.find((photo) => photo.id === selectedPhotoId) ?? null : null;
   const selectedPhotoFavorite = selectedPhoto?.favorite_id ? favorites.find((favorite) => favorite.id === selectedPhoto.favorite_id) ?? null : null;
@@ -121,6 +122,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setActiveId(favoriteId);
     setSelectedPhotoId(null);
     setSelectedFavoriteId(favoriteId);
+    setSelectedFavoritePhotoIndex(0);
   };
 
   const openPhoto = (photo: TravelPhoto) => {
@@ -131,6 +133,19 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const closeDetails = () => {
     setSelectedFavoriteId(null);
     setSelectedPhotoId(null);
+    setSelectedFavoritePhotoIndex(0);
+  };
+
+  const moveFavorite = (direction: -1 | 1) => {
+    if (!selectedFavorite || !favorites.length) return;
+    const currentIndex = favorites.findIndex((favorite) => favorite.id === selectedFavorite.id);
+    const nextIndex = (currentIndex + direction + favorites.length) % favorites.length;
+    openFavorite(favorites[nextIndex].id);
+  };
+
+  const moveFavoritePhoto = (direction: -1 | 1) => {
+    if (selectedFavoritePhotos.length <= 1) return;
+    setSelectedFavoritePhotoIndex((current) => (current + direction + selectedFavoritePhotos.length) % selectedFavoritePhotos.length);
   };
 
   const renderCanvas = (width: number, height: number, markerScale: 1 | 1.4) => {
@@ -335,14 +350,47 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
 
             {selectedFavorite ? (
               <>
-                {selectedFavoriteHeroPhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={selectedFavoriteHeroPhoto.image_url} alt="" className="aspect-video w-full object-cover" />
-                ) : (
-                  <div className="flex aspect-video items-center justify-center bg-slate-100 text-slate-300">
-                    {SelectedFavoriteIcon && <SelectedFavoriteIcon className="h-10 w-10" />}
-                  </div>
-                )}
+                <div className="relative">
+                  {selectedFavoriteHeroPhoto ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={selectedFavoriteHeroPhoto.image_url} alt="" className="aspect-video w-full object-cover" />
+                  ) : (
+                    <div className="flex aspect-video items-center justify-center bg-slate-100 text-slate-300">
+                      {SelectedFavoriteIcon && <SelectedFavoriteIcon className="h-10 w-10" />}
+                    </div>
+                  )}
+                  {favorites.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => moveFavorite(-1)}
+                        aria-label="Previous favorite"
+                        className="absolute left-3 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveFavorite(1)}
+                        aria-label="Next favorite"
+                        className="absolute right-14 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
+                  {selectedFavoritePhotos.length > 1 && (
+                    <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-slate-950/70 px-2 py-1 text-xs font-semibold text-white">
+                      <button type="button" onClick={() => moveFavoritePhoto(-1)} aria-label="Previous photo" className="rounded-full p-1 hover:bg-white/15">
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      <span>{selectedFavoritePhotoIndex + 1} / {selectedFavoritePhotos.length}</span>
+                      <button type="button" onClick={() => moveFavoritePhoto(1)} aria-label="Next photo" className="rounded-full p-1 hover:bg-white/15">
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="space-y-4 p-5">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-teal-600">{selectedFavorite.type}</p>
@@ -354,8 +402,13 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                   </p>
                   {selectedFavoritePhotos.length > 1 && (
                     <div className="grid grid-cols-4 gap-2">
-                      {selectedFavoritePhotos.slice(0, 8).map((photo) => (
-                        <button key={photo.id} type="button" onClick={() => openPhoto(photo)} className="overflow-hidden rounded-md">
+                      {selectedFavoritePhotos.slice(0, 8).map((photo, index) => (
+                        <button
+                          key={photo.id}
+                          type="button"
+                          onClick={() => setSelectedFavoritePhotoIndex(index)}
+                          className={`overflow-hidden rounded-md ring-offset-2 ${index === selectedFavoritePhotoIndex ? "ring-2 ring-teal-500" : ""}`}
+                        >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
                         </button>

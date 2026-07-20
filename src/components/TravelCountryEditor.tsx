@@ -1,6 +1,7 @@
 "use client";
 
 import { optimizeImageFile } from "@/lib/vinylImage";
+import CreateFavoriteFromPhoto from "@/components/CreateFavoriteFromPhoto";
 import { extractPhotoMetadata } from "@/lib/photoMetadata";
 import type { PhotoMetadata } from "@/lib/photoMetadata";
 import { youtubeThumbnailUrl } from "@/lib/travel";
@@ -105,6 +106,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
   const [isSaving, setIsSaving] = useState(false);
   const [attachPhotoId, setAttachPhotoId] = useState("");
   const [isLinking, setIsLinking] = useState(false);
+  const [isCreatingFavoriteFromPhoto, setIsCreatingFavoriteFromPhoto] = useState(false);
 
   const restaurants = useMemo(() => favorites.filter((favorite) => favorite.type === "restaurant"), [favorites]);
   const activities = useMemo(() => favorites.filter((favorite) => favorite.type === "activity"), [favorites]);
@@ -118,6 +120,24 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     () => photos.filter((photo) => photo.favorite_id !== favoriteForm.id),
     [photos, favoriteForm.id],
   );
+  const activeEditorPhoto = useMemo<TravelPhoto | null>(() => {
+    if (!photoForm.id) return null;
+    return {
+      id: photoForm.id,
+      country_id: country.id,
+      state_id: state?.id ?? null,
+      trip_id: photoForm.trip_id || null,
+      favorite_id: photoForm.favorite_id || null,
+      image_url: photoForm.image_url,
+      caption: photoForm.caption || null,
+      location_name: photoForm.location_name || null,
+      latitude: photoForm.latitude ? Number(photoForm.latitude) : null,
+      longitude: photoForm.longitude ? Number(photoForm.longitude) : null,
+      taken_on: photoForm.taken_on || null,
+      sort_order: Number(photoForm.sort_order) || 0,
+      is_featured: photoForm.is_featured,
+    };
+  }, [country.id, photoForm, state?.id]);
 
   useEffect(() => {
     const handleQuickAdd = (event: Event) => {
@@ -157,6 +177,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     setPhotoFile(undefined);
     setPhotoPreview("");
     setImportProgress("");
+    setIsCreatingFavoriteFromPhoto(false);
   };
 
   const handlePhotoChange = async (file?: File) => {
@@ -462,6 +483,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       });
       if (!response.ok) throw new Error("Link failed");
       setAttachPhotoId("");
+      setMessage(favoriteId ? "Photo linked to favorite." : "Photo detached from favorite.");
       router.refresh();
     } catch {
       setMessage("Could not update that photo link.");
@@ -516,6 +538,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     });
     setPhotoPreview(photo.image_url);
     setPhotoFile(undefined);
+    setIsCreatingFavoriteFromPhoto(false);
   };
 
   const editFavorite = (favorite: TravelFavorite) => {
@@ -625,6 +648,31 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                   <option value="">Not linked to a favorite</option>
                   {favorites.map((favorite) => <option key={favorite.id} value={favorite.id}>{favoriteLabel(favorite.type)}: {favorite.name}</option>)}
                 </select>
+                {activeEditorPhoto && !photoForm.favorite_id && (
+                  <div className="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2">
+                    {isCreatingFavoriteFromPhoto ? (
+                      <CreateFavoriteFromPhoto
+                        photo={activeEditorPhoto}
+                        favorites={favorites}
+                        onDone={() => {
+                          setIsCreatingFavoriteFromPhoto(false);
+                          setMessage("Experience updated for this photo.");
+                          router.refresh();
+                        }}
+                        onCancel={() => setIsCreatingFavoriteFromPhoto(false)}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsCreatingFavoriteFromPhoto(true)}
+                        className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Create or link an experience from this photo
+                      </button>
+                    )}
+                  </div>
+                )}
                 <label className="space-y-1">
                   <span className="block text-xs font-semibold text-slate-500">Photo date</span>
                   <input className={inputClassName()} type="date" value={photoForm.taken_on} onChange={(e) => setPhotoForm({ ...photoForm, taken_on: e.target.value })} />
