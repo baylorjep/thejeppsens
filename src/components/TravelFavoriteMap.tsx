@@ -14,6 +14,10 @@ const MAP_HEIGHT = 320;
 const EXPANDED_MAP_WIDTH = 1600;
 const EXPANDED_MAP_HEIGHT = 900;
 
+type MapDetailItem =
+  | { kind: "favorite"; id: string }
+  | { kind: "photo"; id: string };
+
 function lonToX(longitude: number, zoom: number) {
   return ((longitude + 180) / 360) * TILE_SIZE * 2 ** zoom;
 }
@@ -117,6 +121,19 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const SelectedFavoriteIcon = selectedFavorite ? IconForFavorite(selectedFavorite.type) : null;
   const selectedPhoto = selectedPhotoId ? photos.find((photo) => photo.id === selectedPhotoId) ?? null : null;
   const selectedPhotoFavorite = selectedPhoto?.favorite_id ? favorites.find((favorite) => favorite.id === selectedPhoto.favorite_id) ?? null : null;
+  const mapDetailItems: MapDetailItem[] = [
+    ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id })),
+    ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id })),
+  ];
+
+  const openMapItem = (item: MapDetailItem) => {
+    if (item.kind === "favorite") {
+      openFavorite(item.id);
+    } else {
+      const photo = mappedPhotos.find((mappedPhoto) => mappedPhoto.id === item.id) ?? photos.find((photo) => photo.id === item.id);
+      if (photo) openPhoto(photo);
+    }
+  };
 
   const openFavorite = (favoriteId: string) => {
     setActiveId(favoriteId);
@@ -136,11 +153,15 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setSelectedFavoritePhotoIndex(0);
   };
 
-  const moveFavorite = (direction: -1 | 1) => {
-    if (!selectedFavorite || !favorites.length) return;
-    const currentIndex = favorites.findIndex((favorite) => favorite.id === selectedFavorite.id);
-    const nextIndex = (currentIndex + direction + favorites.length) % favorites.length;
-    openFavorite(favorites[nextIndex].id);
+  const moveMapItem = (direction: -1 | 1) => {
+    if (!mapDetailItems.length) return;
+    const currentIndex = mapDetailItems.findIndex((item) => {
+      if (selectedFavorite) return item.kind === "favorite" && item.id === selectedFavorite.id;
+      if (selectedPhoto) return item.kind === "photo" && item.id === selectedPhoto.id;
+      return false;
+    });
+    const nextIndex = ((currentIndex === -1 ? 0 : currentIndex) + direction + mapDetailItems.length) % mapDetailItems.length;
+    openMapItem(mapDetailItems[nextIndex]);
   };
 
   const moveFavoritePhoto = (direction: -1 | 1) => {
@@ -359,20 +380,20 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                       {SelectedFavoriteIcon && <SelectedFavoriteIcon className="h-10 w-10" />}
                     </div>
                   )}
-                  {favorites.length > 1 && (
+                  {mapDetailItems.length > 1 && (
                     <>
                       <button
                         type="button"
-                        onClick={() => moveFavorite(-1)}
-                        aria-label="Previous favorite"
+                        onClick={() => moveMapItem(-1)}
+                        aria-label="Previous map item"
                         className="absolute left-3 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </button>
                       <button
                         type="button"
-                        onClick={() => moveFavorite(1)}
-                        aria-label="Next favorite"
+                        onClick={() => moveMapItem(1)}
+                        aria-label="Next map item"
                         className="absolute right-14 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
                       >
                         <ChevronRight className="h-5 w-5" />
@@ -420,8 +441,30 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
               </>
             ) : selectedPhoto ? (
               <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={selectedPhoto.image_url} alt="" className="max-h-[52vh] w-full object-contain bg-slate-950" />
+                <div className="relative bg-slate-950">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={selectedPhoto.image_url} alt="" className="max-h-[52vh] w-full object-contain" />
+                  {mapDetailItems.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => moveMapItem(-1)}
+                        aria-label="Previous map item"
+                        className="absolute left-3 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveMapItem(1)}
+                        aria-label="Next map item"
+                        className="absolute right-14 top-1/2 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
+                </div>
                 <div className="space-y-4 p-5">
                   <div>
                     <h3 className="text-lg font-bold text-slate-950">{selectedPhoto.caption ?? selectedPhoto.location_name ?? "Travel photo"}</h3>
