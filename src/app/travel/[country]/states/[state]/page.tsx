@@ -82,7 +82,7 @@ export default async function StateTravelPage({ params }: PageProps) {
       .order('sort_order'),
     supabase
       .from('travel_favorites')
-      .select('id, country_id, state_id, trip_id, type, name, location_name, latitude, longitude, notes, sort_order')
+      .select('id, country_id, state_id, trip_id, type, name, location_name, address, latitude, longitude, notes, sort_order')
       .eq('country_id', unitedStates.id)
       .eq('state_id', state.id)
       .order('sort_order')

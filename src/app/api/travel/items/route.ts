@@ -189,6 +189,7 @@ export async function POST(request: Request) {
       type: favoriteType,
       name,
       location_name: nullableText(formData.get("location_name")),
+      address: nullableText(formData.get("address")),
       latitude: numberValue(formData.get("latitude")),
       longitude: numberValue(formData.get("longitude")),
       notes: nullableText(formData.get("notes")),

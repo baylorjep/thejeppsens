@@ -53,6 +53,7 @@ const emptyFavorite = {
   type: "restaurant" as TravelFavoriteType,
   name: "",
   location_name: "",
+  address: "",
   latitude: "",
   longitude: "",
   notes: "",
@@ -397,6 +398,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
     formData.set("favorite_type", favoriteForm.type);
     formData.set("name", favoriteForm.name);
     formData.set("location_name", favoriteForm.location_name);
+    formData.set("address", favoriteForm.address);
     formData.set("latitude", favoriteForm.latitude);
     formData.set("longitude", favoriteForm.longitude);
     formData.set("notes", favoriteForm.notes);
@@ -603,6 +605,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       type: favorite.type,
       name: favorite.name,
       location_name: favorite.location_name ?? "",
+      address: favorite.address ?? "",
       latitude: favorite.latitude?.toString() ?? "",
       longitude: favorite.longitude?.toString() ?? "",
       notes: favorite.notes ?? "",
@@ -802,6 +805,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
                 </select>
                 <input className={inputClassName()} value={favoriteForm.name} onChange={(e) => setFavoriteForm({ ...favoriteForm, name: e.target.value })} placeholder="Name" required />
                 <input className={inputClassName()} value={favoriteForm.location_name} onChange={(e) => setFavoriteForm({ ...favoriteForm, location_name: e.target.value })} placeholder="City or area" />
+                <input className={`${inputClassName()} md:col-span-2`} value={favoriteForm.address} onChange={(e) => setFavoriteForm({ ...favoriteForm, address: e.target.value })} placeholder="Street address or Maps-friendly address" />
                 <div className="grid gap-3 md:col-span-2 md:grid-cols-[1fr_1fr_auto]">
                   <input className={inputClassName()} value={favoriteForm.latitude} onChange={(e) => setFavoriteForm({ ...favoriteForm, latitude: e.target.value })} placeholder="Latitude" />
                   <input className={inputClassName()} value={favoriteForm.longitude} onChange={(e) => setFavoriteForm({ ...favoriteForm, longitude: e.target.value })} placeholder="Longitude" />

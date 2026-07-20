@@ -49,10 +49,19 @@ export interface TravelFavorite {
   type: TravelFavoriteType;
   name: string;
   location_name: string | null;
+  address: string | null;
   latitude: number | null;
   longitude: number | null;
   notes: string | null;
   sort_order: number;
+}
+
+export function travelFavoriteMapsUrl(favorite: Pick<TravelFavorite, 'name' | 'location_name' | 'address' | 'latitude' | 'longitude'>) {
+  const query = favorite.address?.trim()
+    || (favorite.latitude !== null && favorite.longitude !== null ? `${favorite.latitude},${favorite.longitude}` : "")
+    || [favorite.name, favorite.location_name].filter(Boolean).join(", ");
+
+  return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : null;
 }
 
 export interface TravelVideo {

@@ -1,8 +1,8 @@
 "use client";
 
 import { TravelFavoriteModalEditForm } from "@/components/TravelModalEditForm";
-import type { TravelFavorite, TravelPhoto } from "@/lib/travel";
-import { MapPin, X } from "lucide-react";
+import { travelFavoriteMapsUrl, type TravelFavorite, type TravelPhoto } from "@/lib/travel";
+import { ExternalLink, MapPin, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -19,6 +19,7 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
   const selectedFavorite = selectedId ? favorites.find((favorite) => favorite.id === selectedId) ?? null : null;
   const selectedPhotos = selectedFavorite ? photos.filter((photo) => photo.favorite_id === selectedFavorite.id) : [];
   const heroPhoto = selectedPhotos[selectedPhotoIndex] ?? selectedPhotos.find((photo) => photo.is_favorite_featured) ?? selectedPhotos[0] ?? null;
+  const mapsUrl = selectedFavorite ? travelFavoriteMapsUrl(selectedFavorite) : null;
 
   const featuredPhotoIndexFor = (favoriteId: string) => {
     const favoritePhotos = photos.filter((photo) => photo.favorite_id === favoriteId);
@@ -99,6 +100,7 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
                     <p className="text-xs font-semibold uppercase tracking-wide text-teal-600">{selectedFavorite.type}</p>
                     <h3 className="mt-1 text-xl font-bold text-slate-950">{selectedFavorite.name}</h3>
                     {selectedFavorite.location_name && <p className="mt-1 text-sm text-slate-500">{selectedFavorite.location_name}</p>}
+                    {selectedFavorite.address && <p className="mt-2 text-sm text-slate-600">{selectedFavorite.address}</p>}
                   </div>
                   <p className="text-sm leading-6 text-slate-600">{selectedFavorite.notes?.trim() || "No notes saved yet."}</p>
                   {selectedPhotos.length > 0 && (
@@ -115,6 +117,17 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
                         </button>
                       ))}
                     </div>
+                  )}
+                  {mapsUrl && (
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Open in Maps
+                    </a>
                   )}
                   {heroPhoto && (
                     <button

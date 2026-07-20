@@ -89,6 +89,7 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos 
       favoriteData.set("favorite_type", type);
       favoriteData.set("name", name.trim());
       favoriteData.set("location_name", photo.location_name ?? "");
+      favoriteData.set("address", "");
       if (photo.latitude !== null) favoriteData.set("latitude", String(photo.latitude));
       if (photo.longitude !== null) favoriteData.set("longitude", String(photo.longitude));
       favoriteData.set("sort_order", "0");
