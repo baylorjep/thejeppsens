@@ -1,7 +1,7 @@
 "use client";
 
 import type { TravelFavorite, TravelPhoto, TravelTrip, TravelVideo } from "@/lib/travel";
-import { AlertCircle, ArrowRight } from "lucide-react";
+import { ArrowRight, Info } from "lucide-react";
 
 interface TravelDataNudgesProps {
   photos: TravelPhoto[];
@@ -18,6 +18,7 @@ function editItem(type: EditorMode, item: TravelTrip | TravelPhoto | TravelFavor
 
 export default function TravelDataNudges({ photos, favorites, trips, videos }: TravelDataNudgesProps) {
   const photosNeedingLocation = photos.filter((photo) => photo.location_name && (photo.latitude === null || photo.longitude === null));
+  const photosWithoutExperience = photos.filter((photo) => !photo.favorite_id);
   const favoritesNeedingCoordinates = favorites.filter((favorite) => favorite.latitude === null || favorite.longitude === null);
   const videosUnattached = videos.filter((video) => !video.trip_id);
   const tripIdsWithItems = new Set([
@@ -33,6 +34,13 @@ export default function TravelDataNudges({ photos, favorites, trips, videos }: T
           key: "photos",
           label: `${photosNeedingLocation.length} photo${photosNeedingLocation.length === 1 ? "" : "s"} can be placed on the map.`,
           onClick: () => editItem("photo", photosNeedingLocation[0]),
+        }
+      : null,
+    photosWithoutExperience.length
+      ? {
+          key: "photo-experiences",
+          label: `${photosWithoutExperience.length} photo${photosWithoutExperience.length === 1 ? "" : "s"} not linked to an experience.`,
+          onClick: () => editItem("photo", photosWithoutExperience[0]),
         }
       : null,
     favoritesNeedingCoordinates.length
@@ -61,17 +69,17 @@ export default function TravelDataNudges({ photos, favorites, trips, videos }: T
   if (!nudges.length) return null;
 
   return (
-    <section className="border-b border-slate-100 bg-amber-50/70">
+    <section className="border-b border-slate-100 bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-2 text-sm text-amber-900 sm:flex-row sm:items-center">
-          <AlertCircle className="h-4 w-4 shrink-0" />
+        <div className="flex flex-col gap-2 text-sm text-slate-600 sm:flex-row sm:items-center">
+          <Info className="h-4 w-4 shrink-0 text-teal-600" />
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             {nudges.map((nudge) => (
               <button
                 key={nudge.key}
                 type="button"
                 onClick={nudge.onClick}
-                className="inline-flex items-center gap-1 underline decoration-amber-500/50 decoration-dashed underline-offset-2 transition-colors hover:text-amber-950"
+                className="inline-flex items-center gap-1 underline decoration-teal-500/40 decoration-dashed underline-offset-2 transition-colors hover:text-slate-950"
               >
                 {nudge.label}
                 <ArrowRight className="h-3 w-3" />
