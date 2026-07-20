@@ -125,6 +125,11 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     const favoritePhotos = favoritePhotosFor(favoriteId);
     return favoritePhotos.find((photo) => photo.is_favorite_featured) ?? favoritePhotos[0] ?? null;
   };
+  const favoriteFeaturedPhotoIndexFor = (favoriteId: string) => {
+    const favoritePhotos = favoritePhotosFor(favoriteId);
+    const featuredIndex = favoritePhotos.findIndex((photo) => photo.is_favorite_featured);
+    return featuredIndex === -1 ? 0 : featuredIndex;
+  };
   const selectedFavoritePhotos = selectedFavorite ? favoritePhotosFor(selectedFavorite.id) : [];
   const selectedFavoriteHeroPhoto = selectedFavoritePhotos[selectedFavoritePhotoIndex] ?? selectedFavoritePhotos[0] ?? null;
   const SelectedFavoriteIcon = selectedFavorite ? IconForFavorite(selectedFavorite.type) : null;
@@ -148,7 +153,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setActiveId(favoriteId);
     setSelectedPhotoId(null);
     setSelectedFavoriteId(favoriteId);
-    setSelectedFavoritePhotoIndex(0);
+    setSelectedFavoritePhotoIndex(favoriteFeaturedPhotoIndexFor(favoriteId));
     setEditingDetail(null);
   };
 

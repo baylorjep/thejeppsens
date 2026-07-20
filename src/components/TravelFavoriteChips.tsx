@@ -20,6 +20,12 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
   const selectedPhotos = selectedFavorite ? photos.filter((photo) => photo.favorite_id === selectedFavorite.id) : [];
   const heroPhoto = selectedPhotos[selectedPhotoIndex] ?? selectedPhotos.find((photo) => photo.is_favorite_featured) ?? selectedPhotos[0] ?? null;
 
+  const featuredPhotoIndexFor = (favoriteId: string) => {
+    const favoritePhotos = photos.filter((photo) => photo.favorite_id === favoriteId);
+    const featuredIndex = favoritePhotos.findIndex((photo) => photo.is_favorite_featured);
+    return featuredIndex === -1 ? 0 : featuredIndex;
+  };
+
   const close = () => {
     setSelectedId(null);
     setIsEditing(false);
@@ -50,7 +56,7 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
             onClick={() => {
               setSelectedId(favorite.id);
               setIsEditing(false);
-              setSelectedPhotoIndex(0);
+              setSelectedPhotoIndex(featuredPhotoIndexFor(favorite.id));
             }}
             className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-white hover:text-slate-950"
           >
