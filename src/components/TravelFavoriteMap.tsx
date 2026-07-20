@@ -7,7 +7,7 @@ import { travelFavoriteMapsUrl, type TravelFavorite, type TravelPhoto } from "@/
 import type { TravelMapCenter } from "@/lib/travelMapCenters";
 import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Maximize2, MapPin, Sparkles, Trash2, Utensils, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState, type PointerEvent, type WheelEvent } from "react";
 
 const TILE_SIZE = 256;
 const MAP_WIDTH = 768;
@@ -26,6 +26,17 @@ interface MapView {
   zoom: number;
 }
 
+interface GestureState {
+  centerX: number;
+  centerY: number;
+  pointers: Map<number, { x: number; y: number }>;
+  startDistance?: number;
+  startZoom?: number;
+  startMidpoint?: { x: number; y: number };
+  startMidpointMapX?: number;
+  startMidpointMapY?: number;
+}
+
 function lonToX(longitude: number, zoom: number) {
   return ((longitude + 180) / 360) * TILE_SIZE * 2 ** zoom;
 }
@@ -33,6 +44,31 @@ function lonToX(longitude: number, zoom: number) {
 function latToY(latitude: number, zoom: number) {
   const latRad = (latitude * Math.PI) / 180;
   return ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * TILE_SIZE * 2 ** zoom;
+}
+
+function xToLon(x: number, zoom: number) {
+  return (x / (TILE_SIZE * 2 ** zoom)) * 360 - 180;
+}
+
+function yToLat(y: number, zoom: number) {
+  const worldSize = TILE_SIZE * 2 ** zoom;
+  const latitudeRadians = Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / worldSize)));
+  return (latitudeRadians * 180) / Math.PI;
+}
+
+function clampZoom(zoom: number) {
+  return Math.max(3, Math.min(17, zoom));
+}
+
+function distanceBetween(a: { x: number; y: number }, b: { x: number; y: number }) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function midpointBetween(a: { x: number; y: number }, b: { x: number; y: number }) {
+  return {
+    x: (a.x + b.x) / 2,
+    y: (a.y + b.y) / 2,
+  };
 }
 
 function fitMapView(points: { latitude: number; longitude: number }[], fallbackCenter: TravelMapCenter, width: number, height: number): MapView {
@@ -121,6 +157,8 @@ interface TravelFavoriteMapProps {
 
 export default function TravelFavoriteMap({ favorites, photos = [], fallbackCenter }: TravelFavoriteMapProps) {
   const router = useRouter();
+  const expandedMapRef = useRef<HTMLDivElement | null>(null);
+  const gestureRef = useRef<GestureState | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedFavoriteId, setSelectedFavoriteId] = useState<string | null>(null);
@@ -279,6 +317,134 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
 
   const resetMapView = () => {
     setMapView(null);
+  };
+
+  const mapViewFromCenterPixels = (nextCenterX: number, nextCenterY: number, nextZoom: number): MapView => ({
+    latitude: yToLat(nextCenterY, nextZoom),
+    longitude: xToLon(nextCenterX, nextZoom),
+    zoom: nextZoom,
+  });
+
+  const zoomMapAtPoint = (clientX: number, clientY: number, nextZoom: number) => {
+    const element = expandedMapRef.current;
+    if (!element) return;
+
+    const rect = element.getBoundingClientRect();
+    const localX = clientX - rect.left;
+    const localY = clientY - rect.top;
+    const topLeftX = centerX - EXPANDED_MAP_WIDTH / 2;
+    const topLeftY = centerY - EXPANDED_MAP_HEIGHT / 2;
+    const mapX = topLeftX + localX;
+    const mapY = topLeftY + localY;
+    const longitude = xToLon(mapX, zoom);
+    const latitude = yToLat(mapY, zoom);
+    const nextCenterX = lonToX(longitude, nextZoom) - localX + EXPANDED_MAP_WIDTH / 2;
+    const nextCenterY = latToY(latitude, nextZoom) - localY + EXPANDED_MAP_HEIGHT / 2;
+
+    setMapView(mapViewFromCenterPixels(nextCenterX, nextCenterY, nextZoom));
+  };
+
+  const handleMapWheel = (event: WheelEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const zoomDelta = event.deltaY < 0 ? 0.6 : -0.6;
+    const nextZoom = clampZoom(zoom + zoomDelta);
+    if (nextZoom === zoom) return;
+    zoomMapAtPoint(event.clientX, event.clientY, nextZoom);
+  };
+
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.target instanceof HTMLElement && event.target.closest("button, a")) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const point = { x: event.clientX, y: event.clientY };
+    const existingPointers = gestureRef.current?.pointers ?? new Map<number, { x: number; y: number }>();
+    existingPointers.set(event.pointerId, point);
+
+    gestureRef.current = {
+      centerX,
+      centerY,
+      pointers: existingPointers,
+    };
+
+    if (existingPointers.size === 2) {
+      const [first, second] = Array.from(existingPointers.values());
+      const rect = event.currentTarget.getBoundingClientRect();
+      const midpoint = midpointBetween(first, second);
+      gestureRef.current.startDistance = distanceBetween(first, second);
+      gestureRef.current.startZoom = zoom;
+      gestureRef.current.startMidpoint = midpoint;
+      gestureRef.current.startMidpointMapX = centerX - EXPANDED_MAP_WIDTH / 2 + midpoint.x - rect.left;
+      gestureRef.current.startMidpointMapY = centerY - EXPANDED_MAP_HEIGHT / 2 + midpoint.y - rect.top;
+    }
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const gesture = gestureRef.current;
+    if (!gesture?.pointers.has(event.pointerId)) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const previousPoint = gesture.pointers.get(event.pointerId);
+    gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (gesture.pointers.size === 1 && previousPoint) {
+      const nextCenterX = gesture.centerX - (event.clientX - previousPoint.x);
+      const nextCenterY = gesture.centerY - (event.clientY - previousPoint.y);
+      gesture.centerX = nextCenterX;
+      gesture.centerY = nextCenterY;
+      setMapView(mapViewFromCenterPixels(nextCenterX, nextCenterY, zoom));
+      return;
+    }
+
+    if (
+      gesture.pointers.size >= 2 &&
+      gesture.startDistance &&
+      gesture.startZoom !== undefined &&
+      gesture.startMidpoint &&
+      gesture.startMidpointMapX !== undefined &&
+      gesture.startMidpointMapY !== undefined
+    ) {
+      const [first, second] = Array.from(gesture.pointers.values());
+      const rect = event.currentTarget.getBoundingClientRect();
+      const midpoint = midpointBetween(first, second);
+      const nextZoom = clampZoom(gesture.startZoom + Math.log2(distanceBetween(first, second) / gesture.startDistance));
+      const longitude = xToLon(gesture.startMidpointMapX, gesture.startZoom);
+      const latitude = yToLat(gesture.startMidpointMapY, gesture.startZoom);
+      const localX = midpoint.x - rect.left;
+      const localY = midpoint.y - rect.top;
+      const nextCenterX = lonToX(longitude, nextZoom) - localX + EXPANDED_MAP_WIDTH / 2;
+      const nextCenterY = latToY(latitude, nextZoom) - localY + EXPANDED_MAP_HEIGHT / 2;
+      setMapView(mapViewFromCenterPixels(nextCenterX, nextCenterY, nextZoom));
+    }
+  };
+
+  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const gesture = gestureRef.current;
+    if (!gesture) return;
+    gesture.pointers.delete(event.pointerId);
+    if (!gesture.pointers.size) {
+      gestureRef.current = null;
+      return;
+    }
+
+    const [first, second] = Array.from(gesture.pointers.values());
+    gesture.centerX = centerX;
+    gesture.centerY = centerY;
+    if (first && second) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const midpoint = midpointBetween(first, second);
+      gesture.startDistance = distanceBetween(first, second);
+      gesture.startZoom = zoom;
+      gesture.startMidpoint = midpoint;
+      gesture.startMidpointMapX = centerX - EXPANDED_MAP_WIDTH / 2 + midpoint.x - rect.left;
+      gesture.startMidpointMapY = centerY - EXPANDED_MAP_HEIGHT / 2 + midpoint.y - rect.top;
+    } else {
+      gesture.startDistance = undefined;
+      gesture.startZoom = undefined;
+      gesture.startMidpoint = undefined;
+      gesture.startMidpointMapX = undefined;
+      gesture.startMidpointMapY = undefined;
+    }
   };
 
   const renderCanvas = (width: number, height: number, markerScale: 1 | 1.4) => {
@@ -491,7 +657,15 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                 Reset view
               </button>
             )}
-            <div className="absolute left-1/2 top-1/2 h-[900px] w-[1600px] -translate-x-1/2 -translate-y-1/2">
+            <div
+              ref={expandedMapRef}
+              className="absolute left-1/2 top-1/2 h-[900px] w-[1600px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab active:cursor-grabbing"
+              onWheel={handleMapWheel}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+            >
               {renderCanvas(EXPANDED_MAP_WIDTH, EXPANDED_MAP_HEIGHT, 1.4)}
             </div>
             {!mapPoints.length && (
