@@ -218,8 +218,8 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
           >
             <ChevronRight className="h-6 w-6" />
           </button>
-          <div className="flex h-full items-center justify-center" onClick={(event) => event.stopPropagation()}>
-            <div className="max-h-full max-w-5xl">
+          <div className="flex h-full items-center justify-center">
+            <div className="max-h-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={activePhoto.image_url} alt={activePhoto.caption ?? fallbackName} className="max-h-[78vh] max-w-full rounded-lg object-contain shadow-2xl" />
               <div className="mt-4 flex items-start justify-between gap-4">
