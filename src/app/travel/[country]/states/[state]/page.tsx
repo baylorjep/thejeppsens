@@ -166,7 +166,7 @@ export default async function StateTravelPage({ params }: PageProps) {
               <TravelQuickAddButton kind="photo" />
             </div>
 
-            <TravelPhotoLog photos={photoRows} fallbackName={state.state_name} />
+            <TravelPhotoLog photos={photoRows} favorites={favoriteRows} fallbackName={state.state_name} />
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-5">

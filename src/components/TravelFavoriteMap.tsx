@@ -5,7 +5,7 @@ import TravelEditButton from "@/components/TravelEditButton";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 import type { TravelFavorite, TravelPhoto } from "@/lib/travel";
 import type { TravelMapCenter } from "@/lib/travelMapCenters";
-import { Maximize2, MapPin, Sparkles, Utensils, X } from "lucide-react";
+import { CalendarDays, Maximize2, MapPin, Sparkles, Utensils, X } from "lucide-react";
 import { useState } from "react";
 
 const TILE_SIZE = 256;
@@ -74,7 +74,8 @@ interface TravelFavoriteMapProps {
 export default function TravelFavoriteMap({ favorites, photos = [], fallbackCenter }: TravelFavoriteMapProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [creatingFavoriteForPhotoId, setCreatingFavoriteForPhotoId] = useState<string | null>(null);
+  const [selectedFavoriteId, setSelectedFavoriteId] = useState<string | null>(null);
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
     .map((favorite) => ({
@@ -109,7 +110,28 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     return `${color} ${isActive ? "scale-125 ring-4 ring-white" : "ring-2 ring-white"}`;
   };
   const IconForFavorite = (type: TravelFavorite["type"]) => (type === "restaurant" ? Utensils : type === "activity" ? Sparkles : MapPin);
-  const creatingPhoto = mappedPhotos.find((photo) => photo.id === creatingFavoriteForPhotoId) ?? null;
+  const selectedFavorite = selectedFavoriteId ? favorites.find((favorite) => favorite.id === selectedFavoriteId) ?? null : null;
+  const selectedFavoritePhotos = selectedFavorite ? photos.filter((photo) => photo.favorite_id === selectedFavorite.id) : [];
+  const selectedFavoriteHeroPhoto = selectedFavoritePhotos[0] ?? null;
+  const SelectedFavoriteIcon = selectedFavorite ? IconForFavorite(selectedFavorite.type) : null;
+  const selectedPhoto = selectedPhotoId ? photos.find((photo) => photo.id === selectedPhotoId) ?? null : null;
+  const selectedPhotoFavorite = selectedPhoto?.favorite_id ? favorites.find((favorite) => favorite.id === selectedPhoto.favorite_id) ?? null : null;
+
+  const openFavorite = (favoriteId: string) => {
+    setActiveId(favoriteId);
+    setSelectedPhotoId(null);
+    setSelectedFavoriteId(favoriteId);
+  };
+
+  const openPhoto = (photo: TravelPhoto) => {
+    setSelectedFavoriteId(null);
+    setSelectedPhotoId(photo.id);
+  };
+
+  const closeDetails = () => {
+    setSelectedFavoriteId(null);
+    setSelectedPhotoId(null);
+  };
 
   const renderCanvas = (width: number, height: number, markerScale: 1 | 1.4) => {
     const topLeftX = centerX - width / 2;
@@ -137,17 +159,22 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
           const top = latToY(favorite.latitude, zoom) - topLeftY;
           const Icon = IconForFavorite(favorite.type);
           return (
-            <div
+            <button
               key={favorite.id}
+              type="button"
               className={`absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`}
               style={{ left, top }}
               title={favorite.name}
+              onClick={(event) => {
+                event.stopPropagation();
+                openFavorite(favorite.id);
+              }}
               onMouseEnter={() => setActiveId(favorite.id)}
               onMouseLeave={() => setActiveId(null)}
             >
               <Icon className={iconSize} />
               <span className="sr-only">{index + 1}</span>
-            </div>
+            </button>
           );
         })}
         {mappedPhotos.map((photo) => {
@@ -160,12 +187,12 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
               onClick={(event) => {
                 event.stopPropagation();
                 if (photo.favorite_id) {
-                  setActiveId(photo.favorite_id);
+                  openFavorite(photo.favorite_id);
                 } else {
-                  setCreatingFavoriteForPhotoId(photo.id);
+                  openPhoto(photo);
                 }
               }}
-              aria-label={photo.favorite_id ? "Highlight linked favorite" : "Create favorite from this photo"}
+              aria-label={photo.favorite_id ? "Open linked experience" : "Open photo"}
               className={`absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110`}
               style={{ left, top }}
               title={photo.caption ?? photo.location_name ?? "Photo"}
@@ -216,21 +243,6 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
         </div>
       </div>
 
-      {!isExpanded && creatingPhoto && (
-        <div className="rounded-lg border border-slate-200 bg-white p-2">
-          <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={creatingPhoto.image_url} alt="" className="h-8 w-8 rounded-md object-cover" />
-            Create an experience for this photo
-          </div>
-          <CreateFavoriteFromPhoto
-            photo={creatingPhoto}
-            onDone={() => setCreatingFavoriteForPhotoId(null)}
-            onCancel={() => setCreatingFavoriteForPhotoId(null)}
-          />
-        </div>
-      )}
-
       {isExpanded && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/80 p-4" role="dialog" aria-modal="true">
           <div className="relative h-[80vh] w-full max-w-5xl overflow-hidden rounded-xl bg-sky-50 shadow-2xl">
@@ -258,23 +270,6 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             <div className="absolute bottom-3 right-3 rounded bg-white/90 px-2 py-1 text-[10px] text-slate-500 shadow-sm">
               © OpenStreetMap contributors
             </div>
-            {creatingPhoto && (
-              <div className="absolute inset-x-3 bottom-14 rounded-lg bg-white/95 p-2 shadow-lg ring-1 ring-slate-950/10">
-                <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={creatingPhoto.image_url} alt="" className="h-8 w-8 rounded-md object-cover" />
-                  Create an experience for this photo
-                </div>
-                <CreateFavoriteFromPhoto
-                  photo={creatingPhoto}
-                  onDone={() => {
-                    setCreatingFavoriteForPhotoId(null);
-                    setIsExpanded(false);
-                  }}
-                  onCancel={() => setCreatingFavoriteForPhotoId(null)}
-                />
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -309,13 +304,15 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
               {favoritePhotos.length > 0 && (
                 <div className="mt-2 flex gap-1.5 pl-10">
                   {favoritePhotos.map((photo) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <button
                       key={photo.id}
-                      src={photo.image_url}
-                      alt=""
-                      className="h-9 w-9 rounded-md border border-white object-cover shadow-sm"
-                    />
+                      type="button"
+                      onClick={() => openPhoto(photo)}
+                      className="h-9 w-9 overflow-hidden rounded-md border border-white shadow-sm"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={photo.image_url} alt="" className="h-full w-full object-cover" />
+                    </button>
                   ))}
                 </div>
               )}
@@ -323,6 +320,98 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
           );
         })}
       </div>}
+
+      {(selectedFavorite || selectedPhoto) && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true">
+          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-2xl">
+            <button
+              type="button"
+              onClick={closeDetails}
+              aria-label="Close details"
+              className="absolute right-3 top-3 z-10 rounded-full bg-white/90 p-2 text-slate-700 shadow-sm transition-colors hover:bg-slate-100"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {selectedFavorite ? (
+              <>
+                {selectedFavoriteHeroPhoto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={selectedFavoriteHeroPhoto.image_url} alt="" className="aspect-video w-full object-cover" />
+                ) : (
+                  <div className="flex aspect-video items-center justify-center bg-slate-100 text-slate-300">
+                    {SelectedFavoriteIcon && <SelectedFavoriteIcon className="h-10 w-10" />}
+                  </div>
+                )}
+                <div className="space-y-4 p-5">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-teal-600">{selectedFavorite.type}</p>
+                    <h3 className="mt-1 text-xl font-bold text-slate-950">{selectedFavorite.name}</h3>
+                    {selectedFavorite.location_name && <p className="mt-1 text-sm text-slate-500">{selectedFavorite.location_name}</p>}
+                  </div>
+                  <p className="text-sm leading-6 text-slate-600">
+                    {selectedFavorite.notes?.trim() || "No notes saved yet."}
+                  </p>
+                  {selectedFavoritePhotos.length > 1 && (
+                    <div className="grid grid-cols-4 gap-2">
+                      {selectedFavoritePhotos.slice(0, 8).map((photo) => (
+                        <button key={photo.id} type="button" onClick={() => openPhoto(photo)} className="overflow-hidden rounded-md">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <TravelEditButton type="favorite" item={selectedFavorite} label={`Edit ${selectedFavorite.name}`} />
+                </div>
+              </>
+            ) : selectedPhoto ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={selectedPhoto.image_url} alt="" className="max-h-[52vh] w-full object-contain bg-slate-950" />
+                <div className="space-y-4 p-5">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-950">{selectedPhoto.caption ?? selectedPhoto.location_name ?? "Travel photo"}</h3>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      {selectedPhoto.location_name && <span>{selectedPhoto.location_name}</span>}
+                      {selectedPhoto.taken_on && (
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarDays className="h-3.5 w-3.5" />
+                          {selectedPhoto.taken_on}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {selectedPhotoFavorite ? (
+                    <button
+                      type="button"
+                      onClick={() => openFavorite(selectedPhotoFavorite.id)}
+                      className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-left transition-colors hover:bg-slate-100"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Linked experience</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">{selectedPhotoFavorite.name}</p>
+                      <p className="text-xs text-slate-500">
+                        {selectedPhotoFavorite.type}
+                        {selectedPhotoFavorite.location_name ? ` · ${selectedPhotoFavorite.location_name}` : ""}
+                      </p>
+                    </button>
+                  ) : (
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Experience</p>
+                      <CreateFavoriteFromPhoto
+                        photo={selectedPhoto}
+                        favorites={favorites}
+                        onDone={closeDetails}
+                        onCancel={closeDetails}
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

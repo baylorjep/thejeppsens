@@ -6,13 +6,16 @@ import { type FormEvent, useState } from "react";
 
 interface CreateFavoriteFromPhotoProps {
   photo: TravelPhoto;
+  favorites?: TravelFavorite[];
   onDone: () => void;
   onCancel: () => void;
   variant?: "light" | "dark";
 }
 
-export default function CreateFavoriteFromPhoto({ photo, onDone, onCancel, variant = "light" }: CreateFavoriteFromPhotoProps) {
+export default function CreateFavoriteFromPhoto({ photo, favorites = [], onDone, onCancel, variant = "light" }: CreateFavoriteFromPhotoProps) {
   const router = useRouter();
+  const [mode, setMode] = useState<"existing" | "new">(favorites.length ? "existing" : "new");
+  const [favoriteId, setFavoriteId] = useState(favorites[0]?.id ?? "");
   const [name, setName] = useState("");
   const [type, setType] = useState<TravelFavoriteType>("place");
   const [isSaving, setIsSaving] = useState(false);
@@ -21,11 +24,25 @@ export default function CreateFavoriteFromPhoto({ photo, onDone, onCancel, varia
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!name.trim()) return;
+    if (mode === "new" && !name.trim()) return;
+    if (mode === "existing" && !favoriteId) return;
 
     setIsSaving(true);
     setError("");
     try {
+      if (mode === "existing") {
+        const linkResponse = await fetch("/api/travel/items", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "photo", id: photo.id, favorite_id: favoriteId }),
+        });
+        if (!linkResponse.ok) throw new Error("Could not link photo");
+
+        router.refresh();
+        onDone();
+        return;
+      }
+
       const favoriteData = new FormData();
       favoriteData.set("type", "favorite");
       favoriteData.set("country_id", photo.country_id);
@@ -61,28 +78,70 @@ export default function CreateFavoriteFromPhoto({ photo, onDone, onCancel, varia
 
   return (
     <form onSubmit={submit} className={`flex flex-wrap items-center gap-2 rounded-md p-2 ${isDark ? "bg-white/10" : "border border-slate-200 bg-slate-50"}`}>
-      <select
-        value={type}
-        onChange={(event) => setType(event.target.value as TravelFavoriteType)}
-        className={`rounded-md px-2 py-1.5 text-xs font-semibold outline-none ${isDark ? "bg-white/10 text-white" : "border border-slate-200 bg-white text-slate-700"}`}
-      >
-        <option value="restaurant">Restaurant</option>
-        <option value="activity">Activity</option>
-        <option value="place">Place</option>
-      </select>
-      <input
-        autoFocus
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        placeholder="Name this experience"
-        className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-xs outline-none ${isDark ? "bg-white/10 text-white placeholder:text-white/50" : "border border-slate-200 bg-white text-slate-900"}`}
-      />
+      {favorites.length > 0 && (
+        <div className={`flex rounded-md p-0.5 text-xs font-semibold ${isDark ? "bg-white/10" : "bg-white ring-1 ring-slate-200"}`}>
+          {[
+            ["existing", "Existing"],
+            ["new", "New"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setMode(value as "existing" | "new")}
+              className={`rounded px-2 py-1 transition-colors ${
+                mode === value
+                  ? isDark
+                    ? "bg-white text-slate-950"
+                    : "bg-slate-950 text-white"
+                  : isDark
+                    ? "text-white/70 hover:text-white"
+                    : "text-slate-500 hover:text-slate-950"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+      {mode === "existing" && favorites.length > 0 ? (
+        <select
+          autoFocus
+          value={favoriteId}
+          onChange={(event) => setFavoriteId(event.target.value)}
+          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-xs font-semibold outline-none ${isDark ? "bg-white/10 text-white" : "border border-slate-200 bg-white text-slate-700"}`}
+        >
+          {favorites.map((favorite) => (
+            <option key={favorite.id} value={favorite.id}>
+              {favorite.type}: {favorite.name}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <>
+          <select
+            value={type}
+            onChange={(event) => setType(event.target.value as TravelFavoriteType)}
+            className={`rounded-md px-2 py-1.5 text-xs font-semibold outline-none ${isDark ? "bg-white/10 text-white" : "border border-slate-200 bg-white text-slate-700"}`}
+          >
+            <option value="restaurant">Restaurant</option>
+            <option value="activity">Activity</option>
+            <option value="place">Place</option>
+          </select>
+          <input
+            autoFocus
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Name this experience"
+            className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-xs outline-none ${isDark ? "bg-white/10 text-white placeholder:text-white/50" : "border border-slate-200 bg-white text-slate-900"}`}
+          />
+        </>
+      )}
       <button
         type="submit"
-        disabled={isSaving || !name.trim()}
+        disabled={isSaving || (mode === "new" ? !name.trim() : !favoriteId)}
         className="rounded-md bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300"
       >
-        {isSaving ? "Saving..." : "Save"}
+        {isSaving ? "Saving..." : mode === "existing" ? "Link" : "Save"}
       </button>
       <button
         type="button"
@@ -94,7 +153,9 @@ export default function CreateFavoriteFromPhoto({ photo, onDone, onCancel, varia
       {error ? (
         <p className="w-full text-xs text-red-400">{error}</p>
       ) : (
-        <p className={`w-full text-xs ${isDark ? "text-white/50" : "text-slate-400"}`}>You can add more photos to it right after saving.</p>
+        <p className={`w-full text-xs ${isDark ? "text-white/50" : "text-slate-400"}`}>
+          {mode === "existing" ? "This photo will be attached to the selected experience." : "You can add more photos to it right after saving."}
+        </p>
       )}
     </form>
   );

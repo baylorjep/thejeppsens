@@ -210,7 +210,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
               <TravelQuickAddButton kind="photo" />
             </div>
 
-            <TravelPhotoLog photos={photoRows} fallbackName={country.display_name} />
+            <TravelPhotoLog photos={photoRows} favorites={favoriteRows} fallbackName={country.display_name} />
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-5">

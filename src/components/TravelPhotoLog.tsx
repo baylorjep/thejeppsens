@@ -1,6 +1,6 @@
 "use client";
 
-import type { TravelPhoto } from "@/lib/travel";
+import type { TravelFavorite, TravelPhoto } from "@/lib/travel";
 import { Camera, ChevronLeft, ChevronRight, Plus, Star, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
@@ -14,6 +14,7 @@ const SWIPE_THRESHOLD = 45;
 
 interface TravelPhotoLogProps {
   photos: TravelPhoto[];
+  favorites: TravelFavorite[];
   fallbackName: string;
 }
 
@@ -34,7 +35,7 @@ function useSwipe(onSwipe: (direction: -1 | 1) => void) {
   };
 }
 
-export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogProps) {
+export default function TravelPhotoLog({ photos, favorites, fallbackName }: TravelPhotoLogProps) {
   const router = useRouter();
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -45,6 +46,7 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
 
   const currentPhoto = photos[carouselIndex] ?? null;
   const activePhoto = activeIndex === null ? null : photos[activeIndex] ?? null;
+  const activeFavorite = activePhoto?.favorite_id ? favorites.find((favorite) => favorite.id === activePhoto.favorite_id) ?? null : null;
   const modalSubtitle = activePhoto
     ? [activePhoto.caption ? activePhoto.location_name : null, activePhoto.taken_on].filter(Boolean).join(" · ")
     : "";
@@ -242,6 +244,7 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
                   {isAddingFavorite ? (
                     <CreateFavoriteFromPhoto
                       photo={activePhoto}
+                      favorites={favorites}
                       variant="dark"
                       onDone={() => {
                         setIsAddingFavorite(false);
@@ -256,9 +259,19 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
                       className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white/80 transition-colors hover:bg-white/20 hover:text-white"
                     >
                       <Plus className="h-3.5 w-3.5" />
-                      Add experience from this photo
+                      Add or link experience
                     </button>
                   )}
+                </div>
+              )}
+              {activeFavorite && (
+                <div className="mt-3 rounded-md bg-white/10 px-3 py-2 text-sm text-white/80">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-white/50">Linked experience</p>
+                  <p className="mt-1 font-semibold text-white">{activeFavorite.name}</p>
+                  <p className="text-xs text-white/60">
+                    {activeFavorite.type}
+                    {activeFavorite.location_name ? ` · ${activeFavorite.location_name}` : ""}
+                  </p>
                 </div>
               )}
             </div>
