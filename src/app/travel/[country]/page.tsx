@@ -296,15 +296,11 @@ export default async function CountryTravelPage({ params }: PageProps) {
                 <h2 className="text-lg font-bold text-slate-950">Restaurants</h2>
               </div>
               {restaurants.length > 0 ? (
-                <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
                   {restaurants.map((restaurant) => (
-                    <div key={restaurant.id} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">{restaurant.name}</p>
-                        <p className="text-xs text-slate-500">{restaurant.location_name ?? country.display_name}</p>
-                      </div>
-                      <TravelEditButton type="favorite" item={restaurant} label={`Edit ${restaurant.name}`} />
-                    </div>
+                    <span key={restaurant.id} className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                      {restaurant.name}
+                    </span>
                   ))}
                 </div>
               ) : (
@@ -322,15 +318,11 @@ export default async function CountryTravelPage({ params }: PageProps) {
                 <h2 className="text-lg font-bold text-slate-950">Activities</h2>
               </div>
               {activities.length > 0 ? (
-                <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
                   {activities.map((activity) => (
-                    <div key={activity.id} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">{activity.name}</p>
-                        <p className="text-xs text-slate-500">{activity.location_name ?? country.display_name}</p>
-                      </div>
-                      <TravelEditButton type="favorite" item={activity} label={`Edit ${activity.name}`} />
-                    </div>
+                    <span key={activity.id} className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                      {activity.name}
+                    </span>
                   ))}
                 </div>
               ) : (

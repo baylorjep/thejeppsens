@@ -1,7 +1,7 @@
 "use client";
 
 import CreateFavoriteFromPhoto from "@/components/CreateFavoriteFromPhoto";
-import TravelEditButton from "@/components/TravelEditButton";
+import { TravelFavoriteModalEditForm, TravelPhotoModalEditForm } from "@/components/TravelModalEditForm";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 import type { TravelFavorite, TravelPhoto } from "@/lib/travel";
 import type { TravelMapCenter } from "@/lib/travelMapCenters";
@@ -81,6 +81,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const [selectedFavoriteId, setSelectedFavoriteId] = useState<string | null>(null);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [selectedFavoritePhotoIndex, setSelectedFavoritePhotoIndex] = useState(0);
+  const [editingDetail, setEditingDetail] = useState<"favorite" | "photo" | null>(null);
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
     .map((favorite) => ({
@@ -145,17 +146,20 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setSelectedPhotoId(null);
     setSelectedFavoriteId(favoriteId);
     setSelectedFavoritePhotoIndex(0);
+    setEditingDetail(null);
   };
 
   const openPhoto = (photo: TravelPhoto) => {
     setSelectedFavoriteId(null);
     setSelectedPhotoId(photo.id);
+    setEditingDetail(null);
   };
 
   const closeDetails = () => {
     setSelectedFavoriteId(null);
     setSelectedPhotoId(null);
     setSelectedFavoritePhotoIndex(0);
+    setEditingDetail(null);
   };
 
   const moveMapItem = (direction: -1 | 1) => {
@@ -297,8 +301,8 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
       </div>
 
       {isExpanded && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/80 p-4" role="dialog" aria-modal="true">
-          <div className="relative h-[80vh] w-full max-w-5xl overflow-hidden rounded-xl bg-sky-50 shadow-2xl">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/80 p-4" role="dialog" aria-modal="true" onClick={() => setIsExpanded(false)}>
+          <div className="relative h-[80vh] w-full max-w-5xl overflow-hidden rounded-xl bg-sky-50 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <button
               type="button"
               onClick={() => setIsExpanded(false)}
@@ -328,12 +332,15 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
       )}
 
       {(selectedFavorite || selectedPhoto) && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true" onClick={closeDetails}>
           {mapDetailItems.length > 1 && (
             <>
               <button
                 type="button"
-                onClick={() => moveMapItem(-1)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  moveMapItem(-1);
+                }}
                 aria-label="Previous map item"
                 className="fixed left-3 top-1/2 z-10 rounded-full bg-white/90 p-3 text-slate-700 shadow-lg transition-colors hover:bg-white sm:left-6"
               >
@@ -341,7 +348,10 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
               </button>
               <button
                 type="button"
-                onClick={() => moveMapItem(1)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  moveMapItem(1);
+                }}
                 aria-label="Next map item"
                 className="fixed right-3 top-1/2 z-10 rounded-full bg-white/90 p-3 text-slate-700 shadow-lg transition-colors hover:bg-white sm:right-6"
               >
@@ -349,7 +359,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
               </button>
             </>
           )}
-          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-2xl">
+          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <button
               type="button"
               onClick={closeDetails}
@@ -383,30 +393,46 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                   )}
                 </div>
                 <div className="space-y-4 p-5">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-teal-600">{selectedFavorite.type}</p>
-                    <h3 className="mt-1 text-xl font-bold text-slate-950">{selectedFavorite.name}</h3>
-                    {selectedFavorite.location_name && <p className="mt-1 text-sm text-slate-500">{selectedFavorite.location_name}</p>}
-                  </div>
-                  <p className="text-sm leading-6 text-slate-600">
-                    {selectedFavorite.notes?.trim() || "No notes saved yet."}
-                  </p>
-                  {selectedFavoritePhotos.length > 1 && (
-                    <div className="grid grid-cols-4 gap-2">
-                      {selectedFavoritePhotos.slice(0, 8).map((photo, index) => (
-                        <button
-                          key={photo.id}
-                          type="button"
-                          onClick={() => setSelectedFavoritePhotoIndex(index)}
-                          className={`overflow-hidden rounded-md ring-offset-2 ${index === selectedFavoritePhotoIndex ? "ring-2 ring-teal-500" : ""}`}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
-                        </button>
-                      ))}
-                    </div>
+                  {editingDetail === "favorite" ? (
+                    <TravelFavoriteModalEditForm
+                      favorite={selectedFavorite}
+                      onDone={() => setEditingDetail(null)}
+                      onCancel={() => setEditingDetail(null)}
+                    />
+                  ) : (
+                    <>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-teal-600">{selectedFavorite.type}</p>
+                        <h3 className="mt-1 text-xl font-bold text-slate-950">{selectedFavorite.name}</h3>
+                        {selectedFavorite.location_name && <p className="mt-1 text-sm text-slate-500">{selectedFavorite.location_name}</p>}
+                      </div>
+                      <p className="text-sm leading-6 text-slate-600">
+                        {selectedFavorite.notes?.trim() || "No notes saved yet."}
+                      </p>
+                      {selectedFavoritePhotos.length > 1 && (
+                        <div className="grid grid-cols-4 gap-2">
+                          {selectedFavoritePhotos.slice(0, 8).map((photo, index) => (
+                            <button
+                              key={photo.id}
+                              type="button"
+                              onClick={() => setSelectedFavoritePhotoIndex(index)}
+                              className={`overflow-hidden rounded-md ring-offset-2 ${index === selectedFavoritePhotoIndex ? "ring-2 ring-teal-500" : ""}`}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setEditingDetail("favorite")}
+                        className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
+                      >
+                        Edit favorite
+                      </button>
+                    </>
                   )}
-                  <TravelEditButton type="favorite" item={selectedFavorite} label={`Edit ${selectedFavorite.name}`} />
                 </div>
               </>
             ) : selectedPhoto ? (
@@ -416,42 +442,60 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                   <img src={selectedPhoto.image_url} alt="" className="max-h-[52vh] w-full object-contain" />
                 </div>
                 <div className="space-y-4 p-5">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-950">{selectedPhoto.caption ?? selectedPhoto.location_name ?? "Travel photo"}</h3>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                      {selectedPhoto.location_name && <span>{selectedPhoto.location_name}</span>}
-                      {selectedPhoto.taken_on && (
-                        <span className="inline-flex items-center gap-1">
-                          <CalendarDays className="h-3.5 w-3.5" />
-                          {selectedPhoto.taken_on}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {selectedPhotoFavorite ? (
-                    <button
-                      type="button"
-                      onClick={() => openFavorite(selectedPhotoFavorite.id)}
-                      className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-left transition-colors hover:bg-slate-100"
-                    >
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Linked experience</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">{selectedPhotoFavorite.name}</p>
-                      <p className="text-xs text-slate-500">
-                        {selectedPhotoFavorite.type}
-                        {selectedPhotoFavorite.location_name ? ` · ${selectedPhotoFavorite.location_name}` : ""}
-                      </p>
-                    </button>
+                  {editingDetail === "photo" ? (
+                    <TravelPhotoModalEditForm
+                      photo={selectedPhoto}
+                      favorites={favorites}
+                      onDone={() => setEditingDetail(null)}
+                      onCancel={() => setEditingDetail(null)}
+                    />
                   ) : (
-                    <div>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Experience</p>
-                      <CreateFavoriteFromPhoto
-                        photo={selectedPhoto}
-                        favorites={favorites}
-                        photos={photos}
-                        onDone={closeDetails}
-                        onCancel={closeDetails}
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-950">{selectedPhoto.caption ?? selectedPhoto.location_name ?? "Travel photo"}</h3>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          {selectedPhoto.location_name && <span>{selectedPhoto.location_name}</span>}
+                          {selectedPhoto.taken_on && (
+                            <span className="inline-flex items-center gap-1">
+                              <CalendarDays className="h-3.5 w-3.5" />
+                              {selectedPhoto.taken_on}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {selectedPhotoFavorite ? (
+                        <button
+                          type="button"
+                          onClick={() => openFavorite(selectedPhotoFavorite.id)}
+                          className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-left transition-colors hover:bg-slate-100"
+                        >
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Linked experience</p>
+                          <p className="mt-1 text-sm font-semibold text-slate-900">{selectedPhotoFavorite.name}</p>
+                          <p className="text-xs text-slate-500">
+                            {selectedPhotoFavorite.type}
+                            {selectedPhotoFavorite.location_name ? ` · ${selectedPhotoFavorite.location_name}` : ""}
+                          </p>
+                        </button>
+                      ) : (
+                        <div>
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Experience</p>
+                          <CreateFavoriteFromPhoto
+                            photo={selectedPhoto}
+                            favorites={favorites}
+                            photos={photos}
+                            onDone={closeDetails}
+                            onCancel={closeDetails}
+                          />
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setEditingDetail("photo")}
+                        className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
+                      >
+                        Edit photo
+                      </button>
+                    </>
                   )}
                 </div>
               </>

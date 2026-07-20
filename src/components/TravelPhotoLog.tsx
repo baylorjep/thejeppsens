@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 import CreateFavoriteFromPhoto from "@/components/CreateFavoriteFromPhoto";
 import TravelEditButton from "@/components/TravelEditButton";
+import { TravelPhotoModalEditForm } from "@/components/TravelModalEditForm";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 
 const AUTO_ADVANCE_MS = 5000;
@@ -42,6 +43,7 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
   const [deletingId, setDeletingId] = useState("");
   const [isPaused, setIsPaused] = useState(false);
   const [isAddingFavorite, setIsAddingFavorite] = useState(false);
+  const [isEditingPhoto, setIsEditingPhoto] = useState(false);
   const resumeTimer = useRef<number | null>(null);
 
   const currentPhoto = photos[carouselIndex] ?? null;
@@ -57,6 +59,7 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
 
   useEffect(() => {
     setIsAddingFavorite(false);
+    setIsEditingPhoto(false);
   }, [activeIndex]);
 
   useEffect(() => {
@@ -182,6 +185,7 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
           className="fixed inset-0 z-[80] bg-slate-950/90 p-4 text-white"
           role="dialog"
           aria-modal="true"
+          onClick={() => setActiveIndex(null)}
           {...modalSwipe}
         >
           <button
@@ -194,7 +198,10 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
           </button>
           <button
             type="button"
-            onClick={() => move(-1)}
+            onClick={(event) => {
+              event.stopPropagation();
+              move(-1);
+            }}
             className="absolute left-4 top-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
             aria-label="Previous photo"
           >
@@ -202,13 +209,16 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
           </button>
           <button
             type="button"
-            onClick={() => move(1)}
+            onClick={(event) => {
+              event.stopPropagation();
+              move(1);
+            }}
             className="absolute right-4 top-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
             aria-label="Next photo"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full items-center justify-center" onClick={(event) => event.stopPropagation()}>
             <div className="max-h-full max-w-5xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={activePhoto.image_url} alt={activePhoto.caption ?? fallbackName} className="max-h-[78vh] max-w-full rounded-lg object-contain shadow-2xl" />
@@ -218,12 +228,13 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
                   {modalSubtitle && <p className="mt-1 text-xs text-slate-300">{modalSubtitle}</p>}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <TravelEditButton
-                    type="photo"
-                    item={activePhoto}
-                    label="Edit photo"
-                    className="inline-flex items-center justify-center rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/40"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingPhoto((current) => !current)}
+                    className="inline-flex items-center justify-center rounded-md px-2 py-1.5 text-xs font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    {isEditingPhoto ? "Close edit" : "Edit photo"}
+                  </button>
                   <button
                     type="button"
                     onClick={() => void deletePhoto(activePhoto)}
@@ -239,6 +250,17 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
                   </span>
                 </div>
               </div>
+              {isEditingPhoto && (
+                <div className="mt-3">
+                  <TravelPhotoModalEditForm
+                    photo={activePhoto}
+                    favorites={favorites}
+                    variant="dark"
+                    onDone={() => setIsEditingPhoto(false)}
+                    onCancel={() => setIsEditingPhoto(false)}
+                  />
+                </div>
+              )}
               {!activePhoto.favorite_id && (
                 <div className="mt-3">
                   {isAddingFavorite ? (

@@ -920,34 +920,37 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
           </div>
         )}
 
-        <div className="grid gap-4 lg:grid-cols-4">
-          <ItemList title="Trips" items={trips.map((trip) => ({ id: trip.id, title: trip.title, detail: trip.location_name ?? state?.state_name ?? country.display_name, onEdit: () => editTrip(trip), onDelete: () => deleteItem("trip", trip.id) }))} />
-          <ItemList
-            title="Photos"
-            limit={8}
-            items={photos.map((photo) => ({
-              id: photo.id,
-              title: photo.caption ?? photo.location_name ?? "Photo",
-              detail: [photo.taken_on ?? state?.state_name ?? country.display_name, photo.favorite_id ? `linked: ${favoritesById.get(photo.favorite_id)?.name ?? "favorite"}` : null]
-                .filter(Boolean)
-                .join(" · "),
-              thumbnail: photo.image_url,
-              onEdit: () => editPhoto(photo),
-              onDelete: () => deleteItem("photo", photo.id),
-            }))}
-          />
-          <ItemList title="Videos" items={videos.map((video) => ({ id: video.id, title: video.title, detail: video.notes ?? "YouTube", onEdit: () => editVideo(video), onDelete: () => deleteItem("video", video.id) }))} />
-          <ItemList
-            title="Favorites"
-            items={[...restaurants, ...activities, ...places].map((favorite) => ({
-              id: favorite.id,
-              title: favorite.name,
-              detail: `${favorite.type}${favorite.location_name ? ` · ${favorite.location_name}` : ""}`,
-              onEdit: () => editFavorite(favorite),
-              onDelete: () => deleteItem("favorite", favorite.id),
-            }))}
-          />
-        </div>
+        {isOpen && (
+          <div className="grid gap-4 lg:grid-cols-4">
+            <ItemList title="Trips" items={trips.map((trip) => ({ id: trip.id, title: trip.title, detail: trip.location_name ?? state?.state_name ?? country.display_name, onEdit: () => editTrip(trip), onDelete: () => deleteItem("trip", trip.id) }))} />
+            <ItemList
+              title="Photos"
+              limit={8}
+              items={photos.map((photo) => ({
+                id: photo.id,
+                title: photo.caption ?? photo.location_name ?? "Photo",
+                detail: [photo.taken_on ?? state?.state_name ?? country.display_name, photo.favorite_id ? `linked: ${favoritesById.get(photo.favorite_id)?.name ?? "favorite"}` : null]
+                  .filter(Boolean)
+                  .join(" · "),
+                thumbnail: photo.image_url,
+                onEdit: () => editPhoto(photo),
+                onDelete: () => deleteItem("photo", photo.id),
+              }))}
+            />
+            <ItemList title="Videos" items={videos.map((video) => ({ id: video.id, title: video.title, detail: video.notes ?? "YouTube", onEdit: () => editVideo(video), onDelete: () => deleteItem("video", video.id) }))} />
+            <ItemList
+              title="Favorites"
+              limit={8}
+              items={[...restaurants, ...activities, ...places].map((favorite) => ({
+                id: favorite.id,
+                title: favorite.name,
+                detail: `${favorite.type}${favorite.location_name ? ` · ${favorite.location_name}` : ""}`,
+                onEdit: () => editFavorite(favorite),
+                onDelete: () => deleteItem("favorite", favorite.id),
+              }))}
+            />
+          </div>
+        )}
       </div>
     </section>
   );
