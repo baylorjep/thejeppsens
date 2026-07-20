@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import TravelDataNudges from '@/components/TravelDataNudges';
 import TravelEditButton from '@/components/TravelEditButton';
 import TravelCountryEditor from '@/components/TravelCountryEditor';
+import TravelFavoriteChips from '@/components/TravelFavoriteChips';
 import TravelFavoriteMap from '@/components/TravelFavoriteMap';
 import TravelPhotoLog from '@/components/TravelPhotoLog';
 import TravelQuickAddButton from '@/components/TravelQuickAddButton';
@@ -34,12 +35,6 @@ function formatDateRange(trip: TravelTrip) {
     return `${format(trip.started_on)} - ${format(trip.ended_on)}`;
   }
   return format(trip.started_on ?? trip.ended_on ?? '');
-}
-
-function favoriteLabel(type: TravelFavorite['type']) {
-  if (type === 'restaurant') return 'Restaurant';
-  if (type === 'activity') return 'Activity';
-  return 'Place';
 }
 
 function countLabel(count: number, singular: string, plural = `${singular}s`) {
@@ -252,13 +247,7 @@ export default async function StateTravelPage({ params }: PageProps) {
                 <h2 className="text-lg font-bold text-slate-950">Restaurants</h2>
               </div>
               {restaurants.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {restaurants.map((restaurant) => (
-                    <span key={restaurant.id} className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
-                      {restaurant.name}
-                    </span>
-                  ))}
-                </div>
+                <TravelFavoriteChips favorites={restaurants} photos={photoRows} />
               ) : (
                 <div className="flex flex-col items-start gap-3">
                   <Utensils className="h-6 w-6 text-slate-300" />
@@ -274,13 +263,7 @@ export default async function StateTravelPage({ params }: PageProps) {
                 <h2 className="text-lg font-bold text-slate-950">Activities</h2>
               </div>
               {activities.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {activities.map((activity) => (
-                    <span key={activity.id} className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
-                      {activity.name}
-                    </span>
-                  ))}
-                </div>
+                <TravelFavoriteChips favorites={activities} photos={photoRows} />
               ) : (
                 <div className="flex flex-col items-start gap-3">
                   <Sparkles className="h-6 w-6 text-slate-300" />
