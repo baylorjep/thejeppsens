@@ -1,9 +1,10 @@
 "use client";
 
 import type { TravelPhoto } from "@/lib/travel";
-import { Camera, ChevronLeft, ChevronRight, Star, Trash2, X } from "lucide-react";
+import { Camera, ChevronLeft, ChevronRight, Plus, Star, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
+import CreateFavoriteFromPhoto from "@/components/CreateFavoriteFromPhoto";
 import TravelEditButton from "@/components/TravelEditButton";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 
@@ -39,6 +40,7 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState("");
   const [isPaused, setIsPaused] = useState(false);
+  const [isAddingFavorite, setIsAddingFavorite] = useState(false);
   const resumeTimer = useRef<number | null>(null);
 
   const currentPhoto = photos[carouselIndex] ?? null;
@@ -50,6 +52,10 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
   useEffect(() => {
     if (carouselIndex >= photos.length) setCarouselIndex(0);
   }, [photos.length, carouselIndex]);
+
+  useEffect(() => {
+    setIsAddingFavorite(false);
+  }, [activeIndex]);
 
   useEffect(() => {
     if (photos.length <= 1 || isPaused || activeIndex !== null) return;
@@ -231,6 +237,30 @@ export default function TravelPhotoLog({ photos, fallbackName }: TravelPhotoLogP
                   </span>
                 </div>
               </div>
+              {!activePhoto.favorite_id && (
+                <div className="mt-3">
+                  {isAddingFavorite ? (
+                    <CreateFavoriteFromPhoto
+                      photo={activePhoto}
+                      variant="dark"
+                      onDone={() => {
+                        setIsAddingFavorite(false);
+                        setActiveIndex(null);
+                      }}
+                      onCancel={() => setIsAddingFavorite(false)}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingFavorite(true)}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add experience from this photo
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
