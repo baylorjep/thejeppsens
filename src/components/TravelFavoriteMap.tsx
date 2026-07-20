@@ -19,6 +19,12 @@ type MapDetailItem =
   | { kind: "favorite"; id: string }
   | { kind: "photo"; id: string };
 
+interface MapView {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+}
+
 function lonToX(longitude: number, zoom: number) {
   return ((longitude + 180) / 360) * TILE_SIZE * 2 ** zoom;
 }
@@ -44,6 +50,13 @@ function pickZoom(points: { latitude: number; longitude: number }[]) {
   if (span < 3) return 8;
   if (span < 7) return 7;
   return 5;
+}
+
+function clusterPrecisionForZoom(zoom: number) {
+  if (zoom >= 15) return 5;
+  if (zoom >= 13) return 4;
+  if (zoom >= 10) return 3;
+  return 2;
 }
 
 function buildTiles(zoom: number, topLeftX: number, topLeftY: number, width: number, height: number) {
@@ -85,6 +98,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const [selectedFavoritePhotoIndex, setSelectedFavoritePhotoIndex] = useState(0);
   const [editingDetail, setEditingDetail] = useState<"favorite" | "photo" | null>(null);
   const [featuringId, setFeaturingId] = useState("");
+  const [mapView, setMapView] = useState<MapView | null>(null);
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
     .map((favorite) => ({
@@ -104,13 +118,16 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     ...mappedPhotos.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
   ];
 
-  const centerLatitude = mapPoints.length
+  const baseCenterLatitude = mapPoints.length
     ? mapPoints.reduce((sum, point) => sum + point.latitude, 0) / mapPoints.length
     : fallbackCenter.latitude;
-  const centerLongitude = mapPoints.length
+  const baseCenterLongitude = mapPoints.length
     ? mapPoints.reduce((sum, point) => sum + point.longitude, 0) / mapPoints.length
     : fallbackCenter.longitude;
-  const zoom = mapPoints.length ? pickZoom(mapPoints) : fallbackCenter.zoom;
+  const baseZoom = mapPoints.length ? pickZoom(mapPoints) : fallbackCenter.zoom;
+  const centerLatitude = mapView?.latitude ?? baseCenterLatitude;
+  const centerLongitude = mapView?.longitude ?? baseCenterLongitude;
+  const zoom = mapView?.zoom ?? baseZoom;
   const centerX = lonToX(centerLongitude, zoom);
   const centerY = latToY(centerLatitude, zoom);
 
@@ -217,6 +234,10 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     }
   };
 
+  const resetMapView = () => {
+    setMapView(null);
+  };
+
   const renderCanvas = (width: number, height: number, markerScale: 1 | 1.4) => {
     const topLeftX = centerX - width / 2;
     const topLeftY = centerY - height / 2;
@@ -228,10 +249,66 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
       ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id, latitude: favorite.latitude, longitude: favorite.longitude, favorite })),
       ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id, latitude: photo.latitude, longitude: photo.longitude, photo })),
     ];
+    const renderSingleMapItem = (item: (typeof visibleMapItems)[number], left: number, top: number, index: number) => {
+      if (item.kind === "favorite") {
+        const favorite = item.favorite;
+        const Icon = IconForFavorite(favorite.type);
+        const pinPhoto = favoritePinPhotoFor(favorite.id);
+        return (
+          <button
+            key={`favorite-${favorite.id}-${index}`}
+            type="button"
+            className={
+              pinPhoto
+                ? `absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 ${
+                    activeId === favorite.id ? "scale-125 ring-4 ring-white" : ""
+                  }`
+                : `absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`
+            }
+            style={{ left, top }}
+            title={favorite.name}
+            onClick={(event) => {
+              event.stopPropagation();
+              openFavorite(favorite.id);
+            }}
+            onMouseEnter={() => setActiveId(favorite.id)}
+            onMouseLeave={() => setActiveId(null)}
+          >
+            {pinPhoto ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={pinPhoto.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
+            ) : (
+              <Icon className={iconSize} />
+            )}
+            <span className="sr-only">{index + 1}</span>
+          </button>
+        );
+      }
+
+      const photo = item.photo;
+      return (
+        <button
+          key={`photo-${photo.id}-${index}`}
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            openPhoto(photo);
+          }}
+          aria-label="Open photo"
+          className={`absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110`}
+          style={{ left, top }}
+          title={photo.caption ?? photo.location_name ?? "Photo"}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photo.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
+        </button>
+      );
+    };
     const clusters = Array.from(
       visibleMapItems
         .reduce((clusterMap, item) => {
-          const key = `${item.latitude.toFixed(4)}:${item.longitude.toFixed(4)}`;
+          const precision = clusterPrecisionForZoom(zoom);
+          const key = `${item.latitude.toFixed(precision)}:${item.longitude.toFixed(precision)}`;
           const current = clusterMap.get(key) ?? [];
           current.push(item);
           clusterMap.set(key, current);
@@ -255,8 +332,25 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
         ))}
         {clusters.map((cluster, index) => {
           const firstItem = cluster[0];
-          const left = lonToX(firstItem.longitude, zoom) - topLeftX;
-          const top = latToY(firstItem.latitude, zoom) - topLeftY;
+          const clusterLatitude = cluster.reduce((sum, item) => sum + item.latitude, 0) / cluster.length;
+          const clusterLongitude = cluster.reduce((sum, item) => sum + item.longitude, 0) / cluster.length;
+          const left = lonToX(clusterLongitude, zoom) - topLeftX;
+          const top = latToY(clusterLatitude, zoom) - topLeftY;
+          const shouldFanCluster = cluster.length > 1 && zoom >= 15;
+
+          if (shouldFanCluster) {
+            const spread = markerScale === 1.4 ? 54 : 38;
+            return cluster.map((item, clusterItemIndex) => {
+              const angle = (clusterItemIndex / cluster.length) * Math.PI * 2 - Math.PI / 2;
+              return renderSingleMapItem(
+                item,
+                lonToX(item.longitude, zoom) - topLeftX + Math.cos(angle) * spread,
+                latToY(item.latitude, zoom) - topLeftY + Math.sin(angle) * spread,
+                clusterItemIndex,
+              );
+            });
+          }
+
           if (cluster.length > 1) {
             return (
               <button
@@ -267,7 +361,11 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                 title={`${cluster.length} items here`}
                 onClick={(event) => {
                   event.stopPropagation();
-                  openMapItem(cluster[0]);
+                  setMapView({
+                    latitude: clusterLatitude,
+                    longitude: clusterLongitude,
+                    zoom: Math.min(16, Math.max(zoom + 2, 12)),
+                  });
                 }}
               >
                 {cluster.length}
@@ -275,59 +373,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             );
           }
 
-          if (firstItem.kind === "favorite") {
-            const favorite = firstItem.favorite;
-            const Icon = IconForFavorite(favorite.type);
-            const pinPhoto = favoritePinPhotoFor(favorite.id);
-            return (
-              <button
-                key={favorite.id}
-                type="button"
-                className={
-                  pinPhoto
-                    ? `absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 ${
-                        activeId === favorite.id ? "scale-125 ring-4 ring-white" : ""
-                      }`
-                    : `absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`
-                }
-                style={{ left, top }}
-                title={favorite.name}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  openFavorite(favorite.id);
-                }}
-                onMouseEnter={() => setActiveId(favorite.id)}
-                onMouseLeave={() => setActiveId(null)}
-              >
-                {pinPhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={pinPhoto.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
-                ) : (
-                  <Icon className={iconSize} />
-                )}
-                <span className="sr-only">{index + 1}</span>
-              </button>
-            );
-          }
-
-          const photo = firstItem.photo;
-          return (
-            <button
-              key={photo.id}
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                openPhoto(photo);
-              }}
-              aria-label="Open photo"
-              className={`absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110`}
-              style={{ left, top }}
-              title={photo.caption ?? photo.location_name ?? "Photo"}
-            >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
-            </button>
-          );
+          return renderSingleMapItem(firstItem, left, top, index);
         })}
       </>
     );
@@ -361,6 +407,18 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             </div>
           </div>
         )}
+        {mapView && mapPoints.length > 1 && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              resetMapView();
+            }}
+            className="absolute left-2 top-2 rounded-md bg-white/95 px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-950/10 transition-colors hover:bg-white"
+          >
+            Reset view
+          </button>
+        )}
         <span className="absolute right-2 top-2 inline-flex items-center gap-1.5 rounded-md bg-slate-950/70 px-2 py-1 text-[11px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
           <Maximize2 className="h-3 w-3" />
           Expand
@@ -381,6 +439,15 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             >
               <X className="h-5 w-5" />
             </button>
+            {mapView && mapPoints.length > 1 && (
+              <button
+                type="button"
+                onClick={resetMapView}
+                className="absolute left-3 top-3 z-10 rounded-md bg-white/90 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-white"
+              >
+                Reset view
+              </button>
+            )}
             <div className="absolute left-1/2 top-1/2 h-[900px] w-[1600px] -translate-x-1/2 -translate-y-1/2">
               {renderCanvas(EXPANDED_MAP_WIDTH, EXPANDED_MAP_HEIGHT, 1.4)}
             </div>
