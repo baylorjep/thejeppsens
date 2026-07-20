@@ -159,7 +159,7 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
               <button
                 type="button"
                 aria-label={`Open ${stateName} photos`}
-                className="group relative mt-1.5 block h-[32px] w-[26px] origin-center transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="group relative mt-1.5 block h-[32px] w-[26px] focus:outline-none focus:ring-2 focus:ring-teal-500"
                 onClick={() => {
                   if (href) window.location.href = href;
                 }}
@@ -174,7 +174,7 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
                 }
                 onMouseLeave={() => setTooltip(null)}
               >
-                <span className="absolute inset-0 block overflow-hidden rounded-[13px_13px_13px_5px] border border-white/70 bg-white/60 p-px shadow-sm ring-1 ring-slate-950/15">
+                <span className="absolute inset-0 block origin-center overflow-hidden rounded-[13px_13px_13px_5px] border border-white/70 bg-white/60 p-px shadow-sm ring-1 ring-slate-950/15 transition-transform group-hover:scale-110">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[11px_11px_11px_4px] object-cover" />
                 </span>
