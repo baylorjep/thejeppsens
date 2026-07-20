@@ -7,7 +7,7 @@ import { travelFavoriteMapsUrl, type TravelFavorite, type TravelPhoto } from "@/
 import type { TravelMapCenter } from "@/lib/travelMapCenters";
 import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Maximize2, MapPin, Sparkles, Trash2, Utensils, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type PointerEvent, type WheelEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 
 const TILE_SIZE = 256;
 const MAP_WIDTH = 768;
@@ -159,6 +159,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const router = useRouter();
   const expandedMapRef = useRef<HTMLDivElement | null>(null);
   const gestureRef = useRef<GestureState | null>(null);
+  const nativeGestureStartZoomRef = useRef(0);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedFavoriteId, setSelectedFavoriteId] = useState<string | null>(null);
@@ -344,14 +345,47 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setMapView(mapViewFromCenterPixels(nextCenterX, nextCenterY, nextZoom));
   };
 
-  const handleMapWheel = (event: WheelEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const zoomDelta = event.deltaY < 0 ? 0.6 : -0.6;
-    const nextZoom = clampZoom(zoom + zoomDelta);
-    if (nextZoom === zoom) return;
-    zoomMapAtPoint(event.clientX, event.clientY, nextZoom);
-  };
+  useEffect(() => {
+    const element = expandedMapRef.current;
+    if (!isExpanded || !element) return;
+
+    const handleNativeWheel = (event: globalThis.WheelEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const magnitude = event.ctrlKey ? 0.35 : 0.6;
+      const zoomDelta = event.deltaY < 0 ? magnitude : -magnitude;
+      const nextZoom = clampZoom(zoom + zoomDelta);
+      if (nextZoom === zoom) return;
+      zoomMapAtPoint(event.clientX, event.clientY, nextZoom);
+    };
+
+    const handleGestureStart = (event: Event) => {
+      event.preventDefault();
+      nativeGestureStartZoomRef.current = zoom;
+    };
+
+    const handleGestureChange = (event: Event) => {
+      event.preventDefault();
+      const gestureEvent = event as Event & { scale?: number; clientX?: number; clientY?: number };
+      const scale = gestureEvent.scale ?? 1;
+      if (!Number.isFinite(scale) || scale <= 0) return;
+      const rect = element.getBoundingClientRect();
+      const clientX = gestureEvent.clientX ?? rect.left + rect.width / 2;
+      const clientY = gestureEvent.clientY ?? rect.top + rect.height / 2;
+      const nextZoom = clampZoom(nativeGestureStartZoomRef.current + Math.log2(scale));
+      if (nextZoom === zoom) return;
+      zoomMapAtPoint(clientX, clientY, nextZoom);
+    };
+
+    element.addEventListener("wheel", handleNativeWheel, { passive: false });
+    element.addEventListener("gesturestart", handleGestureStart, { passive: false });
+    element.addEventListener("gesturechange", handleGestureChange, { passive: false });
+    return () => {
+      element.removeEventListener("wheel", handleNativeWheel);
+      element.removeEventListener("gesturestart", handleGestureStart);
+      element.removeEventListener("gesturechange", handleGestureChange);
+    };
+  }, [isExpanded, zoom, centerX, centerY]);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.target instanceof HTMLElement && event.target.closest("button, a")) return;
@@ -450,7 +484,13 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const renderCanvas = (width: number, height: number, markerScale: 1 | 1.4) => {
     const topLeftX = centerX - width / 2;
     const topLeftY = centerY - height / 2;
-    const tiles = buildTiles(zoom, topLeftX, topLeftY, width, height);
+    const tileZoom = Math.floor(zoom);
+    const tileScale = 2 ** (zoom - tileZoom);
+    const tileCenterX = lonToX(centerLongitude, tileZoom);
+    const tileCenterY = latToY(centerLatitude, tileZoom);
+    const tileTopLeftX = tileCenterX - width / (2 * tileScale);
+    const tileTopLeftY = tileCenterY - height / (2 * tileScale);
+    const tiles = buildTiles(tileZoom, tileTopLeftX, tileTopLeftY, width / tileScale, height / tileScale);
     const pinSize = markerScale === 1.4 ? "h-11 w-11" : "h-8 w-8";
     const iconSize = markerScale === 1.4 ? "h-5 w-5" : "h-4 w-4";
     const photoSize = markerScale === 1.4 ? "h-12 w-10" : "h-9 w-7";
@@ -534,8 +574,13 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             key={tile.key}
             src={tile.src}
             alt=""
-            className="absolute h-64 w-64 select-none"
-            style={{ left: tile.left, top: tile.top }}
+            className="absolute select-none"
+            style={{
+              height: TILE_SIZE * tileScale,
+              left: tile.left * tileScale,
+              top: tile.top * tileScale,
+              width: TILE_SIZE * tileScale,
+            }}
             draggable={false}
           />
         ))}
@@ -660,7 +705,6 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             <div
               ref={expandedMapRef}
               className="absolute left-1/2 top-1/2 h-[900px] w-[1600px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab active:cursor-grabbing"
-              onWheel={handleMapWheel}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
