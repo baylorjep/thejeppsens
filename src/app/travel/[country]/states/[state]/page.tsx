@@ -208,25 +208,32 @@ export default async function StateTravelPage({ params }: PageProps) {
                         <TravelEditButton type="trip" item={trip} label={`Edit ${trip.title}`} />
                       </div>
                     </div>
-                    {trip.notes && <p className="mt-4 text-sm leading-6 text-slate-600">{trip.notes}</p>}
-                    {(photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length || videosByTrip.get(trip.id)?.length) && (
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        {(photosByTrip.get(trip.id) ?? []).slice(0, 2).map((photo) => (
-                          <div key={photo.id} className="overflow-hidden rounded-lg bg-slate-50">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={photo.image_url} alt={photo.caption ?? trip.title} className="h-28 w-full object-cover" />
+                    {(trip.notes || photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length || videosByTrip.get(trip.id)?.length) && (
+                      <details className="mt-4 group">
+                        <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-slate-950">
+                          Details
+                        </summary>
+                        {trip.notes && <p className="mt-3 text-sm leading-6 text-slate-600">{trip.notes}</p>}
+                        {(photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length || videosByTrip.get(trip.id)?.length) && (
+                          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                            {(photosByTrip.get(trip.id) ?? []).slice(0, 2).map((photo) => (
+                              <div key={photo.id} className="overflow-hidden rounded-lg bg-slate-50">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={photo.image_url} alt={photo.caption ?? trip.title} className="h-28 w-full object-cover" />
+                              </div>
+                            ))}
+                            {(favoritesByTrip.get(trip.id) ?? []).slice(0, 3).map((favorite) => (
+                              <div key={favorite.id} className="flex items-center gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+                                <MapPinned className="h-4 w-4 text-teal-600" />
+                                <span>{favorite.name}</span>
+                              </div>
+                            ))}
+                            {(videosByTrip.get(trip.id) ?? []).map((video) => (
+                              <TravelVideoEmbed key={video.id} video={video} />
+                            ))}
                           </div>
-                        ))}
-                        {(favoritesByTrip.get(trip.id) ?? []).slice(0, 3).map((favorite) => (
-                          <div key={favorite.id} className="flex items-center gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
-                            <MapPinned className="h-4 w-4 text-teal-600" />
-                            <span>{favorite.name}</span>
-                          </div>
-                        ))}
-                        {(videosByTrip.get(trip.id) ?? []).map((video) => (
-                          <TravelVideoEmbed key={video.id} video={video} />
-                        ))}
-                      </div>
+                        )}
+                      </details>
                     )}
                   </article>
                 ))}

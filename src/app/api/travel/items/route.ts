@@ -209,9 +209,18 @@ export async function PATCH(request: Request) {
     const supabase = getTravelSupabaseClient();
     if (!supabase) return NextResponse.json({ error: "No DB" }, { status: 503 });
 
-    const body = (await request.json()) as { type?: ItemType; id?: string; favorite_id?: string | null; is_favorite_featured?: boolean };
+    const body = (await request.json()) as { type?: ItemType; id?: string; favorite_id?: string | null; is_favorite_featured?: boolean; is_featured?: boolean };
     if (body.type !== "photo" || !body.id) {
       return NextResponse.json({ error: "Invalid update" }, { status: 400 });
+    }
+
+    if (body.is_featured) {
+      const { data: photo } = await supabase.from("travel_photos").select("country_id, state_id").eq("id", body.id).maybeSingle();
+      if (!photo?.country_id) return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+      let query = supabase.from("travel_photos").update({ is_featured: false }).eq("country_id", photo.country_id);
+      query = photo.state_id ? query.eq("state_id", photo.state_id) : query.is("state_id", null);
+      const { error } = await query;
+      if (error) throw error;
     }
 
     if (body.is_favorite_featured) {
@@ -229,9 +238,10 @@ export async function PATCH(request: Request) {
       }
     }
 
-    const updateRow: { favorite_id?: string | null; is_favorite_featured?: boolean } = {};
+    const updateRow: { favorite_id?: string | null; is_favorite_featured?: boolean; is_featured?: boolean } = {};
     if ("favorite_id" in body) updateRow.favorite_id = body.favorite_id ?? null;
     if ("is_favorite_featured" in body) updateRow.is_favorite_featured = Boolean(body.is_favorite_featured);
+    if ("is_featured" in body) updateRow.is_featured = Boolean(body.is_featured);
     if ("favorite_id" in body && body.favorite_id === null && !("is_favorite_featured" in body)) updateRow.is_favorite_featured = false;
 
     const { data, error } = await supabase

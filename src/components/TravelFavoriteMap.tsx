@@ -6,6 +6,7 @@ import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 import type { TravelFavorite, TravelPhoto } from "@/lib/travel";
 import type { TravelMapCenter } from "@/lib/travelMapCenters";
 import { CalendarDays, ChevronLeft, ChevronRight, Maximize2, MapPin, Sparkles, Utensils, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const TILE_SIZE = 256;
@@ -76,12 +77,14 @@ interface TravelFavoriteMapProps {
 }
 
 export default function TravelFavoriteMap({ favorites, photos = [], fallbackCenter }: TravelFavoriteMapProps) {
+  const router = useRouter();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedFavoriteId, setSelectedFavoriteId] = useState<string | null>(null);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [selectedFavoritePhotoIndex, setSelectedFavoritePhotoIndex] = useState(0);
   const [editingDetail, setEditingDetail] = useState<"favorite" | "photo" | null>(null);
+  const [featuringId, setFeaturingId] = useState("");
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
     .map((favorite) => ({
@@ -178,6 +181,37 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setSelectedFavoritePhotoIndex((current) => (current + direction + selectedFavoritePhotos.length) % selectedFavoritePhotos.length);
   };
 
+  const setFavoritePinPhoto = async (photo: TravelPhoto) => {
+    try {
+      const response = await fetch("/api/travel/items", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "photo", id: photo.id, is_favorite_featured: true }),
+      });
+      if (!response.ok) throw new Error("Pin update failed");
+      router.refresh();
+    } catch {
+      window.alert("Could not update the favorite pin photo.");
+    }
+  };
+
+  const setPageFeaturedPhoto = async (photo: TravelPhoto) => {
+    setFeaturingId(photo.id);
+    try {
+      const response = await fetch("/api/travel/items", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "photo", id: photo.id, is_featured: true }),
+      });
+      if (!response.ok) throw new Error("Feature update failed");
+      router.refresh();
+    } catch {
+      window.alert("Could not feature that photo.");
+    } finally {
+      setFeaturingId("");
+    }
+  };
+
   const renderCanvas = (width: number, height: number, markerScale: 1 | 1.4) => {
     const topLeftX = centerX - width / 2;
     const topLeftY = centerY - height / 2;
@@ -185,6 +219,21 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     const pinSize = markerScale === 1.4 ? "h-11 w-11" : "h-8 w-8";
     const iconSize = markerScale === 1.4 ? "h-5 w-5" : "h-4 w-4";
     const photoSize = markerScale === 1.4 ? "h-12 w-10" : "h-9 w-7";
+    const visibleMapItems = [
+      ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id, latitude: favorite.latitude, longitude: favorite.longitude, favorite })),
+      ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id, latitude: photo.latitude, longitude: photo.longitude, photo })),
+    ];
+    const clusters = Array.from(
+      visibleMapItems
+        .reduce((clusterMap, item) => {
+          const key = `${item.latitude.toFixed(4)}:${item.longitude.toFixed(4)}`;
+          const current = clusterMap.get(key) ?? [];
+          current.push(item);
+          clusterMap.set(key, current);
+          return clusterMap;
+        }, new Map<string, typeof visibleMapItems>())
+        .values(),
+    );
 
     return (
       <>
@@ -199,62 +248,78 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             draggable={false}
           />
         ))}
-        {pinned.map((favorite, index) => {
-          const left = lonToX(favorite.longitude, zoom) - topLeftX;
-          const top = latToY(favorite.latitude, zoom) - topLeftY;
-          const Icon = IconForFavorite(favorite.type);
-          const pinPhoto = favoritePinPhotoFor(favorite.id);
-          return (
-            <button
-              key={favorite.id}
-              type="button"
-              className={
-                pinPhoto
-                  ? `absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 ${
-                      activeId === favorite.id ? "scale-125 ring-4 ring-white" : ""
-                    }`
-                  : `absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`
-              }
-              style={{ left, top }}
-              title={favorite.name}
-              onClick={(event) => {
-                event.stopPropagation();
-                openFavorite(favorite.id);
-              }}
-              onMouseEnter={() => setActiveId(favorite.id)}
-              onMouseLeave={() => setActiveId(null)}
-            >
-              {pinPhoto ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={pinPhoto.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
-              ) : (
-                <Icon className={iconSize} />
-              )}
-              <span className="sr-only">{index + 1}</span>
-            </button>
-          );
-        })}
-        {mappedPhotos.map((photo) => {
-          const left = lonToX(photo.longitude, zoom) - topLeftX;
-          const top = latToY(photo.latitude, zoom) - topLeftY;
+        {clusters.map((cluster, index) => {
+          const firstItem = cluster[0];
+          const left = lonToX(firstItem.longitude, zoom) - topLeftX;
+          const top = latToY(firstItem.latitude, zoom) - topLeftY;
+          if (cluster.length > 1) {
+            return (
+              <button
+                key={cluster.map((item) => `${item.kind}-${item.id}`).join("-")}
+                type="button"
+                className={`absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white shadow-lg ring-4 ring-white transition-transform hover:scale-110`}
+                style={{ left, top }}
+                title={`${cluster.length} items here`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  openMapItem(cluster[0]);
+                }}
+              >
+                {cluster.length}
+              </button>
+            );
+          }
+
+          if (firstItem.kind === "favorite") {
+            const favorite = firstItem.favorite;
+            const Icon = IconForFavorite(favorite.type);
+            const pinPhoto = favoritePinPhotoFor(favorite.id);
+            return (
+              <button
+                key={favorite.id}
+                type="button"
+                className={
+                  pinPhoto
+                    ? `absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 ${
+                        activeId === favorite.id ? "scale-125 ring-4 ring-white" : ""
+                      }`
+                    : `absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`
+                }
+                style={{ left, top }}
+                title={favorite.name}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  openFavorite(favorite.id);
+                }}
+                onMouseEnter={() => setActiveId(favorite.id)}
+                onMouseLeave={() => setActiveId(null)}
+              >
+                {pinPhoto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={pinPhoto.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
+                ) : (
+                  <Icon className={iconSize} />
+                )}
+                <span className="sr-only">{index + 1}</span>
+              </button>
+            );
+          }
+
+          const photo = firstItem.photo;
           return (
             <button
               key={photo.id}
               type="button"
               onClick={(event) => {
                 event.stopPropagation();
-                if (photo.favorite_id) {
-                  openFavorite(photo.favorite_id);
-                } else {
-                  openPhoto(photo);
-                }
+                openPhoto(photo);
               }}
-              aria-label={photo.favorite_id ? "Open linked experience" : "Open photo"}
+              aria-label="Open photo"
               className={`absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110`}
               style={{ left, top }}
               title={photo.caption ?? photo.location_name ?? "Photo"}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photo.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
             </button>
           );
@@ -424,6 +489,16 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                           ))}
                         </div>
                       )}
+                      {selectedFavoriteHeroPhoto && (
+                        <button
+                          type="button"
+                          onClick={() => void setFavoritePinPhoto(selectedFavoriteHeroPhoto)}
+                          disabled={Boolean(selectedFavoriteHeroPhoto.is_favorite_featured)}
+                          className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950 disabled:text-amber-600"
+                        >
+                          {selectedFavoriteHeroPhoto.is_favorite_featured ? "Pin photo selected" : "Use current photo as pin"}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => setEditingDetail("favorite")}
@@ -494,6 +569,14 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                         className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
                       >
                         Edit photo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void setPageFeaturedPhoto(selectedPhoto)}
+                        disabled={featuringId === selectedPhoto.id || Boolean(selectedPhoto.is_featured)}
+                        className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950 disabled:text-amber-600"
+                      >
+                        {selectedPhoto.is_featured ? "Page featured" : "Set page featured"}
                       </button>
                     </>
                   )}
