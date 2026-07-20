@@ -12,7 +12,6 @@ import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 const AUTO_ADVANCE_MS = 5000;
 const RESUME_AFTER_MS = 10000;
 const SWIPE_THRESHOLD = 45;
-type PhotoFilter = "all" | "unlinked" | "linked" | "featured" | "located";
 
 interface TravelPhotoLogProps {
   photos: TravelPhoto[];
@@ -45,32 +44,19 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
   const [isPaused, setIsPaused] = useState(false);
   const [isAddingFavorite, setIsAddingFavorite] = useState(false);
   const [isEditingPhoto, setIsEditingPhoto] = useState(false);
-  const [filter, setFilter] = useState<PhotoFilter>("all");
   const [featuringId, setFeaturingId] = useState("");
   const resumeTimer = useRef<number | null>(null);
 
-  const visiblePhotos = photos.filter((photo) => {
-    if (filter === "unlinked") return !photo.favorite_id;
-    if (filter === "linked") return Boolean(photo.favorite_id);
-    if (filter === "featured") return Boolean(photo.is_featured);
-    if (filter === "located") return photo.latitude !== null && photo.longitude !== null;
-    return true;
-  });
-  const currentPhoto = visiblePhotos[carouselIndex] ?? null;
-  const activePhoto = activeIndex === null ? null : visiblePhotos[activeIndex] ?? null;
+  const currentPhoto = photos[carouselIndex] ?? null;
+  const activePhoto = activeIndex === null ? null : photos[activeIndex] ?? null;
   const activeFavorite = activePhoto?.favorite_id ? favorites.find((favorite) => favorite.id === activePhoto.favorite_id) ?? null : null;
   const modalSubtitle = activePhoto
     ? [activePhoto.caption ? activePhoto.location_name : null, activePhoto.taken_on].filter(Boolean).join(" · ")
     : "";
 
   useEffect(() => {
-    if (carouselIndex >= visiblePhotos.length) setCarouselIndex(0);
-  }, [visiblePhotos.length, carouselIndex]);
-
-  useEffect(() => {
-    setCarouselIndex(0);
-    setActiveIndex(null);
-  }, [filter]);
+    if (carouselIndex >= photos.length) setCarouselIndex(0);
+  }, [photos.length, carouselIndex]);
 
   useEffect(() => {
     setIsAddingFavorite(false);
@@ -78,12 +64,12 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
   }, [activeIndex]);
 
   useEffect(() => {
-    if (visiblePhotos.length <= 1 || isPaused || activeIndex !== null) return;
+    if (photos.length <= 1 || isPaused || activeIndex !== null) return;
     const timer = window.setInterval(() => {
-      setCarouselIndex((current) => (current + 1) % visiblePhotos.length);
+      setCarouselIndex((current) => (current + 1) % photos.length);
     }, AUTO_ADVANCE_MS);
     return () => window.clearInterval(timer);
-  }, [visiblePhotos.length, isPaused, activeIndex]);
+  }, [photos.length, isPaused, activeIndex]);
 
   useEffect(() => {
     return () => {
@@ -98,14 +84,14 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
   };
 
   const moveCarousel = (direction: -1 | 1) => {
-    if (!visiblePhotos.length) return;
-    setCarouselIndex((current) => (current + direction + visiblePhotos.length) % visiblePhotos.length);
+    if (!photos.length) return;
+    setCarouselIndex((current) => (current + direction + photos.length) % photos.length);
     pauseThenResume();
   };
 
   const move = (direction: -1 | 1) => {
-    if (activeIndex === null || !visiblePhotos.length) return;
-    setActiveIndex((current) => ((current as number) + direction + visiblePhotos.length) % visiblePhotos.length);
+    if (activeIndex === null || !photos.length) return;
+    setActiveIndex((current) => ((current as number) + direction + photos.length) % photos.length);
   };
 
   const deletePhoto = async (photo: TravelPhoto) => {
@@ -146,28 +132,6 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
 
   return (
     <>
-      {photos.length > 0 && (
-        <div className="mb-3 flex flex-wrap gap-2">
-          {[
-            ["all", `All ${photos.length}`],
-            ["unlinked", `Unlinked ${photos.filter((photo) => !photo.favorite_id).length}`],
-            ["linked", `Linked ${photos.filter((photo) => photo.favorite_id).length}`],
-            ["featured", `Featured ${photos.filter((photo) => photo.is_featured).length}`],
-            ["located", `Located ${photos.filter((photo) => photo.latitude !== null && photo.longitude !== null).length}`],
-          ].map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setFilter(value as PhotoFilter)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                filter === value ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-950"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
       {currentPhoto ? (
         <div
           className="group relative overflow-hidden rounded-lg border border-slate-100 bg-slate-50"
@@ -183,7 +147,7 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
               className="aspect-[4/3] w-full object-cover sm:aspect-video"
             />
           </button>
-          {visiblePhotos.length > 1 && (
+          {photos.length > 1 && (
             <>
               <button
                 type="button"
@@ -202,7 +166,7 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
                 <ChevronRight className="h-5 w-5" />
               </button>
               <span className="absolute right-2 top-2 rounded-full bg-slate-950/60 px-2 py-1 text-xs font-semibold text-white">
-                {carouselIndex + 1} / {visiblePhotos.length}
+                {carouselIndex + 1} / {photos.length}
               </span>
             </>
           )}
@@ -308,7 +272,7 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
                     {activePhoto.is_featured ? "Featured" : "Set featured"}
                   </button>
                   <span className="ml-2 whitespace-nowrap text-xs text-slate-400">
-                    {activeIndex + 1} / {visiblePhotos.length}
+                    {activeIndex + 1} / {photos.length}
                   </span>
                 </div>
               </div>
