@@ -20,6 +20,12 @@ function buttonClassName(variant: "light" | "dark", tone: "primary" | "secondary
   return "rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300";
 }
 
+function stickyFooterClassName(variant: "light" | "dark") {
+  return variant === "dark"
+    ? "sticky bottom-0 -mx-3 -mb-3 flex flex-wrap gap-2 border-t border-white/10 bg-slate-950/95 px-3 py-3"
+    : "sticky bottom-0 -mx-3 -mb-3 flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50/95 px-3 py-3";
+}
+
 interface TravelPhotoModalEditFormProps {
   photo: TravelPhoto;
   favorites: TravelFavorite[];
@@ -106,7 +112,7 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
   };
 
   return (
-    <form onSubmit={save} className={`grid gap-3 rounded-lg p-3 ${variant === "dark" ? "bg-white/10" : "border border-slate-200 bg-slate-50"}`}>
+    <form onSubmit={save} className={`grid max-h-[min(70vh,34rem)] gap-3 overflow-y-auto rounded-lg p-3 ${variant === "dark" ? "bg-white/10" : "border border-slate-200 bg-slate-50"}`}>
       <label className="space-y-1">
         <span className={`block text-xs font-semibold ${variant === "dark" ? "text-white/50" : "text-slate-500"}`}>Move to country</span>
         <select
@@ -171,7 +177,7 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
         <input type="checkbox" checked={form.is_featured} onChange={(event) => setForm({ ...form, is_featured: event.target.checked })} />
         Featured photo for this page
       </label>
-      <div className="flex flex-wrap gap-2">
+      <div className={stickyFooterClassName(variant)}>
         <button type="submit" disabled={isSaving} className={buttonClassName(variant)}>
           {isSaving ? "Saving..." : "Save photo"}
         </button>
