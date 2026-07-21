@@ -183,6 +183,13 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
       latitude: photo.latitude as number,
       longitude: photo.longitude as number,
     }));
+  const linkedMappedPhotos = photos
+    .filter((photo) => photo.favorite_id !== null && photo.latitude !== null && photo.longitude !== null)
+    .map((photo) => ({
+      ...photo,
+      latitude: photo.latitude as number,
+      longitude: photo.longitude as number,
+    }));
   const mapPoints = [
     ...pinned.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
     ...mappedPhotos.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
@@ -221,6 +228,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const mapDetailItems: MapDetailItem[] = [
     ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id })),
     ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id })),
+    ...(zoom >= 16 ? linkedMappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id })) : []),
   ];
 
   const openMapItem = (item: MapDetailItem) => {
@@ -497,19 +505,23 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     const visibleMapItems = [
       ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id, latitude: favorite.latitude, longitude: favorite.longitude, favorite })),
       ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id, latitude: photo.latitude, longitude: photo.longitude, photo })),
+      ...(zoom >= 16
+        ? linkedMappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id, latitude: photo.latitude, longitude: photo.longitude, photo }))
+        : []),
     ];
     const renderSingleMapItem = (item: (typeof visibleMapItems)[number], left: number, top: number, index: number) => {
       if (item.kind === "favorite") {
         const favorite = item.favorite;
         const Icon = IconForFavorite(favorite.type);
         const pinPhoto = favoritePinPhotoFor(favorite.id);
+        const favoritePhotoCount = favoritePhotosFor(favorite.id).length;
         return (
           <button
             key={`favorite-${favorite.id}-${index}`}
             type="button"
             className={
               pinPhoto
-                ? `absolute ${photoSize} -translate-x-1/2 -translate-y-full overflow-hidden rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 ${
+                ? `absolute ${photoSize} -translate-x-1/2 -translate-y-full rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 ${
                     activeId === favorite.id ? "scale-125 ring-4 ring-white" : ""
                   }`
                 : `absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`
@@ -528,6 +540,11 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
               <img src={pinPhoto.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
             ) : (
               <Icon className={iconSize} />
+            )}
+            {favoritePhotoCount > 1 && (
+              <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-950 px-1.5 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-white">
+                {favoritePhotoCount}
+              </span>
             )}
             <span className="sr-only">{index + 1}</span>
           </button>
