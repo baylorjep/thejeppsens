@@ -146,6 +146,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
   const activities = useMemo(() => favorites.filter((favorite) => favorite.type === "activity"), [favorites]);
   const places = useMemo(() => favorites.filter((favorite) => favorite.type === "place"), [favorites]);
   const favoritesById = useMemo(() => new Map(favorites.map((favorite) => [favorite.id, favorite])), [favorites]);
+  const selectedPhotoFavorite = photoForm.favorite_id ? favoritesById.get(photoForm.favorite_id) ?? null : null;
   const selectedPhotoCountry = destinationCountries.find((destination) => destination.id === photoForm.country_id) ?? country;
   const selectedPhotoDestinationChanged = Boolean(photoForm.country_id && (photoForm.country_id !== country.id || (photoForm.state_id || "") !== (state?.id ?? "")));
   const selectedPhotoCountryIsUnitedStates =
@@ -834,10 +835,28 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
                   <option value="">No trip</option>
                   {trips.map((trip) => <option key={trip.id} value={trip.id}>{trip.title}</option>)}
                 </select>
-                <select className={inputClassName()} value={photoForm.favorite_id} onChange={(e) => setPhotoForm({ ...photoForm, favorite_id: e.target.value })} disabled={selectedPhotoDestinationChanged}>
+                <select className={inputClassName()} value={photoForm.favorite_id} onChange={(e) => setPhotoForm({ ...photoForm, favorite_id: e.target.value, favorite_location_id: "" })} disabled={selectedPhotoDestinationChanged}>
                   <option value="">Not linked to a favorite</option>
                   {sortedPhotoFavorites.map((favorite) => <option key={favorite.id} value={favorite.id}>{favoriteLabel(favorite.type)}: {favorite.name}</option>)}
                 </select>
+                {selectedPhotoFavorite?.locations?.length ? (
+                  <label className="space-y-1 md:col-span-2">
+                    <span className="block text-xs font-semibold text-slate-500">Chain location</span>
+                    <select
+                      className={inputClassName()}
+                      value={photoForm.favorite_location_id}
+                      onChange={(e) => setPhotoForm({ ...photoForm, favorite_location_id: e.target.value })}
+                      disabled={selectedPhotoDestinationChanged}
+                    >
+                      <option value="">Parent favorite only</option>
+                      {selectedPhotoFavorite.locations.map((location) => (
+                        <option key={location.id} value={location.id}>
+                          {location.name || location.location_name || location.address || "Saved location"}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 {activeEditorPhoto && !photoForm.favorite_id && (
                   <div className="rounded-lg border border-slate-200 bg-white p-3 md:col-span-2">
                     {isCreatingFavoriteFromPhoto ? (

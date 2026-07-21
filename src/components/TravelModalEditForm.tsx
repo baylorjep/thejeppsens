@@ -59,6 +59,7 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
   const selectedCountry = destinationCountries.find((country) => country.id === form.country_id);
   const selectedCountryIsUnitedStates = selectedCountry?.display_name === "United States" || selectedCountry?.geo_name === "United States";
   const destinationChanged = form.country_id !== photo.country_id || form.state_id !== (photo.state_id ?? "");
+  const selectedFavorite = form.favorite_id ? favorites.find((favorite) => favorite.id === form.favorite_id) ?? null : null;
 
   useEffect(() => {
     const loadDestinations = async () => {
@@ -128,6 +129,7 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
             state_id: "",
             trip_id: "",
             favorite_id: "",
+            favorite_location_id: "",
             is_featured: false,
           })}
         >
@@ -147,6 +149,7 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
               state_id: event.target.value,
               trip_id: "",
               favorite_id: "",
+              favorite_location_id: "",
               is_featured: false,
             })}
           >
@@ -162,7 +165,7 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
           Saving will move this photo and clear its current trip/favorite link.
         </p>
       )}
-      <select className={inputClassName(variant)} value={form.favorite_id} onChange={(event) => setForm({ ...form, favorite_id: event.target.value })} disabled={destinationChanged}>
+      <select className={inputClassName(variant)} value={form.favorite_id} onChange={(event) => setForm({ ...form, favorite_id: event.target.value, favorite_location_id: "" })} disabled={destinationChanged}>
         <option value="">Not linked to a favorite</option>
         {favorites.map((favorite) => (
           <option key={favorite.id} value={favorite.id}>
@@ -170,6 +173,24 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
           </option>
         ))}
       </select>
+      {selectedFavorite?.locations?.length ? (
+        <label className="space-y-1">
+          <span className={`block text-xs font-semibold ${variant === "dark" ? "text-white/50" : "text-slate-500"}`}>Chain location</span>
+          <select
+            className={inputClassName(variant)}
+            value={form.favorite_location_id}
+            onChange={(event) => setForm({ ...form, favorite_location_id: event.target.value })}
+            disabled={destinationChanged}
+          >
+            <option value="">Parent favorite only</option>
+            {selectedFavorite.locations.map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.name || location.location_name || location.address || "Saved location"}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
       <input className={inputClassName(variant)} value={form.caption} onChange={(event) => setForm({ ...form, caption: event.target.value })} placeholder="Caption" />
       <input className={inputClassName(variant)} value={form.location_name} onChange={(event) => setForm({ ...form, location_name: event.target.value })} placeholder="Location" />
       <div className="grid gap-3 sm:grid-cols-2">
