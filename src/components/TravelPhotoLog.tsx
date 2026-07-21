@@ -248,7 +248,7 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
 
       {activePhoto && activeIndex !== null && (
         <div
-          className="fixed inset-0 z-[80] bg-slate-950/90 p-4 text-white"
+          className="fixed inset-0 z-[80] overflow-y-auto bg-slate-950/90 p-4 text-white"
           role="dialog"
           aria-modal="true"
           onClick={() => setActiveIndex(null)}
@@ -284,11 +284,15 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
           >
             <ChevronRight className="h-6 w-6" />
           </button>
-          <div className="flex h-full items-center justify-center">
-            <div className="max-h-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
+          <div className="flex min-h-full items-center justify-center py-2">
+            <div className="max-h-[calc(100dvh-2rem)] w-full max-w-5xl overflow-y-auto rounded-xl" onClick={(event) => event.stopPropagation()}>
               <div className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={activePhoto.image_url} alt={activePhoto.caption ?? fallbackName} className="max-h-[78vh] max-w-full rounded-lg object-contain shadow-2xl" />
+                <img
+                  src={activePhoto.image_url}
+                  alt={activePhoto.caption ?? fallbackName}
+                  className={`${isEditingPhoto ? "max-h-[34dvh]" : "max-h-[72dvh]"} mx-auto max-w-full rounded-lg object-contain shadow-2xl`}
+                />
                 {activePhoto.taken_on && (
                   <div className="absolute left-3 top-3 rounded-full bg-slate-950/70 px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
                     {activePhoto.taken_on}

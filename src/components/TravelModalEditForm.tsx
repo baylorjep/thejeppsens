@@ -116,8 +116,10 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
     }
   };
 
+  const maxHeightClassName = variant === "dark" ? "max-h-[min(42dvh,28rem)]" : "max-h-[min(70dvh,34rem)]";
+
   return (
-    <form onSubmit={save} className={`grid max-h-[min(70vh,34rem)] gap-3 overflow-y-auto rounded-lg p-3 ${variant === "dark" ? "bg-white/10" : "border border-slate-200 bg-slate-50"}`}>
+    <form onSubmit={save} className={`grid ${maxHeightClassName} gap-3 overflow-y-auto rounded-lg p-3 ${variant === "dark" ? "bg-white/10" : "border border-slate-200 bg-slate-50"}`}>
       <label className="space-y-1">
         <span className={`block text-xs font-semibold ${variant === "dark" ? "text-white/50" : "text-slate-500"}`}>Move to country</span>
         <select
