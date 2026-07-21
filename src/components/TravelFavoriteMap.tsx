@@ -168,6 +168,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [selectedFavoritePhotoIndex, setSelectedFavoritePhotoIndex] = useState(0);
   const [editingDetail, setEditingDetail] = useState<"favorite" | "photo" | null>(null);
+  const [isAssigningPhotos, setIsAssigningPhotos] = useState(false);
   const [featuringId, setFeaturingId] = useState("");
   const [deletingPhotoId, setDeletingPhotoId] = useState("");
   const [assigningLocationPhotoId, setAssigningLocationPhotoId] = useState("");
@@ -266,12 +267,14 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setSelectedPhotoId(null);
     setSelectedFavoriteId(favoriteId);
     setSelectedFavoritePhotoIndex(favoriteFeaturedPhotoIndexFor(favoriteId));
+    setIsAssigningPhotos(false);
     setEditingDetail(null);
   };
 
   const openPhoto = (photo: TravelPhoto) => {
     setSelectedFavoriteId(null);
     setSelectedPhotoId(photo.id);
+    setIsAssigningPhotos(false);
     setEditingDetail(null);
   };
 
@@ -279,6 +282,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setSelectedFavoriteId(null);
     setSelectedPhotoId(null);
     setSelectedFavoritePhotoIndex(0);
+    setIsAssigningPhotos(false);
     setEditingDetail(null);
   };
 
@@ -917,30 +921,40 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                       </p>
                       {selectedFavorite.type === "restaurant" && <TravelFavoriteLocations favorite={selectedFavorite} />}
                       {selectedFavorite.type === "restaurant" && (selectedFavorite.locations ?? []).length > 0 && selectedFavoritePhotos.length > 0 && (
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Assign Photos To Locations</p>
-                          <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
-                            {selectedFavoritePhotos.map((photo) => (
-                              <div key={photo.id} className="grid grid-cols-[3rem_1fr] items-center gap-3 rounded-md bg-white p-2 ring-1 ring-slate-200">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={photo.image_url} alt="" className="h-12 w-12 rounded-md object-cover" />
-                                <select
-                                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-slate-900"
-                                  value={photo.favorite_location_id ?? ""}
-                                  onChange={(event) => void assignPhotoToFavoriteLocation(photo, event.target.value)}
-                                  disabled={assigningLocationPhotoId === photo.id}
-                                >
-                                  <option value="">Parent favorite only</option>
-                                  {(selectedFavorite.locations ?? []).map((location) => (
-                                    <option key={location.id} value={location.id}>
-                                      {location.name || location.location_name || location.address || "Saved location"}
-                                    </option>
-                                  ))}
-                                </select>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setIsAssigningPhotos((current) => !current)}
+                            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
+                          >
+                            {isAssigningPhotos ? "Hide photo assignments" : "Assign photos to locations"}
+                          </button>
+                          {isAssigningPhotos && (
+                            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                              <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                                {selectedFavoritePhotos.map((photo) => (
+                                  <div key={photo.id} className="grid grid-cols-[3rem_1fr] items-center gap-3 rounded-md bg-white p-2 ring-1 ring-slate-200">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={photo.image_url} alt="" className="h-12 w-12 rounded-md object-cover" />
+                                    <select
+                                      className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-slate-900"
+                                      value={photo.favorite_location_id ?? ""}
+                                      onChange={(event) => void assignPhotoToFavoriteLocation(photo, event.target.value)}
+                                      disabled={assigningLocationPhotoId === photo.id}
+                                    >
+                                      <option value="">Parent favorite only</option>
+                                      {(selectedFavorite.locations ?? []).map((location) => (
+                                        <option key={location.id} value={location.id}>
+                                          {location.name || location.location_name || location.address || "Saved location"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </div>
+                            </div>
+                          )}
+                        </>
                       )}
                       {selectedFavoritePhotos.length > 1 && (
                         <div className="max-h-32 overflow-y-auto pr-1">
