@@ -129,6 +129,26 @@ async function backfillPhotoCoordinatesFromFavorite(
   if (error) throw error;
 }
 
+async function defaultTripIdForScope(
+  supabase: NonNullable<ReturnType<typeof getTravelSupabaseClient>>,
+  countryId: string,
+  stateId: string | null,
+  explicitTripId: string | null,
+) {
+  if (explicitTripId) return explicitTripId;
+
+  let query = supabase
+    .from("travel_trips")
+    .select("id")
+    .eq("country_id", countryId)
+    .limit(2);
+  query = stateId ? query.eq("state_id", stateId) : query.is("state_id", null);
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data?.length === 1 ? data[0].id : null;
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = getTravelSupabaseClient();
@@ -147,6 +167,13 @@ export async function POST(request: Request) {
     if (!countryId) {
       return NextResponse.json({ error: "Missing country" }, { status: 400 });
     }
+
+    const scopedTripId = await defaultTripIdForScope(
+      supabase,
+      countryId,
+      stateId,
+      nullableText(formData.get("trip_id")),
+    );
 
     if (type === "trip") {
       const title = nullableText(formData.get("title"));
@@ -203,7 +230,7 @@ export async function POST(request: Request) {
         ...(id ? { id } : {}),
         country_id: countryId,
         state_id: stateId,
-        trip_id: nullableText(formData.get("trip_id")),
+        trip_id: scopedTripId,
         favorite_id: nullableText(formData.get("favorite_id")),
         favorite_location_id: nullableText(formData.get("favorite_location_id")),
         image_url: imageUrl,
@@ -234,7 +261,7 @@ export async function POST(request: Request) {
         ...(id ? { id } : {}),
         country_id: countryId,
         state_id: stateId,
-        trip_id: nullableText(formData.get("trip_id")),
+        trip_id: scopedTripId,
         title,
         url,
         provider: "youtube",
@@ -283,7 +310,7 @@ export async function POST(request: Request) {
       ...(id ? { id } : {}),
       country_id: countryId,
       state_id: stateId,
-      trip_id: nullableText(formData.get("trip_id")),
+      trip_id: scopedTripId,
       type: favoriteType,
       name,
       location_name: nullableText(formData.get("location_name")),
