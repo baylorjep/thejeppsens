@@ -127,6 +127,7 @@ export function TravelFavoriteModalEditForm({ favorite, variant = "light", onDon
     name: favorite.name,
     location_name: favorite.location_name ?? "",
     address: favorite.address ?? "",
+    cuisine: favorite.cuisine ?? "",
     latitude: favorite.latitude?.toString() ?? "",
     longitude: favorite.longitude?.toString() ?? "",
     notes: favorite.notes ?? "",
@@ -152,6 +153,7 @@ export function TravelFavoriteModalEditForm({ favorite, variant = "light", onDon
       formData.set("name", form.name);
       formData.set("location_name", form.location_name);
       formData.set("address", form.address);
+      formData.set("cuisine", form.cuisine);
       formData.set("latitude", form.latitude);
       formData.set("longitude", form.longitude);
       formData.set("notes", form.notes);
@@ -176,6 +178,9 @@ export function TravelFavoriteModalEditForm({ favorite, variant = "light", onDon
         <option value="place">Place</option>
       </select>
       <input className={inputClassName(variant)} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Name" required />
+      {form.type === "restaurant" && (
+        <input className={inputClassName(variant)} value={form.cuisine} onChange={(event) => setForm({ ...form, cuisine: event.target.value })} placeholder="Cuisine (Mexican, burgers, pizza)" />
+      )}
       <input className={inputClassName(variant)} value={form.location_name} onChange={(event) => setForm({ ...form, location_name: event.target.value })} placeholder="City or area" />
       <input className={inputClassName(variant)} value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} placeholder="Street address or Maps-friendly address" />
       <div className="grid gap-3 sm:grid-cols-2">

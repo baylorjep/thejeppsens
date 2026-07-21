@@ -56,6 +56,7 @@ const emptyFavorite = {
   name: "",
   location_name: "",
   address: "",
+  cuisine: "",
   latitude: "",
   longitude: "",
   notes: "",
@@ -424,6 +425,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     formData.set("name", favoriteForm.name);
     formData.set("location_name", favoriteForm.location_name);
     formData.set("address", favoriteForm.address);
+    formData.set("cuisine", favoriteForm.cuisine);
     formData.set("latitude", favoriteForm.latitude);
     formData.set("longitude", favoriteForm.longitude);
     formData.set("notes", favoriteForm.notes);
@@ -631,6 +633,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
       name: favorite.name,
       location_name: favorite.location_name ?? "",
       address: favorite.address ?? "",
+      cuisine: favorite.cuisine ?? "",
       latitude: favorite.latitude?.toString() ?? "",
       longitude: favorite.longitude?.toString() ?? "",
       notes: favorite.notes ?? "",
@@ -829,6 +832,9 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
                   {trips.map((trip) => <option key={trip.id} value={trip.id}>{trip.title}</option>)}
                 </select>
                 <input className={inputClassName()} value={favoriteForm.name} onChange={(e) => setFavoriteForm({ ...favoriteForm, name: e.target.value })} placeholder="Name" required />
+                {favoriteForm.type === "restaurant" && (
+                  <input className={inputClassName()} value={favoriteForm.cuisine} onChange={(e) => setFavoriteForm({ ...favoriteForm, cuisine: e.target.value })} placeholder="Cuisine (Mexican, burgers, pizza)" />
+                )}
                 <input className={inputClassName()} value={favoriteForm.location_name} onChange={(e) => setFavoriteForm({ ...favoriteForm, location_name: e.target.value })} placeholder="City or area" />
                 <input className={`${inputClassName()} md:col-span-2`} value={favoriteForm.address} onChange={(e) => setFavoriteForm({ ...favoriteForm, address: e.target.value })} placeholder="Street address or Maps-friendly address" />
                 <div className="grid gap-3 md:col-span-2 md:grid-cols-[1fr_1fr_auto]">
@@ -973,7 +979,11 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
               items={[...restaurants, ...activities, ...places].map((favorite) => ({
                 id: favorite.id,
                 title: favorite.name,
-                detail: `${favorite.type}${favorite.location_name ? ` · ${favorite.location_name}` : ""}`,
+                detail: [
+                  favorite.type === "restaurant" ? "Food" : favorite.type,
+                  favorite.type === "restaurant" ? favorite.cuisine : null,
+                  favorite.location_name,
+                ].filter(Boolean).join(" · "),
                 onEdit: () => editFavorite(favorite),
                 onDelete: () => deleteItem("favorite", favorite.id),
               }))}

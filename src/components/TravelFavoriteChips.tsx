@@ -106,6 +106,9 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-teal-600">{selectedFavorite.type}</p>
                     <h3 className="mt-1 text-xl font-bold text-slate-950">{selectedFavorite.name}</h3>
+                    {selectedFavorite.type === "restaurant" && selectedFavorite.cuisine && (
+                      <p className="mt-1 text-sm font-semibold text-rose-600">{selectedFavorite.cuisine}</p>
+                    )}
                     {selectedFavorite.location_name && <p className="mt-1 text-sm text-slate-500">{selectedFavorite.location_name}</p>}
                     {selectedFavorite.address && <p className="mt-2 text-sm text-slate-600">{selectedFavorite.address}</p>}
                   </div>

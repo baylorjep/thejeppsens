@@ -249,6 +249,7 @@ export async function POST(request: Request) {
       name,
       location_name: nullableText(formData.get("location_name")),
       address: nullableText(formData.get("address")),
+      cuisine: favoriteType === "restaurant" ? nullableText(formData.get("cuisine")) : null,
       latitude: numberValue(formData.get("latitude")),
       longitude: longitudeValue(formData.get("longitude"), stateId),
       notes: nullableText(formData.get("notes")),
