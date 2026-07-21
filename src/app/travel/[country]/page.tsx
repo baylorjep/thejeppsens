@@ -196,7 +196,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
                 </div>
               </div>
               <p className="max-w-2xl text-base leading-7 text-slate-300">
-                {travelerLabel(country)} visited. {countLabel(tripRows.length, 'trip')} logged, {countLabel(photoRows.length, 'photo')} saved,{' '}
+                {travelerLabel(country)} visited. {countLabel(tripRows.length, 'trip')}, {countLabel(photoRows.length, 'photo')},{' '}
                 {countLabel(favoriteRows.length, 'favorite spot')}.
               </p>
             </div>

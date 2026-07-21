@@ -158,7 +158,7 @@ export default async function StateTravelPage({ params }: PageProps) {
             <h1 className="mt-2 text-5xl font-bold tracking-tight sm:text-6xl">{state.state_name}</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
               {travelerLabel({ baylor_visited: state.baylor_visited, isabel_visited: state.isabel_visited })} visited.{' '}
-              {countLabel(tripRows.length, 'trip')} logged, {countLabel(photoRows.length, 'photo')} saved, {countLabel(favoriteRows.length, 'favorite spot')}.
+              {countLabel(tripRows.length, 'trip')}, {countLabel(photoRows.length, 'photo')}, {countLabel(favoriteRows.length, 'favorite spot')}.
             </p>
           </div>
         </div>
