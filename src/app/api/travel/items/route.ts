@@ -205,6 +205,7 @@ export async function POST(request: Request) {
         state_id: stateId,
         trip_id: nullableText(formData.get("trip_id")),
         favorite_id: nullableText(formData.get("favorite_id")),
+        favorite_location_id: nullableText(formData.get("favorite_location_id")),
         image_url: imageUrl,
         image_hash: imageHash,
         caption: nullableText(formData.get("caption")),
@@ -308,7 +309,7 @@ export async function PATCH(request: Request) {
     const supabase = getTravelSupabaseClient();
     if (!supabase) return NextResponse.json({ error: "No DB" }, { status: 503 });
 
-    const body = (await request.json()) as { type?: ItemType; id?: string; favorite_id?: string | null; is_favorite_featured?: boolean; is_featured?: boolean };
+    const body = (await request.json()) as { type?: ItemType; id?: string; favorite_id?: string | null; favorite_location_id?: string | null; is_favorite_featured?: boolean; is_featured?: boolean };
     if (body.type !== "photo" || !body.id) {
       return NextResponse.json({ error: "Invalid update" }, { status: 400 });
     }
@@ -337,11 +338,15 @@ export async function PATCH(request: Request) {
       }
     }
 
-    const updateRow: { favorite_id?: string | null; is_favorite_featured?: boolean; is_featured?: boolean } = {};
+    const updateRow: { favorite_id?: string | null; favorite_location_id?: string | null; is_favorite_featured?: boolean; is_featured?: boolean } = {};
     if ("favorite_id" in body) updateRow.favorite_id = body.favorite_id ?? null;
+    if ("favorite_location_id" in body) updateRow.favorite_location_id = body.favorite_location_id ?? null;
     if ("is_favorite_featured" in body) updateRow.is_favorite_featured = Boolean(body.is_favorite_featured);
     if ("is_featured" in body) updateRow.is_featured = Boolean(body.is_featured);
-    if ("favorite_id" in body && body.favorite_id === null && !("is_favorite_featured" in body)) updateRow.is_favorite_featured = false;
+    if ("favorite_id" in body && body.favorite_id === null && !("is_favorite_featured" in body)) {
+      updateRow.is_favorite_featured = false;
+      updateRow.favorite_location_id = null;
+    }
 
     const { data, error } = await supabase
       .from("travel_photos")

@@ -41,6 +41,7 @@ const emptyPhoto = {
   state_id: "",
   trip_id: "",
   favorite_id: "",
+  favorite_location_id: "",
   image_url: "",
   image_hash: "",
   caption: "",
@@ -165,6 +166,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
       state_id: photoForm.state_id || null,
       trip_id: photoForm.trip_id || null,
       favorite_id: photoForm.favorite_id || null,
+      favorite_location_id: photoForm.favorite_location_id || null,
       image_url: photoForm.image_url,
       image_hash: photoForm.image_hash || null,
       caption: photoForm.caption || null,
@@ -453,6 +455,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     if (photoForm.id) formData.set("id", photoForm.id);
     formData.set("trip_id", selectedPhotoDestinationChanged ? "" : photoForm.trip_id);
     formData.set("favorite_id", selectedPhotoDestinationChanged ? "" : photoForm.favorite_id);
+    formData.set("favorite_location_id", selectedPhotoDestinationChanged ? "" : photoForm.favorite_location_id);
     formData.set("image_url", photoForm.image_url);
     formData.set("image_hash", photoForm.image_hash);
     formData.set("caption", photoForm.caption);
@@ -665,6 +668,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
       state_id: photo.state_id ?? "",
       trip_id: photo.trip_id ?? "",
       favorite_id: photo.favorite_id ?? "",
+      favorite_location_id: photo.favorite_location_id ?? "",
       image_url: photo.image_url,
       image_hash: photo.image_hash ?? "",
       caption: photo.caption ?? "",

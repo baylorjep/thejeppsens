@@ -76,6 +76,7 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos 
     setError("");
     try {
       if (mode === "existing") {
+        let favoriteLocationId: string | null = null;
         if (canAddChainLocation && shouldAddChainLocation) {
           const locationData = new FormData();
           locationData.set("type", "favorite_location");
@@ -92,12 +93,14 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos 
 
           const locationResponse = await fetch("/api/travel/items", { method: "POST", body: locationData });
           if (!locationResponse.ok) throw new Error("Could not add chain location");
+          const { item: location } = (await locationResponse.json()) as { item: { id: string } };
+          favoriteLocationId = location.id;
         }
 
         const linkResponse = await fetch("/api/travel/items", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "photo", id: photo.id, favorite_id: favoriteId }),
+          body: JSON.stringify({ type: "photo", id: photo.id, favorite_id: favoriteId, favorite_location_id: favoriteLocationId }),
         });
         if (!linkResponse.ok) throw new Error("Could not link photo");
 

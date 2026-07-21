@@ -223,6 +223,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const IconForFavorite = (type: TravelFavorite["type"]) => (type === "restaurant" ? Utensils : type === "activity" ? Sparkles : MapPin);
   const selectedFavorite = selectedFavoriteId ? favorites.find((favorite) => favorite.id === selectedFavoriteId) ?? null : null;
   const favoritePhotosFor = (favoriteId: string) => photos.filter((photo) => photo.favorite_id === favoriteId);
+  const favoriteLocationPhotosFor = (favoriteLocationId: string) => photos.filter((photo) => photo.favorite_location_id === favoriteLocationId);
   const favoritePinPhotoFor = (favoriteId: string) => {
     const favoritePhotos = favoritePhotosFor(favoriteId);
     return favoritePhotos.find((photo) => photo.is_favorite_featured) ?? favoritePhotos[0] ?? null;
@@ -576,11 +577,18 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
         const favorite = item.favorite;
         const location = item.location;
         const Icon = IconForFavorite(favorite.type);
+        const locationPhoto = favoriteLocationPhotosFor(location.id).find((photo) => photo.is_favorite_featured) ?? favoriteLocationPhotosFor(location.id)[0] ?? null;
         return (
           <button
             key={`favorite-location-${location.id}-${index}`}
             type="button"
-            className={`absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`}
+            className={
+              locationPhoto
+                ? `absolute ${photoSize} -translate-x-1/2 -translate-y-full rounded-[12px_12px_12px_4px] border border-white/80 bg-white p-px shadow-md ring-1 ring-slate-950/15 transition-transform hover:scale-110 ${
+                    activeId === favorite.id ? "scale-125 ring-4 ring-white" : ""
+                  }`
+                : `absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`
+            }
             style={{ left, top }}
             title={[favorite.name, location.name || location.location_name].filter(Boolean).join(" · ")}
             onClick={(event) => {
@@ -590,8 +598,13 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             onMouseEnter={() => setActiveId(favorite.id)}
             onMouseLeave={() => setActiveId(null)}
           >
-            <Icon className={iconSize} />
-            <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-white ring-1 ring-slate-950/20" />
+            {locationPhoto ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={locationPhoto.image_url} alt="" className="h-full w-full rounded-[10px_10px_10px_3px] object-cover" />
+            ) : (
+              <Icon className={iconSize} />
+            )}
+            {!locationPhoto && <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-white ring-1 ring-slate-950/20" />}
             <span className="sr-only">{index + 1}</span>
           </button>
         );
