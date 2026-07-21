@@ -121,6 +121,14 @@ function formatMiles(meters: number) {
   return Math.round(meters / 1609.344).toLocaleString();
 }
 
+function nextTripDates(currentEndDate: string, nextStartDate: string) {
+  if (!nextStartDate) return { started_on: nextStartDate };
+  if (!currentEndDate || currentEndDate < nextStartDate) {
+    return { started_on: nextStartDate, ended_on: nextStartDate };
+  }
+  return { started_on: nextStartDate };
+}
+
 export default function TravelCountryEditor({ country, state, mapCenter, trips, photos, favorites, videos }: TravelCountryEditorProps) {
   const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -778,11 +786,22 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
                 <input className={inputClassName()} value={tripForm.location_name} onChange={(e) => setTripForm({ ...tripForm, location_name: e.target.value })} placeholder="City or area" />
                 <label className="space-y-1">
                   <span className="block text-xs font-semibold text-slate-500">Start date</span>
-                  <input className={inputClassName()} type="date" value={tripForm.started_on} onChange={(e) => setTripForm({ ...tripForm, started_on: e.target.value })} />
+                  <input
+                    className={inputClassName()}
+                    type="date"
+                    value={tripForm.started_on}
+                    onChange={(e) => setTripForm({ ...tripForm, ...nextTripDates(tripForm.ended_on, e.target.value) })}
+                  />
                 </label>
                 <label className="space-y-1">
                   <span className="block text-xs font-semibold text-slate-500">End date</span>
-                  <input className={inputClassName()} type="date" value={tripForm.ended_on} onChange={(e) => setTripForm({ ...tripForm, ended_on: e.target.value })} />
+                  <input
+                    className={inputClassName()}
+                    type="date"
+                    min={tripForm.started_on || undefined}
+                    value={tripForm.ended_on}
+                    onChange={(e) => setTripForm({ ...tripForm, ended_on: e.target.value })}
+                  />
                 </label>
                 <textarea className={`${inputClassName()} md:col-span-2`} value={tripForm.notes} onChange={(e) => setTripForm({ ...tripForm, notes: e.target.value })} placeholder="Notes" rows={3} />
                 <div className="flex gap-4 text-sm text-slate-600">
