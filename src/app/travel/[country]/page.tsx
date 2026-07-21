@@ -239,47 +239,63 @@ export default async function CountryTravelPage({ params }: PageProps) {
       </section>
 
       <section className="py-12">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
-          <div className="lg:col-span-2">
-            <div className="mb-5 flex items-center gap-3">
+        <div className="mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8">
+          <div>
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-slate-950">Trip Overview</h2>
+                <p className="text-sm text-slate-500">Travel plans, memories, and what they include.</p>
+              </div>
               <TravelQuickAddButton kind="trip" />
-              <h2 className="text-lg font-bold text-slate-950">Trips</h2>
             </div>
 
             {tripRows.length > 0 ? (
               <div className="space-y-4">
                 {tripRows.map((trip) => (
-                  <article key={trip.id} className="rounded-xl border border-slate-200 bg-white p-5">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <h3 className="text-base font-bold text-slate-900">{trip.title}</h3>
-                        <p className="mt-1 text-sm text-slate-500">{trip.location_name ?? country.display_name}</p>
+                  <article key={trip.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                    <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
+                      <div className="p-5 sm:p-6">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <h3 className="text-lg font-bold text-slate-950">{trip.title}</h3>
+                            <p className="mt-1 text-sm text-slate-500">{trip.location_name ?? country.display_name}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {formatDateRange(trip) && (
+                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                                {formatDateRange(trip)}
+                              </span>
+                            )}
+                            <TravelEditButton type="trip" item={trip} label={`Edit ${trip.title}`} />
+                          </div>
+                        </div>
+                        <div className="mt-5 grid grid-cols-3 gap-3">
+                          <div className="rounded-lg bg-slate-50 p-3">
+                            <p className="text-lg font-bold text-slate-950">{photosByTrip.get(trip.id)?.length ?? 0}</p>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Photos</p>
+                          </div>
+                          <div className="rounded-lg bg-slate-50 p-3">
+                            <p className="text-lg font-bold text-slate-950">{favoritesByTrip.get(trip.id)?.length ?? 0}</p>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Favorites</p>
+                          </div>
+                          <div className="rounded-lg bg-slate-50 p-3">
+                            <p className="text-lg font-bold text-slate-950">{videosByTrip.get(trip.id)?.length ?? 0}</p>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Videos</p>
+                          </div>
+                        </div>
+                        {trip.notes && <p className="mt-5 text-sm leading-6 text-slate-600">{trip.notes}</p>}
                       </div>
-                      <div className="flex items-center gap-2">
-                        {formatDateRange(trip) && (
-                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-                            {formatDateRange(trip)}
-                          </span>
-                        )}
-                        <TravelEditButton type="trip" item={trip} label={`Edit ${trip.title}`} />
-                      </div>
-                    </div>
-                    {(trip.notes || photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length || videosByTrip.get(trip.id)?.length) && (
-                      <details className="mt-4 group">
-                        <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-slate-950">
-                          Details
-                        </summary>
-                        {trip.notes && <p className="mt-3 text-sm leading-6 text-slate-600">{trip.notes}</p>}
-                        {(photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length || videosByTrip.get(trip.id)?.length) && (
-                          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                            {(photosByTrip.get(trip.id) ?? []).slice(0, 2).map((photo) => (
-                              <div key={photo.id} className="overflow-hidden rounded-lg bg-slate-50">
+                      <div className="border-t border-slate-100 bg-slate-50 p-4 lg:border-l lg:border-t-0">
+                        {(photosByTrip.get(trip.id)?.length || favoritesByTrip.get(trip.id)?.length || videosByTrip.get(trip.id)?.length) ? (
+                          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                            {(photosByTrip.get(trip.id) ?? []).slice(0, 4).map((photo) => (
+                              <div key={photo.id} className="overflow-hidden rounded-lg bg-white">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={photo.image_url} alt={photo.caption ?? trip.title} className="h-28 w-full object-cover" />
                               </div>
                             ))}
-                            {(favoritesByTrip.get(trip.id) ?? []).slice(0, 3).map((favorite) => (
-                              <div key={favorite.id} className="flex items-center gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+                            {(favoritesByTrip.get(trip.id) ?? []).slice(0, 4).map((favorite) => (
+                              <div key={favorite.id} className="flex items-center gap-2 rounded-lg bg-white p-3 text-sm text-slate-600">
                                 <MapPinned className="h-4 w-4 text-teal-600" />
                                 <span>{favorite.name}</span>
                               </div>
@@ -288,9 +304,13 @@ export default async function CountryTravelPage({ params }: PageProps) {
                               <TravelVideoEmbed key={video.id} video={video} />
                             ))}
                           </div>
+                        ) : (
+                          <div className="flex h-full min-h-36 items-center justify-center rounded-lg border border-dashed border-slate-200 bg-white text-sm text-slate-400">
+                            No photos, favorites, or videos attached yet.
+                          </div>
                         )}
-                      </details>
-                    )}
+                      </div>
+                    </div>
                   </article>
                 ))}
               </div>
@@ -303,42 +323,53 @@ export default async function CountryTravelPage({ params }: PageProps) {
             )}
           </div>
 
-          <aside className="space-y-6">
-            <div className="rounded-xl border border-slate-200 bg-white p-5">
-              <div className="mb-4 flex items-center gap-3">
-                <TravelQuickAddButton kind="restaurant" />
-                <h2 className="text-lg font-bold text-slate-950">Food</h2>
+          <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-950">Favorite Spots</h2>
+                <p className="text-sm text-slate-500">Food, activities, and places worth remembering.</p>
               </div>
-              {restaurants.length > 0 ? (
-                <TravelFavoriteChips favorites={restaurants} photos={photoRows} />
-              ) : (
-                <div className="flex flex-col items-start gap-3">
-                  <Utensils className="h-6 w-6 text-slate-300" />
-                  <p className="text-sm text-slate-400">No food spots yet.</p>
-                  <TravelQuickAddButton kind="restaurant" label="Add first food spot" />
-                </div>
-              )}
+              <div className="flex flex-wrap gap-2">
+                <TravelQuickAddButton kind="restaurant" />
+                <TravelQuickAddButton kind="activity" />
+              </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-5">
-              <div className="mb-4 flex items-center gap-3">
-                <TravelQuickAddButton kind="activity" />
-                <h2 className="text-lg font-bold text-slate-950">Activities</h2>
-              </div>
-              {activities.length > 0 ? (
-                <TravelFavoriteChips favorites={activities} photos={photoRows} />
-              ) : (
-                <div className="flex flex-col items-start gap-3">
-                  <Sparkles className="h-6 w-6 text-slate-300" />
-                  <p className="text-sm text-slate-400">No activities yet.</p>
-                  <TravelQuickAddButton kind="activity" label="Add first activity" />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <Utensils className="h-5 w-5 text-rose-600" />
+                  <h3 className="text-base font-bold text-slate-950">Food</h3>
                 </div>
-              )}
+                {restaurants.length > 0 ? (
+                  <TravelFavoriteChips favorites={restaurants} photos={photoRows} />
+                ) : (
+                  <p className="text-sm text-slate-400">No food spots yet.</p>
+                )}
+              </div>
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-amber-500" />
+                  <h3 className="text-base font-bold text-slate-950">Activities & Places</h3>
+                </div>
+                {activities.length > 0 ? (
+                  <TravelFavoriteChips favorites={activities} photos={photoRows} />
+                ) : (
+                  <p className="text-sm text-slate-400">No activities yet.</p>
+                )}
+              </div>
             </div>
-          </aside>
+          </div>
         </div>
       </section>
-      <TravelCountryEditor country={country} mapCenter={mapCenter} trips={tripRows} photos={photoRows} favorites={favoriteRows} videos={videoRows} />
+      <section className="border-t border-slate-100 bg-white py-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <details className="rounded-xl border border-slate-200 bg-slate-50">
+            <summary className="cursor-pointer px-5 py-4 text-sm font-bold text-slate-700">Edit Travel Log</summary>
+            <TravelCountryEditor country={country} mapCenter={mapCenter} trips={tripRows} photos={photoRows} favorites={favoriteRows} videos={videoRows} />
+          </details>
+        </div>
+      </section>
         </>
       )}
     </main>
