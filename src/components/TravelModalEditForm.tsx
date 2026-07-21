@@ -1,8 +1,8 @@
 "use client";
 
-import type { TravelFavorite, TravelFavoriteType, TravelPhoto } from "@/lib/travel";
+import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState } from "@/lib/travel";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 function inputClassName(variant: "light" | "dark") {
   return variant === "dark"
@@ -31,6 +31,8 @@ interface TravelPhotoModalEditFormProps {
 export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", onDone, onCancel }: TravelPhotoModalEditFormProps) {
   const router = useRouter();
   const [form, setForm] = useState({
+    country_id: photo.country_id,
+    state_id: photo.state_id ?? "",
     trip_id: photo.trip_id ?? "",
     favorite_id: photo.favorite_id ?? "",
     image_url: photo.image_url,
@@ -44,6 +46,31 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const [destinationCountries, setDestinationCountries] = useState<Country[]>([]);
+  const [destinationStates, setDestinationStates] = useState<TravelState[]>([]);
+  const selectedCountry = destinationCountries.find((country) => country.id === form.country_id);
+  const selectedCountryIsUnitedStates = selectedCountry?.display_name === "United States" || selectedCountry?.geo_name === "United States";
+  const destinationChanged = form.country_id !== photo.country_id || form.state_id !== (photo.state_id ?? "");
+
+  useEffect(() => {
+    const loadDestinations = async () => {
+      try {
+        const [countriesResponse, statesResponse] = await Promise.all([
+          fetch("/api/travel/countries"),
+          fetch("/api/travel/states"),
+        ]);
+        const countriesPayload = countriesResponse.ok ? await countriesResponse.json() : null;
+        const statesPayload = statesResponse.ok ? await statesResponse.json() : null;
+        if (Array.isArray(countriesPayload?.countries)) setDestinationCountries(countriesPayload.countries);
+        if (Array.isArray(statesPayload?.states)) setDestinationStates(statesPayload.states);
+      } catch {
+        setDestinationCountries([]);
+        setDestinationStates([]);
+      }
+    };
+
+    void loadDestinations();
+  }, []);
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
@@ -54,10 +81,10 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
       const formData = new FormData();
       formData.set("type", "photo");
       formData.set("id", photo.id);
-      formData.set("country_id", photo.country_id);
-      if (photo.state_id) formData.set("state_id", photo.state_id);
-      formData.set("trip_id", form.trip_id);
-      formData.set("favorite_id", form.favorite_id);
+      formData.set("country_id", form.country_id);
+      if (form.state_id) formData.set("state_id", form.state_id);
+      formData.set("trip_id", destinationChanged ? "" : form.trip_id);
+      formData.set("favorite_id", destinationChanged ? "" : form.favorite_id);
       formData.set("image_url", form.image_url);
       formData.set("caption", form.caption);
       formData.set("location_name", form.location_name);
@@ -80,7 +107,52 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
 
   return (
     <form onSubmit={save} className={`grid gap-3 rounded-lg p-3 ${variant === "dark" ? "bg-white/10" : "border border-slate-200 bg-slate-50"}`}>
-      <select className={inputClassName(variant)} value={form.favorite_id} onChange={(event) => setForm({ ...form, favorite_id: event.target.value })}>
+      <label className="space-y-1">
+        <span className={`block text-xs font-semibold ${variant === "dark" ? "text-white/50" : "text-slate-500"}`}>Move to country</span>
+        <select
+          className={inputClassName(variant)}
+          value={form.country_id}
+          onChange={(event) => setForm({
+            ...form,
+            country_id: event.target.value,
+            state_id: "",
+            trip_id: "",
+            favorite_id: "",
+            is_featured: false,
+          })}
+        >
+          {(destinationCountries.length ? destinationCountries : [{ id: photo.country_id, display_name: "Current country" } as Country]).map((country) => (
+            <option key={country.id} value={country.id}>{country.display_name}</option>
+          ))}
+        </select>
+      </label>
+      {selectedCountryIsUnitedStates && (
+        <label className="space-y-1">
+          <span className={`block text-xs font-semibold ${variant === "dark" ? "text-white/50" : "text-slate-500"}`}>Move to state</span>
+          <select
+            className={inputClassName(variant)}
+            value={form.state_id}
+            onChange={(event) => setForm({
+              ...form,
+              state_id: event.target.value,
+              trip_id: "",
+              favorite_id: "",
+              is_featured: false,
+            })}
+          >
+            <option value="">United States country page</option>
+            {destinationStates.map((state) => (
+              <option key={state.id} value={state.id}>{state.state_name}</option>
+            ))}
+          </select>
+        </label>
+      )}
+      {destinationChanged && (
+        <p className={`rounded-md px-3 py-2 text-xs font-medium ${variant === "dark" ? "bg-amber-300/15 text-amber-100" : "border border-amber-200 bg-amber-50 text-amber-800"}`}>
+          Saving will move this photo and clear its current trip/favorite link.
+        </p>
+      )}
+      <select className={inputClassName(variant)} value={form.favorite_id} onChange={(event) => setForm({ ...form, favorite_id: event.target.value })} disabled={destinationChanged}>
         <option value="">Not linked to a favorite</option>
         {favorites.map((favorite) => (
           <option key={favorite.id} value={favorite.id}>

@@ -37,6 +37,8 @@ const emptyTrip = {
 
 const emptyPhoto = {
   id: "",
+  country_id: "",
+  state_id: "",
   trip_id: "",
   favorite_id: "",
   image_url: "",
@@ -128,11 +130,17 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
   const [attachPhotoId, setAttachPhotoId] = useState("");
   const [isLinking, setIsLinking] = useState(false);
   const [isCreatingFavoriteFromPhoto, setIsCreatingFavoriteFromPhoto] = useState(false);
+  const [destinationCountries, setDestinationCountries] = useState<Country[]>([country]);
+  const [destinationStates, setDestinationStates] = useState<TravelState[]>(state ? [state] : []);
 
   const restaurants = useMemo(() => favorites.filter((favorite) => favorite.type === "restaurant"), [favorites]);
   const activities = useMemo(() => favorites.filter((favorite) => favorite.type === "activity"), [favorites]);
   const places = useMemo(() => favorites.filter((favorite) => favorite.type === "place"), [favorites]);
   const favoritesById = useMemo(() => new Map(favorites.map((favorite) => [favorite.id, favorite])), [favorites]);
+  const selectedPhotoCountry = destinationCountries.find((destination) => destination.id === photoForm.country_id) ?? country;
+  const selectedPhotoDestinationChanged = Boolean(photoForm.country_id && (photoForm.country_id !== country.id || (photoForm.state_id || "") !== (state?.id ?? "")));
+  const selectedPhotoCountryIsUnitedStates =
+    selectedPhotoCountry.display_name === "United States" || selectedPhotoCountry.geo_name === "United States";
   const attachedPhotos = useMemo(
     () => photos.filter((photo) => photo.favorite_id === favoriteForm.id),
     [photos, favoriteForm.id],
@@ -145,8 +153,8 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     if (!photoForm.id) return null;
     return {
       id: photoForm.id,
-      country_id: country.id,
-      state_id: state?.id ?? null,
+      country_id: photoForm.country_id || country.id,
+      state_id: photoForm.state_id || null,
       trip_id: photoForm.trip_id || null,
       favorite_id: photoForm.favorite_id || null,
       image_url: photoForm.image_url,
@@ -229,9 +237,29 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     return () => window.removeEventListener("travel:edit-item", handleEditItem);
   }, []);
 
+  useEffect(() => {
+    const loadDestinations = async () => {
+      try {
+        const [countriesResponse, statesResponse] = await Promise.all([
+          fetch("/api/travel/countries"),
+          fetch("/api/travel/states"),
+        ]);
+        const countriesPayload = countriesResponse.ok ? await countriesResponse.json() : null;
+        const statesPayload = statesResponse.ok ? await statesResponse.json() : null;
+        if (Array.isArray(countriesPayload?.countries)) setDestinationCountries(countriesPayload.countries);
+        if (Array.isArray(statesPayload?.states)) setDestinationStates(statesPayload.states);
+      } catch {
+        setDestinationCountries([country]);
+        setDestinationStates(state ? [state] : []);
+      }
+    };
+
+    void loadDestinations();
+  }, [country, state]);
+
   const resetForms = () => {
     setTripForm(emptyTrip);
-    setPhotoForm(emptyPhoto);
+    setPhotoForm({ ...emptyPhoto, country_id: country.id, state_id: state?.id ?? "" });
     setFavoriteForm(emptyFavorite);
     setVideoForm(emptyVideo);
     setPhotoFile(undefined);
@@ -395,11 +423,13 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     if (!confirmCoordinateDistance(photoForm.latitude, photoForm.longitude)) return;
     const formData = new FormData();
     formData.set("type", "photo");
-    formData.set("country_id", country.id);
-    if (state) formData.set("state_id", state.id);
+    const destinationCountryId = photoForm.country_id || country.id;
+    const destinationStateId = photoForm.state_id;
+    formData.set("country_id", destinationCountryId);
+    if (destinationStateId) formData.set("state_id", destinationStateId);
     if (photoForm.id) formData.set("id", photoForm.id);
-    formData.set("trip_id", photoForm.trip_id);
-    formData.set("favorite_id", photoForm.favorite_id);
+    formData.set("trip_id", selectedPhotoDestinationChanged ? "" : photoForm.trip_id);
+    formData.set("favorite_id", selectedPhotoDestinationChanged ? "" : photoForm.favorite_id);
     formData.set("image_url", photoForm.image_url);
     formData.set("caption", photoForm.caption);
     formData.set("location_name", photoForm.location_name);
@@ -607,6 +637,8 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     setIsOpen(true);
     setPhotoForm({
       id: photo.id,
+      country_id: photo.country_id,
+      state_id: photo.state_id ?? "",
       trip_id: photo.trip_id ?? "",
       favorite_id: photo.favorite_id ?? "",
       image_url: photo.image_url,
@@ -724,11 +756,56 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
 
             {mode === "photo" && (
               <form onSubmit={savePhoto} className="grid gap-3 md:grid-cols-2">
-                <select className={inputClassName()} value={photoForm.trip_id} onChange={(e) => setPhotoForm({ ...photoForm, trip_id: e.target.value })}>
+                <label className="space-y-1">
+                  <span className="block text-xs font-semibold text-slate-500">Move to country</span>
+                  <select
+                    className={inputClassName()}
+                    value={photoForm.country_id || country.id}
+                    onChange={(e) => setPhotoForm({
+                      ...photoForm,
+                      country_id: e.target.value,
+                      state_id: "",
+                      trip_id: "",
+                      favorite_id: "",
+                      is_featured: false,
+                    })}
+                  >
+                    {destinationCountries.map((destination) => (
+                      <option key={destination.id} value={destination.id}>{destination.display_name}</option>
+                    ))}
+                  </select>
+                </label>
+                {selectedPhotoCountryIsUnitedStates && (
+                  <label className="space-y-1">
+                    <span className="block text-xs font-semibold text-slate-500">Move to state</span>
+                    <select
+                      className={inputClassName()}
+                      value={photoForm.state_id}
+                      onChange={(e) => setPhotoForm({
+                        ...photoForm,
+                        state_id: e.target.value,
+                        trip_id: "",
+                        favorite_id: "",
+                        is_featured: false,
+                      })}
+                    >
+                      <option value="">United States country page</option>
+                      {destinationStates.map((destinationState) => (
+                        <option key={destinationState.id} value={destinationState.id}>{destinationState.state_name}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {selectedPhotoDestinationChanged && (
+                  <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 md:col-span-2">
+                    Saving will move this photo and clear its current trip/favorite link.
+                  </p>
+                )}
+                <select className={inputClassName()} value={photoForm.trip_id} onChange={(e) => setPhotoForm({ ...photoForm, trip_id: e.target.value })} disabled={selectedPhotoDestinationChanged}>
                   <option value="">No trip</option>
                   {trips.map((trip) => <option key={trip.id} value={trip.id}>{trip.title}</option>)}
                 </select>
-                <select className={inputClassName()} value={photoForm.favorite_id} onChange={(e) => setPhotoForm({ ...photoForm, favorite_id: e.target.value })}>
+                <select className={inputClassName()} value={photoForm.favorite_id} onChange={(e) => setPhotoForm({ ...photoForm, favorite_id: e.target.value })} disabled={selectedPhotoDestinationChanged}>
                   <option value="">Not linked to a favorite</option>
                   {sortedPhotoFavorites.map((favorite) => <option key={favorite.id} value={favorite.id}>{favoriteLabel(favorite.type)}: {favorite.name}</option>)}
                 </select>
