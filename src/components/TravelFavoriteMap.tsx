@@ -238,8 +238,11 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const selectedFavoriteMapsUrl = selectedFavorite ? travelFavoriteMapsUrl(selectedFavorite) : null;
   const selectedPhoto = selectedPhotoId ? photos.find((photo) => photo.id === selectedPhotoId) ?? null : null;
   const selectedPhotoFavorite = selectedPhoto?.favorite_id ? favorites.find((favorite) => favorite.id === selectedPhoto.favorite_id) ?? null : null;
+  const isSplittingLinkedPhotos = zoom >= 16;
+  const favoritesWithSplitPhotos = new Set(isSplittingLinkedPhotos ? linkedMappedPhotos.map((photo) => photo.favorite_id).filter(Boolean) : []);
+  const visiblePinned = pinned.filter((favorite) => !favoritesWithSplitPhotos.has(favorite.id));
   const mapDetailItems: MapDetailItem[] = [
-    ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id })),
+    ...visiblePinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id })),
     ...pinnedLocations.map((location) => ({ kind: "favorite_location" as const, id: location.id, favoriteId: location.favorite_id })),
     ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id })),
     ...(zoom >= 16 ? linkedMappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id })) : []),
@@ -519,7 +522,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     const iconSize = markerScale === 1.4 ? "h-5 w-5" : "h-4 w-4";
     const photoSize = markerScale === 1.4 ? "h-12 w-10" : "h-9 w-7";
     const visibleMapItems = [
-      ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id, latitude: favorite.latitude, longitude: favorite.longitude, favorite })),
+      ...visiblePinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id, latitude: favorite.latitude, longitude: favorite.longitude, favorite })),
       ...pinnedLocations.map((location) => ({ kind: "favorite_location" as const, id: location.id, latitude: location.latitude, longitude: location.longitude, location, favorite: location.favorite })),
       ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id, latitude: photo.latitude, longitude: photo.longitude, photo })),
       ...(zoom >= 16
