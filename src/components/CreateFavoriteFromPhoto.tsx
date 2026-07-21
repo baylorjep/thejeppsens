@@ -11,6 +11,7 @@ interface CreateFavoriteFromPhotoProps {
   onDone: () => void;
   onCancel: () => void;
   variant?: "light" | "dark";
+  openCreatedFavoriteEditor?: boolean;
 }
 
 function distanceInMeters(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
@@ -26,7 +27,7 @@ function distanceInMeters(a: { latitude: number; longitude: number }, b: { latit
   return 2 * earthRadiusMeters * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }
 
-export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos = [], onDone, onCancel, variant = "light" }: CreateFavoriteFromPhotoProps) {
+export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos = [], onDone, onCancel, variant = "light", openCreatedFavoriteEditor = true }: CreateFavoriteFromPhotoProps) {
   const router = useRouter();
   const sortedFavorites = useMemo(() => {
     if (photo.latitude === null || photo.longitude === null) return favorites;
@@ -108,7 +109,9 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos 
 
       router.refresh();
       onDone();
-      window.dispatchEvent(new CustomEvent("travel:edit-item", { detail: { type: "favorite", item: favorite } }));
+      if (openCreatedFavoriteEditor) {
+        window.dispatchEvent(new CustomEvent("travel:edit-item", { detail: { type: "favorite", item: favorite } }));
+      }
     } catch {
       setError("Could not save that. Try again.");
     } finally {

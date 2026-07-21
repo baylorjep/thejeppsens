@@ -361,9 +361,9 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
                       favorites={favorites}
                       photos={photos}
                       variant="dark"
+                      openCreatedFavoriteEditor={false}
                       onDone={() => {
                         setIsAddingFavorite(false);
-                        setActiveIndex(null);
                       }}
                       onCancel={() => setIsAddingFavorite(false)}
                     />
