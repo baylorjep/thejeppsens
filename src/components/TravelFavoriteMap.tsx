@@ -515,6 +515,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
         const Icon = IconForFavorite(favorite.type);
         const pinPhoto = favoritePinPhotoFor(favorite.id);
         const favoritePhotoCount = favoritePhotosFor(favorite.id).length;
+        const isShowingLinkedPhotos = zoom >= 16;
         return (
           <button
             key={`favorite-${favorite.id}-${index}`}
@@ -541,7 +542,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
             ) : (
               <Icon className={iconSize} />
             )}
-            {favoritePhotoCount > 1 && (
+            {favoritePhotoCount > 1 && !isShowingLinkedPhotos && (
               <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-950 px-1.5 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-white">
                 {favoritePhotoCount}
               </span>
