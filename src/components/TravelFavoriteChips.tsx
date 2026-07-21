@@ -15,7 +15,11 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isShowingAll, setIsShowingAll] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const visibleLimit = 10;
+  const hasHiddenFavorites = favorites.length > visibleLimit;
+  const visibleFavorites = isShowingAll ? favorites : favorites.slice(0, visibleLimit);
   const selectedFavorite = selectedId ? favorites.find((favorite) => favorite.id === selectedId) ?? null : null;
   const selectedPhotos = selectedFavorite ? photos.filter((photo) => photo.favorite_id === selectedFavorite.id) : [];
   const heroPhoto = selectedPhotos[selectedPhotoIndex] ?? selectedPhotos.find((photo) => photo.is_favorite_featured) ?? selectedPhotos[0] ?? null;
@@ -50,7 +54,7 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        {favorites.map((favorite) => (
+        {visibleFavorites.map((favorite) => (
           <button
             key={favorite.id}
             type="button"
@@ -64,6 +68,15 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
             {favorite.name}
           </button>
         ))}
+        {hasHiddenFavorites && (
+          <button
+            type="button"
+            onClick={() => setIsShowingAll((current) => !current)}
+            className="rounded-full border border-dashed border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:border-slate-400 hover:text-slate-950"
+          >
+            {isShowingAll ? "Show less" : `View all ${favorites.length}`}
+          </button>
+        )}
       </div>
 
       {selectedFavorite && (
