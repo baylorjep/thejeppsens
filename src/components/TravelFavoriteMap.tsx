@@ -778,6 +778,11 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                       {SelectedFavoriteIcon && <SelectedFavoriteIcon className="h-10 w-10" />}
                     </div>
                   )}
+                  {selectedFavoriteHeroPhoto?.taken_on && (
+                    <div className="absolute left-3 top-3 rounded-full bg-slate-950/70 px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
+                      {selectedFavoriteHeroPhoto.taken_on}
+                    </div>
+                  )}
                   {selectedFavoritePhotos.length > 1 && (
                     <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-slate-950/70 px-2 py-1 text-xs font-semibold text-white">
                       <button type="button" onClick={() => moveFavoritePhoto(-1)} aria-label="Previous photo" className="rounded-full p-1 hover:bg-white/15">
@@ -862,6 +867,11 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                 <div className="relative bg-slate-950">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={selectedPhoto.image_url} alt="" className="max-h-[52vh] w-full object-contain" />
+                  {selectedPhoto.taken_on && (
+                    <div className="absolute left-3 top-3 rounded-full bg-slate-950/70 px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
+                      {selectedPhoto.taken_on}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-4 p-5">
                   {editingDetail === "photo" ? (

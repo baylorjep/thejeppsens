@@ -286,8 +286,15 @@ export default function TravelPhotoLog({ photos, favorites, fallbackName }: Trav
           </button>
           <div className="flex h-full items-center justify-center">
             <div className="max-h-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={activePhoto.image_url} alt={activePhoto.caption ?? fallbackName} className="max-h-[78vh] max-w-full rounded-lg object-contain shadow-2xl" />
+              <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={activePhoto.image_url} alt={activePhoto.caption ?? fallbackName} className="max-h-[78vh] max-w-full rounded-lg object-contain shadow-2xl" />
+                {activePhoto.taken_on && (
+                  <div className="absolute left-3 top-3 rounded-full bg-slate-950/70 px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
+                    {activePhoto.taken_on}
+                  </div>
+                )}
+              </div>
               <div className="mt-4 flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{activePhoto.caption ?? activePhoto.location_name ?? fallbackName}</p>

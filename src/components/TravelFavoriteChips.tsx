@@ -79,8 +79,15 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
             </button>
 
             {heroPhoto ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={heroPhoto.image_url} alt="" className="aspect-video w-full object-cover" />
+              <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={heroPhoto.image_url} alt="" className="aspect-video w-full object-cover" />
+                {heroPhoto.taken_on && (
+                  <div className="absolute left-3 top-3 rounded-full bg-slate-950/70 px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
+                    {heroPhoto.taken_on}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="flex aspect-video items-center justify-center bg-slate-100 text-slate-300">
                 <MapPin className="h-10 w-10" />
