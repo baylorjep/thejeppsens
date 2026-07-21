@@ -219,6 +219,15 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     );
   };
 
+  const revealEditor = () => {
+    const editorSection = sectionRef.current;
+    const parentDetails = editorSection?.closest("details");
+    if (parentDetails instanceof HTMLDetailsElement) {
+      parentDetails.open = true;
+    }
+    window.setTimeout(() => editorSection?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+  };
+
   useEffect(() => {
     const handleQuickAdd = (event: Event) => {
       const { mode: nextMode, favoriteType } = (event as CustomEvent<TravelQuickAddDetail>).detail;
@@ -228,7 +237,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
         setFavoriteForm({ ...emptyFavorite, type: favoriteType });
       }
       setIsOpen(true);
-      window.setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+      revealEditor();
     };
 
     window.addEventListener("travel:quick-add", handleQuickAdd);
@@ -242,7 +251,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
       if (detail.type === "photo") editPhoto(detail.item as TravelPhoto);
       if (detail.type === "favorite") editFavorite(detail.item as TravelFavorite);
       if (detail.type === "video") editVideo(detail.item as TravelVideo);
-      window.setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+      revealEditor();
     };
 
     window.addEventListener("travel:edit-item", handleEditItem);
