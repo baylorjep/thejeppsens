@@ -326,7 +326,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
           </aside>
         </div>
       </section>
-      <TravelCountryEditor country={country} trips={tripRows} photos={photoRows} favorites={favoriteRows} videos={videoRows} />
+      <TravelCountryEditor country={country} mapCenter={mapCenter} trips={tripRows} photos={photoRows} favorites={favoriteRows} videos={videoRows} />
         </>
       )}
     </main>

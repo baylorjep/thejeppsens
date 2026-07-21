@@ -283,7 +283,7 @@ export default async function StateTravelPage({ params }: PageProps) {
         </div>
       </section>
 
-      <TravelCountryEditor country={unitedStates} state={state} trips={tripRows} photos={photoRows} favorites={favoriteRows} videos={videoRows} />
+      <TravelCountryEditor country={unitedStates} state={state} mapCenter={mapCenter} trips={tripRows} photos={photoRows} favorites={favoriteRows} videos={videoRows} />
     </main>
   );
 }

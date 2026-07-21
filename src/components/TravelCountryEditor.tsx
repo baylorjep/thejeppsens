@@ -6,6 +6,7 @@ import { extractPhotoMetadata } from "@/lib/photoMetadata";
 import type { PhotoMetadata } from "@/lib/photoMetadata";
 import { youtubeThumbnailUrl } from "@/lib/travel";
 import type { Country, TravelFavorite, TravelFavoriteType, TravelPhoto, TravelState, TravelTrip, TravelVideo } from "@/lib/travel";
+import type { TravelMapCenter } from "@/lib/travelMapCenters";
 import type { TravelQuickAddDetail } from "@/components/TravelQuickAddButton";
 import { Edit3, ImagePlus, LocateFixed, Plus, Star, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ type EditorMode = "trip" | "photo" | "favorite" | "video";
 interface TravelCountryEditorProps {
   country: Country;
   state?: TravelState;
+  mapCenter: TravelMapCenter;
   trips: TravelTrip[];
   photos: TravelPhoto[];
   favorites: TravelFavorite[];
@@ -103,7 +105,11 @@ function distanceInMeters(a: { latitude: number; longitude: number }, b: { latit
   return 2 * earthRadiusMeters * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }
 
-export default function TravelCountryEditor({ country, state, trips, photos, favorites, videos }: TravelCountryEditorProps) {
+function formatMiles(meters: number) {
+  return Math.round(meters / 1609.344).toLocaleString();
+}
+
+export default function TravelCountryEditor({ country, state, mapCenter, trips, photos, favorites, videos }: TravelCountryEditorProps) {
   const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -174,6 +180,23 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
       .sort((a, b) => a.nearestDistance - b.nearestDistance || a.favorite.name.localeCompare(b.favorite.name))
       .map(({ favorite }) => favorite);
   }, [activeEditorPhoto, favorites, photos]);
+
+  const confirmCoordinateDistance = (latitudeValue: string, longitudeValue: string) => {
+    const latitude = Number(latitudeValue);
+    const longitude = Number(longitudeValue);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return true;
+
+    const distance = distanceInMeters(
+      { latitude, longitude },
+      { latitude: mapCenter.latitude, longitude: mapCenter.longitude },
+    );
+    const thresholdMiles = state ? 350 : 2500;
+    if (distance <= thresholdMiles * 1609.344) return true;
+
+    return window.confirm(
+      `These coordinates are about ${formatMiles(distance)} miles from ${mapCenter.label}. Are you sure this location belongs here?`,
+    );
+  };
 
   useEffect(() => {
     const handleQuickAdd = (event: Event) => {
@@ -368,6 +391,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
 
   const savePhoto = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!confirmCoordinateDistance(photoForm.latitude, photoForm.longitude)) return;
     const formData = new FormData();
     formData.set("type", "photo");
     formData.set("country_id", country.id);
@@ -389,6 +413,7 @@ export default function TravelCountryEditor({ country, state, trips, photos, fav
 
   const saveFavorite = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!confirmCoordinateDistance(favoriteForm.latitude, favoriteForm.longitude)) return;
     const formData = new FormData();
     formData.set("type", "favorite");
     formData.set("country_id", country.id);
