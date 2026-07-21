@@ -196,6 +196,44 @@ export default async function StateTravelPage({ params }: PageProps) {
 
       <section className="py-12">
         <div className="mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8">
+          <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-950">Favorite Spots</h2>
+                <p className="text-sm text-slate-500">Food, activities, and places worth remembering.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <TravelQuickAddButton kind="restaurant" />
+                <TravelQuickAddButton kind="activity" />
+              </div>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <Utensils className="h-5 w-5 text-rose-600" />
+                  <h3 className="text-base font-bold text-slate-950">Food</h3>
+                </div>
+                {restaurants.length > 0 ? (
+                  <TravelFavoriteChips favorites={restaurants} photos={photoRows} />
+                ) : (
+                  <p className="text-sm text-slate-400">No food spots yet.</p>
+                )}
+              </div>
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-amber-500" />
+                  <h3 className="text-base font-bold text-slate-950">Activities & Places</h3>
+                </div>
+                {activities.length > 0 ? (
+                  <TravelFavoriteChips favorites={activities} photos={photoRows} />
+                ) : (
+                  <p className="text-sm text-slate-400">No activities yet.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div>
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
@@ -277,44 +315,6 @@ export default async function StateTravelPage({ params }: PageProps) {
                 <TravelQuickAddButton kind="trip" label="Add first trip" />
               </div>
             )}
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
-            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-slate-950">Favorite Spots</h2>
-                <p className="text-sm text-slate-500">Food, activities, and places worth remembering.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <TravelQuickAddButton kind="restaurant" />
-                <TravelQuickAddButton kind="activity" />
-              </div>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div>
-                <div className="mb-3 flex items-center gap-2">
-                  <Utensils className="h-5 w-5 text-rose-600" />
-                  <h3 className="text-base font-bold text-slate-950">Food</h3>
-                </div>
-                {restaurants.length > 0 ? (
-                  <TravelFavoriteChips favorites={restaurants} photos={photoRows} />
-                ) : (
-                  <p className="text-sm text-slate-400">No food spots yet.</p>
-                )}
-              </div>
-              <div>
-                <div className="mb-3 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-amber-500" />
-                  <h3 className="text-base font-bold text-slate-950">Activities & Places</h3>
-                </div>
-                {activities.length > 0 ? (
-                  <TravelFavoriteChips favorites={activities} photos={photoRows} />
-                ) : (
-                  <p className="text-sm text-slate-400">No activities yet.</p>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </section>
