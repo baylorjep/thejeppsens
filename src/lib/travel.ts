@@ -28,6 +28,7 @@ export interface TravelPhoto {
   trip_id: string | null;
   favorite_id: string | null;
   image_url: string;
+  image_hash: string | null;
   caption: string | null;
   location_name: string | null;
   latitude: number | null;
@@ -40,6 +41,20 @@ export interface TravelPhoto {
 }
 
 export type TravelFavoriteType = 'restaurant' | 'activity' | 'place';
+
+export interface TravelFavoriteLocation {
+  id: string;
+  favorite_id: string;
+  country_id: string;
+  state_id: string | null;
+  name: string | null;
+  location_name: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  notes: string | null;
+  sort_order: number;
+}
 
 export interface TravelFavorite {
   id: string;
@@ -55,12 +70,21 @@ export interface TravelFavorite {
   longitude: number | null;
   notes: string | null;
   sort_order: number;
+  locations?: TravelFavoriteLocation[];
 }
 
 export function travelFavoriteMapsUrl(favorite: Pick<TravelFavorite, 'name' | 'location_name' | 'address' | 'latitude' | 'longitude'>) {
   const query = favorite.address?.trim()
     || (favorite.latitude !== null && favorite.longitude !== null ? `${favorite.latitude},${favorite.longitude}` : "")
     || [favorite.name, favorite.location_name].filter(Boolean).join(", ");
+
+  return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : null;
+}
+
+export function travelFavoriteLocationMapsUrl(location: Pick<TravelFavoriteLocation, 'name' | 'location_name' | 'address' | 'latitude' | 'longitude'>) {
+  const query = location.address?.trim()
+    || (location.latitude !== null && location.longitude !== null ? `${location.latitude},${location.longitude}` : "")
+    || [location.name, location.location_name].filter(Boolean).join(", ");
 
   return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : null;
 }

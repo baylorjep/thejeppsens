@@ -42,6 +42,7 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
     trip_id: photo.trip_id ?? "",
     favorite_id: photo.favorite_id ?? "",
     image_url: photo.image_url,
+    image_hash: photo.image_hash ?? "",
     caption: photo.caption ?? "",
     location_name: photo.location_name ?? "",
     latitude: photo.latitude?.toString() ?? "",
@@ -92,6 +93,7 @@ export function TravelPhotoModalEditForm({ photo, favorites, variant = "light", 
       formData.set("trip_id", destinationChanged ? "" : form.trip_id);
       formData.set("favorite_id", destinationChanged ? "" : form.favorite_id);
       formData.set("image_url", form.image_url);
+      formData.set("image_hash", form.image_hash);
       formData.set("caption", form.caption);
       formData.set("location_name", form.location_name);
       formData.set("latitude", form.latitude);

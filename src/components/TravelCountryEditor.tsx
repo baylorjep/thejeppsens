@@ -42,6 +42,7 @@ const emptyPhoto = {
   trip_id: "",
   favorite_id: "",
   image_url: "",
+  image_hash: "",
   caption: "",
   location_name: "",
   latitude: "",
@@ -83,6 +84,13 @@ function imageToDataUrl(file: File) {
     reader.onerror = () => reject(new Error("Could not read image"));
     reader.readAsDataURL(file);
   });
+}
+
+async function fileSha256(file: File) {
+  const hashBuffer = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function inputClassName() {
@@ -158,6 +166,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
       trip_id: photoForm.trip_id || null,
       favorite_id: photoForm.favorite_id || null,
       image_url: photoForm.image_url,
+      image_hash: photoForm.image_hash || null,
       caption: photoForm.caption || null,
       location_name: photoForm.location_name || null,
       latitude: photoForm.latitude ? Number(photoForm.latitude) : null,
@@ -273,8 +282,11 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
 
     try {
       const optimizedFile = await optimizeImageFile(file, 1600, 0.76);
+      setPhotoForm((current) => ({ ...current, image_hash: "" }));
+      const imageHash = await fileSha256(optimizedFile);
       setPhotoFile(optimizedFile);
       setPhotoPreview(await imageToDataUrl(optimizedFile));
+      setPhotoForm((current) => ({ ...current, image_hash: imageHash }));
       setMessage("Photo optimized.");
     } catch {
       setMessage("Could not load that photo.");
@@ -336,6 +348,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
 
         setImportProgress(`${currentStatus}: optimizing image...`);
         const optimizedFile = await optimizeImageFile(file, 1600, 0.76);
+        const imageHash = await fileSha256(optimizedFile);
 
         setImportProgress(`${currentStatus}: uploading...`);
         const formData = new FormData();
@@ -351,6 +364,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
         formData.set("taken_on", metadata.takenOn ?? "");
         formData.set("sort_order", String(photos.length + index));
         formData.set("is_featured", "false");
+        formData.set("image_hash", imageHash);
         formData.set("image", optimizedFile);
 
         const response = await fetch("/api/travel/items", {
@@ -358,7 +372,12 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
           body: formData,
         });
 
-        if (!response.ok) throw new Error("Import failed");
+      if (response.status === 409) {
+        skipped += 1;
+        setImportProgress(`Imported ${imported} / ${files.length}, skipped ${skipped} duplicate${skipped === 1 ? "" : "s"}.`);
+        continue;
+      }
+      if (!response.ok) throw new Error("Import failed");
         imported += 1;
         setImportProgress(`Imported ${imported} / ${files.length}${skipped ? `, skipped ${skipped}` : ""}.`);
       } catch {
@@ -389,6 +408,10 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
         body: formData,
       });
 
+      if (response.status === 409) {
+        setMessage("Duplicate photo skipped. That image already exists in the travel log.");
+        return;
+      }
       if (!response.ok) throw new Error("Save failed");
 
       resetForms();
@@ -431,6 +454,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     formData.set("trip_id", selectedPhotoDestinationChanged ? "" : photoForm.trip_id);
     formData.set("favorite_id", selectedPhotoDestinationChanged ? "" : photoForm.favorite_id);
     formData.set("image_url", photoForm.image_url);
+    formData.set("image_hash", photoForm.image_hash);
     formData.set("caption", photoForm.caption);
     formData.set("location_name", photoForm.location_name);
     formData.set("latitude", photoForm.latitude);
@@ -642,6 +666,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
       trip_id: photo.trip_id ?? "",
       favorite_id: photo.favorite_id ?? "",
       image_url: photo.image_url,
+      image_hash: photo.image_hash ?? "",
       caption: photo.caption ?? "",
       location_name: photo.location_name ?? "",
       latitude: photo.latitude?.toString() ?? "",

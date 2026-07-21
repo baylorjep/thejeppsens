@@ -1,6 +1,7 @@
 "use client";
 
 import { TravelFavoriteModalEditForm } from "@/components/TravelModalEditForm";
+import TravelFavoriteLocations from "@/components/TravelFavoriteLocations";
 import { travelFavoriteMapsUrl, type TravelFavorite, type TravelPhoto } from "@/lib/travel";
 import { ExternalLink, MapPin, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -126,6 +127,7 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
                     {selectedFavorite.address && <p className="mt-2 text-sm text-slate-600">{selectedFavorite.address}</p>}
                   </div>
                   <p className="text-sm leading-6 text-slate-600">{selectedFavorite.notes?.trim() || "No notes saved yet."}</p>
+                  {selectedFavorite.type === "restaurant" && <TravelFavoriteLocations favorite={selectedFavorite} />}
                   {selectedPhotos.length > 0 && (
                     <div className="max-h-32 overflow-y-auto pr-1">
                       <div className="grid grid-cols-4 gap-2">

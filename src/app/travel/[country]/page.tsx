@@ -16,6 +16,7 @@ import {
   travelerLabel,
   type Country,
   type TravelFavorite,
+  type TravelFavoriteLocation,
   type TravelPhoto,
   type TravelState,
   type TravelStatePhotoPreview,
@@ -59,7 +60,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
   const country = findCountryBySlug(countries as Country[], slug);
   if (!country) notFound();
 
-  const [{ data: trips }, { data: photos }, { data: favorites }, { data: videos }] = await Promise.all([
+  const [{ data: trips }, { data: photos }, { data: favorites }, { data: favoriteLocations }, { data: videos }] = await Promise.all([
     supabase
       .from('travel_trips')
       .select('id, country_id, state_id, title, location_name, started_on, ended_on, notes, baylor_went, isabel_went')
@@ -68,7 +69,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
       .order('started_on', { ascending: false, nullsFirst: false }),
     supabase
       .from('travel_photos')
-      .select('id, country_id, state_id, trip_id, favorite_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, is_favorite_featured, created_at')
+      .select('id, country_id, state_id, trip_id, favorite_id, image_url, image_hash, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, is_favorite_featured, created_at')
       .eq('country_id', country.id)
       .is('state_id', null)
       .order('is_featured', { ascending: false })
@@ -78,6 +79,13 @@ export default async function CountryTravelPage({ params }: PageProps) {
     supabase
       .from('travel_favorites')
       .select('id, country_id, state_id, trip_id, type, name, location_name, address, cuisine, latitude, longitude, notes, sort_order')
+      .eq('country_id', country.id)
+      .is('state_id', null)
+      .order('sort_order')
+      .order('name'),
+    supabase
+      .from('travel_favorite_locations')
+      .select('id, favorite_id, country_id, state_id, name, location_name, address, latitude, longitude, notes, sort_order')
       .eq('country_id', country.id)
       .is('state_id', null)
       .order('sort_order')
@@ -93,7 +101,11 @@ export default async function CountryTravelPage({ params }: PageProps) {
 
   const tripRows = (trips ?? []) as TravelTrip[];
   const photoRows = (photos ?? []) as TravelPhoto[];
-  const favoriteRows = (favorites ?? []) as TravelFavorite[];
+  const favoriteLocationRows = (favoriteLocations ?? []) as TravelFavoriteLocation[];
+  const favoriteRows = ((favorites ?? []) as TravelFavorite[]).map((favorite) => ({
+    ...favorite,
+    locations: favoriteLocationRows.filter((location) => location.favorite_id === favorite.id),
+  }));
   const videoRows = (videos ?? []) as TravelVideo[];
   const restaurants = favoriteRows.filter((favorite) => favorite.type === 'restaurant');
   const activities = favoriteRows.filter((favorite) => favorite.type !== 'restaurant');
@@ -106,7 +118,7 @@ export default async function CountryTravelPage({ params }: PageProps) {
           .order('state_name'),
         supabase
           .from('travel_photos')
-          .select('id, country_id, state_id, trip_id, favorite_id, image_url, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, is_favorite_featured, created_at')
+          .select('id, country_id, state_id, trip_id, favorite_id, image_url, image_hash, caption, location_name, latitude, longitude, taken_on, sort_order, is_featured, is_favorite_featured, created_at')
           .eq('country_id', country.id)
           .not('state_id', 'is', null)
           .order('is_featured', { ascending: false })

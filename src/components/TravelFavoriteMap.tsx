@@ -1,6 +1,7 @@
 "use client";
 
 import CreateFavoriteFromPhoto from "@/components/CreateFavoriteFromPhoto";
+import TravelFavoriteLocations from "@/components/TravelFavoriteLocations";
 import { TravelFavoriteModalEditForm, TravelPhotoModalEditForm } from "@/components/TravelModalEditForm";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 import { travelFavoriteMapsUrl, type TravelFavorite, type TravelPhoto } from "@/lib/travel";
@@ -18,6 +19,7 @@ const MAP_FIT_PADDING = 72;
 
 type MapDetailItem =
   | { kind: "favorite"; id: string }
+  | { kind: "favorite_location"; id: string; favoriteId: string }
   | { kind: "photo"; id: string };
 
 interface MapView {
@@ -176,6 +178,16 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
       latitude: favorite.latitude as number,
       longitude: favorite.longitude as number,
     }));
+  const pinnedLocations = favorites.flatMap((favorite) =>
+    (favorite.locations ?? [])
+      .filter((location) => location.latitude !== null && location.longitude !== null)
+      .map((location) => ({
+        ...location,
+        favorite,
+        latitude: location.latitude as number,
+        longitude: location.longitude as number,
+      })),
+  );
   const mappedPhotos = photos
     .filter((photo) => photo.favorite_id === null && photo.latitude !== null && photo.longitude !== null)
     .map((photo) => ({
@@ -192,6 +204,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     }));
   const mapPoints = [
     ...pinned.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
+    ...pinnedLocations.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
     ...mappedPhotos.map((item) => ({ latitude: item.latitude, longitude: item.longitude })),
   ];
 
@@ -227,6 +240,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const selectedPhotoFavorite = selectedPhoto?.favorite_id ? favorites.find((favorite) => favorite.id === selectedPhoto.favorite_id) ?? null : null;
   const mapDetailItems: MapDetailItem[] = [
     ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id })),
+    ...pinnedLocations.map((location) => ({ kind: "favorite_location" as const, id: location.id, favoriteId: location.favorite_id })),
     ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id })),
     ...(zoom >= 16 ? linkedMappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id })) : []),
   ];
@@ -234,6 +248,8 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const openMapItem = (item: MapDetailItem) => {
     if (item.kind === "favorite") {
       openFavorite(item.id);
+    } else if (item.kind === "favorite_location") {
+      openFavorite(item.favoriteId);
     } else {
       const photo = mappedPhotos.find((mappedPhoto) => mappedPhoto.id === item.id) ?? photos.find((photo) => photo.id === item.id);
       if (photo) openPhoto(photo);
@@ -504,6 +520,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     const photoSize = markerScale === 1.4 ? "h-12 w-10" : "h-9 w-7";
     const visibleMapItems = [
       ...pinned.map((favorite) => ({ kind: "favorite" as const, id: favorite.id, latitude: favorite.latitude, longitude: favorite.longitude, favorite })),
+      ...pinnedLocations.map((location) => ({ kind: "favorite_location" as const, id: location.id, latitude: location.latitude, longitude: location.longitude, location, favorite: location.favorite })),
       ...mappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id, latitude: photo.latitude, longitude: photo.longitude, photo })),
       ...(zoom >= 16
         ? linkedMappedPhotos.map((photo) => ({ kind: "photo" as const, id: photo.id, latitude: photo.latitude, longitude: photo.longitude, photo }))
@@ -547,6 +564,31 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                 {favoritePhotoCount}
               </span>
             )}
+            <span className="sr-only">{index + 1}</span>
+          </button>
+        );
+      }
+
+      if (item.kind === "favorite_location") {
+        const favorite = item.favorite;
+        const location = item.location;
+        const Icon = IconForFavorite(favorite.type);
+        return (
+          <button
+            key={`favorite-location-${location.id}-${index}`}
+            type="button"
+            className={`absolute flex ${pinSize} -translate-x-1/2 -translate-y-full items-center justify-center rounded-full text-white shadow-lg transition-transform ${markerStyle(favorite.type, activeId === favorite.id)}`}
+            style={{ left, top }}
+            title={[favorite.name, location.name || location.location_name].filter(Boolean).join(" · ")}
+            onClick={(event) => {
+              event.stopPropagation();
+              openFavorite(favorite.id);
+            }}
+            onMouseEnter={() => setActiveId(favorite.id)}
+            onMouseLeave={() => setActiveId(null)}
+          >
+            <Icon className={iconSize} />
+            <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-white ring-1 ring-slate-950/20" />
             <span className="sr-only">{index + 1}</span>
           </button>
         );
@@ -834,6 +876,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                       <p className="text-sm leading-6 text-slate-600">
                         {selectedFavorite.notes?.trim() || "No notes saved yet."}
                       </p>
+                      {selectedFavorite.type === "restaurant" && <TravelFavoriteLocations favorite={selectedFavorite} />}
                       {selectedFavoritePhotos.length > 1 && (
                         <div className="max-h-32 overflow-y-auto pr-1">
                           <div className="grid grid-cols-4 gap-2">

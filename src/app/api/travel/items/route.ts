@@ -2,7 +2,7 @@ import { youtubeThumbnailUrl } from "@/lib/travel";
 import { getTravelSupabaseClient, uploadTravelPhoto } from "@/lib/travelServer";
 import { NextResponse } from "next/server";
 
-type ItemType = "trip" | "photo" | "favorite" | "video";
+type ItemType = "trip" | "photo" | "favorite" | "favorite_location" | "video";
 const TRAVEL_PHOTOS_BUCKET = "travel-photos";
 
 function nullableText(value: FormDataEntryValue | null) {
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
     const countryId = nullableText(formData.get("country_id"));
     const stateId = nullableText(formData.get("state_id"));
 
-    if (type !== "trip" && type !== "photo" && type !== "favorite" && type !== "video") {
+    if (type !== "trip" && type !== "photo" && type !== "favorite" && type !== "favorite_location" && type !== "video") {
       return NextResponse.json({ error: "Invalid type" }, { status: 400 });
     }
 
@@ -173,6 +173,20 @@ export async function POST(request: Request) {
     if (type === "photo") {
       const file = formData.get("image");
       const existingUrl = nullableText(formData.get("image_url"));
+      const imageHash = nullableText(formData.get("image_hash"));
+      if (imageHash) {
+        let duplicateQuery = supabase
+          .from("travel_photos")
+          .select("id")
+          .eq("image_hash", imageHash)
+          .limit(1);
+        if (id) duplicateQuery = duplicateQuery.neq("id", id);
+        const { data: duplicates, error: duplicateError } = await duplicateQuery;
+        if (duplicateError) throw duplicateError;
+        if (duplicates?.length) {
+          return NextResponse.json({ error: "Duplicate photo" }, { status: 409 });
+        }
+      }
       const imageUrl = file instanceof File && file.size > 0 ? await uploadTravelPhoto(countryId, file) : existingUrl;
       const isFeatured = booleanValue(formData.get("is_featured"));
 
@@ -192,6 +206,7 @@ export async function POST(request: Request) {
         trip_id: nullableText(formData.get("trip_id")),
         favorite_id: nullableText(formData.get("favorite_id")),
         image_url: imageUrl,
+        image_hash: imageHash,
         caption: nullableText(formData.get("caption")),
         location_name: nullableText(formData.get("location_name")),
         latitude: numberValue(formData.get("latitude")),
@@ -229,6 +244,29 @@ export async function POST(request: Request) {
       };
 
       const { data, error } = await supabase.from("travel_videos").upsert(row).select().single();
+      if (error) throw error;
+      return NextResponse.json({ item: data });
+    }
+
+    if (type === "favorite_location") {
+      const favoriteId = nullableText(formData.get("favorite_id"));
+      if (!favoriteId) return NextResponse.json({ error: "Missing favorite" }, { status: 400 });
+
+      const row = {
+        ...(id ? { id } : {}),
+        favorite_id: favoriteId,
+        country_id: countryId,
+        state_id: stateId,
+        name: nullableText(formData.get("name")),
+        location_name: nullableText(formData.get("location_name")),
+        address: nullableText(formData.get("address")),
+        latitude: numberValue(formData.get("latitude")),
+        longitude: longitudeValue(formData.get("longitude"), stateId),
+        notes: nullableText(formData.get("notes")),
+        sort_order: numberValue(formData.get("sort_order")) ?? 0,
+      };
+
+      const { data, error } = await supabase.from("travel_favorite_locations").upsert(row).select().single();
       if (error) throw error;
       return NextResponse.json({ item: data });
     }
@@ -335,6 +373,8 @@ export async function DELETE(request: Request) {
         ? "travel_trips"
         : type === "photo"
           ? "travel_photos"
+          : type === "favorite_location"
+            ? "travel_favorite_locations"
           : type === "favorite"
             ? "travel_favorites"
             : type === "video"
