@@ -170,6 +170,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const [editingDetail, setEditingDetail] = useState<"favorite" | "photo" | null>(null);
   const [featuringId, setFeaturingId] = useState("");
   const [deletingPhotoId, setDeletingPhotoId] = useState("");
+  const [assigningLocationPhotoId, setAssigningLocationPhotoId] = useState("");
   const [mapView, setMapView] = useState<MapView | null>(null);
   const pinned = favorites
     .filter((favorite) => favorite.latitude !== null && favorite.longitude !== null)
@@ -325,6 +326,28 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
       window.alert("Could not feature that photo.");
     } finally {
       setFeaturingId("");
+    }
+  };
+
+  const assignPhotoToFavoriteLocation = async (photo: TravelPhoto, favoriteLocationId: string) => {
+    setAssigningLocationPhotoId(photo.id);
+    try {
+      const response = await fetch("/api/travel/items", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "photo",
+          id: photo.id,
+          favorite_id: selectedFavorite?.id ?? photo.favorite_id,
+          favorite_location_id: favoriteLocationId || null,
+        }),
+      });
+      if (!response.ok) throw new Error("Location assignment failed");
+      router.refresh();
+    } catch {
+      window.alert("Could not assign that photo to the chain location.");
+    } finally {
+      setAssigningLocationPhotoId("");
     }
   };
 
@@ -893,6 +916,32 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                         {selectedFavorite.notes?.trim() || "No notes saved yet."}
                       </p>
                       {selectedFavorite.type === "restaurant" && <TravelFavoriteLocations favorite={selectedFavorite} />}
+                      {selectedFavorite.type === "restaurant" && (selectedFavorite.locations ?? []).length > 0 && selectedFavoritePhotos.length > 0 && (
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Assign Photos To Locations</p>
+                          <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                            {selectedFavoritePhotos.map((photo) => (
+                              <div key={photo.id} className="grid grid-cols-[3rem_1fr] items-center gap-3 rounded-md bg-white p-2 ring-1 ring-slate-200">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={photo.image_url} alt="" className="h-12 w-12 rounded-md object-cover" />
+                                <select
+                                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-slate-900"
+                                  value={photo.favorite_location_id ?? ""}
+                                  onChange={(event) => void assignPhotoToFavoriteLocation(photo, event.target.value)}
+                                  disabled={assigningLocationPhotoId === photo.id}
+                                >
+                                  <option value="">Parent favorite only</option>
+                                  {(selectedFavorite.locations ?? []).map((location) => (
+                                    <option key={location.id} value={location.id}>
+                                      {location.name || location.location_name || location.address || "Saved location"}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       {selectedFavoritePhotos.length > 1 && (
                         <div className="max-h-32 overflow-y-auto pr-1">
                           <div className="grid grid-cols-4 gap-2">
