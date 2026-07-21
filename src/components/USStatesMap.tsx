@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
+import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import type { VisitType } from '@/components/WorldMap';
 import type { TravelStatePhotoPreview } from '@/lib/travel';
 
@@ -15,6 +15,7 @@ type GeographyItem = {
   rsmKey: string;
   properties: { name: string };
 };
+type MapPosition = { coordinates: [number, number]; zoom: number };
 type StatePhotoMarker = {
   stateName: string;
   photo: TravelStatePhotoPreview;
@@ -89,6 +90,8 @@ const STATE_CENTERS: Record<string, [number, number]> = {
 
 export default function USStatesMap({ visitedByState, hrefByState = {}, photoPreviewByState = {} }: USStatesMapProps) {
   const [tooltip, setTooltip] = useState<Tooltip>(null);
+  const [position, setPosition] = useState<MapPosition>({ coordinates: [-96, 39], zoom: 1 });
+  const isMoved = position.zoom !== 1 || position.coordinates[0] !== -96 || position.coordinates[1] !== 39;
   const statePhotoMarkers = Object.entries(photoPreviewByState)
     .map(([stateName, photo]) => ({
       stateName,
@@ -99,7 +102,7 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
     .filter((marker): marker is StatePhotoMarker => Boolean(marker.coordinates));
 
   return (
-    <div className="relative w-full select-none overflow-hidden rounded-xl bg-sky-50">
+    <div className="relative w-full touch-none select-none overflow-hidden rounded-xl bg-sky-50">
       {tooltip && (
         <div
           className={
@@ -125,68 +128,88 @@ export default function USStatesMap({ visitedByState, hrefByState = {}, photoPre
           )}
         </div>
       )}
+      {isMoved && (
+        <button
+          type="button"
+          onClick={() => setPosition({ coordinates: [-96, 39], zoom: 1 })}
+          className="absolute left-3 top-3 z-10 rounded-md bg-white/90 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-white"
+        >
+          Reset view
+        </button>
+      )}
       <ComposableMap projection="geoAlbersUsa" height={440} style={{ width: '100%', height: 'auto' }}>
-        <Geographies geography={GEO_URL}>
-          {({ geographies }: { geographies: GeographyItem[] }) =>
-            geographies.map((geo) => {
-              const visit = visitedByState[geo.properties.name];
-              const href = hrefByState[geo.properties.name];
-              const colors = visit ? FILL[visit] : { default: '#cbd5e1', hover: '#94a3b8' };
-              return (
-                <Geography
-                  key={geo.rsmKey}
-                  geography={geo}
+        <ZoomableGroup
+          center={position.coordinates}
+          zoom={position.zoom}
+          minZoom={1}
+          maxZoom={8}
+          filterZoomEvent={(event: MouseEvent) => !event.button}
+          onMoveEnd={({ coordinates, zoom }: { coordinates: [number, number]; zoom: number }) => {
+            setPosition({ coordinates, zoom });
+          }}
+        >
+          <Geographies geography={GEO_URL}>
+            {({ geographies }: { geographies: GeographyItem[] }) =>
+              geographies.map((geo) => {
+                const visit = visitedByState[geo.properties.name];
+                const href = hrefByState[geo.properties.name];
+                const colors = visit ? FILL[visit] : { default: '#cbd5e1', hover: '#94a3b8' };
+                return (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    onClick={() => {
+                      if (href) window.location.href = href;
+                    }}
+                    onMouseMove={(e: React.MouseEvent) =>
+                      setTooltip({ type: 'text', name: geo.properties.name, x: e.clientX, y: e.clientY })
+                    }
+                    onMouseLeave={() => setTooltip(null)}
+                    style={{
+                      default: { fill: colors.default, stroke: '#ffffff', strokeWidth: 0.75 / position.zoom, outline: 'none', cursor: href ? 'pointer' : 'grab' },
+                      hover: { fill: colors.hover, stroke: '#ffffff', strokeWidth: 0.75 / position.zoom, outline: 'none', cursor: href ? 'pointer' : 'grab' },
+                      pressed: { outline: 'none', cursor: 'grabbing' },
+                    }}
+                  />
+                );
+              })
+            }
+          </Geographies>
+          {statePhotoMarkers.map(({ stateName, photo, coordinates, href }) => (
+            <Marker key={photo.state_id} coordinates={coordinates}>
+              <foreignObject x={-16 / position.zoom} y={-36 / position.zoom} width={32 / position.zoom} height={44 / position.zoom}>
+                <button
+                  type="button"
+                  aria-label={`Open ${stateName} photos`}
+                  className="group relative mt-1.5 block h-full w-full focus:outline-none focus:ring-2 focus:ring-teal-500"
                   onClick={() => {
                     if (href) window.location.href = href;
                   }}
-                  onMouseMove={(e: React.MouseEvent) =>
-                    setTooltip({ type: 'text', name: geo.properties.name, x: e.clientX, y: e.clientY })
+                  onMouseMove={(e) =>
+                    setTooltip({
+                      type: 'photo',
+                      name: photo.caption ?? photo.location_name ?? stateName,
+                      x: e.clientX,
+                      y: e.clientY,
+                      photo,
+                    })
                   }
                   onMouseLeave={() => setTooltip(null)}
-                  style={{
-                    default: { fill: colors.default, stroke: '#ffffff', strokeWidth: 0.75, outline: 'none', cursor: href ? 'pointer' : 'default' },
-                    hover: { fill: colors.hover, stroke: '#ffffff', strokeWidth: 0.75, outline: 'none', cursor: href ? 'pointer' : 'default' },
-                    pressed: { outline: 'none' },
-                  }}
-                />
-              );
-            })
-          }
-        </Geographies>
-        {statePhotoMarkers.map(({ stateName, photo, coordinates, href }) => (
-          <Marker key={photo.state_id} coordinates={coordinates}>
-            <foreignObject x={-16} y={-36} width={32} height={44}>
-              <button
-                type="button"
-                aria-label={`Open ${stateName} photos`}
-                className="group relative mt-1.5 block h-[32px] w-[26px] focus:outline-none focus:ring-2 focus:ring-teal-500"
-                onClick={() => {
-                  if (href) window.location.href = href;
-                }}
-                onMouseMove={(e) =>
-                  setTooltip({
-                    type: 'photo',
-                    name: photo.caption ?? photo.location_name ?? stateName,
-                    x: e.clientX,
-                    y: e.clientY,
-                    photo,
-                  })
-                }
-                onMouseLeave={() => setTooltip(null)}
-              >
-                <span className="absolute inset-0 block origin-center overflow-hidden rounded-[13px_13px_13px_5px] border border-white/70 bg-white/60 p-px shadow-sm ring-1 ring-slate-950/15 transition-transform group-hover:scale-110">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[11px_11px_11px_4px] object-cover" />
-                </span>
-                {photo.photo_count > 1 && (
-                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-950 px-1 text-[9px] font-bold leading-none text-white ring-1 ring-white">
-                    {photo.photo_count}
+                >
+                  <span className="absolute inset-0 block origin-center overflow-hidden rounded-[13px_13px_13px_5px] border border-white/70 bg-white/60 p-px shadow-sm ring-1 ring-slate-950/15 transition-transform group-hover:scale-110">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.image_url} alt={photo.caption ?? photo.location_name ?? stateName} className="h-full w-full rounded-[11px_11px_11px_4px] object-cover" />
                   </span>
-                )}
-              </button>
-            </foreignObject>
-          </Marker>
-        ))}
+                  {photo.photo_count > 1 && (
+                    <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-950 px-1 text-[9px] font-bold leading-none text-white ring-1 ring-white">
+                      {photo.photo_count}
+                    </span>
+                  )}
+                </button>
+              </foreignObject>
+            </Marker>
+          ))}
+        </ZoomableGroup>
       </ComposableMap>
     </div>
   );
