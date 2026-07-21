@@ -993,7 +993,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                             photo={selectedPhoto}
                             favorites={favorites}
                             photos={photos}
-                            onDone={closeDetails}
+                            onDone={() => router.refresh()}
                             onCancel={closeDetails}
                           />
                         </div>

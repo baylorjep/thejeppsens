@@ -57,9 +57,15 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos 
   const [favoriteId, setFavoriteId] = useState(sortedFavorites[0]?.id ?? "");
   const [name, setName] = useState("");
   const [type, setType] = useState<TravelFavoriteType>("place");
+  const [shouldAddChainLocation, setShouldAddChainLocation] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const isDark = variant === "dark";
+  const selectedFavorite = mode === "existing" ? favorites.find((favorite) => favorite.id === favoriteId) ?? null : null;
+  const canAddChainLocation =
+    selectedFavorite?.type === "restaurant" &&
+    photo.latitude !== null &&
+    photo.longitude !== null;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -70,6 +76,24 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos 
     setError("");
     try {
       if (mode === "existing") {
+        if (canAddChainLocation && shouldAddChainLocation) {
+          const locationData = new FormData();
+          locationData.set("type", "favorite_location");
+          locationData.set("favorite_id", selectedFavorite.id);
+          locationData.set("country_id", photo.country_id);
+          if (photo.state_id) locationData.set("state_id", photo.state_id);
+          locationData.set("name", photo.location_name ?? photo.caption ?? "Photo location");
+          locationData.set("location_name", photo.location_name ?? "");
+          locationData.set("address", "");
+          locationData.set("latitude", String(photo.latitude));
+          locationData.set("longitude", String(photo.longitude));
+          locationData.set("notes", photo.caption ?? "");
+          locationData.set("sort_order", String(selectedFavorite.locations?.length ?? 0));
+
+          const locationResponse = await fetch("/api/travel/items", { method: "POST", body: locationData });
+          if (!locationResponse.ok) throw new Error("Could not add chain location");
+        }
+
         const linkResponse = await fetch("/api/travel/items", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -147,18 +171,34 @@ export default function CreateFavoriteFromPhoto({ photo, favorites = [], photos 
         </div>
       )}
       {mode === "existing" && sortedFavorites.length > 0 ? (
-        <select
-          autoFocus
-          value={favoriteId}
-          onChange={(event) => setFavoriteId(event.target.value)}
-          className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-xs font-semibold outline-none ${isDark ? "bg-white/10 text-white" : "border border-slate-200 bg-white text-slate-700"}`}
-        >
-          {sortedFavorites.map((favorite) => (
-            <option key={favorite.id} value={favorite.id}>
-              {favorite.type}: {favorite.name}
-            </option>
-          ))}
-        </select>
+        <div className="grid min-w-0 flex-1 gap-2">
+          <select
+            autoFocus
+            value={favoriteId}
+            onChange={(event) => {
+              setFavoriteId(event.target.value);
+              setShouldAddChainLocation(true);
+            }}
+            className={`min-w-0 rounded-md px-2 py-1.5 text-xs font-semibold outline-none ${isDark ? "bg-white/10 text-white" : "border border-slate-200 bg-white text-slate-700"}`}
+          >
+            {sortedFavorites.map((favorite) => (
+              <option key={favorite.id} value={favorite.id}>
+                {favorite.type}: {favorite.name}
+              </option>
+            ))}
+          </select>
+          {canAddChainLocation && (
+            <label className={`flex items-start gap-2 rounded-md px-2 py-1.5 text-xs ${isDark ? "bg-white/10 text-white/75" : "border border-teal-100 bg-teal-50 text-teal-800"}`}>
+              <input
+                type="checkbox"
+                checked={shouldAddChainLocation}
+                onChange={(event) => setShouldAddChainLocation(event.target.checked)}
+                className="mt-0.5"
+              />
+              <span>Also save this as another {selectedFavorite.name} location. Existing pin coordinates will stay unchanged.</span>
+            </label>
+          )}
+        </div>
       ) : (
         <>
           <select
