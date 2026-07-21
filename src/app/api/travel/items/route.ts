@@ -21,6 +21,12 @@ function numberValue(value: FormDataEntryValue | null) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function longitudeValue(value: FormDataEntryValue | null, stateId: string | null) {
+  const parsed = numberValue(value);
+  if (parsed === null) return null;
+  return stateId && parsed > 0 ? -parsed : parsed;
+}
+
 function travelPhotoStoragePath(imageUrl: string | null | undefined) {
   if (!imageUrl) return null;
   const marker = `/storage/v1/object/public/${TRAVEL_PHOTOS_BUCKET}/`;
@@ -189,7 +195,7 @@ export async function POST(request: Request) {
         caption: nullableText(formData.get("caption")),
         location_name: nullableText(formData.get("location_name")),
         latitude: numberValue(formData.get("latitude")),
-        longitude: numberValue(formData.get("longitude")),
+        longitude: longitudeValue(formData.get("longitude"), stateId),
         taken_on: nullableText(formData.get("taken_on")),
         sort_order: numberValue(formData.get("sort_order")) ?? 0,
         is_featured: isFeatured,
@@ -244,7 +250,7 @@ export async function POST(request: Request) {
       location_name: nullableText(formData.get("location_name")),
       address: nullableText(formData.get("address")),
       latitude: numberValue(formData.get("latitude")),
-      longitude: numberValue(formData.get("longitude")),
+      longitude: longitudeValue(formData.get("longitude"), stateId),
       notes: nullableText(formData.get("notes")),
       sort_order: numberValue(formData.get("sort_order")) ?? 0,
     };
