@@ -2,6 +2,7 @@
 
 import { TravelFavoriteModalEditForm } from "@/components/TravelModalEditForm";
 import TravelFavoriteLocations from "@/components/TravelFavoriteLocations";
+import TravelFavoritePhotoAddForm from "@/components/TravelFavoritePhotoAddForm";
 import { travelFavoriteMapsUrl, type TravelFavorite, type TravelPhoto } from "@/lib/travel";
 import { ExternalLink, MapPin, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isAddingPhoto, setIsAddingPhoto] = useState(false);
   const [isShowingAll, setIsShowingAll] = useState(false);
   const [isAssigningPhotos, setIsAssigningPhotos] = useState(false);
   const [assigningLocationPhotoId, setAssigningLocationPhotoId] = useState("");
@@ -37,6 +39,7 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
   const close = () => {
     setSelectedId(null);
     setIsEditing(false);
+    setIsAddingPhoto(false);
     setIsAssigningPhotos(false);
     setSelectedPhotoIndex(0);
   };
@@ -88,6 +91,7 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
             onClick={() => {
               setSelectedId(favorite.id);
               setIsEditing(false);
+              setIsAddingPhoto(false);
               setSelectedPhotoIndex(featuredPhotoIndexFor(favorite.id));
             }}
             className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-white hover:text-slate-950"
@@ -154,6 +158,25 @@ export default function TravelFavoriteChips({ favorites, photos }: TravelFavorit
                   </div>
                   <p className="text-sm leading-6 text-slate-600">{selectedFavorite.notes?.trim() || "No notes saved yet."}</p>
                   {selectedFavorite.type === "restaurant" && <TravelFavoriteLocations favorite={selectedFavorite} />}
+                  {isAddingPhoto ? (
+                    <TravelFavoritePhotoAddForm
+                      favorite={selectedFavorite}
+                      photoCount={photos.length}
+                      onDone={() => {
+                        setIsAddingPhoto(false);
+                        router.refresh();
+                      }}
+                      onCancel={() => setIsAddingPhoto(false)}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingPhoto(true)}
+                      className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
+                    >
+                      Add photo
+                    </button>
+                  )}
                   {selectedFavorite.type === "restaurant" && (selectedFavorite.locations ?? []).length > 0 && selectedPhotos.length > 0 && (
                     <>
                       <button

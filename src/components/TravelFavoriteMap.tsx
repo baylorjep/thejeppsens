@@ -2,6 +2,7 @@
 
 import CreateFavoriteFromPhoto from "@/components/CreateFavoriteFromPhoto";
 import TravelFavoriteLocations from "@/components/TravelFavoriteLocations";
+import TravelFavoritePhotoAddForm from "@/components/TravelFavoritePhotoAddForm";
 import { TravelFavoriteModalEditForm, TravelPhotoModalEditForm } from "@/components/TravelModalEditForm";
 import TravelQuickAddButton from "@/components/TravelQuickAddButton";
 import { travelFavoriteMapsUrl, type TravelFavorite, type TravelPhoto } from "@/lib/travel";
@@ -168,6 +169,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [selectedFavoritePhotoIndex, setSelectedFavoritePhotoIndex] = useState(0);
   const [editingDetail, setEditingDetail] = useState<"favorite" | "photo" | null>(null);
+  const [isAddingFavoritePhoto, setIsAddingFavoritePhoto] = useState(false);
   const [isAssigningPhotos, setIsAssigningPhotos] = useState(false);
   const [featuringId, setFeaturingId] = useState("");
   const [deletingPhotoId, setDeletingPhotoId] = useState("");
@@ -273,6 +275,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setSelectedFavoriteId(favoriteId);
     setSelectedFavoritePhotoIndex(favoriteFeaturedPhotoIndexFor(favoriteId));
     setIsAssigningPhotos(false);
+    setIsAddingFavoritePhoto(false);
     setEditingDetail(null);
   };
 
@@ -280,6 +283,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setSelectedFavoriteId(null);
     setSelectedPhotoId(photo.id);
     setIsAssigningPhotos(false);
+    setIsAddingFavoritePhoto(false);
     setEditingDetail(null);
   };
 
@@ -288,6 +292,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
     setSelectedPhotoId(null);
     setSelectedFavoritePhotoIndex(0);
     setIsAssigningPhotos(false);
+    setIsAddingFavoritePhoto(false);
     setEditingDetail(null);
   };
 
@@ -925,6 +930,25 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
                         {selectedFavorite.notes?.trim() || "No notes saved yet."}
                       </p>
                       {selectedFavorite.type === "restaurant" && <TravelFavoriteLocations favorite={selectedFavorite} />}
+                      {isAddingFavoritePhoto ? (
+                        <TravelFavoritePhotoAddForm
+                          favorite={selectedFavorite}
+                          photoCount={photos.length}
+                          onDone={() => {
+                            setIsAddingFavoritePhoto(false);
+                            router.refresh();
+                          }}
+                          onCancel={() => setIsAddingFavoritePhoto(false)}
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingFavoritePhoto(true)}
+                          className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:text-slate-950"
+                        >
+                          Add photo
+                        </button>
+                      )}
                       {selectedFavorite.type === "restaurant" && (selectedFavorite.locations ?? []).length > 0 && selectedFavoritePhotos.length > 0 && (
                         <>
                           <button
