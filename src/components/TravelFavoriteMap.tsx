@@ -226,9 +226,14 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
   const selectedFavorite = selectedFavoriteId ? favorites.find((favorite) => favorite.id === selectedFavoriteId) ?? null : null;
   const favoritePhotosFor = (favoriteId: string) => photos.filter((photo) => photo.favorite_id === favoriteId);
   const favoriteLocationPhotosFor = (favoriteLocationId: string) => photos.filter((photo) => photo.favorite_location_id === favoriteLocationId);
+  const parentFavoritePhotosFor = (favoriteId: string) => favoritePhotosFor(favoriteId).filter((photo) => !photo.favorite_location_id);
   const favoritePinPhotoFor = (favoriteId: string) => {
-    const favoritePhotos = favoritePhotosFor(favoriteId);
+    const favoritePhotos = parentFavoritePhotosFor(favoriteId);
     return favoritePhotos.find((photo) => photo.is_favorite_featured) ?? favoritePhotos[0] ?? null;
+  };
+  const favoriteLocationPinPhotoFor = (favoriteId: string, favoriteLocationId: string) => {
+    const locationPhotos = favoriteLocationPhotosFor(favoriteLocationId);
+    return locationPhotos.find((photo) => photo.is_favorite_featured) ?? favoritePinPhotoFor(favoriteId);
   };
   const favoriteFeaturedPhotoIndexFor = (favoriteId: string) => {
     const favoritePhotos = favoritePhotosFor(favoriteId);
@@ -604,7 +609,7 @@ export default function TravelFavoriteMap({ favorites, photos = [], fallbackCent
         const favorite = item.favorite;
         const location = item.location;
         const Icon = IconForFavorite(favorite.type);
-        const locationPhoto = favoriteLocationPhotosFor(location.id).find((photo) => photo.is_favorite_featured) ?? favoriteLocationPhotosFor(location.id)[0] ?? null;
+        const locationPhoto = favoriteLocationPinPhotoFor(favorite.id, location.id);
         return (
           <button
             key={`favorite-location-${location.id}-${index}`}

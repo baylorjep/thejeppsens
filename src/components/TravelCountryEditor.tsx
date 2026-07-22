@@ -735,6 +735,16 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
     });
   };
 
+  const setPhotoTrip = (tripId: string) => {
+    const selectedTrip = trips.find((trip) => trip.id === tripId);
+    const tripDate = selectedTrip?.started_on ?? selectedTrip?.ended_on ?? "";
+    setPhotoForm((current) => ({
+      ...current,
+      trip_id: tripId,
+      taken_on: tripDate || current.taken_on,
+    }));
+  };
+
   return (
     <section ref={sectionRef} className="border-t border-slate-100 bg-white py-12">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -859,7 +869,7 @@ export default function TravelCountryEditor({ country, state, mapCenter, trips, 
                     Saving will move this photo and clear its current trip/favorite link.
                   </p>
                 )}
-                <select className={inputClassName()} value={photoForm.trip_id} onChange={(e) => setPhotoForm({ ...photoForm, trip_id: e.target.value })} disabled={selectedPhotoDestinationChanged}>
+                <select className={inputClassName()} value={photoForm.trip_id} onChange={(e) => setPhotoTrip(e.target.value)} disabled={selectedPhotoDestinationChanged}>
                   <option value="">No trip</option>
                   {trips.map((trip) => <option key={trip.id} value={trip.id}>{trip.title}</option>)}
                 </select>

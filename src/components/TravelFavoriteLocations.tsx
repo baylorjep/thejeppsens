@@ -1,7 +1,7 @@
 "use client";
 
 import { travelFavoriteLocationMapsUrl, type TravelFavorite, type TravelFavoriteLocation } from "@/lib/travel";
-import { ExternalLink, Plus, Trash2 } from "lucide-react";
+import { Edit3, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
@@ -35,19 +35,36 @@ export default function TravelFavoriteLocations({ favorite, variant = "light" }:
   const [deletingId, setDeletingId] = useState("");
   const [error, setError] = useState("");
   const [form, setForm] = useState({
+    id: "",
     name: "",
     location_name: "",
     address: "",
     latitude: "",
     longitude: "",
     notes: "",
+    sort_order: "0",
   });
   const locations = favorite.locations ?? [];
   const isDark = variant === "dark";
 
   const resetForm = () => {
-    setForm({ name: "", location_name: "", address: "", latitude: "", longitude: "", notes: "" });
+    setForm({ id: "", name: "", location_name: "", address: "", latitude: "", longitude: "", notes: "", sort_order: "0" });
     setError("");
+  };
+
+  const editLocation = (location: TravelFavoriteLocation) => {
+    setForm({
+      id: location.id,
+      name: location.name ?? "",
+      location_name: location.location_name ?? "",
+      address: location.address ?? "",
+      latitude: location.latitude?.toString() ?? "",
+      longitude: location.longitude?.toString() ?? "",
+      notes: location.notes ?? "",
+      sort_order: String(location.sort_order),
+    });
+    setError("");
+    setIsAdding(true);
   };
 
   const saveLocation = async (event: FormEvent) => {
@@ -59,6 +76,7 @@ export default function TravelFavoriteLocations({ favorite, variant = "light" }:
     try {
       const formData = new FormData();
       formData.set("type", "favorite_location");
+      if (form.id) formData.set("id", form.id);
       formData.set("favorite_id", favorite.id);
       formData.set("country_id", favorite.country_id);
       if (favorite.state_id) formData.set("state_id", favorite.state_id);
@@ -68,7 +86,7 @@ export default function TravelFavoriteLocations({ favorite, variant = "light" }:
       formData.set("latitude", form.latitude);
       formData.set("longitude", form.longitude);
       formData.set("notes", form.notes);
-      formData.set("sort_order", String(locations.length));
+      formData.set("sort_order", form.id ? form.sort_order : String(locations.length));
 
       const response = await fetch("/api/travel/items", { method: "POST", body: formData });
       if (!response.ok) throw new Error("Save failed");
@@ -130,6 +148,9 @@ export default function TravelFavoriteLocations({ favorite, variant = "light" }:
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                     )}
+                    <button type="button" onClick={() => editLocation(location)} className={buttonClassName(variant)} title="Edit location">
+                      <Edit3 className="h-3.5 w-3.5" />
+                    </button>
                     <button type="button" onClick={() => void deleteLocation(location)} disabled={deletingId === location.id} className={buttonClassName(variant, "danger")}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -153,7 +174,7 @@ export default function TravelFavoriteLocations({ favorite, variant = "light" }:
           <textarea className={inputClassName(variant)} value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} placeholder="Notes" rows={2} />
           <div className="flex flex-wrap gap-2">
             <button type="submit" disabled={isSaving || (!form.name.trim() && !form.location_name.trim() && !form.address.trim())} className={buttonClassName(variant, "primary")}>
-              {isSaving ? "Saving..." : "Save location"}
+              {isSaving ? "Saving..." : form.id ? "Update location" : "Save location"}
             </button>
             <button type="button" onClick={() => { resetForm(); setIsAdding(false); }} className={buttonClassName(variant)}>
               Cancel

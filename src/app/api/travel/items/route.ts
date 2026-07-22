@@ -351,16 +351,20 @@ export async function PATCH(request: Request) {
     }
 
     if (body.is_favorite_featured) {
-      const { data: photo } = await supabase.from("travel_photos").select("favorite_id").eq("id", body.id).maybeSingle();
+      const { data: photo } = await supabase.from("travel_photos").select("favorite_id, favorite_location_id").eq("id", body.id).maybeSingle();
       const targetFavoriteId = body.favorite_id ?? photo?.favorite_id ?? null;
+      const targetFavoriteLocationId =
+        "favorite_location_id" in body ? body.favorite_location_id ?? null : photo?.favorite_location_id ?? null;
       if (!targetFavoriteId) {
         return NextResponse.json({ error: "Favorite featured photos must be linked to a favorite" }, { status: 400 });
       }
       if (targetFavoriteId) {
-        const { error } = await supabase
+        let query = supabase
           .from("travel_photos")
           .update({ is_favorite_featured: false })
           .eq("favorite_id", targetFavoriteId);
+        query = targetFavoriteLocationId ? query.eq("favorite_location_id", targetFavoriteLocationId) : query.is("favorite_location_id", null);
+        const { error } = await query;
         if (error) throw error;
       }
     }
