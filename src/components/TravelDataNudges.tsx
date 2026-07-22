@@ -14,8 +14,25 @@ interface TravelDataNudgesProps {
 
 type EditorMode = "trip" | "photo" | "favorite" | "video";
 
+function openTravelEditorDetails() {
+  document.querySelectorAll("details").forEach((details) => {
+    const summary = details.querySelector("summary");
+    if (summary?.textContent?.trim() === "Edit Travel Log") {
+      details.open = true;
+    }
+  });
+}
+
 function editItem(type: EditorMode, item: TravelTrip | TravelPhoto | TravelFavorite | TravelVideo) {
-  window.dispatchEvent(new CustomEvent("travel:edit-item", { detail: { type, item } }));
+  openTravelEditorDetails();
+  window.setTimeout(() => {
+    window.dispatchEvent(new CustomEvent("travel:edit-item", { detail: { type, item } }));
+  }, 0);
+}
+
+function favoriteHasMapCoordinates(favorite: TravelFavorite) {
+  if (favorite.latitude !== null && favorite.longitude !== null) return true;
+  return Boolean(favorite.locations?.some((location) => location.latitude !== null && location.longitude !== null));
 }
 
 export default function TravelDataNudges({ photos, favorites, trips, videos }: TravelDataNudgesProps) {
@@ -27,7 +44,7 @@ export default function TravelDataNudges({ photos, favorites, trips, videos }: T
     () => photos.filter((photo) => !photo.favorite_id && !reviewedPhotoIds.has(photo.id)),
     [photos, reviewedPhotoIds],
   );
-  const favoritesNeedingCoordinates = favorites.filter((favorite) => favorite.latitude === null || favorite.longitude === null);
+  const favoritesNeedingCoordinates = favorites.filter((favorite) => !favoriteHasMapCoordinates(favorite));
   const videosUnattached = videos.filter((video) => !video.trip_id);
   const tripIdsWithItems = new Set([
     ...photos.map((photo) => photo.trip_id).filter(Boolean),
