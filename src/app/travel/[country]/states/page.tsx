@@ -5,9 +5,19 @@ import type { Country, TravelPhoto, TravelState, TravelStatePhotoPreview } from 
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 
 interface PageProps {
   params: Promise<{ country: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { country } = await params;
+  if (country !== 'united-states') return { title: 'Baylor & Isabel - Travel' };
+  return {
+    title: 'Baylor & Isabel - United States',
+    description: 'Every state we\'ve visited together.',
+  };
 }
 
 export default async function UnitedStatesStatesPage({ params }: PageProps) {

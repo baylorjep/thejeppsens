@@ -1,6 +1,12 @@
 import Header from "@/components/Header";
 import VinylManager from "@/components/VinylManager";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Baylor & Isabel - Add Records",
+  description: "Add records to the vinyl collection.",
+};
 
 export default function VinylManagePage() {
   return (

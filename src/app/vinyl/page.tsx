@@ -3,6 +3,12 @@ import VinylCatalog from "@/components/VinylCatalog";
 import { vinyls } from "@/data/vinyls";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Baylor & Isabel - Vinyl Catalog",
+  description: "Isabel's vinyl collection.",
+};
 
 export default function VinylPage() {
   return (

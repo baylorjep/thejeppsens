@@ -1,6 +1,12 @@
 import Header from "@/components/Header";
 import VinylInsights from "@/components/VinylInsights";
 import { vinyls } from "@/data/vinyls";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Baylor & Isabel - Vinyl Insights",
+  description: "Stats and trends across our vinyl collection.",
+};
 
 export default function VinylInsightsPage() {
   return (

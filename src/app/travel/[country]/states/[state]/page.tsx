@@ -23,9 +23,56 @@ import {
 import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Utensils } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 
 interface PageProps {
   params: Promise<{ country: string; state: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { country, state: stateParam } = await params;
+  if (country !== 'united-states') return { title: 'Baylor & Isabel - Travel' };
+
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return { title: 'Baylor & Isabel - Travel' };
+
+  const { data: states } = await supabase
+    .from('visited_states')
+    .select('id, state_name, abbreviation, baylor_visited, isabel_visited');
+
+  const state = findStateBySlug((states ?? []) as TravelState[], stateParam);
+  if (!state) return { title: 'Baylor & Isabel - Travel' };
+
+  const { data: countryRow } = await supabase
+    .from('visited_countries')
+    .select('id')
+    .eq('geo_name', 'United States of America')
+    .single();
+
+  let heroPhotoUrl: string | undefined;
+  if (countryRow) {
+    const { data: heroPhotos } = await supabase
+      .from('travel_photos')
+      .select('image_url')
+      .eq('country_id', (countryRow as { id: string }).id)
+      .eq('state_id', state.id)
+      .order('is_featured', { ascending: false })
+      .order('taken_on', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .limit(1);
+    heroPhotoUrl = heroPhotos?.[0]?.image_url as string | undefined;
+  }
+
+  return {
+    title: `Baylor & Isabel - ${state.state_name}`,
+    description: `Our trips, photos, and favorite spots in ${state.state_name}.`,
+    openGraph: heroPhotoUrl
+      ? { images: [{ url: heroPhotoUrl, alt: `${state.state_name} photo` }] }
+      : undefined,
+    twitter: heroPhotoUrl
+      ? { card: 'summary_large_image', images: [heroPhotoUrl] }
+      : undefined,
+  };
 }
 
 function formatDateRange(trip: TravelTrip) {

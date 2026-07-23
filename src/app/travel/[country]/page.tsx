@@ -26,9 +26,46 @@ import {
 import { ArrowLeft, CalendarDays, MapPinned, Sparkles, Utensils } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 
 interface PageProps {
   params: Promise<{ country: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { country: slug } = await params;
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return { title: 'Baylor & Isabel - Travel' };
+
+  const { data: countries } = await supabase
+    .from('visited_countries')
+    .select('id, geo_name, display_name, flag, continent, baylor_visited, isabel_visited');
+
+  const country = countries ? findCountryBySlug(countries as Country[], slug) : null;
+  if (!country) return { title: 'Baylor & Isabel - Travel' };
+
+  const { data: heroPhotos } = await supabase
+    .from('travel_photos')
+    .select('image_url')
+    .eq('country_id', country.id)
+    .is('state_id', null)
+    .order('is_featured', { ascending: false })
+    .order('taken_on', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  const heroPhotoUrl = heroPhotos?.[0]?.image_url as string | undefined;
+
+  return {
+    title: `Baylor & Isabel - ${country.display_name}`,
+    description: `Our trips, photos, and favorite spots in ${country.display_name}.`,
+    openGraph: heroPhotoUrl
+      ? { images: [{ url: heroPhotoUrl, alt: `${country.display_name} photo` }] }
+      : undefined,
+    twitter: heroPhotoUrl
+      ? { card: 'summary_large_image', images: [heroPhotoUrl] }
+      : undefined,
+  };
 }
 
 function formatDateRange(trip: TravelTrip) {
