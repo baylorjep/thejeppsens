@@ -488,10 +488,11 @@ function tierTone(tier: SeasonTier): { border: string; text: string; glow: strin
 
 export default function NflDealDynastySummary({ results, teamName, onPlayAgain, onSimulationStart, onSeasonReveal }: Props) {
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
-  const [stage, setStage] = useState<'roster' | 'simulating' | 'revealed'>('roster');
+  const [stage, setStage] = useState<'roster' | 'simulating' | 'season-summary' | 'revealed'>('roster');
   const [visibleWeeks, setVisibleWeeks] = useState(0);
   const [showResultCardModal, setShowResultCardModal] = useState(false);
   const [leaderboard, setLeaderboard] = useState<DynastyLeaderboardEntry[]>([]);
+  const [playoffSeed, setPlayoffSeed] = useState(7);
   const savedLeaderboardIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -533,7 +534,16 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
   useEffect(() => {
     if (stage !== 'simulating') return;
     if (visibleWeeks >= weeks.length) {
-      const t = setTimeout(() => setStage('revealed'), 650);
+      // Calculate seed after simulation
+      let seed = 7;
+      if (season.wins >= 14) seed = 1;
+      else if (season.wins >= 13) seed = 2;
+      else if (season.wins >= 12) seed = 3;
+      else if (season.wins >= 11) seed = 4;
+      else if (season.wins >= 10) seed = 5;
+      else if (season.wins >= 9) seed = 6;
+      setPlayoffSeed(seed);
+      const t = setTimeout(() => setStage('season-summary'), 650);
       return () => clearTimeout(t);
     }
     const t = setTimeout(() => setVisibleWeeks((count) => count + 1), visibleWeeks < 4 ? 420 : 260);
@@ -578,6 +588,50 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
       .then(setLeaderboard)
       .catch(() => setLeaderboard([]));
   }, [missingPositions.length, results, season.finish, season.losses, season.playoffWins, season.rating, season.wins, stage, teamName]);
+
+  if (stage === 'season-summary') {
+    return (
+      <div className="rounded-2xl border border-amber-500/25 bg-slate-900/85 p-8 shadow-2xl">
+        <div className="space-y-8">
+          <div className="text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300">Regular Season Complete</p>
+            <h2 className="mt-3 text-4xl font-black text-white sm:text-5xl">{season.wins}-{season.losses}</h2>
+            <p className="mt-2 text-lg font-semibold text-slate-300">{season.title}</p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-center">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Team Rating</p>
+              <p className="mt-2 text-3xl font-black text-teal-300">{season.rating}</p>
+            </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-center">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Playoff Seed</p>
+              <p className="mt-2 text-3xl font-black text-amber-300">{playoffSeed}</p>
+            </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-center">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Status</p>
+              <p className="mt-2 text-lg font-black text-sky-300">{playoffSeed <= 7 ? 'Playoffs' : 'Missed'}</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={() => setStage('revealed')}
+              className="flex-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-center font-bold uppercase text-slate-950 transition-all hover:from-amber-400 hover:to-amber-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+            >
+              Start Playoffs
+            </button>
+            <button
+              onClick={onPlayAgain}
+              className="rounded-lg border border-slate-700 bg-slate-800 px-6 py-4 font-bold uppercase text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+            >
+              New Season
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (missingPositions.length > 0) {
     return (
