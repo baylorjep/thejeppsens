@@ -437,7 +437,7 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
         </div>
       )}
 
-      {tradedFinalCase && declinedFinalCase ? (
+      {isFinalChoice && declinedFinalCase ? (
         <div className="mx-auto mt-5 max-w-md space-y-3">
           <div
             className={[
@@ -445,23 +445,37 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
               playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? 'bg-green-500/10 text-green-300' : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
             ].join(' ')}
           >
-            {playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? (
+            {tradedFinalCase ? (
+              playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? (
+                <>
+                  <TrendingUp className="h-4 w-4" aria-hidden />
+                  Great trade — you got the better player!
+                </>
+              ) : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? (
+                <>
+                  <TrendingDown className="h-4 w-4" aria-hidden />
+                  That trade didn't go your way — you gave up more value.
+                </>
+              ) : (
+                'Even trade between the two cases.'
+              )
+            ) : playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? (
               <>
                 <TrendingUp className="h-4 w-4" aria-hidden />
-                Great trade — you got the better player!
+                Great call — your case was worth more!
               </>
             ) : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? (
               <>
                 <TrendingDown className="h-4 w-4" aria-hidden />
-                That trade didn't go your way — you gave up more value.
+                You could've traded up — that case was better.
               </>
             ) : (
-              'Even trade between the two cases.'
+              'Both cases had the same value.'
             )}
           </div>
           <div className="flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2.5">
             <p className="text-sm font-bold text-slate-300">
-              Net value:{' '}
+              {tradedFinalCase ? 'Net value: ' : 'Case value: '}
               <span className={playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? 'text-green-300' : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? 'text-rose-300' : 'text-slate-300'}>
                 {playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? '+' : ''}{playerCase.quarterback.ovr - declinedFinalCase.quarterback.ovr} OVR
               </span>
