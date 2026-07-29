@@ -11,7 +11,8 @@ import {
 } from '@/lib/nflDeal/gameLogic';
 import { POSITIONS, DYNASTY_POSITIONS } from '@/lib/nflDeal/positions';
 import { claimSessionAndCheckIfResuming, clearSavedGame, loadGame, releaseSession, saveGame } from '@/lib/nflDeal/storage';
-import NflDealCaseGrid, { BOARD_ENTRANCE_TOTAL_MS } from './NflDealCaseGrid';
+import NflDealCaseGrid from './NflDealCaseGrid';
+import NflDealCaseIntroSequence, { CASE_INTRO_TOTAL_MS } from './NflDealCaseIntroSequence';
 import NflDealQbBoard from './NflDealQbBoard';
 import NflDealOfferModal from './NflDealOfferModal';
 import NflDealRoundPanel from './NflDealRoundPanel';
@@ -77,8 +78,9 @@ export default function NflDealGame() {
   const [hasStarted, setHasStarted] = useState(false);
   const [introVisualStage, setIntroVisualStage] = useState<'rules' | 'board'>('rules');
   const [offerModalReady, setOfferModalReady] = useState(false);
-  // Cases are still tumbling into place for the first ~11s of a fresh board
-  // -- don't let a click register mid-animation.
+  // The case intro sequence (reveal/seal/shuffle/settle) is still playing
+  // for a fresh board -- don't let a click register on the real grid until
+  // it's done (or skipped).
   const [boardSettled, setBoardSettled] = useState(false);
   const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -95,11 +97,17 @@ export default function NflDealGame() {
     if (state.phase !== 'selecting-case') return;
     setBoardSettled(false);
     if (boardSettledTimeoutRef.current) clearTimeout(boardSettledTimeoutRef.current);
-    boardSettledTimeoutRef.current = setTimeout(() => setBoardSettled(true), BOARD_ENTRANCE_TOTAL_MS);
+    boardSettledTimeoutRef.current = setTimeout(() => setBoardSettled(true), CASE_INTRO_TOTAL_MS);
     return () => {
       if (boardSettledTimeoutRef.current) clearTimeout(boardSettledTimeoutRef.current);
     };
   }, [state.seed, state.phase]);
+
+  // Lets the case intro sequence's own click-to-skip end the wait early too.
+  function skipBoardIntro() {
+    if (boardSettledTimeoutRef.current) clearTimeout(boardSettledTimeoutRef.current);
+    setBoardSettled(true);
+  }
 
   // Don't show the offer modal the instant phase flips to bank-offer/final-
   // choice -- let the case reveal finish holding, then give the banker's
@@ -361,6 +369,10 @@ export default function NflDealGame() {
               }}
             />
           </div>
+        ) : state.phase === 'selecting-case' && !boardSettled ? (
+          <div className="mt-10">
+            <NflDealCaseIntroSequence cases={state.cases} onSkip={skipBoardIntro} />
+          </div>
         ) : (
           // Explicit grid placement (rather than DOM order) so mobile can
           // stack these in document order -- case grid, board, your case --
@@ -374,7 +386,7 @@ export default function NflDealGame() {
                 phase={state.phase}
                 playerCaseNumber={state.playerCaseNumber}
                 currentRoundOpenedNumbers={state.casesOpenedThisRound}
-                locked={pendingReveal !== null || (state.phase === 'selecting-case' && !boardSettled)}
+                locked={pendingReveal !== null}
                 onOpen={(caseNumber) => {
                   if (state.phase === 'selecting-case') dispatch({ type: 'SELECT_CASE', caseNumber });
                   else if (state.phase === 'opening-cases') openCase(caseNumber);
