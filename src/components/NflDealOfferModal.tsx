@@ -21,6 +21,9 @@ interface Props {
   /** Fires the instant No Deal is clicked, before the reaction delay -- see
    * onDealChosen. */
   onNoDealChosen: () => void;
+  /** Fires after the short red No Deal flash leaves, while the audio is
+   * still finishing. */
+  onNoDealTransitionStart?: () => void;
 }
 
 // Matches the length of whichever deal-accepted clip corresponds to this
@@ -45,6 +48,7 @@ export default function NflDealOfferModal({
   onDealChosen,
   onNoDeal,
   onNoDealChosen,
+  onNoDealTransitionStart,
 }: Props) {
   const dealButtonRef = useRef<HTMLButtonElement>(null);
   const dealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,7 +84,10 @@ export default function NflDealOfferModal({
     setResolving(true);
     setReaction('no-deal');
     onNoDealChosen();
-    noDealOverlayTimeoutRef.current = setTimeout(() => setReaction(null), NO_DEAL_REACTION_OVERLAY_MS);
+    noDealOverlayTimeoutRef.current = setTimeout(() => {
+      setReaction(null);
+      onNoDealTransitionStart?.();
+    }, NO_DEAL_REACTION_OVERLAY_MS);
     noDealTimeoutRef.current = setTimeout(onNoDeal, NO_DEAL_REACTION_DELAY_MS);
   }
 
@@ -126,12 +133,10 @@ export default function NflDealOfferModal({
               <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300/90">
                 {isFinal ? 'Final offer' : `Round ${offer.round} offer`}
               </span>
-              <span className="mt-1 block text-lg font-black text-white">The Banker is calling...</span>
-              <span className="mt-1 block text-xs text-slate-400">Tap to skip to the offer.</span>
+              <span className="mt-1 block text-lg font-black text-white">The Banker is making an offer...</span>
+              <span className="mt-1 block text-xs text-slate-400">Tap anywhere here to skip the wait.</span>
             </span>
-            <span className="shrink-0 rounded-lg bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-wide text-slate-950">
-              Answer
-            </span>
+            <span className="shrink-0 text-xs font-black uppercase tracking-[0.2em] text-amber-300">Pending</span>
           </button>
         ) : (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

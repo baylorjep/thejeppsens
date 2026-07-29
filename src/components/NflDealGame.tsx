@@ -22,6 +22,7 @@ import NflDealYourCase from './NflDealYourCase';
 import NflDealAudioController, { type NflDealAudioHandle } from './NflDealAudioController';
 import NflDealCaseRevealPopup from './NflDealCaseRevealPopup';
 import NflDealRulesIntro from './NflDealRulesIntro';
+import NflDealNoDealTransition from './NflDealNoDealTransition';
 import type { DynastyRunState, Player, PositionId } from '@/lib/nflDeal/types';
 
 // How long the sound plays before the result actually shows -- timed to
@@ -80,6 +81,7 @@ export default function NflDealGame() {
   const [introVisualStage, setIntroVisualStage] = useState<'rules' | 'board'>('rules');
   const [offerModalReady, setOfferModalReady] = useState(false);
   const [offerDecisionReady, setOfferDecisionReady] = useState(false);
+  const [noDealTransitioning, setNoDealTransitioning] = useState(false);
   // The case intro sequence (reveal/seal/shuffle/settle) is still playing
   // for a fresh board -- don't let a click register on the real grid until
   // it's done (or skipped).
@@ -124,6 +126,7 @@ export default function NflDealGame() {
     if (!isOfferPhase) {
       setOfferModalReady(false);
       setOfferDecisionReady(false);
+      setNoDealTransitioning(false);
       return;
     }
     if (pendingReveal) return; // still showing/holding the case reveal
@@ -215,6 +218,7 @@ export default function NflDealGame() {
     setDynasty(null);
     setDynastyDone(false);
     setDynastyTeamName(DEFAULT_DYNASTY_TEAM_NAME);
+    setNoDealTransitioning(false);
     setCeremonyCaseNumber(null);
     setPendingReveal(null);
     if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
@@ -430,18 +434,24 @@ export default function NflDealGame() {
           // the case grid + your case in the main column.
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px] lg:grid-rows-[auto_auto]">
             <div className="space-y-4 lg:col-start-1 lg:row-start-1">
-              <NflDealRoundPanel state={state} />
-              <NflDealCaseGrid
-                cases={state.cases}
-                phase={state.phase}
-                playerCaseNumber={state.playerCaseNumber}
-                currentRoundOpenedNumbers={state.casesOpenedThisRound}
-                locked={pendingReveal !== null}
-                onOpen={(caseNumber) => {
-                  if (state.phase === 'selecting-case') dispatch({ type: 'SELECT_CASE', caseNumber });
-                  else if (state.phase === 'opening-cases') openCase(caseNumber);
-                }}
-              />
+              {noDealTransitioning ? (
+                <NflDealNoDealTransition state={state} />
+              ) : (
+                <>
+                  <NflDealRoundPanel state={state} />
+                  <NflDealCaseGrid
+                    cases={state.cases}
+                    phase={state.phase}
+                    playerCaseNumber={state.playerCaseNumber}
+                    currentRoundOpenedNumbers={state.casesOpenedThisRound}
+                    locked={pendingReveal !== null}
+                    onOpen={(caseNumber) => {
+                      if (state.phase === 'selecting-case') dispatch({ type: 'SELECT_CASE', caseNumber });
+                      else if (state.phase === 'opening-cases') openCase(caseNumber);
+                    }}
+                  />
+                </>
+              )}
               {visibleOffer && (
                 <NflDealOfferModal
                   offer={visibleOffer}
@@ -454,9 +464,18 @@ export default function NflDealGame() {
                     audioRef.current?.skipBankOfferIntro();
                   }}
                   onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
-                  onDealChosen={() => audioRef.current?.playDealAccepted(offerTier ?? 'medium')}
-                  onNoDeal={() => dispatch({ type: 'REJECT_OFFER' })}
+                  onDealChosen={() => {
+                    setNoDealTransitioning(false);
+                    audioRef.current?.playDealAccepted(offerTier ?? 'medium');
+                  }}
+                  onNoDeal={() => {
+                    setNoDealTransitioning(false);
+                    dispatch({ type: 'REJECT_OFFER' });
+                  }}
                   onNoDealChosen={() => audioRef.current?.playNoDealAccepted()}
+                  onNoDealTransitionStart={() => {
+                    if (state.phase === 'bank-offer') setNoDealTransitioning(true);
+                  }}
                 />
               )}
             </div>
