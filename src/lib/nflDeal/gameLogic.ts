@@ -70,7 +70,16 @@ function shuffledCases(position: PositionId, seed: number): { cases: CaseState[]
   return { cases, cursor };
 }
 
-export function createInitialGameState(position: PositionId, seed: number = Date.now()): GameState {
+function createGameSeed(): number {
+  if (typeof globalThis.crypto?.getRandomValues === 'function') {
+    const values = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(values);
+    return values[0];
+  }
+  return Math.floor((Date.now() + Math.random() * 0x100000000) % 0x100000000);
+}
+
+export function createInitialGameState(position: PositionId, seed: number = createGameSeed()): GameState {
   const { cases, cursor } = shuffledCases(position, seed);
   return {
     position,
