@@ -231,11 +231,11 @@ async function saveDynastyLeaderboardEntry(entry: DynastyLeaderboardEntry): Prom
 }
 
 const POSITION_WEIGHTS: Record<PositionId, number> = {
-  QB: 0.3,
+  QB: 0.35,
   RB: 0.13,
-  WR: 0.18,
-  TE: 0.12,
-  DST: 0.27,
+  WR: 0.16,
+  TE: 0.11,
+  DST: 0.25,
 };
 
 function rosterJitter(results: Partial<Record<PositionId, Player>>): number {
@@ -254,8 +254,28 @@ function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
           (available.reduce((sum, pos) => sum + results[pos]!.ovr * POSITION_WEIGHTS[pos], 0) / totalWeight) * 10,
         ) / 10
       : 0;
+
+  // Position synergies
+  let synergy = 0;
+  const qb = results.QB?.ovr ?? 0;
+  const rb = results.RB?.ovr ?? 0;
+  const wr = results.WR?.ovr ?? 0;
+  const te = results.TE?.ovr ?? 0;
+  const dst = results.DST?.ovr ?? 0;
+
+  // QB-WR synergy: great passing attack
+  if (qb >= 85 && wr >= 85) synergy += 2;
+  // Pass catchers synergy: strong receiving corps
+  if (wr >= 80 && te >= 80) synergy += 1;
+  // QB-RB synergy: balanced attack is hard to stop
+  if (qb >= 85 && rb >= 85) synergy += 1;
+  // Elite defense can carry a game
+  if (dst >= 90) synergy += 1.5;
+  // Weak QB limits effectiveness
+  if (qb < 75) synergy -= 0.5;
+
   const jitter = rosterJitter(results);
-  const projectedWins = Math.round((rating - 74) * 0.48 + 5.5 + jitter * 0.28);
+  const projectedWins = Math.round((rating - 74) * 0.48 + 5.5 + jitter * 0.28 + synergy);
   const wins = Math.min(17, Math.max(1, projectedWins));
   const losses = 17 - wins;
 
