@@ -70,7 +70,7 @@ export default function NflDealGame() {
     }
     return createInitialGameState('QB');
   });
-  const [selectedMode, setSelectedMode] = useState<Mode>(resumedRunRef.current?.dynasty ? 'DYNASTY' : state.position);
+  const [selectedMode, setSelectedMode] = useState<Mode>(resumedRunRef.current?.dynasty ? 'DYNASTY' : 'DYNASTY');
   // Only set while playing a Dynasty run: tracks which stage we're on and
   // the winning player banked from each finished stage so far.
   const [dynasty, setDynasty] = useState<DynastyRunState | null>(resumedRunRef.current?.dynasty ?? null);
