@@ -10,6 +10,8 @@ import type { CaseState, GameState, Player } from '@/lib/nflDeal/types';
 interface Props {
   state: GameState;
   playerCase: CaseState;
+  /** For final-choice rounds, the case that was passed on */
+  declinedFinalCase?: CaseState | null;
   onPlayAgain: () => void;
   ctaLabel?: string;
   /** Fires once, timed so the sound lands right as the reveal happens, with
@@ -59,9 +61,10 @@ function SealedCase({ number }: { number: number }) {
   );
 }
 
-export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLabel = 'Play Again', onReveal }: Props) {
+export default function NflDealEndScreen({ state, playerCase, declinedFinalCase, onPlayAgain, ctaLabel = 'Play Again', onReveal }: Props) {
   const dealAccepted = state.dealAccepted;
   const tradedFinalCase = !dealAccepted && state.finalCaseNumber != null && state.finalCaseNumber !== state.playerCaseNumber;
+  const isFinalChoice = state.phase === 'finished' && state.finalCaseNumber != null;
   // If no deal was accepted, state.currentOffer still holds the final offer
   // they turned down (see rejectOffer in gameLogic.ts).
   const declinedOffer = !dealAccepted ? state.currentOffer : null;
@@ -124,6 +127,37 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
   }, [stage]);
 
   if (stage === 'stakes' && knownOffer) {
+    // For final-choice rounds, show both the chosen case and the passed case
+    if (isFinalChoice && declinedFinalCase && dealAccepted === null) {
+      return (
+        <div
+          onClick={skipForward}
+          className="flex min-h-[420px] cursor-pointer flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-8 text-center sm:p-10"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Your final choice</p>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                {tradedFinalCase ? 'You chose' : 'You kept'}
+              </p>
+              <SealedCase number={playerCase.number} />
+            </div>
+            <span className="text-xl font-black text-slate-600">vs</span>
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                {tradedFinalCase ? 'You passed on' : 'You could trade for'}
+              </p>
+              <SealedCase number={declinedFinalCase.number} />
+            </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-[11px] font-semibold text-slate-400">Click anywhere to see what's inside</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div
         onClick={skipForward}

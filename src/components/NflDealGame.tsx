@@ -459,6 +459,13 @@ export default function NflDealGame() {
             <NflDealEndScreen
               state={state}
               playerCase={finalCase}
+              declinedFinalCase={
+                state.finalCaseNumber != null && state.finalCaseNumber !== state.playerCaseNumber
+                  ? state.cases.find((c) => c.number === state.playerCaseNumber) ?? null
+                  : state.finalCaseNumber != null
+                    ? state.cases.find((c) => c.status === 'available') ?? null
+                    : null
+              }
               onPlayAgain={handleEndScreenContinue}
               ctaLabel={
                 dynasty
