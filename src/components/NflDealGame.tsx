@@ -308,6 +308,8 @@ export default function NflDealGame() {
 
   const dynastyStageLabel = dynasty ? `Dynasty — Stage ${dynasty.index + 1} of ${DYNASTY_POSITIONS.length}: ${positionConfig.pluralLabel}` : null;
   const visibleOffer = hasStarted && offerModalReady && !dynastyDone ? state.currentOffer : null;
+  const bankOfferIntroBlocked =
+    pendingReveal !== null && (state.phase === 'bank-offer' || state.phase === 'final-choice');
 
   useEffect(() => {
     if (!visibleOffer || noDealTransitioning) return;
@@ -327,6 +329,7 @@ export default function NflDealGame() {
         roundIndex={state.roundIndex}
         offerTier={offerTier}
         introNarrationEnabled={!dynasty || dynasty.index === 0}
+        bankOfferIntroBlocked={bankOfferIntroBlocked}
         onBankOfferPromptReady={() => {
           if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
           setOfferDecisionReady(true);

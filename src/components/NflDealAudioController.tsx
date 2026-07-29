@@ -182,9 +182,13 @@ const NflDealAudioController = forwardRef<
     roundIndex: number;
     offerTier: OfferTier | null;
     introNarrationEnabled: boolean;
+    bankOfferIntroBlocked?: boolean;
     onBankOfferPromptReady?: () => void;
   }
->(function NflDealAudioController({ phase, eliminationEvent, enabled, roundIndex, offerTier, introNarrationEnabled, onBankOfferPromptReady }, ref) {
+>(function NflDealAudioController(
+  { phase, eliminationEvent, enabled, roundIndex, offerTier, introNarrationEnabled, bankOfferIntroBlocked = false, onBankOfferPromptReady },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLAudioElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -477,6 +481,7 @@ const NflDealAudioController = forwardRef<
       if (activeCueRef.current == null || !INTRO_SEQUENCE.includes(activeCueRef.current)) startIntroSequence();
       return;
     }
+    if (bankOfferIntroBlocked && (phase === 'bank-offer' || phase === 'final-choice')) return;
     const desired = resolvePhaseCue(phase, introDone, introNarrationEnabled, revealDone, openingCasesCue, offerTier);
     if (noDealRoundMusicHeld && phase === 'opening-cases' && (desired === 'openingCasesA' || desired === 'openingCasesB')) return;
     if (!desired) {
@@ -500,7 +505,7 @@ const NflDealAudioController = forwardRef<
     if (!enabled || !playerReady || muted) return;
     startForCurrentPhase();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, phase, introDone, introNarrationEnabled, revealDone, playerReady, muted, openingCasesCue, offerTier]);
+  }, [enabled, phase, introDone, introNarrationEnabled, revealDone, playerReady, muted, openingCasesCue, offerTier, bankOfferIntroBlocked]);
 
   useEffect(() => {
     if (!enabled || !playerReady || muted || noDealRoundMusicHeld || phase !== 'opening-cases') return;
