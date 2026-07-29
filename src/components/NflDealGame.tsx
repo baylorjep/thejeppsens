@@ -90,6 +90,7 @@ export default function NflDealGame() {
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const offerDecisionFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boardSettledTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const offerPanelRef = useRef<HTMLDivElement>(null);
   const eliminationCounterRef = useRef(0);
   const prevPhaseRef = useRef(state.phase);
   const audioRef = useRef<NflDealAudioHandle>(null);
@@ -306,6 +307,14 @@ export default function NflDealGame() {
   const dynastyStageLabel = dynasty ? `Dynasty — Stage ${dynasty.index + 1} of ${DYNASTY_POSITIONS.length}: ${positionConfig.pluralLabel}` : null;
   const visibleOffer = hasStarted && offerModalReady && !dynastyDone ? state.currentOffer : null;
 
+  useEffect(() => {
+    if (!visibleOffer || noDealTransitioning) return;
+    const t = setTimeout(() => {
+      offerPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+    return () => clearTimeout(t);
+  }, [visibleOffer?.round, visibleOffer?.quarterback.id, noDealTransitioning]);
+
   return (
     <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.08),transparent_60%)] pb-20 text-slate-100">
       <NflDealAudioController
@@ -455,32 +464,34 @@ export default function NflDealGame() {
                   />
                 </>
               )}
-              {visibleOffer && (
-                <NflDealOfferModal
-                  offer={visibleOffer}
-                  isFinal={state.phase === 'final-choice'}
-                  roundIndex={state.roundIndex}
-                  decisionReady={offerDecisionReady}
-                  onSkipIntro={() => {
-                    if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
-                    setOfferDecisionReady(true);
-                    audioRef.current?.skipBankOfferIntro();
-                  }}
-                  onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
-                  onDealChosen={() => {
-                    setNoDealTransitioning(false);
-                    audioRef.current?.playDealAccepted(offerTier ?? 'medium');
-                  }}
-                  onNoDeal={() => {
-                    setNoDealTransitioning(false);
-                    dispatch({ type: 'REJECT_OFFER' });
-                  }}
-                  onNoDealChosen={() => audioRef.current?.playNoDealAccepted()}
-                  onNoDealTransitionStart={() => {
-                    if (state.phase === 'bank-offer') setNoDealTransitioning(true);
-                  }}
-                />
-              )}
+              <div ref={offerPanelRef}>
+                {visibleOffer && (
+                  <NflDealOfferModal
+                    offer={visibleOffer}
+                    isFinal={state.phase === 'final-choice'}
+                    roundIndex={state.roundIndex}
+                    decisionReady={offerDecisionReady}
+                    onSkipIntro={() => {
+                      if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
+                      setOfferDecisionReady(true);
+                      audioRef.current?.skipBankOfferIntro();
+                    }}
+                    onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
+                    onDealChosen={() => {
+                      setNoDealTransitioning(false);
+                      audioRef.current?.playDealAccepted(offerTier ?? 'medium');
+                    }}
+                    onNoDeal={() => {
+                      setNoDealTransitioning(false);
+                      dispatch({ type: 'REJECT_OFFER' });
+                    }}
+                    onNoDealChosen={() => audioRef.current?.playNoDealAccepted()}
+                    onNoDealTransitionStart={() => {
+                      if (state.phase === 'bank-offer') setNoDealTransitioning(true);
+                    }}
+                  />
+                )}
+              </div>
             </div>
             <div className="lg:col-start-2 lg:row-start-1 lg:row-span-2">
               <NflDealQbBoard
