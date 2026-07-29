@@ -144,9 +144,11 @@ function resolvePhaseCue(
   if (phase === 'opening-cases') return openingCasesCue;
   if (phase === 'bank-offer' || phase === 'final-choice') return offerTier === 'big' ? 'bankOfferLarge' : 'bankOffer';
   // The good/bad elimination sting (fired via `eliminationEvent`, not this
-  // phase-driven resolver) doubles as the final-outcome reveal sound -- stay
-  // silent until it finishes and flips revealDone, then roll into credits.
-  if (phase === 'finished') return revealDone ? 'credits' : null;
+  // phase-driven resolver) doubles as the final-outcome reveal sound. Until
+  // that sting fires, keep the round bed underneath the suspense/stakes
+  // screens so the endgame doesn't sit in silence; after it finishes, roll
+  // into credits.
+  if (phase === 'finished') return revealDone ? 'credits' : openingCasesCue;
   return null;
 }
 
