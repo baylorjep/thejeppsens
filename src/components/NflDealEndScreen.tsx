@@ -345,7 +345,7 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
         </p>
       )}
       <h2 className="animate-case-reveal text-3xl font-black text-white sm:text-4xl">
-        {dealAccepted ? 'DEAL!' : tradedFinalCase ? 'TRADE!' : 'NO DEAL'}
+        {dealAccepted ? 'DEAL!' : tradedFinalCase ? 'TRADE!' : isFinalChoice ? 'KEPT!' : 'NO DEAL'}
       </h2>
       <p className="animate-case-reveal mt-1 text-sm text-slate-400">
         {dealAccepted ? 'You took the offer.' : tradedFinalCase ? 'You traded for the last case.' : 'You kept your case.'}
