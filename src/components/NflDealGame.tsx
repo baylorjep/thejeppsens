@@ -324,6 +324,7 @@ export default function NflDealGame() {
         enabled={hasStarted}
         roundIndex={state.roundIndex}
         offerTier={offerTier}
+        introNarrationEnabled={!dynasty || dynasty.index === 0}
         onBankOfferPromptReady={() => {
           if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
           setOfferDecisionReady(true);

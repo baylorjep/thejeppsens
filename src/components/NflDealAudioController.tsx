@@ -136,11 +136,12 @@ function cueDurationMs(key: CueKey): number {
 function resolvePhaseCue(
   phase: GamePhase,
   introDone: boolean,
+  introNarrationEnabled: boolean,
   revealDone: boolean,
   openingCasesCue: 'openingCasesA' | 'openingCasesB',
   offerTier: OfferTier | null,
 ): CueKey | null {
-  if (phase === 'selecting-case') return introDone ? 'caseSelection' : null; // intro sequence handles this until done
+  if (phase === 'selecting-case') return introNarrationEnabled && !introDone ? null : 'caseSelection';
   if (phase === 'opening-cases') return openingCasesCue;
   if (phase === 'bank-offer' || phase === 'final-choice') return offerTier === 'big' ? 'bankOfferLarge' : 'bankOffer';
   // The good/bad elimination sting (fired via `eliminationEvent`, not this
@@ -173,9 +174,10 @@ const NflDealAudioController = forwardRef<
     enabled: boolean;
     roundIndex: number;
     offerTier: OfferTier | null;
+    introNarrationEnabled: boolean;
     onBankOfferPromptReady?: () => void;
   }
->(function NflDealAudioController({ phase, eliminationEvent, enabled, roundIndex, offerTier, onBankOfferPromptReady }, ref) {
+>(function NflDealAudioController({ phase, eliminationEvent, enabled, roundIndex, offerTier, introNarrationEnabled, onBankOfferPromptReady }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLAudioElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -432,11 +434,11 @@ const NflDealAudioController = forwardRef<
   // the mute toggle) regardless of `enabled`, since a real click is its own
   // permission.
   function startForCurrentPhase() {
-    if (phase === 'selecting-case' && !introDone) {
+    if (phase === 'selecting-case' && introNarrationEnabled && !introDone) {
       if (activeCueRef.current == null || !INTRO_SEQUENCE.includes(activeCueRef.current)) startIntroSequence();
       return;
     }
-    const desired = resolvePhaseCue(phase, introDone, revealDone, openingCasesCue, offerTier);
+    const desired = resolvePhaseCue(phase, introDone, introNarrationEnabled, revealDone, openingCasesCue, offerTier);
     if (!desired) {
       playerRef.current?.pauseVideo();
       cancelBankOfferIntro();
@@ -458,7 +460,7 @@ const NflDealAudioController = forwardRef<
     if (!enabled || !playerReady || muted) return;
     startForCurrentPhase();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, phase, introDone, revealDone, playerReady, muted, openingCasesCue, offerTier]);
+  }, [enabled, phase, introDone, introNarrationEnabled, revealDone, playerReady, muted, openingCasesCue, offerTier]);
 
   useEffect(() => {
     if (!pendingDynastyNamingMusicRef.current || !playerReady || muted) return;
