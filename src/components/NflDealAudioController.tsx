@@ -528,7 +528,9 @@ const NflDealAudioController = forwardRef<
 
   return (
     <>
-      <button
+      {/* Temporarily hidden from the live UI; keep the mute control logic above
+       * so this can be restored by uncommenting the button. */}
+      {/* <button
         type="button"
         onClick={toggleMute}
         aria-label={muted ? 'Unmute game sound' : 'Mute game sound'}
@@ -536,7 +538,7 @@ const NflDealAudioController = forwardRef<
         className="fixed right-4 top-20 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 bg-slate-900/90 text-slate-300 shadow-lg transition-colors hover:border-teal-400 hover:text-teal-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300"
       >
         {muted ? <VolumeX className="h-4 w-4" aria-hidden /> : <Volume2 className="h-4 w-4" aria-hidden />}
-      </button>
+      </button> */}
       <audio ref={ringRef} src={BANK_RING_SRC} preload="none" />
       {/* Audio only -- rendered fully off-screen so no video is ever visible. */}
       <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px' }} aria-hidden>
