@@ -212,11 +212,42 @@ function DynastyLeaderboard({ entries }: { entries: DynastyLeaderboardEntry[] })
   );
 }
 
+// Recalculates rating and wins for legacy leaderboard entries using current synergy rules
+function recalculateEntryStats(entry: DynastyLeaderboardEntry): DynastyLeaderboardEntry {
+  const players = entry.players;
+  const qb = players.QB?.ovr ?? 0;
+  const rb = players.RB?.ovr ?? 0;
+  const wr = players.WR?.ovr ?? 0;
+  const te = players.TE?.ovr ?? 0;
+  const dst = players.DST?.ovr ?? 0;
+
+  // Recalculate rating with current weights
+  const ovrSum = qb * 0.35 + rb * 0.13 + wr * 0.16 + te * 0.11 + dst * 0.25;
+  const newRating = Math.round(ovrSum * 10) / 10;
+
+  // Recalculate synergy bonuses
+  let synergy = 0;
+  if (qb >= 85 && wr >= 85) synergy += 2;
+  if (wr >= 80 && te >= 80) synergy += 1;
+  if (qb >= 85 && rb >= 85) synergy += 1;
+  if (dst >= 90) synergy += 1.5;
+  if (qb < 75) synergy -= 0.5;
+
+  // Recalculate wins (using 0 jitter for consistency across recalculations)
+  const projectedWins = Math.round((newRating - 74) * 0.48 + 5.5 + synergy);
+  const newWins = Math.min(17, Math.max(1, projectedWins));
+  const newLosses = 17 - newWins;
+
+  return { ...entry, rating: newRating, wins: newWins, losses: newLosses };
+}
+
 async function fetchDynastyLeaderboard(): Promise<DynastyLeaderboardEntry[]> {
   const response = await fetch('/api/deal-or-no-deal/dynasty-leaderboard', { cache: 'no-store' });
   if (!response.ok) return [];
   const data = (await response.json()) as { entries?: DynastyLeaderboardEntry[] };
-  return Array.isArray(data.entries) ? data.entries : [];
+  const entries = Array.isArray(data.entries) ? data.entries : [];
+  // Recalculate all entries with current synergy rules
+  return entries.map(recalculateEntryStats).sort((a, b) => b.rating - a.rating || b.wins - a.wins);
 }
 
 async function saveDynastyLeaderboardEntry(entry: DynastyLeaderboardEntry): Promise<DynastyLeaderboardEntry[]> {
