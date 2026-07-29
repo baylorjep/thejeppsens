@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import type { CaseState, GameState } from '@/lib/nflDeal/types';
 
 interface Props {
@@ -26,13 +29,24 @@ function MiniCase({ caseState, exiting, index }: { caseState: CaseState; exiting
 }
 
 export default function NflDealNoDealTransition({ state }: Props) {
+  const [animating, setAnimating] = useState(false);
+  const [compact, setCompact] = useState(false);
   const openedThisRound = new Set(state.casesOpenedThisRound);
   const visibleCases = state.cases.filter(
     (caseState) =>
       caseState.number !== state.playerCaseNumber &&
-      (caseState.status === 'available' || openedThisRound.has(caseState.number)),
+      (caseState.status === 'available' || (!compact && openedThisRound.has(caseState.number))),
   );
   const remainingCount = state.cases.filter((caseState) => caseState.status === 'available').length;
+
+  useEffect(() => {
+    const start = setTimeout(() => setAnimating(true), 40);
+    const tighten = setTimeout(() => setCompact(true), 1150);
+    return () => {
+      clearTimeout(start);
+      clearTimeout(tighten);
+    };
+  }, []);
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-5 sm:px-5">
@@ -47,7 +61,7 @@ export default function NflDealNoDealTransition({ state }: Props) {
       <div className="mt-5 flex flex-wrap justify-center gap-2 sm:gap-3">
         {visibleCases.map((caseState, index) => (
           <div key={caseState.number} className="w-[calc(25%-6px)] sm:w-[calc(16.6667%-10px)]">
-            <MiniCase caseState={caseState} exiting={openedThisRound.has(caseState.number)} index={index} />
+            <MiniCase caseState={caseState} exiting={animating && openedThisRound.has(caseState.number)} index={index} />
           </div>
         ))}
       </div>
