@@ -6,7 +6,6 @@ import Confetti from 'react-confetti';
 import { RotateCcw, Trophy } from 'lucide-react';
 import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
 import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
-import { loadDynastyLeaderboard, saveDynastyLeaderboardEntry } from '@/lib/nflDeal/storage';
 import type { DynastyLeaderboardEntry, Player, PositionId } from '@/lib/nflDeal/types';
 
 interface Props {
@@ -142,6 +141,24 @@ function DynastyLeaderboard({ entries }: { entries: DynastyLeaderboardEntry[] })
       </div>
     </div>
   );
+}
+
+async function fetchDynastyLeaderboard(): Promise<DynastyLeaderboardEntry[]> {
+  const response = await fetch('/api/deal-or-no-deal/dynasty-leaderboard', { cache: 'no-store' });
+  if (!response.ok) return [];
+  const data = (await response.json()) as { entries?: DynastyLeaderboardEntry[] };
+  return Array.isArray(data.entries) ? data.entries : [];
+}
+
+async function saveDynastyLeaderboardEntry(entry: DynastyLeaderboardEntry): Promise<DynastyLeaderboardEntry[]> {
+  const response = await fetch('/api/deal-or-no-deal/dynasty-leaderboard', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry),
+  });
+  if (!response.ok) return [];
+  const data = (await response.json()) as { entries?: DynastyLeaderboardEntry[] };
+  return Array.isArray(data.entries) ? data.entries : [];
 }
 
 const POSITION_WEIGHTS: Record<PositionId, number> = {
@@ -309,7 +326,17 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
-    setLeaderboard(loadDynastyLeaderboard());
+    let active = true;
+    fetchDynastyLeaderboard()
+      .then((entries) => {
+        if (active) setLeaderboard(entries);
+      })
+      .catch(() => {
+        if (active) setLeaderboard([]);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const missingPositions = DYNASTY_POSITIONS.filter((pos) => !results[pos]);
@@ -320,7 +347,7 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
     return () => clearTimeout(t);
   }, [missingPositions.length, stage]);
 
-  const season = seasonFor(results);
+  const season = useMemo(() => seasonFor(results), [results]);
   const tone = tierTone(season.tier);
   const celebrate = season.tier === 'dynasty' || season.tier === 'elite';
   const weeks = useMemo(() => buildWeekResults(season, teamName, results), [results, season, teamName]);
@@ -367,18 +394,18 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
     if (savedLeaderboardIdRef.current === id) return;
     savedLeaderboardIdRef.current = id;
 
-    setLeaderboard(
-      saveDynastyLeaderboardEntry({
-        id,
-        teamName,
-        rating: season.rating,
-        wins: season.wins,
-        losses: season.losses,
-        finish: season.finish,
-        players,
-        createdAt: new Date().toISOString(),
-      }),
-    );
+    saveDynastyLeaderboardEntry({
+      id,
+      teamName,
+      rating: season.rating,
+      wins: season.wins,
+      losses: season.losses,
+      finish: season.finish,
+      players,
+      createdAt: new Date().toISOString(),
+    })
+      .then(setLeaderboard)
+      .catch(() => setLeaderboard([]));
   }, [missingPositions.length, results, season.finish, season.losses, season.rating, season.wins, stage, teamName]);
 
   if (missingPositions.length > 0) {

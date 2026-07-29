@@ -1,10 +1,9 @@
 import { POSITIONS } from './positions';
 import { ROUND_SCHEDULE } from './gameLogic';
-import type { CaseStatus, DynastyLeaderboardEntry, DynastyRunState, GamePhase, GameState, Player, PositionId } from './types';
+import type { CaseStatus, DynastyRunState, GamePhase, GameState, Player, PositionId } from './types';
 
 const LEGACY_STORAGE_KEY = 'deal-or-no-deal:v1';
 const STORAGE_KEY = 'deal-or-no-deal:v2';
-const DYNASTY_LEADERBOARD_KEY = 'deal-or-no-deal:dynasty-leaderboard:v1';
 
 const VALID_PHASES: GamePhase[] = ['selecting-case', 'opening-cases', 'bank-offer', 'final-choice', 'finished'];
 const VALID_STATUSES: CaseStatus[] = ['available', 'selected', 'opened'];
@@ -81,28 +80,6 @@ function isValidDynastyRun(value: unknown): value is DynastyRunState {
   return true;
 }
 
-function isValidDynastyLeaderboardEntry(value: unknown): value is DynastyLeaderboardEntry {
-  if (!value || typeof value !== 'object') return false;
-  const entry = value as DynastyLeaderboardEntry;
-  if (typeof entry.id !== 'string' || entry.id.length === 0) return false;
-  if (typeof entry.teamName !== 'string' || entry.teamName.length === 0 || entry.teamName.length > 40) return false;
-  if (typeof entry.rating !== 'number' || entry.rating < 0 || entry.rating > 100) return false;
-  if (!Number.isInteger(entry.wins) || entry.wins < 0 || entry.wins > 17) return false;
-  if (!Number.isInteger(entry.losses) || entry.losses < 0 || entry.losses > 17 || entry.wins + entry.losses !== 17) return false;
-  if (typeof entry.finish !== 'string' || entry.finish.length === 0) return false;
-  if (typeof entry.createdAt !== 'string' || Number.isNaN(Date.parse(entry.createdAt))) return false;
-  if (!entry.players || typeof entry.players !== 'object') return false;
-
-  for (const position of VALID_POSITIONS) {
-    const player = entry.players[position];
-    if (!player || typeof player !== 'object') return false;
-    if (typeof player.id !== 'string' || typeof player.name !== 'string') return false;
-    if (typeof player.ovr !== 'number' || player.ovr < 0 || player.ovr > 100) return false;
-  }
-
-  return true;
-}
-
 function isValidSavedDealRun(value: unknown): value is SavedDealRun {
   if (!value || typeof value !== 'object') return false;
   const saved = value as SavedDealRun;
@@ -142,31 +119,6 @@ export function clearSavedGame() {
     window.localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {
     // no-op
-  }
-}
-
-export function loadDynastyLeaderboard(): DynastyLeaderboardEntry[] {
-  try {
-    const raw = window.localStorage.getItem(DYNASTY_LEADERBOARD_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isValidDynastyLeaderboardEntry).slice(0, 5);
-  } catch {
-    return [];
-  }
-}
-
-export function saveDynastyLeaderboardEntry(entry: DynastyLeaderboardEntry): DynastyLeaderboardEntry[] {
-  try {
-    const existing = loadDynastyLeaderboard();
-    const next = [entry, ...existing.filter((item) => item.id !== entry.id)]
-      .sort((a, b) => b.rating - a.rating || b.wins - a.wins || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-      .slice(0, 5);
-    window.localStorage.setItem(DYNASTY_LEADERBOARD_KEY, JSON.stringify(next));
-    return next;
-  } catch {
-    return [];
   }
 }
 
