@@ -146,6 +146,7 @@ function computeBankOffer(state: GameState): { offer: BankOffer; cursor: number 
       round: state.roundIndex + 1,
       expectedValueOvr: Math.round(expectedValueOvr * 10) / 10,
       offerOvr: chosen.ovr,
+      remainingPool: remainingHidden,
     },
     cursor,
   };

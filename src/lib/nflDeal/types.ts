@@ -27,6 +27,9 @@ export interface BankOffer {
   round: number;
   expectedValueOvr: number;
   offerOvr: number;
+  /** Every QB that was still hidden (your case + all unopened cases) at the
+   * moment this offer was made -- your case was one of these. */
+  remainingPool: Quarterback[];
 }
 
 export interface GameState {

@@ -116,7 +116,6 @@ export default function NflDealGame() {
 
   const playerCase = getPlayerCase(state);
   const eliminatedIds = getEliminatedQbIds(state);
-  const unopenedAtFinish = state.phase === 'finished' ? state.cases.filter((c) => c.status === 'available') : [];
   const showYourCase = playerCase && state.phase !== 'selecting-case' && state.phase !== 'finished';
 
   function newGame() {
@@ -195,7 +194,6 @@ export default function NflDealGame() {
             <NflDealEndScreen
               state={state}
               playerCase={playerCase}
-              unopenedCases={unopenedAtFinish}
               onPlayAgain={newGame}
               onReveal={(outcome) => {
                 eliminationCounterRef.current += 1;

@@ -10,7 +10,6 @@ import type { CaseState, GameState, Quarterback } from '@/lib/nflDeal/types';
 interface Props {
   state: GameState;
   playerCase: CaseState;
-  unopenedCases: CaseState[];
   onPlayAgain: () => void;
   /** Fires once, right as the reveal stage begins, with whether the
    * decision (deal taken or case kept) turned out to be the right call. */
@@ -18,7 +17,7 @@ interface Props {
 }
 
 const SUSPENSE_STEP_MS = 850;
-const STAKES_STAGE_MS = 3200;
+const STAKES_STAGE_MS = 3800;
 
 function QbChip({ qb, size = 40 }: { qb: Quarterback; size?: number }) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -55,7 +54,7 @@ function SealedCase({ number }: { number: number }) {
   );
 }
 
-export default function NflDealEndScreen({ state, playerCase, unopenedCases, onPlayAgain, onReveal }: Props) {
+export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onReveal }: Props) {
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
   const [countdown, setCountdown] = useState(3);
   const [stage, setStage] = useState<'suspense' | 'stakes' | 'revealed'>('suspense');
@@ -118,7 +117,7 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
 
   if (stage === 'stakes' && knownOffer) {
     return (
-      <div className="flex min-h-[420px] flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-10 text-center">
+      <div className="flex min-h-[420px] flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-8 text-center sm:p-10">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Here's what was on the line</p>
         <div className="flex items-center gap-6 sm:gap-10">
           <div className="flex flex-col items-center gap-3">
@@ -131,6 +130,19 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
           <div className="flex flex-col items-center gap-3">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Your case</p>
             <SealedCase number={playerCase.number} />
+          </div>
+        </div>
+
+        <div className="w-full max-w-md">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+            Your case could have been any of these
+          </p>
+          <div className="flex max-h-40 flex-wrap justify-center gap-2 overflow-y-auto">
+            {knownOffer.remainingPool.map((qb) => (
+              <div key={qb.id} className="rounded-md border border-slate-700 bg-slate-800/50 px-2 py-1.5">
+                <QbChip qb={qb} size={28} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -235,22 +247,6 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
             </div>
           </div>
         </>
-      )}
-
-      {unopenedCases.length > 0 && (
-        <div className="mt-8">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-            Remaining case{unopenedCases.length === 1 ? '' : 's'}
-          </p>
-          <div className="mx-auto flex max-w-md flex-wrap justify-center gap-4">
-            {unopenedCases.map((c) => (
-              <div key={c.number} className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2">
-                <p className="mb-1 text-[10px] text-slate-500">{c.number}</p>
-                <QbChip qb={c.quarterback} size={32} />
-              </div>
-            ))}
-          </div>
-        </div>
       )}
 
       <button
