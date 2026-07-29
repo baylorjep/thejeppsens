@@ -12,6 +12,25 @@ interface Props {
   onDismiss: () => void;
 }
 
+function SpinningCase({ number }: { number: number }) {
+  return (
+    <div className="relative h-28 w-32">
+      {/* Shell spins; the number is a separate layer on top so it stays
+       * upright and readable the whole time instead of tumbling. */}
+      <div className="animate-spin-slow absolute inset-0">
+        <div className="absolute -top-2.5 left-1/2 h-3 w-10 -translate-x-1/2 rounded-t-md border-2 border-b-0 border-slate-400" />
+        <div className="absolute inset-0 rounded-lg border-2 border-slate-500 bg-gradient-to-b from-slate-600 to-slate-900 shadow-[0_0_24px_rgba(45,212,191,0.2)]">
+          <div className="absolute inset-x-3 top-1/2 h-px -translate-y-1/2 bg-black/25" />
+          <div className="absolute left-1/2 top-1/2 h-6 w-4 -translate-x-1/2 -translate-y-1/2 rounded-sm bg-black/25" />
+        </div>
+      </div>
+      <div className="relative flex h-full w-full items-center justify-center">
+        <span className="text-5xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">{number}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function NflDealCaseRevealPopup({ caseNumber, quarterback, onDismiss }: Props) {
   const [imgFailed, setImgFailed] = useState(false);
   const headshotUrl = quarterback ? espnHeadshotUrl(quarterback) : null;
@@ -22,9 +41,9 @@ export default function NflDealCaseRevealPopup({ caseNumber, quarterback, onDism
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm ${quarterback ? 'cursor-pointer' : ''}`}
     >
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-8 py-7 shadow-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{caseNumber}</p>
         {quarterback ? (
           <>
+            <p className="text-2xl font-black text-slate-400">{caseNumber}</p>
             <div className="animate-case-reveal relative h-24 w-24 overflow-hidden rounded-full border-2 border-slate-600 bg-slate-800">
               {headshotUrl && !imgFailed ? (
                 <Image src={headshotUrl} alt="" fill sizes="96px" className="object-cover" onError={() => setImgFailed(true)} />
@@ -41,10 +60,7 @@ export default function NflDealCaseRevealPopup({ caseNumber, quarterback, onDism
             <p className="text-2xl font-black text-teal-300">{quarterback.ovr} OVR</p>
           </>
         ) : (
-          <div className="relative flex h-24 w-24 items-center justify-center">
-            <div className="absolute inset-0 animate-pulse rounded-full border-2 border-slate-600 bg-slate-800" />
-            <span className="relative text-3xl font-black text-slate-500">?</span>
-          </div>
+          <SpinningCase number={caseNumber} />
         )}
       </div>
     </div>

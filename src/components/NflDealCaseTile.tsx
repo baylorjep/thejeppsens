@@ -8,10 +8,13 @@ import type { CaseState } from '@/lib/nflDeal/types';
 interface Props {
   caseState: CaseState;
   clickable: boolean;
+  /** When set, the tile pops in with this delay on mount -- used to stagger
+   * the whole board revealing at once instead of just appearing static. */
+  enterDelayMs?: number;
   onOpen: (caseNumber: number) => void;
 }
 
-export default function NflDealCaseTile({ caseState, clickable, onOpen }: Props) {
+export default function NflDealCaseTile({ caseState, clickable, enterDelayMs, onOpen }: Props) {
   const prevStatus = useRef(caseState.status);
   const [justRevealed, setJustRevealed] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
@@ -43,6 +46,7 @@ export default function NflDealCaseTile({ caseState, clickable, onOpen }: Props)
       disabled={isDisabled}
       onClick={() => onOpen(caseState.number)}
       aria-label={ariaLabel}
+      style={enterDelayMs != null ? { animationDelay: `${enterDelayMs}ms`, animationFillMode: 'backwards' } : undefined}
       className={[
         'group relative flex aspect-[5/4] w-full items-center justify-center overflow-hidden rounded-lg border text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400',
         isOpened
@@ -50,7 +54,7 @@ export default function NflDealCaseTile({ caseState, clickable, onOpen }: Props)
           : clickable
             ? 'cursor-pointer border-slate-600 bg-gradient-to-b from-slate-600 to-slate-900 hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-[0_6px_18px_rgba(20,184,166,0.25)]'
             : 'cursor-not-allowed border-slate-800 bg-gradient-to-b from-slate-800 to-slate-950 opacity-50',
-        justRevealed ? 'animate-case-reveal' : '',
+        justRevealed || enterDelayMs != null ? 'animate-case-reveal' : '',
       ].join(' ')}
     >
       {isOpened ? (

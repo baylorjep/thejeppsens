@@ -59,12 +59,13 @@ const CUES: Record<
   reveal: { videoId: 'ogJj9pX8Pvs', kind: 'oneshot' },
   credits: { videoId: 'A8430xpRh8o', kind: 'loop' },
   goodElimination: { videoId: 'jrEriKj1C44', start: 185, end: 191, kind: 'oneshot' },
-  badElimination: { videoId: 'jrEriKj1C44', start: 209, end: 215, kind: 'oneshot' },
+  badElimination: { videoId: 'jrEriKj1C44', start: 209, end: 215.5, kind: 'oneshot' },
 };
 type CueKey = keyof typeof CUES;
 
 const INTRO_SEQUENCE: CueKey[] = ['introReady', 'introMonologue', 'pickCasePrompt'];
 const DEFAULT_ONESHOT_MS = 5000; // fallback for cues without an explicit start/end (e.g. `reveal`)
+const RING_REPEAT_COUNT = 2; // rings 1 (initial) + this many more before the offer loop takes over
 
 function cueDurationMs(key: CueKey): number {
   const cue = CUES[key];
@@ -208,10 +209,19 @@ const NflDealAudioController = forwardRef<
       playCue('bankOffer');
       return;
     }
-    ring.currentTime = 0;
     ring.volume = 0.8;
-    ring.onended = () => playCue('bankOffer');
-    ring.play().catch(() => playCue('bankOffer')); // no ring file present -- just start the loop
+    let ringsPlayed = 0;
+    const playNextRing = () => {
+      ringsPlayed += 1;
+      if (ringsPlayed > RING_REPEAT_COUNT) {
+        playCue('bankOffer');
+        return;
+      }
+      ring.currentTime = 0;
+      ring.play().catch(() => playCue('bankOffer')); // no ring file present -- just start the loop
+    };
+    ring.onended = playNextRing;
+    playNextRing();
   }
 
   // Call any time -- safe to call repeatedly, never restarts a cue that's

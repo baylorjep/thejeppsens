@@ -1,36 +1,37 @@
 import { ROUND_SCHEDULE } from '@/lib/nflDeal/gameLogic';
 import type { GameState } from '@/lib/nflDeal/types';
 
-function statusFor(state: GameState): { title: string; detail: string | null } {
+function statusFor(state: GameState): { eyebrow: string; headline: string } {
   switch (state.phase) {
     case 'selecting-case':
-      return { title: 'Choose your case', detail: 'Pick one case to keep sealed for the rest of the game.' };
+      return { eyebrow: 'Get ready', headline: 'Choose your case' };
     case 'opening-cases': {
       const target = ROUND_SCHEDULE[state.roundIndex];
       const opened = state.casesOpenedThisRound.length;
+      const remaining = target - opened;
       return {
-        title: `Round ${state.roundIndex + 1} — open ${target} case${target === 1 ? '' : 's'}`,
-        detail: `${opened} of ${target} opened`,
+        eyebrow: `Round ${state.roundIndex + 1}`,
+        headline: `Open ${remaining} more case${remaining === 1 ? '' : 's'}`,
       };
     }
     case 'bank-offer':
-      return { title: 'The Bank is calling', detail: 'Deal, or No Deal?' };
+      return { eyebrow: 'The Bank is calling', headline: 'Deal, or No Deal?' };
     case 'final-choice':
-      return { title: 'Final decision', detail: 'One case left besides yours.' };
+      return { eyebrow: 'Final decision', headline: 'One case left besides yours' };
     case 'finished':
-      return { title: 'Game over', detail: null };
+      return { eyebrow: '', headline: 'Game over' };
     default:
-      return { title: '', detail: null };
+      return { eyebrow: '', headline: '' };
   }
 }
 
 export default function NflDealRoundPanel({ state }: { state: GameState }) {
-  const { title, detail } = statusFor(state);
+  const { eyebrow, headline } = statusFor(state);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3">
-      <p className="text-sm font-semibold text-slate-100">{title}</p>
-      {detail && <p className="text-xs text-slate-400">{detail}</p>}
+    <div className="rounded-xl border border-slate-700 bg-slate-900/60 px-5 py-4">
+      {eyebrow && <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-400/90">{eyebrow}</p>}
+      <p className="mt-1 text-2xl font-black text-white sm:text-3xl">{headline}</p>
     </div>
   );
 }

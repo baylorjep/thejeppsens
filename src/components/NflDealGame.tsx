@@ -18,17 +18,22 @@ import NflDealEndScreen from './NflDealEndScreen';
 import NflDealYourCase from './NflDealYourCase';
 import NflDealAudioController, { type NflDealAudioHandle } from './NflDealAudioController';
 import NflDealCaseRevealPopup from './NflDealCaseRevealPopup';
+import NflDealRulesIntro from './NflDealRulesIntro';
 import type { Quarterback } from '@/lib/nflDeal/types';
 
 // How long the sound plays before the result actually shows -- timed to
 // land near the end of each ~6s elimination clip. Best-effort estimate;
-// nudge if it doesn't match the clips.
-const REVEAL_DELAY_MS = 5000;
+// nudge per-outcome if it drifts out of sync with the clips.
+const REVEAL_DELAY_MS_BY_OUTCOME: Record<'good' | 'bad', number> = { good: 4500, bad: 5000 };
 const REVEAL_HOLD_MS = 1500;
 // Extra room after the reveal for the banker's-call ring before the offer
 // modal actually appears, so a round-ending case doesn't cut straight from
 // "here's who you lost" to the offer with no beat in between.
 const OFFER_MODAL_DELAY_MS = 1800;
+// How long the simple rules explainer shows before the case board animates
+// in -- otherwise the board just sits there fully-formed and static while
+// ~45s of intro audio plays, which is dead time with nothing to watch.
+const RULES_STAGE_MS = 10000;
 
 export default function NflDealGame() {
   const [state, dispatch] = useReducer(gameReducer, undefined, () => {
@@ -44,10 +49,12 @@ export default function NflDealGame() {
   const [pendingReveal, setPendingReveal] = useState<{ number: number; quarterback: Quarterback | null } | null>(null);
   const [eliminationEvent, setEliminationEvent] = useState<{ key: number; outcome: 'good' | 'bad' } | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [introVisualStage, setIntroVisualStage] = useState<'rules' | 'board'>('rules');
   const [offerModalReady, setOfferModalReady] = useState(false);
   const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const offerModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const introVisualTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const eliminationCounterRef = useRef(0);
   const prevPhaseRef = useRef(state.phase);
   const audioRef = useRef<NflDealAudioHandle>(null);
@@ -72,10 +79,20 @@ export default function NflDealGame() {
 
   function handleStartGame() {
     setHasStarted(true);
+    setIntroVisualStage('rules');
     // Runs inside this click handler, so it's a direct user gesture and
     // won't be blocked by the browser's autoplay policy.
     audioRef.current?.unlockAndPlay();
+
+    if (introVisualTimeoutRef.current) clearTimeout(introVisualTimeoutRef.current);
+    introVisualTimeoutRef.current = setTimeout(() => setIntroVisualStage('board'), RULES_STAGE_MS);
   }
+
+  useEffect(() => {
+    return () => {
+      if (introVisualTimeoutRef.current) clearTimeout(introVisualTimeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     // No need to keep a finished game around -- next load should start fresh.
@@ -133,7 +150,7 @@ export default function NflDealGame() {
       setPendingReveal({ number: caseNumber, quarterback: opening.quarterback });
       if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
       revealTimeoutRef.current = setTimeout(() => setPendingReveal(null), REVEAL_HOLD_MS);
-    }, REVEAL_DELAY_MS);
+    }, REVEAL_DELAY_MS_BY_OUTCOME[outcome]);
   }
 
   return (
@@ -154,6 +171,8 @@ export default function NflDealGame() {
             Start Game
           </button>
         </div>
+      ) : introVisualStage === 'rules' ? (
+        <NflDealRulesIntro />
       ) : (
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -188,18 +207,18 @@ export default function NflDealGame() {
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
             <div className="space-y-4">
               <NflDealRoundPanel state={state} />
-              {showYourCase && playerCase && <NflDealYourCase number={playerCase.number} />}
               <NflDealCaseGrid
                 cases={state.cases}
                 phase={state.phase}
                 playerCaseNumber={state.playerCaseNumber}
-                activeRevealNumber={pendingReveal?.number ?? null}
+                currentRoundOpenedNumbers={state.casesOpenedThisRound}
                 locked={pendingReveal !== null}
                 onOpen={(caseNumber) => {
                   if (state.phase === 'selecting-case') dispatch({ type: 'SELECT_CASE', caseNumber });
                   else if (state.phase === 'opening-cases') openCase(caseNumber);
                 }}
               />
+              {showYourCase && playerCase && <NflDealYourCase number={playerCase.number} />}
             </div>
             <div>
               <NflDealQbBoard board={QB_BOARD} eliminatedIds={eliminatedIds} offerQbId={state.currentOffer?.quarterback.id} />
@@ -213,6 +232,7 @@ export default function NflDealGame() {
         <NflDealOfferModal
           offer={state.currentOffer}
           isFinal={state.phase === 'final-choice'}
+          roundIndex={state.roundIndex}
           onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
           onNoDeal={() => dispatch({ type: 'REJECT_OFFER' })}
         />
