@@ -7,6 +7,7 @@ export interface Player {
   ovr: number;
   rank: number;
   espnId: string | null;
+  ratingSource?: string;
   /** True for Defense/Special Teams "players" -- these represent a whole
    * team, not an individual, so espnId holds an ESPN team abbreviation
    * (e.g. 'sf') instead of an athlete ID, and espnHeadshotUrl resolves it to
@@ -52,4 +53,10 @@ export interface GameState {
   currentOffer: BankOffer | null;
   offerHistory: BankOffer[];
   dealAccepted: BankOffer | null;
+}
+
+export interface DynastyRunState {
+  index: number;
+  teamName: string;
+  results: Partial<Record<PositionId, Player>>;
 }

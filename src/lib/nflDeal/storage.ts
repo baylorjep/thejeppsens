@@ -1,12 +1,20 @@
 import { POSITIONS } from './positions';
 import { ROUND_SCHEDULE } from './gameLogic';
-import type { CaseStatus, GamePhase, GameState, PositionId } from './types';
+import type { CaseStatus, DynastyRunState, GamePhase, GameState, Player, PositionId } from './types';
 
-const STORAGE_KEY = 'deal-or-no-deal:v1';
+const LEGACY_STORAGE_KEY = 'deal-or-no-deal:v1';
+const STORAGE_KEY = 'deal-or-no-deal:v2';
 
 const VALID_PHASES: GamePhase[] = ['selecting-case', 'opening-cases', 'bank-offer', 'final-choice', 'finished'];
 const VALID_STATUSES: CaseStatus[] = ['available', 'selected', 'opened'];
 const VALID_POSITIONS: PositionId[] = ['QB', 'RB', 'WR', 'TE', 'DST'];
+
+export interface SavedDealRun {
+  version: 2;
+  game: GameState;
+  dynasty: DynastyRunState | null;
+  dynastyDone: boolean;
+}
 
 // Defensive: only trust a saved state if it could actually have come from a
 // real game (right shape, no duplicate/missing players, phase-consistent).
@@ -52,20 +60,54 @@ function isValidGameState(value: unknown): value is GameState {
   return true;
 }
 
-export function saveGame(state: GameState) {
+function isValidDynastyPlayer(position: PositionId, value: unknown): value is Player {
+  if (!value || typeof value !== 'object') return false;
+  const player = value as Player;
+  return POSITIONS[position].board.some((p) => p.id === player.id);
+}
+
+function isValidDynastyRun(value: unknown): value is DynastyRunState {
+  if (!value || typeof value !== 'object') return false;
+  const dynasty = value as DynastyRunState;
+  if (!Number.isInteger(dynasty.index) || dynasty.index < 0 || dynasty.index >= VALID_POSITIONS.length) return false;
+  if (typeof dynasty.teamName !== 'string' || dynasty.teamName.length > 40) return false;
+  if (!dynasty.results || typeof dynasty.results !== 'object') return false;
+
+  for (const position of VALID_POSITIONS) {
+    const player = dynasty.results[position];
+    if (player && !isValidDynastyPlayer(position, player)) return false;
+  }
+  return true;
+}
+
+function isValidSavedDealRun(value: unknown): value is SavedDealRun {
+  if (!value || typeof value !== 'object') return false;
+  const saved = value as SavedDealRun;
+  if (saved.version !== 2 || !isValidGameState(saved.game)) return false;
+  if (typeof saved.dynastyDone !== 'boolean') return false;
+  if (saved.dynasty !== null && !isValidDynastyRun(saved.dynasty)) return false;
+  if (saved.dynastyDone && saved.dynasty) {
+    for (const position of VALID_POSITIONS) {
+      if (!saved.dynasty.results[position]) return false;
+    }
+  }
+  return true;
+}
+
+export function saveDealRun(run: Omit<SavedDealRun, 'version'>) {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, ...run }));
   } catch {
     // Storage can fail (private browsing, quota) — losing persistence isn't fatal.
   }
 }
 
-export function loadGame(): GameState | null {
+export function loadDealRun(): SavedDealRun | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return isValidGameState(parsed) ? parsed : null;
+    return isValidSavedDealRun(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -74,6 +116,7 @@ export function loadGame(): GameState | null {
 export function clearSavedGame() {
   try {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {
     // no-op
   }

@@ -1,12 +1,12 @@
-import { buildBoard } from './playerData';
+import { RATING_SOURCE_OFFICIAL, buildBoard } from './playerData';
 
 // Best TE per team, current Madden NFL 27 OVR + ESPN athlete ID. Uses
 // official Madden NFL 27 reveals where available, then MaddenRatings-listed
 // OVRs for unrevealed players. Reflects a real 2026 free-agent move: David
 // Njoku signed with the Chargers, so Cleveland's TE1 is now rookie Harold
 // Fannin Jr.
-const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
-  ['Trey McBride', 99, '4361307'],
+const RAW_BOARD: Array<[name: string, ovr: number, espnId: string, ratingSource?: string]> = [
+  ['Trey McBride', 99, '4361307', RATING_SOURCE_OFFICIAL],
   ['George Kittle', 98, '3040151'],
   ['Brock Bowers', 93, '4432665'],
   ['Mark Andrews', 91, '3116365'],

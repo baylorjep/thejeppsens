@@ -429,8 +429,8 @@ const NflDealAudioController = forwardRef<
 
   useEffect(() => {
     if (!eliminationEvent || eliminationEvent.key === lastEliminationKeyRef.current) return;
-    lastEliminationKeyRef.current = eliminationEvent.key;
     if (!enabled || !playerReady || muted) return;
+    lastEliminationKeyRef.current = eliminationEvent.key;
     queueRef.current = [];
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     playCue(eliminationEvent.outcome === 'good' ? 'goodElimination' : 'badElimination');

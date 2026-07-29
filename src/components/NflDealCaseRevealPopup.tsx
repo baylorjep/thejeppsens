@@ -58,6 +58,9 @@ export default function NflDealCaseRevealPopup({ caseNumber, quarterback, onDism
             </div>
             <p className="text-xl font-bold text-white">{quarterback.name}</p>
             <p className="text-2xl font-black text-teal-300">{quarterback.ovr} OVR</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              {quarterback.ratingSource ?? 'Rating source pending'}
+            </p>
           </>
         ) : (
           <SpinningCase number={caseNumber} />

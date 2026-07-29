@@ -47,6 +47,9 @@ export default function NflDealOfferModal({
   onNoDealChosen,
 }: Props) {
   const dealButtonRef = useRef<HTMLButtonElement>(null);
+  const dealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const noDealOverlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const noDealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imgFailed, setImgFailed] = useState(false);
   const [reaction, setReaction] = useState<'deal' | 'no-deal' | null>(null);
   const [resolving, setResolving] = useState(false);
@@ -56,21 +59,29 @@ export default function NflDealOfferModal({
     if (decisionReady) dealButtonRef.current?.focus();
   }, [decisionReady, offer]);
 
+  useEffect(() => {
+    return () => {
+      if (dealTimeoutRef.current) clearTimeout(dealTimeoutRef.current);
+      if (noDealOverlayTimeoutRef.current) clearTimeout(noDealOverlayTimeoutRef.current);
+      if (noDealTimeoutRef.current) clearTimeout(noDealTimeoutRef.current);
+    };
+  }, [offer]);
+
   function handleDeal() {
-    if (!decisionReady) return;
+    if (!decisionReady || resolving) return;
     setResolving(true);
     setReaction('deal');
     onDealChosen();
-    setTimeout(onDeal, DEAL_REACTION_DELAY_MS_BY_TIER[classifyOfferTier(offer)]);
+    dealTimeoutRef.current = setTimeout(onDeal, DEAL_REACTION_DELAY_MS_BY_TIER[classifyOfferTier(offer)]);
   }
 
   function handleNoDeal() {
-    if (!decisionReady) return;
+    if (!decisionReady || resolving) return;
     setResolving(true);
     setReaction('no-deal');
     onNoDealChosen();
-    setTimeout(() => setReaction(null), NO_DEAL_REACTION_OVERLAY_MS);
-    setTimeout(onNoDeal, NO_DEAL_REACTION_DELAY_MS);
+    noDealOverlayTimeoutRef.current = setTimeout(() => setReaction(null), NO_DEAL_REACTION_OVERLAY_MS);
+    noDealTimeoutRef.current = setTimeout(onNoDeal, NO_DEAL_REACTION_DELAY_MS);
   }
 
   if (reaction) {

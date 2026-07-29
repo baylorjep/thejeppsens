@@ -5,61 +5,53 @@ import Image from 'next/image';
 import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
 import type { CaseState } from '@/lib/nflDeal/types';
 
-type Stage = 'reveal' | 'seal' | 'shuffle' | 'settle';
+type Stage = 'reveal' | 'seal' | 'gather' | 'deal';
 
 const REVEAL_MS = 2600;
 const SEAL_MS = 900;
-const SHUFFLE_MS = 4800;
-const SETTLE_MS = 1600;
-const SHUFFLE_TICK_MS = 450;
+const GATHER_MS = 1800;
+const DEAL_MS = 2200;
 
 // Total wall-clock time this sequence takes -- the caller should keep the
 // board locked (and this component mounted) for at least this long.
-export const CASE_INTRO_TOTAL_MS = REVEAL_MS + SEAL_MS + SHUFFLE_MS + SETTLE_MS;
+export const CASE_INTRO_TOTAL_MS = REVEAL_MS + SEAL_MS + GATHER_MS + DEAL_MS;
 
 const STAGE_LABEL: Record<Stage, string> = {
   reveal: "Here's the board...",
   seal: 'Sealing the cases...',
-  shuffle: 'Mixing them up...',
-  settle: 'Taking their places...',
+  gather: 'Bringing out the cases...',
+  deal: 'Numbering the board...',
 };
 
-function shuffledOrder(count: number): number[] {
-  const order = Array.from({ length: count }, (_, i) => i);
-  for (let i = order.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
-  }
-  return order;
-}
-
-function mixStyle(visualIndex: number): CSSProperties {
-  const col = visualIndex % 6;
-  const row = Math.floor(visualIndex / 6);
+function caseMotionStyle(index: number): CSSProperties {
+  const col = index % 6;
+  const row = Math.floor(index / 6);
   const centerCol = 2.5;
   const centerRow = 2.5;
   const x = (centerCol - col) * 72;
   const y = (centerRow - row) * 56;
-  const rotation = ((visualIndex * 47) % 34) - 17;
+  const rotation = ((index * 47) % 38) - 19;
+  const dealDelay = (index % 8) * 35;
   return {
-    '--mix-x': `${x}px`,
-    '--mix-y': `${y}px`,
-    '--mix-rot': `${rotation}deg`,
+    '--case-x': `${x}px`,
+    '--case-y': `${y}px`,
+    '--case-rot': `${rotation}deg`,
+    transitionDelay: `${dealDelay}ms`,
   } as CSSProperties;
 }
 
-function IntroTile({ caseState, stage }: { caseState: CaseState; stage: Stage }) {
+function IntroTile({ caseState, stage, index }: { caseState: CaseState; stage: Stage; index: number }) {
   const [imgFailed, setImgFailed] = useState(false);
   const headshotUrl = espnHeadshotUrl(caseState.quarterback);
   const showPlayer = stage === 'reveal';
-  const showNumber = stage === 'settle';
+  const showNumber = stage === 'deal';
 
   return (
     <div
       className={[
         'relative flex aspect-[5/4] w-full items-center justify-center overflow-hidden rounded-lg border transition-colors duration-300',
         showPlayer ? 'border-slate-600 bg-slate-800/80' : 'border-slate-700 bg-gradient-to-b from-slate-600 to-slate-900',
-        stage === 'seal' ? 'animate-case-reveal' : stage === 'shuffle' ? 'animate-case-mix' : stage === 'settle' ? 'animate-case-tumble-in' : '',
+        stage === 'seal' ? 'animate-case-reveal' : '',
       ].join(' ')}
     >
       {showPlayer ? (
@@ -84,7 +76,12 @@ function IntroTile({ caseState, stage }: { caseState: CaseState; stage: Stage })
             <div className="absolute inset-x-[12%] top-1/2 h-px -translate-y-1/2 bg-black/25" />
             <div className="absolute left-1/2 top-1/2 h-[26%] w-[16%] -translate-x-1/2 -translate-y-1/2 rounded-sm bg-black/25" />
             {showNumber && (
-              <span className="animate-case-reveal relative text-lg font-bold text-slate-100 sm:text-xl">{caseState.number}</span>
+              <span
+                className="animate-case-reveal relative text-lg font-bold text-slate-100 sm:text-xl"
+                style={{ animationDelay: `${index * 18}ms` }}
+              >
+                {caseState.number}
+              </span>
             )}
           </div>
         </div>
@@ -95,40 +92,20 @@ function IntroTile({ caseState, stage }: { caseState: CaseState; stage: Stage })
 
 export default function NflDealCaseIntroSequence({ cases, onSkip }: { cases: CaseState[]; onSkip: () => void }) {
   const [stage, setStage] = useState<Stage>('reveal');
-  // `order[i]` is the CSS order assigned to the tile at array index i (which
-  // is always case number i+1 -- see shuffledCases in gameLogic.ts). CSS
-  // `order` snaps instantly rather than tweening, which is exactly the
-  // point during the shuffle stage: no smooth slide to track, just a case
-  // that's suddenly somewhere else.
-  const [order, setOrder] = useState<number[]>(() => cases.map((_, i) => i));
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     const t1 = setTimeout(() => setStage('seal'), REVEAL_MS);
-    const t2 = setTimeout(() => setStage('shuffle'), REVEAL_MS + SEAL_MS);
-    const t3 = setTimeout(
-      () => {
-        setStage('settle');
-        setOrder(cases.map((_, i) => i)); // snap back to true numbered order
-      },
-      REVEAL_MS + SEAL_MS + SHUFFLE_MS,
-    );
+    const t2 = setTimeout(() => setStage('gather'), REVEAL_MS + SEAL_MS);
+    const t3 = setTimeout(() => setStage('deal'), REVEAL_MS + SEAL_MS + GATHER_MS);
     timeoutsRef.current = [t1, t2, t3];
     return () => timeoutsRef.current.forEach(clearTimeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (stage !== 'shuffle') return;
-    const interval = setInterval(() => setOrder(shuffledOrder(cases.length)), SHUFFLE_TICK_MS);
-    return () => clearInterval(interval);
-  }, [stage, cases.length]);
-
   function handleSkip() {
-    if (stage === 'settle') return;
+    if (stage === 'deal') return;
     timeoutsRef.current.forEach(clearTimeout);
-    setStage('settle');
-    setOrder(cases.map((_, i) => i));
+    setStage('deal');
     onSkip();
   }
 
@@ -141,13 +118,16 @@ export default function NflDealCaseIntroSequence({ cases, onSkip }: { cases: Cas
         {cases.map((c, i) => (
           <div
             key={c.number}
-            style={{ order: order[i], ...mixStyle(order[i]) }}
+            style={caseMotionStyle(i)}
             className={[
               'transition-transform duration-700 ease-in-out',
-              stage === 'shuffle' ? 'z-10 translate-x-[var(--mix-x)] translate-y-[var(--mix-y)] scale-75 rotate-[var(--mix-rot)]' : '',
+              stage === 'gather'
+                ? 'z-10 translate-x-[var(--case-x)] translate-y-[var(--case-y)] scale-75 rotate-[var(--case-rot)]'
+                : '',
+              stage === 'deal' ? 'translate-x-0 translate-y-0 scale-100 rotate-0' : '',
             ].join(' ')}
           >
-            <IntroTile caseState={c} stage={stage} />
+            <IntroTile caseState={c} stage={stage} index={i} />
           </div>
         ))}
       </div>

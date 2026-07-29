@@ -9,7 +9,8 @@ import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
 import type { Player, PositionId } from '@/lib/nflDeal/types';
 
 interface Props {
-  results: Record<PositionId, Player>;
+  results: Partial<Record<PositionId, Player>>;
+  teamName: string;
   onPlayAgain: () => void;
 }
 
@@ -38,6 +39,9 @@ function RosterCard({ position, player }: { position: PositionId; player: Player
       </div>
       <p className="text-center text-sm font-bold text-white">{player.name}</p>
       <p className="text-lg font-black text-teal-300">{player.ovr} OVR</p>
+      <p className="text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+        {player.ratingSource ?? 'Rating source pending'}
+      </p>
     </div>
   );
 }
@@ -52,6 +56,14 @@ interface SeasonResult {
   title: string;
   tier: SeasonTier;
   summary: string;
+}
+
+interface WeekResult {
+  week: number;
+  opponent: string;
+  won: boolean;
+  score: string;
+  note: string;
 }
 
 const POSITION_WEIGHTS: Record<PositionId, number> = {
@@ -107,6 +119,68 @@ function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
   return { rating, wins, losses, finish: 'Missed Playoffs', title: 'Rebuild Year', tier: 'bad', summary: 'The Bank kept the better roster.' };
 }
 
+const NFL_OPPONENTS = [
+  'Kansas City',
+  'Buffalo',
+  'Baltimore',
+  'Cincinnati',
+  'Houston',
+  'Denver',
+  'Detroit',
+  'Green Bay',
+  'Philadelphia',
+  'Dallas',
+  'San Francisco',
+  'Los Angeles',
+  'Seattle',
+  'Miami',
+  'Tampa Bay',
+  'Atlanta',
+  'Chicago',
+];
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) hash = (hash * 33 + value.charCodeAt(i)) % 104729;
+  return hash;
+}
+
+function buildWeekResults(season: SeasonResult, teamName: string, results: Partial<Record<PositionId, Player>>): WeekResult[] {
+  const seed = hashString(`${teamName}|${DYNASTY_POSITIONS.map((pos) => results[pos]?.id ?? pos).join('|')}`);
+  const weeks = Array.from({ length: 17 }, (_, index) => {
+    const wobble = ((seed + index * 37) % 13) - 6;
+    const opponent = NFL_OPPONENTS[(seed + index * 5) % NFL_OPPONENTS.length];
+    return { index, wobble, opponent };
+  }).sort((a, b) => b.wobble - a.wobble);
+  const winIndexes = new Set(weeks.slice(0, season.wins).map((week) => week.index));
+
+  return Array.from({ length: 17 }, (_, index) => {
+    const won = winIndexes.has(index);
+    const margin = Math.abs(((seed + index * 11) % 18) - 6) + 1;
+    const base = 18 + ((seed + index * 7) % 17);
+    const high = base + margin;
+    const low = Math.max(6, base - Math.max(1, Math.floor(margin / 2)));
+    const note = won
+      ? index >= 14 && season.wins >= 10
+        ? 'Playoff push'
+        : margin >= 14
+          ? 'Statement win'
+          : 'Found a way'
+      : margin >= 14
+        ? 'Rough Sunday'
+        : index >= 14 && season.wins < 9
+          ? 'Season slipping'
+          : 'Close loss';
+    return {
+      week: index + 1,
+      opponent: weeks.find((week) => week.index === index)?.opponent ?? NFL_OPPONENTS[index],
+      won,
+      score: won ? `${high}-${low}` : `${low}-${high}`,
+      note,
+    };
+  });
+}
+
 function tierTone(tier: SeasonTier): { border: string; text: string; glow: string; confetti: string[] } {
   switch (tier) {
     case 'dynasty':
@@ -147,23 +221,65 @@ function tierTone(tier: SeasonTier): { border: string; text: string; glow: strin
   }
 }
 
-export default function NflDealDynastySummary({ results, onPlayAgain }: Props) {
+export default function NflDealDynastySummary({ results, teamName, onPlayAgain }: Props) {
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
   const [stage, setStage] = useState<'roster' | 'simulating' | 'revealed'>('roster');
+  const [visibleWeeks, setVisibleWeeks] = useState(0);
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
   }, []);
 
+  const missingPositions = DYNASTY_POSITIONS.filter((pos) => !results[pos]);
+
   useEffect(() => {
-    if (stage === 'revealed') return;
-    const t = setTimeout(() => setStage(stage === 'roster' ? 'simulating' : 'revealed'), stage === 'roster' ? 3200 : 3600);
+    if (stage !== 'roster' || missingPositions.length > 0) return;
+    const t = setTimeout(() => setStage('simulating'), 3200);
     return () => clearTimeout(t);
-  }, [stage]);
+  }, [missingPositions.length, stage]);
 
   const season = seasonFor(results);
   const tone = tierTone(season.tier);
   const celebrate = season.tier === 'dynasty' || season.tier === 'elite';
+  const weeks = buildWeekResults(season, teamName, results);
+  const currentRecord = weeks.slice(0, visibleWeeks).reduce(
+    (record, week) => {
+      if (week.won) record.wins += 1;
+      else record.losses += 1;
+      return record;
+    },
+    { wins: 0, losses: 0 },
+  );
+
+  useEffect(() => {
+    if (stage !== 'simulating') return;
+    if (visibleWeeks >= weeks.length) {
+      const t = setTimeout(() => setStage('revealed'), 650);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setVisibleWeeks((count) => count + 1), visibleWeeks < 4 ? 420 : 260);
+    return () => clearTimeout(t);
+  }, [stage, visibleWeeks, weeks.length]);
+
+  if (missingPositions.length > 0) {
+    return (
+      <div className="rounded-2xl border border-amber-500/35 bg-slate-900 p-6 text-center sm:p-10">
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-300">Dynasty needs a fresh run</p>
+        <h2 className="mt-1 text-3xl font-black text-white sm:text-4xl">{teamName}</h2>
+        <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
+          This saved Dynasty is missing {missingPositions.map((pos) => POSITIONS[pos].shortLabel).join(', ')} from the new format.
+        </p>
+        <button
+          type="button"
+          onClick={onPlayAgain}
+          className="mt-8 inline-flex items-center gap-2 rounded-lg bg-teal-500 px-5 py-3 text-sm font-bold uppercase tracking-wide text-slate-950 transition-colors hover:bg-teal-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200"
+        >
+          <RotateCcw className="h-4 w-4" aria-hidden />
+          Start Fresh
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative overflow-hidden rounded-2xl border p-6 text-center sm:p-10 ${tone.border}`}>
@@ -179,8 +295,11 @@ export default function NflDealDynastySummary({ results, onPlayAgain }: Props) {
 
       <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ${tone.text}`}>Your Dynasty</p>
       <h2 className="animate-case-reveal mt-1 text-3xl font-black text-white sm:text-4xl">
-        {stage === 'revealed' ? season.title : stage === 'simulating' ? 'Season Simulation' : 'Team Complete'}
+        {stage === 'revealed' ? teamName : stage === 'simulating' ? 'Season Simulation' : teamName}
       </h2>
+      <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        {stage === 'revealed' ? season.title : stage === 'simulating' ? `${currentRecord.wins}-${currentRecord.losses}` : 'Team Complete'}
+      </p>
 
       <div className="animate-case-reveal mx-auto mt-6 flex flex-col items-center gap-1">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Overall Team Rating</p>
@@ -194,14 +313,24 @@ export default function NflDealDynastySummary({ results, onPlayAgain }: Props) {
       </div>
 
       {stage === 'simulating' && (
-        <div className="animate-case-reveal mx-auto mt-8 max-w-xl rounded-xl border border-slate-700 bg-slate-950/60 p-6">
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">The season plays out</p>
-          <div className="mt-5 flex justify-center gap-2">
-            {[0, 1, 2, 3].map((i) => (
-              <span key={i} className="h-3 w-3 animate-pulse rounded-full bg-teal-300" style={{ animationDelay: `${i * 180}ms` }} />
+        <div className="animate-case-reveal mx-auto mt-8 max-w-2xl rounded-xl border border-slate-700 bg-slate-950/60 p-4 sm:p-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">Week by week</p>
+          <div className="mt-4 max-h-72 space-y-2 overflow-hidden text-left">
+            {weeks.slice(0, visibleWeeks).map((week) => (
+              <div key={week.week} className="grid grid-cols-[56px_1fr_auto] items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Wk {week.week}</span>
+                <span className="min-w-0 truncate text-sm font-semibold text-slate-200">vs {week.opponent}</span>
+                <span className={`text-right text-xs font-black ${week.won ? 'text-green-300' : 'text-rose-300'}`}>
+                  {week.won ? 'W' : 'L'} {week.score}
+                </span>
+                <span className="col-start-2 text-[11px] text-slate-500">{week.note}</span>
+                <span className="text-right text-[11px] font-semibold text-slate-500">
+                  {weeks.slice(0, week.week).filter((w) => w.won).length}-{week.week - weeks.slice(0, week.week).filter((w) => w.won).length}
+                </span>
+              </div>
             ))}
           </div>
-          <p className="mt-5 text-sm text-slate-400">The Bank is calculating wins, losses, and heartbreak.</p>
+          {visibleWeeks === 0 && <p className="mt-5 text-sm text-slate-400">The schedule is loading.</p>}
         </div>
       )}
 
@@ -216,6 +345,34 @@ export default function NflDealDynastySummary({ results, onPlayAgain }: Props) {
             <p className={`text-xl font-black uppercase tracking-wide ${tone.text}`}>{season.finish}</p>
             <p className="max-w-md text-sm text-slate-300">{season.summary}</p>
           </div>
+        </div>
+      )}
+
+      {stage === 'revealed' && (
+        <div className="animate-case-reveal mx-auto mt-5 max-w-3xl rounded-xl border border-slate-700 bg-slate-950/70 p-5 text-left">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500">Result Card</p>
+              <h3 className="mt-1 text-2xl font-black text-white">{teamName}</h3>
+              <p className={`text-sm font-black uppercase tracking-wide ${tone.text}`}>{season.title}</p>
+            </div>
+            <div className="text-left sm:text-right">
+              <p className="text-4xl font-black text-white">
+                {season.wins}-{season.losses}
+              </p>
+              <p className="text-sm font-semibold text-slate-400">{season.finish}</p>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {DYNASTY_POSITIONS.map((pos) => (
+              <div key={pos} className="rounded-lg border border-slate-800 bg-slate-900/70 p-2">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">{POSITIONS[pos].shortLabel}</p>
+                <p className="truncate text-xs font-semibold text-white">{results[pos]!.name}</p>
+                <p className="text-sm font-black text-teal-300">{results[pos]!.ovr}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Baylor & Isabel Deal or No Deal Dynasty</p>
         </div>
       )}
 

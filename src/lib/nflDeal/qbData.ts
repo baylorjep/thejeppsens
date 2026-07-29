@@ -1,4 +1,4 @@
-import { buildBoard } from './playerData';
+import { RATING_SOURCE_OFFICIAL, buildBoard } from './playerData';
 
 export { espnHeadshotUrl } from './playerData';
 
@@ -8,9 +8,9 @@ export { espnHeadshotUrl } from './playerData';
 // long-term starter) even though Justin Fields is projected to open the
 // 2026 season while Mahomes rehabs a torn ACL/LCL.
 // espnId powers the case-reveal headshot (see espnHeadshotUrl in playerData).
-const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
+const RAW_BOARD: Array<[name: string, ovr: number, espnId: string, ratingSource?: string]> = [
   ['Josh Allen', 99, '3918298'],
-  ['Matthew Stafford', 99, '12483'],
+  ['Matthew Stafford', 99, '12483', RATING_SOURCE_OFFICIAL],
   ['Joe Burrow', 96, '3915511'],
   ['Lamar Jackson', 94, '3916387'],
   ['Drake Maye', 93, '4431452'],

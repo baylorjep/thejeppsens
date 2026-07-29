@@ -14,15 +14,27 @@ function rulesFor(label: string, pluralLabel: string): string[] {
   ];
 }
 
+function dynastyRulesFor(teamName: string): string[] {
+  return [
+    `${teamName} needs five cornerstone picks: QB, RB, WR, TE, and D/ST.`,
+    'Each stage is its own Deal or No Deal board.',
+    'Whatever player or defense you finish with gets locked onto your roster.',
+    'After the final stage, we simulate the season and reveal your record.',
+    'Build the team. Beat the Bank.',
+  ];
+}
+
 interface Props {
   onComplete: () => void;
   label: string;
   pluralLabel: string;
+  variant?: 'single' | 'dynasty';
+  teamName?: string;
 }
 
-export default function NflDealRulesIntro({ onComplete, label, pluralLabel }: Props) {
+export default function NflDealRulesIntro({ onComplete, label, pluralLabel, variant = 'single', teamName = 'Your Dynasty' }: Props) {
   const [index, setIndex] = useState(0);
-  const RULES = rulesFor(label, pluralLabel);
+  const RULES = variant === 'dynasty' ? dynastyRulesFor(teamName) : rulesFor(label, pluralLabel);
 
   useEffect(() => {
     if (index < RULES.length - 1) {
