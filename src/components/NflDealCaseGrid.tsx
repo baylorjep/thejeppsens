@@ -12,7 +12,12 @@ interface Props {
 
 // The board's tumble-in entrance spreads across this whole window instead
 // of a quick stagger, so it has real presence during the intro's dead air.
-const ENTRANCE_SPREAD_MS = 10000;
+export const ENTRANCE_SPREAD_MS = 10000;
+// Each tile's own animate-case-tumble-in animation (see globals.css) on top
+// of its staggered start -- the last tile to begin is still animating for
+// this long after the stagger window ends.
+const TILE_ANIMATION_MS = 800;
+export const BOARD_ENTRANCE_TOTAL_MS = ENTRANCE_SPREAD_MS + TILE_ANIMATION_MS;
 
 export default function NflDealCaseGrid({ cases, phase, playerCaseNumber, currentRoundOpenedNumbers, locked, onOpen }: Props) {
   const casesAreClickable = !locked && (phase === 'selecting-case' || phase === 'opening-cases');

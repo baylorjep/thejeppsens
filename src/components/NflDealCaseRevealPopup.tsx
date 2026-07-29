@@ -37,8 +37,8 @@ export default function NflDealCaseRevealPopup({ caseNumber, quarterback, onDism
 
   return (
     <div
-      onClick={quarterback ? onDismiss : undefined}
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm ${quarterback ? 'cursor-pointer' : ''}`}
+      onClick={onDismiss}
+      className="fixed inset-0 z-50 flex cursor-pointer flex-col items-center justify-center gap-3 bg-black/70 px-4 backdrop-blur-sm"
     >
       <div className="flex max-w-full flex-col items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-6 py-7 shadow-2xl sm:px-8">
         {quarterback ? (
@@ -63,6 +63,7 @@ export default function NflDealCaseRevealPopup({ caseNumber, quarterback, onDism
           <SpinningCase number={caseNumber} />
         )}
       </div>
+      {!quarterback && <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Tap to reveal</p>}
     </div>
   );
 }

@@ -10,7 +10,7 @@ import {
 } from '@/lib/nflDeal/gameLogic';
 import { POSITIONS, DYNASTY_POSITIONS } from '@/lib/nflDeal/positions';
 import { claimSessionAndCheckIfResuming, clearSavedGame, loadGame, releaseSession, saveGame } from '@/lib/nflDeal/storage';
-import NflDealCaseGrid from './NflDealCaseGrid';
+import NflDealCaseGrid, { BOARD_ENTRANCE_TOTAL_MS } from './NflDealCaseGrid';
 import NflDealQbBoard from './NflDealQbBoard';
 import NflDealOfferModal from './NflDealOfferModal';
 import NflDealRoundPanel from './NflDealRoundPanel';
@@ -31,6 +31,7 @@ const REVEAL_HOLD_MS = 1500;
 // modal actually appears, so a round-ending case doesn't cut straight from
 // "here's who you lost" to the offer with no beat in between.
 const OFFER_MODAL_DELAY_MS = 1800;
+const CASE_SELECTED_SRC = '/sounds/nfl-deal/case-selected.mp3';
 
 type Mode = PositionId | 'DYNASTY';
 
@@ -75,12 +76,29 @@ export default function NflDealGame() {
   const [hasStarted, setHasStarted] = useState(false);
   const [introVisualStage, setIntroVisualStage] = useState<'rules' | 'board'>('rules');
   const [offerModalReady, setOfferModalReady] = useState(false);
+  // Cases are still tumbling into place for the first ~11s of a fresh board
+  // -- don't let a click register mid-animation.
+  const [boardSettled, setBoardSettled] = useState(false);
   const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const offerModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const boardSettledTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const eliminationCounterRef = useRef(0);
   const prevPhaseRef = useRef(state.phase);
   const audioRef = useRef<NflDealAudioHandle>(null);
+
+  // Re-arms every time a fresh case-selection board appears (each NEW_GAME
+  // dispatch gets its own seed), including Dynasty's later stages, which
+  // skip the rules intro but still tumble in a brand new board.
+  useEffect(() => {
+    if (state.phase !== 'selecting-case') return;
+    setBoardSettled(false);
+    if (boardSettledTimeoutRef.current) clearTimeout(boardSettledTimeoutRef.current);
+    boardSettledTimeoutRef.current = setTimeout(() => setBoardSettled(true), BOARD_ENTRANCE_TOTAL_MS);
+    return () => {
+      if (boardSettledTimeoutRef.current) clearTimeout(boardSettledTimeoutRef.current);
+    };
+  }, [state.seed, state.phase]);
 
   // Don't show the offer modal the instant phase flips to bank-offer/final-
   // choice -- let the case reveal finish holding, then give the banker's
@@ -141,6 +159,9 @@ export default function NflDealGame() {
     if (!justPickedCase || state.playerCaseNumber === null) return;
 
     setCeremonyCaseNumber(state.playerCaseNumber);
+    // A dedicated upbeat chime for the ceremony itself -- distinct from the
+    // good/bad elimination stings used later for opened cases.
+    new Audio(CASE_SELECTED_SRC).play().catch(() => {});
     const t = setTimeout(() => setCeremonyCaseNumber(null), 1800);
     return () => clearTimeout(t);
   }, [state.phase, state.playerCaseNumber]);
@@ -190,15 +211,28 @@ export default function NflDealGame() {
     dispatch({ type: 'NEW_GAME', position: DYNASTY_POSITIONS[nextIndex] });
   }
 
+  // Shared by the natural (timed) reveal and the tap-to-skip path -- flips
+  // the case open in game state and shows the real result immediately.
+  function revealNow(caseNumber: number, quarterback: Player) {
+    dispatch({ type: 'OPEN_CASE', caseNumber });
+    setPendingReveal({ number: caseNumber, quarterback });
+    if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
+    revealTimeoutRef.current = setTimeout(() => setPendingReveal(null), REVEAL_HOLD_MS);
+  }
+
   function openCase(caseNumber: number) {
     if (pendingReveal) return; // one reveal plays out fully before the next case can open
     const opening = state.cases.find((c) => c.number === caseNumber);
     if (!opening) return;
 
-    // Good = a bottom-half (worst-ranked) player got knocked off the board;
-    // bad = a top-half (best-ranked) player did. Ranks are fixed 1 (best) ->
-    // 32 (worst) regardless of who's still hidden.
-    const outcome: 'good' | 'bad' = opening.quarterback.rank > 16 ? 'good' : 'bad';
+    // Good/bad is judged against the pool of values still actually in play
+    // right now (every case not yet opened, including the player's own),
+    // not the fixed original 1-32 ranking -- late in the game, losing the
+    // single best surviving option is bad news even if that player would've
+    // ranked below-average against the full original board.
+    const stillInPlay = state.cases.filter((c) => c.status !== 'opened').map((c) => c.quarterback.ovr);
+    const strongerRemaining = stillInPlay.filter((ovr) => ovr > opening.quarterback.ovr).length;
+    const outcome: 'good' | 'bad' = strongerRemaining >= Math.ceil(stillInPlay.length / 2) ? 'good' : 'bad';
 
     // Start the sound and show the case sealed first -- the actual reveal
     // (and the game-state update) lands later, timed to the sound's payoff.
@@ -208,11 +242,21 @@ export default function NflDealGame() {
 
     if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
     pendingTimeoutRef.current = setTimeout(() => {
-      dispatch({ type: 'OPEN_CASE', caseNumber });
-      setPendingReveal({ number: caseNumber, quarterback: opening.quarterback });
-      if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
-      revealTimeoutRef.current = setTimeout(() => setPendingReveal(null), REVEAL_HOLD_MS);
+      revealNow(caseNumber, opening.quarterback);
     }, REVEAL_DELAY_MS_BY_OUTCOME[outcome]);
+  }
+
+  // Tapping/clicking the reveal popup while it's still spinning (suspense
+  // phase, before the result is shown) jumps straight to the result instead
+  // of waiting out the full delay -- and tells the audio controller to jump
+  // its sting to the payoff beat instead of restarting or cutting off cold.
+  function skipSuspense() {
+    if (!pendingReveal || pendingReveal.quarterback !== null) return;
+    if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
+    const opening = state.cases.find((c) => c.number === pendingReveal.number);
+    if (!opening) return;
+    audioRef.current?.skipCurrentCue();
+    revealNow(pendingReveal.number, opening.quarterback);
   }
 
   const dynastyStageLabel = dynasty ? `Dynasty — Stage ${dynasty.index + 1} of ${DYNASTY_POSITIONS.length}: ${positionConfig.pluralLabel}` : null;
@@ -309,23 +353,26 @@ export default function NflDealGame() {
             />
           </div>
         ) : (
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
-            <div className="space-y-4">
+          // Explicit grid placement (rather than DOM order) so mobile can
+          // stack these in document order -- case grid, board, your case --
+          // while desktop keeps the board as a full-height sidebar next to
+          // the case grid + your case in the main column.
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px] lg:grid-rows-[auto_auto]">
+            <div className="space-y-4 lg:col-start-1 lg:row-start-1">
               <NflDealRoundPanel state={state} />
               <NflDealCaseGrid
                 cases={state.cases}
                 phase={state.phase}
                 playerCaseNumber={state.playerCaseNumber}
                 currentRoundOpenedNumbers={state.casesOpenedThisRound}
-                locked={pendingReveal !== null}
+                locked={pendingReveal !== null || (state.phase === 'selecting-case' && !boardSettled)}
                 onOpen={(caseNumber) => {
                   if (state.phase === 'selecting-case') dispatch({ type: 'SELECT_CASE', caseNumber });
                   else if (state.phase === 'opening-cases') openCase(caseNumber);
                 }}
               />
-              {showYourCase && playerCase && <NflDealYourCase number={playerCase.number} />}
             </div>
-            <div>
+            <div className="lg:col-start-2 lg:row-start-1 lg:row-span-2">
               <NflDealQbBoard
                 board={positionConfig.board}
                 eliminatedIds={eliminatedIds}
@@ -333,6 +380,11 @@ export default function NflDealGame() {
                 positionLabel={positionConfig.shortLabel}
               />
             </div>
+            {showYourCase && playerCase && (
+              <div className="lg:col-start-1 lg:row-start-2">
+                <NflDealYourCase number={playerCase.number} />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -353,6 +405,10 @@ export default function NflDealGame() {
           caseNumber={pendingReveal.number}
           quarterback={pendingReveal.quarterback}
           onDismiss={() => {
+            if (pendingReveal.quarterback === null) {
+              skipSuspense();
+              return;
+            }
             if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
             setPendingReveal(null);
           }}
