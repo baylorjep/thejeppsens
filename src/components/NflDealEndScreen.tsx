@@ -17,7 +17,6 @@ interface Props {
   onReveal: (outcome: 'good' | 'bad') => void;
 }
 
-const SUSPENSE_STEP_MS = 850;
 // Same idea as the case-opening reveals: start the sound partway through the
 // stakes page (so you've had a moment to read it), then land the actual
 // reveal right at the sound's payoff -- these reuse the same elimination
@@ -61,16 +60,14 @@ function SealedCase({ number }: { number: number }) {
 }
 
 export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLabel = 'Play Again', onReveal }: Props) {
-  const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
-  const [countdown, setCountdown] = useState(3);
-  const [stage, setStage] = useState<'suspense' | 'stakes' | 'revealed'>('suspense');
-  const onRevealFiredRef = useRef(false);
-
   const dealAccepted = state.dealAccepted;
   // If no deal was accepted, state.currentOffer still holds the final offer
   // they turned down (see rejectOffer in gameLogic.ts).
   const declinedOffer = !dealAccepted ? state.currentOffer : null;
   const knownOffer = dealAccepted ?? declinedOffer;
+  const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
+  const [stage, setStage] = useState<'stakes' | 'revealed'>(() => (knownOffer ? 'stakes' : 'revealed'));
+  const onRevealFiredRef = useRef(false);
 
   const beatCase = dealAccepted ? dealAccepted.offerOvr > playerCase.quarterback.ovr : null;
   const beatDeclinedOffer = declinedOffer ? playerCase.quarterback.ovr > declinedOffer.offerOvr : null;
@@ -90,27 +87,12 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
   }
 
   function skipForward() {
-    if (stage === 'suspense') {
-      setCountdown(0);
-      setStage(knownOffer ? 'stakes' : 'revealed');
-      return;
-    }
     if (stage === 'stakes') revealOutcomeNow();
   }
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
   }, []);
-
-  useEffect(() => {
-    if (stage !== 'suspense') return;
-    if (countdown <= 0) {
-      setStage(knownOffer ? 'stakes' : 'revealed');
-      return;
-    }
-    const t = setTimeout(() => setCountdown((c) => c - 1), SUSPENSE_STEP_MS);
-    return () => clearTimeout(t);
-  }, [countdown, stage, knownOffer]);
 
   useEffect(() => {
     if (stage !== 'stakes') return;
@@ -139,24 +121,6 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
     if (outcome) onReveal(outcome);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
-
-  if (stage === 'suspense') {
-    return (
-      <div
-        onClick={skipForward}
-        className="flex min-h-[420px] cursor-pointer flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-10 text-center"
-      >
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Was it a good deal?</p>
-        <div className="relative flex h-24 w-24 items-center justify-center">
-          <div key={countdown} className="absolute inset-0 animate-ping rounded-full bg-teal-500/20" />
-          <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-4 border-teal-500/50 bg-slate-900 text-4xl font-black text-teal-300">
-            {countdown > 0 ? countdown : '!'}
-          </div>
-        </div>
-        <p className="text-xs text-slate-500">Tap to continue.</p>
-      </div>
-    );
-  }
 
   if (stage === 'stakes' && knownOffer) {
     return (
