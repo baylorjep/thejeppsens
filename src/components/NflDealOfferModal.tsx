@@ -46,6 +46,7 @@ export default function NflDealOfferModal({
   const dealOverlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noDealOverlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noDealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const noDealTransitionStartedRef = useRef(false);
   const [imgFailed, setImgFailed] = useState(false);
   const [reaction, setReaction] = useState<'deal' | 'no-deal' | null>(null);
   const [resolving, setResolving] = useState(false);
@@ -78,12 +79,21 @@ export default function NflDealOfferModal({
     if (!decisionReady || resolving) return;
     setResolving(true);
     setReaction('no-deal');
+    noDealTransitionStartedRef.current = false;
     onNoDealChosen();
-    noDealOverlayTimeoutRef.current = setTimeout(() => {
-      setReaction(null);
-      onNoDealTransitionStart?.();
-    }, NO_DEAL_REACTION_OVERLAY_MS);
+    noDealOverlayTimeoutRef.current = setTimeout(finishNoDealOverlay, NO_DEAL_REACTION_OVERLAY_MS);
     noDealTimeoutRef.current = setTimeout(onNoDeal, NO_DEAL_REACTION_DELAY_MS);
+  }
+
+  function finishNoDealOverlay() {
+    if (noDealTransitionStartedRef.current) return;
+    noDealTransitionStartedRef.current = true;
+    if (noDealOverlayTimeoutRef.current) {
+      clearTimeout(noDealOverlayTimeoutRef.current);
+      noDealOverlayTimeoutRef.current = null;
+    }
+    setReaction(null);
+    onNoDealTransitionStart?.();
   }
 
   if (reaction) {
@@ -92,8 +102,10 @@ export default function NflDealOfferModal({
       <div
         role="status"
         aria-live="assertive"
+        onClick={isDeal ? undefined : finishNoDealOverlay}
         className={[
           'fixed inset-0 z-50 flex flex-col items-center justify-center gap-2 backdrop-blur-sm',
+          isDeal ? '' : 'cursor-pointer',
           isDeal ? 'bg-green-600/90' : 'bg-red-600/90',
         ].join(' ')}
       >
@@ -131,7 +143,6 @@ export default function NflDealOfferModal({
               <span className="mt-1 block text-lg font-black text-white">The Banker is making an offer...</span>
               <span className="mt-1 block text-xs text-slate-400">Tap anywhere here to skip the wait.</span>
             </span>
-            <span className="shrink-0 text-xs font-black uppercase tracking-[0.2em] text-amber-300">Pending</span>
           </button>
         ) : (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

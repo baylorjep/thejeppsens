@@ -90,7 +90,7 @@ const CUES: Record<
   | 'badElimination',
   CueDef
 > = {
-  introReady: { videoId: '7onGy0GiMtE', start: 38, end: 43, kind: 'oneshot' },
+  introReady: { videoId: '7onGy0GiMtE', start: 37, end: 43, kind: 'oneshot' },
   introMonologue: { videoId: '7onGy0GiMtE', start: 46, end: 82, kind: 'oneshot' },
   pickCasePrompt: { videoId: '7onGy0GiMtE', start: 105, end: 110, kind: 'oneshot' },
   caseSelection: { videoId: '_V6eu74Cm6s', kind: 'loop' },
