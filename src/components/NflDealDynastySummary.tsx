@@ -51,6 +51,7 @@ interface SeasonResult {
   rating: number;
   wins: number;
   losses: number;
+  playoffWins: number;
   finish: string;
   title: string;
   tier: SeasonTier;
@@ -276,6 +277,64 @@ function rosterJitter(results: Partial<Record<PositionId, Player>>): number {
   return (hash % 9) - 4;
 }
 
+function simulatePlayoffGame(teamRating: number, teamJitter: number, opponentRating: number, seed: number): boolean {
+  // Team wins if their strength beats opponent strength
+  // Higher seed bonus (lower seed number = higher seed = stronger team)
+  const seedBonus = (8 - seed) * 0.3;
+  return teamRating + teamJitter + seedBonus > opponentRating + (Math.random() * 4 - 2);
+}
+
+function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: number): { finish: string; title: string; tier: SeasonTier; summary: string; playoffWins: number } {
+  if (wins < 7) {
+    return { finish: 'Missed Playoffs', title: 'Rebuild Year', tier: 'bad', summary: 'The Bank kept the better roster.', playoffWins: 0 };
+  }
+
+  let currentSeed = seed;
+  let playoffWins = 0;
+  let round = 'Wild Card';
+
+  // Determine starting round based on seed
+  if (seed <= 2) {
+    round = 'Bye Week';
+  } else if (seed <= 6) {
+    // Wild Card game
+    const opponentRating = 75 + Math.random() * 12;
+    if (simulatePlayoffGame(rating, jitter, opponentRating, currentSeed)) {
+      playoffWins = 1;
+      round = 'Divisional';
+    } else {
+      return { finish: 'Wild Card Round', title: 'Wild Card Exit', tier: 'decent', summary: 'So close, yet the playoffs had other plans.', playoffWins };
+    }
+  }
+
+  // Divisional Round
+  const divisionalOpp = 85 + Math.random() * 8;
+  if (simulatePlayoffGame(rating, jitter, divisionalOpp, currentSeed + 1)) {
+    playoffWins += 1;
+    round = 'Conference Championship';
+  } else {
+    return { finish: 'Divisional Round', title: 'Divisional Exit', tier: 'good', summary: 'A valiant effort ended by a stronger foe.', playoffWins };
+  }
+
+  // Conference Championship
+  const confChampOpp = 87 + Math.random() * 8;
+  if (simulatePlayoffGame(rating, jitter, confChampOpp, currentSeed + 2)) {
+    playoffWins += 1;
+    round = 'Super Bowl';
+  } else {
+    return { finish: 'Conference Championship', title: 'Conference Champion', tier: 'elite', summary: 'One game away from immortality, but it wasn\'t meant to be.', playoffWins };
+  }
+
+  // Super Bowl
+  const superbowlOpp = 88 + Math.random() * 7;
+  if (simulatePlayoffGame(rating, jitter, superbowlOpp, currentSeed + 3)) {
+    playoffWins += 1;
+    return { finish: 'Super Bowl Champions', title: 'Dynasty', tier: 'dynasty', summary: 'The season ends with confetti and a ring.', playoffWins };
+  } else {
+    return { finish: 'Super Bowl Runner-Up', title: 'Elite Contender', tier: 'elite', summary: 'A monster season, one win short of immortality.', playoffWins };
+  }
+}
+
 function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
   const available = DYNASTY_POSITIONS.filter((pos) => results[pos]);
   const totalWeight = available.reduce((sum, pos) => sum + POSITION_WEIGHTS[pos], 0);
@@ -310,28 +369,19 @@ function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
   const wins = Math.min(17, Math.max(1, projectedWins));
   const losses = 17 - wins;
 
-  if (wins === 17 && rating >= 96.5) {
-    return { rating, wins, losses, finish: 'Super Bowl Champions', title: 'Perfect Dynasty', tier: 'dynasty', summary: 'No one found an answer for this roster.' };
-  }
-  if (wins >= 14 && rating >= 93 && jitter >= 0) {
-    return { rating, wins, losses, finish: 'Super Bowl Champions', title: 'Dynasty', tier: 'dynasty', summary: 'The season ends with confetti and a ring.' };
-  }
-  if (wins >= 13 && rating >= 91) {
-    return { rating, wins, losses, finish: 'Super Bowl Runner-Up', title: 'Elite Contender', tier: 'elite', summary: 'A monster season, one win short of immortality.' };
-  }
-  if (wins >= 11 && rating >= 88) {
-    return { rating, wins, losses, finish: 'Conference Championship', title: 'Title Threat', tier: 'elite', summary: 'This team had January teeth.' };
-  }
-  if (wins >= 10 && rating >= 85) {
-    return { rating, wins, losses, finish: 'Divisional Round', title: 'Playoff Team', tier: 'good', summary: 'Good enough to scare somebody, not quite built to finish it.' };
-  }
-  if (wins >= 9 && rating >= 83) {
-    return { rating, wins, losses, finish: 'Wild Card Round', title: 'Scrappy Wild Card', tier: 'decent', summary: 'A tense season that got them into the dance.' };
-  }
-  if (wins >= 7) {
-    return { rating, wins, losses, finish: 'Missed Playoffs', title: 'Middle of the Pack', tier: 'decent', summary: 'Competitive Sundays, but not enough answers.' };
-  }
-  return { rating, wins, losses, finish: 'Missed Playoffs', title: 'Rebuild Year', tier: 'bad', summary: 'The Bank kept the better roster.' };
+  // Determine playoff seed (1-7 based on wins, 1 seed = 14+ wins)
+  let seed = 7;
+  if (wins >= 14) seed = 1;
+  else if (wins >= 13) seed = 2;
+  else if (wins >= 12) seed = 3;
+  else if (wins >= 11) seed = 4;
+  else if (wins >= 10) seed = 5;
+  else if (wins >= 9) seed = 6;
+  else if (wins >= 7) seed = 7;
+
+  const playoff = simulatePlayoffs(rating, wins, jitter, seed);
+
+  return { rating, wins, losses, playoffWins: playoff.playoffWins, finish: playoff.finish, title: playoff.title, tier: playoff.tier, summary: playoff.summary };
 }
 
 const NFL_OPPONENTS = [
@@ -520,13 +570,14 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
       rating: season.rating,
       wins: season.wins,
       losses: season.losses,
+      playoffWins: season.playoffWins,
       finish: season.finish,
       players,
       createdAt: new Date().toISOString(),
     })
       .then(setLeaderboard)
       .catch(() => setLeaderboard([]));
-  }, [missingPositions.length, results, season.finish, season.losses, season.rating, season.wins, stage, teamName]);
+  }, [missingPositions.length, results, season.finish, season.losses, season.playoffWins, season.rating, season.wins, stage, teamName]);
 
   if (missingPositions.length > 0) {
     return (

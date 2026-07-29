@@ -11,6 +11,7 @@ interface LeaderboardRow {
   rating: number | string;
   wins: number;
   losses: number;
+  playoff_wins: number;
   finish: string;
   players: DynastyLeaderboardEntry['players'];
   created_at: string;
@@ -24,6 +25,7 @@ function isValidLeaderboardEntry(value: unknown): value is DynastyLeaderboardEnt
   if (typeof entry.rating !== 'number' || entry.rating < 0 || entry.rating > 100) return false;
   if (!Number.isInteger(entry.wins) || entry.wins < 0 || entry.wins > 17) return false;
   if (!Number.isInteger(entry.losses) || entry.losses < 0 || entry.losses > 17 || entry.wins + entry.losses !== 17) return false;
+  if (!Number.isInteger(entry.playoffWins) || entry.playoffWins < 0 || entry.playoffWins > 4) return false;
   if (typeof entry.finish !== 'string' || entry.finish.trim().length === 0 || entry.finish.length > 80) return false;
   if (!entry.players || typeof entry.players !== 'object') return false;
 
@@ -71,6 +73,7 @@ function rowToEntry(row: LeaderboardRow): DynastyLeaderboardEntry {
     rating: Number(row.rating),
     wins: row.wins,
     losses: row.losses,
+    playoffWins: row.playoff_wins,
     finish: row.finish,
     players,
     createdAt: row.created_at,
@@ -83,7 +86,8 @@ async function loadTopEntries() {
 
   const { data, error } = await supabase
     .from('dynasty_leaderboard_entries')
-    .select('id, team_name, rating, wins, losses, finish, players, created_at')
+    .select('id, team_name, rating, wins, losses, playoff_wins, finish, players, created_at')
+    .order('playoff_wins', { ascending: false })
     .order('wins', { ascending: false })
     .order('rating', { ascending: false })
     .order('created_at', { ascending: true })
@@ -130,6 +134,7 @@ export async function POST(request: Request) {
       rating: Math.round(body.rating * 10) / 10,
       wins: body.wins,
       losses: body.losses,
+      playoff_wins: body.playoffWins,
       finish: body.finish.trim(),
       players,
     },
