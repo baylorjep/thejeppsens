@@ -16,11 +16,6 @@ interface Props {
 function BoardCell({ qb, eliminated, isOffer }: { qb: Player; eliminated: boolean; isOffer: boolean }) {
   const headshotUrl = espnHeadshotUrl(qb);
   const [imgFailed, setImgFailed] = useState(false);
-  const sourceLabel = qb.ratingSource?.includes('Official')
-    ? 'Official'
-    : qb.ratingSource?.includes('proxy')
-      ? 'Proxy'
-      : 'Fallback';
 
   return (
     <div
@@ -50,17 +45,8 @@ function BoardCell({ qb, eliminated, isOffer }: { qb: Player; eliminated: boolea
           Offer
         </span>
       )}
-      <span className="flex shrink-0 items-center gap-1">
-        <span
-          title={qb.ratingSource ?? 'Rating source pending'}
-          className={[
-            'h-1.5 w-1.5 rounded-full',
-            sourceLabel === 'Official' ? 'bg-amber-300' : sourceLabel === 'Proxy' ? 'bg-sky-300' : 'bg-slate-500',
-          ].join(' ')}
-        />
-        <span className={`w-6 text-right text-xs font-bold tabular-nums ${eliminated ? 'text-slate-600' : 'text-teal-300'}`}>
-          {qb.ovr}
-        </span>
+      <span className={`w-6 shrink-0 text-right text-xs font-bold tabular-nums ${eliminated ? 'text-slate-600' : 'text-teal-300'}`}>
+        {qb.ovr}
       </span>
     </div>
   );
@@ -106,11 +92,6 @@ export default function NflDealQbBoard({ board, eliminatedIds, offerQbId, positi
                 <BoardCell qb={qb} eliminated={eliminatedIds.has(qb.id)} isOffer={qb.id === offerQbId} />
               </div>
             ))}
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-            <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-300" /> Official</span>
-            <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-slate-500" /> Fallback</span>
-            <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-sky-300" /> Proxy</span>
           </div>
         </div>
       )}

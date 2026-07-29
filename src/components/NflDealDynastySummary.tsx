@@ -39,9 +39,6 @@ function RosterCard({ position, player }: { position: PositionId; player: Player
       </div>
       <p className="text-center text-sm font-bold text-white">{player.name}</p>
       <p className="text-lg font-black text-teal-300">{player.ovr} OVR</p>
-      <p className="text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-        {player.ratingSource ?? 'Rating source pending'}
-      </p>
     </div>
   );
 }
