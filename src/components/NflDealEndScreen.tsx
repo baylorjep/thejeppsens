@@ -184,7 +184,7 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
                     )}
                   </div>
                   <p className="text-xs font-bold text-white">{declinedFinalCase.quarterback.name.split(' ').slice(-1)[0]}</p>
-                  <p className="text-lg font-black text-rose-300">{declinedFinalCase.quarterback.ovr}</p>
+                  <p className="text-lg font-black text-slate-300">{declinedFinalCase.quarterback.ovr}</p>
                 </div>
               </div>
             </div>
@@ -220,7 +220,7 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
                     )}
                   </div>
                   <p className="text-xs font-bold text-white">{playerCase.quarterback.name.split(' ').slice(-1)[0]}</p>
-                  <p className="text-lg font-black text-teal-300">{playerCase.quarterback.ovr}</p>
+                  <p className="text-lg font-black text-slate-300">{playerCase.quarterback.ovr}</p>
                 </div>
               </div>
             </div>
