@@ -35,6 +35,7 @@ const DEAL_REACTION_DELAY_MS_BY_TIER: Record<OfferTier, number> = {
   medium: 13000, // 13s clip
   small: 9000, // 9s clip
 };
+const DEAL_REACTION_OVERLAY_MS = 1200;
 const NO_DEAL_REACTION_OVERLAY_MS = 1200;
 const NO_DEAL_REACTION_DELAY_MS = 5500; // no-deal-accepted clip: 1:40:40.5-1:40:46
 
@@ -51,6 +52,7 @@ export default function NflDealOfferModal({
   onNoDealTransitionStart,
 }: Props) {
   const dealButtonRef = useRef<HTMLButtonElement>(null);
+  const dealOverlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noDealOverlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noDealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -65,6 +67,7 @@ export default function NflDealOfferModal({
 
   useEffect(() => {
     return () => {
+      if (dealOverlayTimeoutRef.current) clearTimeout(dealOverlayTimeoutRef.current);
       if (dealTimeoutRef.current) clearTimeout(dealTimeoutRef.current);
       if (noDealOverlayTimeoutRef.current) clearTimeout(noDealOverlayTimeoutRef.current);
       if (noDealTimeoutRef.current) clearTimeout(noDealTimeoutRef.current);
@@ -76,6 +79,7 @@ export default function NflDealOfferModal({
     setResolving(true);
     setReaction('deal');
     onDealChosen();
+    dealOverlayTimeoutRef.current = setTimeout(() => setReaction(null), DEAL_REACTION_OVERLAY_MS);
     dealTimeoutRef.current = setTimeout(onDeal, DEAL_REACTION_DELAY_MS_BY_TIER[classifyOfferTier(offer)]);
   }
 
