@@ -10,6 +10,7 @@ interface Props {
 
 export default function NflDealCaseGrid({ cases, phase, playerCaseNumber, onOpen }: Props) {
   const casesAreClickable = phase === 'selecting-case' || phase === 'opening-cases';
+  const boardCases = cases.filter((c) => c.number !== playerCaseNumber);
 
   return (
     <div
@@ -17,12 +18,11 @@ export default function NflDealCaseGrid({ cases, phase, playerCaseNumber, onOpen
       aria-label="Briefcases"
       className="grid grid-cols-4 gap-2 sm:grid-cols-6 sm:gap-3 md:grid-cols-8"
     >
-      {cases.map((caseState) => (
+      {boardCases.map((caseState) => (
         <NflDealCaseTile
           key={caseState.number}
           caseState={caseState}
           clickable={casesAreClickable && caseState.status === 'available'}
-          isPlayerCase={caseState.number === playerCaseNumber}
           onOpen={onOpen}
         />
       ))}
