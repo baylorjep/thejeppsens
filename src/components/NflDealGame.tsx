@@ -38,12 +38,12 @@ const DYNASTY_TEAM_NAME_PLACEHOLDER = "The Baconator's";
 type Mode = PositionId | 'DYNASTY';
 
 const MODE_OPTIONS: { id: Mode; label: string }[] = [
+  { id: 'DYNASTY', label: 'Dynasty' },
   { id: 'QB', label: 'Quarterback' },
   { id: 'RB', label: 'Running Back' },
   { id: 'WR', label: 'Wide Receiver' },
   { id: 'TE', label: 'Tight End' },
   { id: 'DST', label: 'Defense' },
-  { id: 'DYNASTY', label: 'Dynasty' },
 ];
 
 function modeSubtitle(mode: Mode): string {
