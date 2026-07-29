@@ -25,6 +25,9 @@ export interface NflDealAudioHandle {
   playDealAccepted: (tier: OfferTier) => void;
   /** Same idea as playDealAccepted, for the No Deal button. */
   playNoDealAccepted: () => void;
+  /** Keeps No Deal reaction audio from being replaced by next-round music
+   * after the visual board has already advanced. */
+  holdRoundMusicForNoDeal: () => void;
   /** Dynasty pregame: plays the "ready" sting once, then settles into the
    * case-selection bed while the player names their team. */
   playDynastyNamingMusic: () => void;
@@ -123,7 +126,6 @@ const SKIP_PAYOFF_LEAD_SECONDS: Partial<Record<CueKey, number>> = {
   goodElimination: 1.5,
   badElimination: 1,
 };
-const BANK_RING_COUNT = 2; // total rings before the "deal or no deal" prompt
 const DEAL_ACCEPTED_CUE_BY_TIER: Record<OfferTier, CueKey> = {
   big: 'dealAcceptedBig',
   medium: 'dealAcceptedMedium',
@@ -134,6 +136,9 @@ function cueDurationMs(key: CueKey): number {
   const cue = CUES[key];
   return cue.end != null ? (cue.end - (cue.start ?? 0)) * 1000 : DEFAULT_ONESHOT_MS;
 }
+
+const BANK_RING_COUNT = 2; // total rings before the "deal or no deal" prompt
+const NO_DEAL_ACCEPTED_ROUND_MUSIC_HOLD_MS = cueDurationMs('noDealAccepted') + 250;
 
 function resolvePhaseCue(
   phase: GamePhase,
@@ -189,11 +194,13 @@ const NflDealAudioController = forwardRef<
   const lastEliminationKeyRef = useRef(0);
   const bankOfferSequenceRef = useRef(0);
   const pendingDynastyNamingMusicRef = useRef(false);
+  const noDealRoundMusicHoldTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [playerReady, setPlayerReady] = useState(false);
   const [muted, setMuted] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [revealDone, setRevealDone] = useState(false);
+  const [noDealRoundMusicHeld, setNoDealRoundMusicHeld] = useState(false);
   // Which of the two ~1-minute ambient tracks underlies the current round's
   // case-opening grind -- re-rolled once per round (not per click), so it
   // doesn't restart mid-round just because something else re-renders.
@@ -218,6 +225,12 @@ const NflDealAudioController = forwardRef<
       setRevealDone(false);
     }
   }, [phase]);
+
+  useEffect(() => {
+    return () => {
+      if (noDealRoundMusicHoldTimeoutRef.current) clearTimeout(noDealRoundMusicHoldTimeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     function initPlayer() {
@@ -354,7 +367,17 @@ const NflDealAudioController = forwardRef<
     if (!playerReady || muted) return;
     cancelBankOfferIntro();
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    holdRoundMusicForNoDeal();
     playCue('noDealAccepted');
+  }
+
+  function holdRoundMusicForNoDeal() {
+    setNoDealRoundMusicHeld(true);
+    if (noDealRoundMusicHoldTimeoutRef.current) clearTimeout(noDealRoundMusicHoldTimeoutRef.current);
+    noDealRoundMusicHoldTimeoutRef.current = setTimeout(() => {
+      setNoDealRoundMusicHeld(false);
+      noDealRoundMusicHoldTimeoutRef.current = null;
+    }, NO_DEAL_ACCEPTED_ROUND_MUSIC_HOLD_MS);
   }
 
   function stopPregameMusic() {
@@ -455,6 +478,7 @@ const NflDealAudioController = forwardRef<
       return;
     }
     const desired = resolvePhaseCue(phase, introDone, introNarrationEnabled, revealDone, openingCasesCue, offerTier);
+    if (noDealRoundMusicHeld && phase === 'opening-cases' && (desired === 'openingCasesA' || desired === 'openingCasesB')) return;
     if (!desired) {
       playerRef.current?.pauseVideo();
       cancelBankOfferIntro();
@@ -477,6 +501,12 @@ const NflDealAudioController = forwardRef<
     startForCurrentPhase();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, phase, introDone, introNarrationEnabled, revealDone, playerReady, muted, openingCasesCue, offerTier]);
+
+  useEffect(() => {
+    if (!enabled || !playerReady || muted || noDealRoundMusicHeld || phase !== 'opening-cases') return;
+    startForCurrentPhase();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noDealRoundMusicHeld]);
 
   useEffect(() => {
     if (!pendingDynastyNamingMusicRef.current || !playerReady || muted) return;
@@ -505,6 +535,7 @@ const NflDealAudioController = forwardRef<
     skipBankOfferIntro,
     playDealAccepted,
     playNoDealAccepted,
+    holdRoundMusicForNoDeal,
     playDynastyNamingMusic,
     stopPregameMusic,
     playSeasonSimulationMusic,

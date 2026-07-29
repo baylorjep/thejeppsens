@@ -1,21 +1,21 @@
-import { buildBoard } from './playerData';
+import { RATING_SOURCE_OFFICIAL, buildBoard } from './playerData';
 
 // Best RB per team, current Madden NFL 27 OVR + ESPN athlete ID (all IDs
 // verified against real headshots, not just name matches). Reflects several
 // real 2026 offseason moves: Kenneth Walker III (SEA->KC), Rico Dowdle
 // (CAR->PIT), Travis Etienne Jr (JAX->NO). Minnesota and Washington were
 // near-ties resolved in favor of the confirmed 2026 depth-chart starter.
-const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
-  ['Jahmyr Gibbs', 98, '4429795'],
-  ['Christian McCaffrey', 96, '3117251'],
-  ['Jonathan Taylor', 96, '4242335'],
-  ['Bijan Robinson', 95, '4430807'],
-  ['Derrick Henry', 94, '3043078'],
-  ['James Cook III', 93, '4379399'],
-  ['Saquon Barkley', 92, '3929630'],
-  ['Josh Jacobs', 91, '4047365'],
-  ['Kenneth Walker III', 90, '4567048'],
-  ['Kyren Williams', 89, '4430737'],
+const RAW_BOARD: Array<[name: string, ovr: number, espnId: string, ratingSource?: string]> = [
+  ['Jahmyr Gibbs', 98, '4429795', RATING_SOURCE_OFFICIAL],
+  ['Christian McCaffrey', 97, '3117251', RATING_SOURCE_OFFICIAL],
+  ['Jonathan Taylor', 96, '4242335', RATING_SOURCE_OFFICIAL],
+  ['Bijan Robinson', 95, '4430807', RATING_SOURCE_OFFICIAL],
+  ['James Cook III', 94, '4379399', RATING_SOURCE_OFFICIAL],
+  ['Derrick Henry', 93, '3043078', RATING_SOURCE_OFFICIAL],
+  ['Saquon Barkley', 92, '3929630', RATING_SOURCE_OFFICIAL],
+  ['Josh Jacobs', 91, '4047365', RATING_SOURCE_OFFICIAL],
+  ['Kenneth Walker III', 90, '4567048', RATING_SOURCE_OFFICIAL],
+  ['Kyren Williams', 89, '4430737', RATING_SOURCE_OFFICIAL],
   ["De'Von Achane", 87, '4429160'],
   ['Travis Etienne Jr', 87, '4239996'],
   ['Breece Hall', 86, '4427366'],
