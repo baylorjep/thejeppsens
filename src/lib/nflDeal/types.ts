@@ -60,3 +60,14 @@ export interface DynastyRunState {
   teamName: string;
   results: Partial<Record<PositionId, Player>>;
 }
+
+export interface DynastyLeaderboardEntry {
+  id: string;
+  teamName: string;
+  rating: number;
+  wins: number;
+  losses: number;
+  finish: string;
+  players: Record<PositionId, Pick<Player, 'id' | 'name' | 'ovr'>>;
+  createdAt: string;
+}

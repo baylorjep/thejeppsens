@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Confetti from 'react-confetti';
 import { RotateCcw, Trophy } from 'lucide-react';
 import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
 import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
-import type { Player, PositionId } from '@/lib/nflDeal/types';
+import { loadDynastyLeaderboard, saveDynastyLeaderboardEntry } from '@/lib/nflDeal/storage';
+import type { DynastyLeaderboardEntry, Player, PositionId } from '@/lib/nflDeal/types';
 
 interface Props {
   results: Partial<Record<PositionId, Player>>;
@@ -101,6 +102,44 @@ function ResultCard({
         ))}
       </div>
       <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Baylor & Isabel Deal or No Deal Dynasty</p>
+    </div>
+  );
+}
+
+function DynastyLeaderboard({ entries }: { entries: DynastyLeaderboardEntry[] }) {
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="animate-case-reveal mx-auto mt-5 max-w-3xl rounded-xl border border-slate-700 bg-slate-950/80 p-5 text-left">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500">Dynasty Leaderboard</p>
+          <h3 className="mt-1 text-xl font-black text-white">Top 5 Teams</h3>
+        </div>
+        <Trophy className="h-6 w-6 text-amber-300" aria-hidden />
+      </div>
+      <div className="mt-4 space-y-2">
+        {entries.map((entry, index) => (
+          <div key={entry.id} className="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-black text-white">
+                  #{index + 1} {entry.teamName}
+                </p>
+                <p className="mt-1 truncate text-xs font-semibold text-slate-400">
+                  {DYNASTY_POSITIONS.map((pos) => `${POSITIONS[pos].shortLabel}: ${entry.players[pos].name} ${entry.players[pos].ovr}`).join(' | ')}
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-xl font-black text-teal-300">{entry.rating}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                  {entry.wins}-{entry.losses}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -265,9 +304,12 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
   const [stage, setStage] = useState<'roster' | 'simulating' | 'revealed'>('roster');
   const [visibleWeeks, setVisibleWeeks] = useState(0);
   const [showResultCardModal, setShowResultCardModal] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<DynastyLeaderboardEntry[]>([]);
+  const savedLeaderboardIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
+    setLeaderboard(loadDynastyLeaderboard());
   }, []);
 
   const missingPositions = DYNASTY_POSITIONS.filter((pos) => !results[pos]);
@@ -281,7 +323,7 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
   const season = seasonFor(results);
   const tone = tierTone(season.tier);
   const celebrate = season.tier === 'dynasty' || season.tier === 'elite';
-  const weeks = buildWeekResults(season, teamName, results);
+  const weeks = useMemo(() => buildWeekResults(season, teamName, results), [results, season, teamName]);
   const currentRecord = weeks.slice(0, visibleWeeks).reduce(
     (record, week) => {
       if (week.won) record.wins += 1;
@@ -309,6 +351,35 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
+
+  useEffect(() => {
+    if (stage !== 'revealed' || missingPositions.length > 0) return;
+
+    const players = DYNASTY_POSITIONS.reduce(
+      (picked, pos) => {
+        const player = results[pos]!;
+        picked[pos] = { id: player.id, name: player.name, ovr: player.ovr };
+        return picked;
+      },
+      {} as DynastyLeaderboardEntry['players'],
+    );
+    const id = `${teamName}|${DYNASTY_POSITIONS.map((pos) => players[pos].id).join('|')}`;
+    if (savedLeaderboardIdRef.current === id) return;
+    savedLeaderboardIdRef.current = id;
+
+    setLeaderboard(
+      saveDynastyLeaderboardEntry({
+        id,
+        teamName,
+        rating: season.rating,
+        wins: season.wins,
+        losses: season.losses,
+        finish: season.finish,
+        players,
+        createdAt: new Date().toISOString(),
+      }),
+    );
+  }, [missingPositions.length, results, season.finish, season.losses, season.rating, season.wins, stage, teamName]);
 
   if (missingPositions.length > 0) {
     return (
@@ -402,6 +473,8 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
           <ResultCard teamName={teamName} season={season} toneText={tone.text} results={results} />
         </div>
       )}
+
+      {stage === 'revealed' && <DynastyLeaderboard entries={leaderboard} />}
 
       {showResultCardModal && stage === 'revealed' && (
         <div
