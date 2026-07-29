@@ -330,15 +330,22 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
         />
       )}
 
-      {outcome && (
+      {outcome && !tradedFinalCase && (
         <p
           className={`animate-case-reveal mb-1 text-[10px] font-bold uppercase tracking-[0.3em] ${isGood ? 'text-green-400' : 'text-rose-400'}`}
         >
           {isGood ? 'Great outcome' : 'Tough break'}
         </p>
       )}
+      {tradedFinalCase && declinedFinalCase && (
+        <p
+          className={`animate-case-reveal mb-1 text-[10px] font-bold uppercase tracking-[0.3em] ${playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? 'text-green-400' : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? 'text-rose-400' : 'text-slate-400'}`}
+        >
+          {playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? 'Smart trade' : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? 'Tough trade' : 'Even trade'}
+        </p>
+      )}
       <h2 className="animate-case-reveal text-3xl font-black text-white sm:text-4xl">
-        {dealAccepted ? 'DEAL!' : 'NO DEAL'}
+        {dealAccepted ? 'DEAL!' : tradedFinalCase ? 'TRADE!' : 'NO DEAL'}
       </h2>
       <p className="animate-case-reveal mt-1 text-sm text-slate-400">
         {dealAccepted ? 'You took the offer.' : tradedFinalCase ? 'You traded for the last case.' : 'You kept your case.'}
@@ -431,25 +438,35 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
       )}
 
       {tradedFinalCase && declinedFinalCase ? (
-        <div
-          className={[
-            'mx-auto mt-5 flex max-w-md items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold',
-            playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? 'bg-green-500/10 text-green-300' : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
-          ].join(' ')}
-        >
-          {playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? (
-            <>
-              <TrendingUp className="h-4 w-4" aria-hidden />
-              Great trade — you got the better player!
-            </>
-          ) : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? (
-            <>
-              <TrendingDown className="h-4 w-4" aria-hidden />
-              That trade didn't go your way — you gave up more value.
-            </>
-          ) : (
-            'Even trade between the two cases.'
-          )}
+        <div className="mx-auto mt-5 max-w-md space-y-3">
+          <div
+            className={[
+              'flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold',
+              playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? 'bg-green-500/10 text-green-300' : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
+            ].join(' ')}
+          >
+            {playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? (
+              <>
+                <TrendingUp className="h-4 w-4" aria-hidden />
+                Great trade — you got the better player!
+              </>
+            ) : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? (
+              <>
+                <TrendingDown className="h-4 w-4" aria-hidden />
+                That trade didn't go your way — you gave up more value.
+              </>
+            ) : (
+              'Even trade between the two cases.'
+            )}
+          </div>
+          <div className="flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2.5">
+            <p className="text-sm font-bold text-slate-300">
+              Net value:{' '}
+              <span className={playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? 'text-green-300' : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? 'text-rose-300' : 'text-slate-300'}>
+                {playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? '+' : ''}{playerCase.quarterback.ovr - declinedFinalCase.quarterback.ovr} OVR
+              </span>
+            </p>
+          </div>
         </div>
       ) : declinedOffer ? (
         <>
