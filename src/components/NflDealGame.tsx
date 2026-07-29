@@ -31,7 +31,7 @@ import type { DynastyRunState, Player, PositionId } from '@/lib/nflDeal/types';
 const REVEAL_DELAY_MS_BY_OUTCOME: Record<'good' | 'bad', number> = { good: 4500, bad: 5000 };
 const REVEAL_HOLD_MS = 1500;
 const CASE_SELECTED_SRC = '/sounds/nfl-deal/case-selected.mp3';
-const DEFAULT_DYNASTY_TEAM_NAME = "The Baconator's";
+const DYNASTY_TEAM_NAME_PLACEHOLDER = "The Baconator's";
 
 type Mode = PositionId | 'DYNASTY';
 
@@ -73,7 +73,7 @@ export default function NflDealGame() {
   // the winning player banked from each finished stage so far.
   const [dynasty, setDynasty] = useState<DynastyRunState | null>(resumedRunRef.current?.dynasty ?? null);
   const [dynastyDone, setDynastyDone] = useState(resumedRunRef.current?.dynastyDone ?? false);
-  const [dynastyTeamName, setDynastyTeamName] = useState(resumedRunRef.current?.dynasty?.teamName ?? DEFAULT_DYNASTY_TEAM_NAME);
+  const [dynastyTeamName, setDynastyTeamName] = useState(resumedRunRef.current?.dynasty?.teamName ?? '');
   const [ceremonyCaseNumber, setCeremonyCaseNumber] = useState<number | null>(null);
   const [pendingReveal, setPendingReveal] = useState<{ number: number; quarterback: Player | null } | null>(null);
   const [eliminationEvent, setEliminationEvent] = useState<{ key: number; outcome: 'good' | 'bad' } | null>(null);
@@ -157,7 +157,8 @@ export default function NflDealGame() {
 
     if (!resuming) {
       if (selectedMode === 'DYNASTY') {
-        const teamName = dynastyTeamName.trim() || DEFAULT_DYNASTY_TEAM_NAME;
+        const teamName = dynastyTeamName.trim();
+        if (!teamName) return;
         setDynasty({ index: 0, teamName, results: {} });
         setDynastyTeamName(teamName);
         setDynastyDone(false);
@@ -205,6 +206,7 @@ export default function NflDealGame() {
   const showYourCase = playerCase && state.phase !== 'selecting-case' && state.phase !== 'finished';
   const positionConfig = POSITIONS[state.position];
   const offerTier = state.currentOffer ? classifyOfferTier(state.currentOffer) : null;
+  const dynastyNameMissing = selectedMode === 'DYNASTY' && dynastyTeamName.trim().length === 0;
 
   function handleSelectMode(mode: Mode) {
     setSelectedMode(mode);
@@ -218,7 +220,7 @@ export default function NflDealGame() {
     setHasStarted(false);
     setDynasty(null);
     setDynastyDone(false);
-    setDynastyTeamName(DEFAULT_DYNASTY_TEAM_NAME);
+    setDynastyTeamName('');
     setNoDealTransitioning(false);
     setCeremonyCaseNumber(null);
     setPendingReveal(null);
@@ -364,7 +366,7 @@ export default function NflDealGame() {
                 value={dynastyTeamName}
                 onChange={(event) => setDynastyTeamName(event.target.value.slice(0, 40))}
                 className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-3 text-center text-lg font-black text-white outline-none transition-colors placeholder:text-slate-600 focus:border-teal-400"
-                placeholder="Name your team"
+                placeholder={DYNASTY_TEAM_NAME_PLACEHOLDER}
                 maxLength={40}
               />
             </label>
@@ -372,7 +374,13 @@ export default function NflDealGame() {
           <button
             type="button"
             onClick={handleStartGame}
-            className="rounded-xl bg-teal-500 px-10 py-4 text-lg font-black uppercase tracking-wide text-slate-950 transition-colors hover:bg-teal-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200"
+            disabled={dynastyNameMissing}
+            className={[
+              'rounded-xl px-10 py-4 text-lg font-black uppercase tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200',
+              dynastyNameMissing
+                ? 'cursor-not-allowed bg-slate-700 text-slate-500'
+                : 'bg-teal-500 text-slate-950 hover:bg-teal-400',
+            ].join(' ')}
           >
             Start Game
           </button>

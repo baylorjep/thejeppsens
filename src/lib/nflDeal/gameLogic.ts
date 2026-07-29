@@ -142,7 +142,17 @@ function computeBankOffer(state: GameState): { offer: BankOffer; cursor: number 
     hiddenMin === hiddenMax
       ? sorted.filter((qb) => qb.ovr === hiddenMin)
       : sorted.filter((qb) => qb.ovr > hiddenMin && qb.ovr < hiddenMax);
-  const candidates = withinRange.length > 0 ? withinRange : sorted;
+  // If no player sits strictly between the remaining values (e.g. final two
+  // are 91 and 92), do not fall back to the whole board -- that can offer
+  // the top remaining value and make Deal a guaranteed win. Instead offer
+  // the strongest board value below the best remaining outcome.
+  const floorFallback =
+    hiddenMin === hiddenMax
+      ? []
+      : [...board]
+          .filter((qb) => qb.ovr < hiddenMax && qb.ovr <= targetOvr)
+          .sort((a, b) => b.ovr - a.ovr || Math.abs(a.ovr - targetOvr) - Math.abs(b.ovr - targetOvr));
+  const candidates = withinRange.length > 0 ? withinRange : floorFallback.length > 0 ? floorFallback : sorted;
 
   const freshCandidates = candidates.filter((qb) => !recentOfferIds.has(qb.id));
   // If every close option has already been offered recently, the board
