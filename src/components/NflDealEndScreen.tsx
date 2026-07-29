@@ -81,6 +81,23 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
   const celebrate = isGood || playerCase.quarterback.ovr >= 90;
   const isRestartCta = ctaLabel === 'Play Again';
 
+  function revealOutcomeNow() {
+    if (outcome && !onRevealFiredRef.current) {
+      onRevealFiredRef.current = true;
+      onReveal(outcome);
+    }
+    setStage('revealed');
+  }
+
+  function skipForward() {
+    if (stage === 'suspense') {
+      setCountdown(0);
+      setStage(knownOffer ? 'stakes' : 'revealed');
+      return;
+    }
+    if (stage === 'stakes') revealOutcomeNow();
+  }
+
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
   }, []);
@@ -125,7 +142,10 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
 
   if (stage === 'suspense') {
     return (
-      <div className="flex min-h-[420px] flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-10 text-center">
+      <div
+        onClick={skipForward}
+        className="flex min-h-[420px] cursor-pointer flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-10 text-center"
+      >
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Was it a good deal?</p>
         <div className="relative flex h-24 w-24 items-center justify-center">
           <div key={countdown} className="absolute inset-0 animate-ping rounded-full bg-teal-500/20" />
@@ -133,14 +153,17 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
             {countdown > 0 ? countdown : '!'}
           </div>
         </div>
-        <p className="text-xs text-slate-500">The Bank is watching too.</p>
+        <p className="text-xs text-slate-500">Tap to continue.</p>
       </div>
     );
   }
 
   if (stage === 'stakes' && knownOffer) {
     return (
-      <div className="flex min-h-[420px] flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-8 text-center sm:p-10">
+      <div
+        onClick={skipForward}
+        className="flex min-h-[420px] cursor-pointer flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-8 text-center sm:p-10"
+      >
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Here's what was on the line</p>
         <div className="flex items-center gap-6 sm:gap-10">
           <div className="flex flex-col items-center gap-3">

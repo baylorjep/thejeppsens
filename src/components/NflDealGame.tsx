@@ -450,7 +450,13 @@ export default function NflDealGame() {
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px] lg:grid-rows-[auto_auto]">
             <div className="space-y-4 lg:col-start-1 lg:row-start-1">
               {noDealTransitioning ? (
-                <NflDealNoDealTransition state={state} />
+                <NflDealNoDealTransition
+                  state={state}
+                  onSkip={() => {
+                    setNoDealTransitioning(false);
+                    dispatch({ type: 'REJECT_OFFER' });
+                  }}
+                />
               ) : (
                 <>
                   <NflDealRoundPanel state={state} />

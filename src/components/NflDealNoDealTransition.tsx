@@ -5,6 +5,7 @@ import type { CaseState, GameState } from '@/lib/nflDeal/types';
 
 interface Props {
   state: GameState;
+  onSkip: () => void;
 }
 
 function MiniCase({ caseState, exiting, index }: { caseState: CaseState; exiting: boolean; index: number }) {
@@ -28,7 +29,7 @@ function MiniCase({ caseState, exiting, index }: { caseState: CaseState; exiting
   );
 }
 
-export default function NflDealNoDealTransition({ state }: Props) {
+export default function NflDealNoDealTransition({ state, onSkip }: Props) {
   const [animating, setAnimating] = useState(false);
   const [compact, setCompact] = useState(false);
   const openedThisRound = new Set(state.casesOpenedThisRound);
@@ -49,7 +50,11 @@ export default function NflDealNoDealTransition({ state }: Props) {
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-5 sm:px-5">
+    <button
+      type="button"
+      onClick={onSkip}
+      className="block w-full cursor-pointer overflow-hidden rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-5 text-left transition-colors hover:border-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300 sm:px-5"
+    >
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-300">No Deal</p>
       <p className="mt-1 text-2xl font-black text-white sm:text-3xl">Resetting the board</p>
       <p className="mt-1 text-sm text-slate-400">
@@ -65,6 +70,6 @@ export default function NflDealNoDealTransition({ state }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </button>
   );
 }
