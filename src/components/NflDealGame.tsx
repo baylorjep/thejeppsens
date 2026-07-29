@@ -30,6 +30,7 @@ import type { DynastyRunState, Player, PositionId } from '@/lib/nflDeal/types';
 const REVEAL_DELAY_MS_BY_OUTCOME: Record<'good' | 'bad', number> = { good: 4500, bad: 5000 };
 const REVEAL_HOLD_MS = 1500;
 const CASE_SELECTED_SRC = '/sounds/nfl-deal/case-selected.mp3';
+const DEFAULT_DYNASTY_TEAM_NAME = "The Baconator's";
 
 type Mode = PositionId | 'DYNASTY';
 
@@ -71,7 +72,7 @@ export default function NflDealGame() {
   // the winning player banked from each finished stage so far.
   const [dynasty, setDynasty] = useState<DynastyRunState | null>(resumedRunRef.current?.dynasty ?? null);
   const [dynastyDone, setDynastyDone] = useState(resumedRunRef.current?.dynastyDone ?? false);
-  const [dynastyTeamName, setDynastyTeamName] = useState(resumedRunRef.current?.dynasty?.teamName ?? 'Jeppsen Dynasty');
+  const [dynastyTeamName, setDynastyTeamName] = useState(resumedRunRef.current?.dynasty?.teamName ?? DEFAULT_DYNASTY_TEAM_NAME);
   const [ceremonyCaseNumber, setCeremonyCaseNumber] = useState<number | null>(null);
   const [pendingReveal, setPendingReveal] = useState<{ number: number; quarterback: Player | null } | null>(null);
   const [eliminationEvent, setEliminationEvent] = useState<{ key: number; outcome: 'good' | 'bad' } | null>(null);
@@ -152,7 +153,7 @@ export default function NflDealGame() {
 
     if (!resuming) {
       if (selectedMode === 'DYNASTY') {
-        const teamName = dynastyTeamName.trim() || 'Jeppsen Dynasty';
+        const teamName = dynastyTeamName.trim() || DEFAULT_DYNASTY_TEAM_NAME;
         setDynasty({ index: 0, teamName, results: {} });
         setDynastyTeamName(teamName);
         setDynastyDone(false);
@@ -213,7 +214,7 @@ export default function NflDealGame() {
     setHasStarted(false);
     setDynasty(null);
     setDynastyDone(false);
-    setDynastyTeamName('Jeppsen Dynasty');
+    setDynastyTeamName(DEFAULT_DYNASTY_TEAM_NAME);
     setCeremonyCaseNumber(null);
     setPendingReveal(null);
     if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
