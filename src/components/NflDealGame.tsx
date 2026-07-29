@@ -7,6 +7,7 @@ import {
   createInitialGameState,
   gameReducer,
   getEliminatedQbIds,
+  getFinalCase,
   getPlayerCase,
 } from '@/lib/nflDeal/gameLogic';
 import { POSITIONS, DYNASTY_POSITIONS } from '@/lib/nflDeal/positions';
@@ -82,6 +83,7 @@ export default function NflDealGame() {
   const [offerModalReady, setOfferModalReady] = useState(false);
   const [offerDecisionReady, setOfferDecisionReady] = useState(false);
   const [noDealTransitioning, setNoDealTransitioning] = useState(false);
+  const [finalCasePromptOpen, setFinalCasePromptOpen] = useState(false);
   // The case intro sequence (reveal/seal/shuffle/settle) is still playing
   // for a fresh board -- don't let a click register on the real grid until
   // it's done (or skipped).
@@ -128,6 +130,7 @@ export default function NflDealGame() {
       setOfferModalReady(false);
       setOfferDecisionReady(false);
       setNoDealTransitioning(false);
+      setFinalCasePromptOpen(false);
       return;
     }
     if (pendingReveal) return; // still showing/holding the case reveal
@@ -202,6 +205,8 @@ export default function NflDealGame() {
   }, [state.phase, state.playerCaseNumber]);
 
   const playerCase = getPlayerCase(state);
+  const finalCase = getFinalCase(state);
+  const tradeCase = state.phase === 'final-choice' ? state.cases.find((c) => c.status === 'available') ?? null : null;
   const eliminatedIds = getEliminatedQbIds(state);
   const showYourCase = playerCase && state.phase !== 'selecting-case' && state.phase !== 'finished';
   const positionConfig = POSITIONS[state.position];
@@ -222,6 +227,7 @@ export default function NflDealGame() {
     setDynastyDone(false);
     setDynastyTeamName('');
     setNoDealTransitioning(false);
+    setFinalCasePromptOpen(false);
     setCeremonyCaseNumber(null);
     setPendingReveal(null);
     if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
@@ -234,12 +240,12 @@ export default function NflDealGame() {
   // play again -- for a Dynasty run this advances to the next position
   // instead of resetting to the mode picker.
   function handleEndScreenContinue() {
-    if (!dynasty || !playerCase) {
+    if (!dynasty || !finalCase) {
       backToModePicker();
       return;
     }
 
-    const won = state.dealAccepted?.quarterback ?? playerCase.quarterback;
+    const won = state.dealAccepted?.quarterback ?? finalCase.quarterback;
     const results = { ...dynasty.results, [state.position]: won };
     const nextIndex = dynasty.index + 1;
 
@@ -252,6 +258,7 @@ export default function NflDealGame() {
     setDynasty({ ...dynasty, index: nextIndex, results });
     setCeremonyCaseNumber(null);
     setPendingReveal(null);
+    setFinalCasePromptOpen(false);
     // Skip the full ~25s rules explainer for stages 2 and 3 -- the player
     // already knows how the game works, they just need to see the new board.
     setIntroVisualStage('board');
@@ -307,7 +314,7 @@ export default function NflDealGame() {
   }
 
   const dynastyStageLabel = dynasty ? `Dynasty — Stage ${dynasty.index + 1} of ${DYNASTY_POSITIONS.length}: ${positionConfig.pluralLabel}` : null;
-  const visibleOffer = hasStarted && offerModalReady && !dynastyDone ? state.currentOffer : null;
+  const visibleOffer = hasStarted && offerModalReady && !dynastyDone && !finalCasePromptOpen ? state.currentOffer : null;
   const bankOfferIntroBlocked =
     pendingReveal !== null && (state.phase === 'bank-offer' || state.phase === 'final-choice');
 
@@ -430,11 +437,11 @@ export default function NflDealGame() {
               onSeasonReveal={() => audioRef.current?.playCreditsMusic()}
             />
           </div>
-        ) : state.phase === 'finished' && playerCase ? (
+        ) : state.phase === 'finished' && finalCase ? (
           <div className="mt-6">
             <NflDealEndScreen
               state={state}
-              playerCase={playerCase}
+              playerCase={finalCase}
               onPlayAgain={handleEndScreenContinue}
               ctaLabel={
                 dynasty
@@ -468,6 +475,34 @@ export default function NflDealGame() {
                     dispatch({ type: 'REJECT_OFFER' });
                   }}
                 />
+              ) : finalCasePromptOpen && playerCase && tradeCase ? (
+                <div className="animate-case-reveal rounded-xl border border-amber-500/35 bg-slate-900/80 p-5 text-center shadow-[0_14px_34px_rgba(0,0,0,0.35)] sm:p-7">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-300">Final choice</p>
+                  <h2 className="mt-1 text-2xl font-black text-white sm:text-3xl">Keep your case, or trade?</h2>
+                  <p className="mx-auto mt-2 max-w-lg text-sm text-slate-400">
+                    One case is left besides yours. Pick which sealed case you want to ride with.
+                  </p>
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => dispatch({ type: 'CHOOSE_FINAL_CASE', caseNumber: playerCase.number })}
+                      className="rounded-xl border border-teal-500/45 bg-teal-500/10 p-5 text-left transition-colors hover:border-teal-300 hover:bg-teal-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200"
+                    >
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">Keep</span>
+                      <span className="mt-2 block text-3xl font-black text-white">Case #{playerCase.number}</span>
+                      <span className="mt-1 block text-sm text-slate-400">The case you picked at the start.</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => dispatch({ type: 'CHOOSE_FINAL_CASE', caseNumber: tradeCase.number })}
+                      className="rounded-xl border border-amber-500/45 bg-amber-500/10 p-5 text-left transition-colors hover:border-amber-300 hover:bg-amber-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200"
+                    >
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">Trade</span>
+                      <span className="mt-2 block text-3xl font-black text-white">Case #{tradeCase.number}</span>
+                      <span className="mt-1 block text-sm text-slate-400">Swap for the last unopened case.</span>
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <>
                   <NflDealRoundPanel state={state} />
@@ -503,7 +538,15 @@ export default function NflDealGame() {
                     }}
                     onNoDeal={() => {
                       setNoDealTransitioning(false);
-                      dispatch({ type: 'REJECT_OFFER' });
+                      if (state.phase === 'final-choice') {
+                        if (tradeCase) {
+                          setFinalCasePromptOpen(true);
+                        } else {
+                          dispatch({ type: 'REJECT_OFFER' });
+                        }
+                      } else {
+                        dispatch({ type: 'REJECT_OFFER' });
+                      }
                     }}
                     onNoDealChosen={() => audioRef.current?.playNoDealAccepted()}
                     onNoDealTransitionStart={() => {

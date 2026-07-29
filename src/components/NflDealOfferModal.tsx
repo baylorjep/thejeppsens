@@ -47,6 +47,7 @@ export default function NflDealOfferModal({
   const noDealOverlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noDealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noDealTransitionStartedRef = useRef(false);
+  const noDealResolvedRef = useRef(false);
   const [imgFailed, setImgFailed] = useState(false);
   const [reaction, setReaction] = useState<'deal' | 'no-deal' | null>(null);
   const [resolving, setResolving] = useState(false);
@@ -80,9 +81,20 @@ export default function NflDealOfferModal({
     setResolving(true);
     setReaction('no-deal');
     noDealTransitionStartedRef.current = false;
+    noDealResolvedRef.current = false;
     onNoDealChosen();
     noDealOverlayTimeoutRef.current = setTimeout(finishNoDealOverlay, NO_DEAL_REACTION_OVERLAY_MS);
-    noDealTimeoutRef.current = setTimeout(onNoDeal, NO_DEAL_REACTION_DELAY_MS);
+    noDealTimeoutRef.current = setTimeout(resolveNoDeal, NO_DEAL_REACTION_DELAY_MS);
+  }
+
+  function resolveNoDeal() {
+    if (noDealResolvedRef.current) return;
+    noDealResolvedRef.current = true;
+    if (noDealTimeoutRef.current) {
+      clearTimeout(noDealTimeoutRef.current);
+      noDealTimeoutRef.current = null;
+    }
+    onNoDeal();
   }
 
   function finishNoDealOverlay() {
@@ -94,6 +106,7 @@ export default function NflDealOfferModal({
     }
     setReaction(null);
     onNoDealTransitionStart?.();
+    if (isFinal) resolveNoDeal();
   }
 
   if (reaction) {
@@ -113,7 +126,7 @@ export default function NflDealOfferModal({
           {isDeal ? 'DEAL!' : 'NO DEAL!'}
         </p>
         <p className="text-lg font-semibold text-white/90">
-          {isDeal ? `${offer.quarterback.name}, ${offer.offerOvr} OVR` : 'Back to the cases.'}
+          {isDeal ? `${offer.quarterback.name}, ${offer.offerOvr} OVR` : isFinal ? 'One last choice.' : 'Back to the cases.'}
         </p>
       </div>
     );
@@ -168,7 +181,7 @@ export default function NflDealOfferModal({
             <div className="flex flex-col items-stretch gap-2 sm:items-end">
               <p className="text-center text-[11px] text-slate-400 sm:text-right">
                 {isFinal
-                  ? 'No Deal means keeping your case — final answer.'
+                  ? 'No Deal means choosing to keep your case or trade.'
                   : `No Deal → open ${nextRoundCases} more case${nextRoundCases === 1 ? '' : 's'} before the next offer.`}
               </p>
               <div className="flex gap-2.5">

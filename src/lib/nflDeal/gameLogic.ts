@@ -94,6 +94,7 @@ export function createInitialGameState(position: PositionId, seed: number = crea
     currentOffer: null,
     offerHistory: [],
     dealAccepted: null,
+    finalCaseNumber: null,
   };
 }
 
@@ -232,14 +233,14 @@ export function openCase(state: GameState, caseNumber: number): GameState {
 export function acceptOffer(state: GameState): GameState {
   if (!state.currentOffer) return state;
   if (state.phase !== 'bank-offer' && state.phase !== 'final-choice') return state;
-  return { ...state, phase: 'finished', dealAccepted: state.currentOffer };
+  return { ...state, phase: 'finished', dealAccepted: state.currentOffer, finalCaseNumber: null };
 }
 
 export function rejectOffer(state: GameState): GameState {
   if (state.phase === 'final-choice') {
     // Keep currentOffer (don't null it) -- the end screen needs it to show
     // what was turned down, even though the offer modal itself is done.
-    return { ...state, phase: 'finished' };
+    return { ...state, phase: 'finished', finalCaseNumber: state.playerCaseNumber };
   }
   if (state.phase !== 'bank-offer') return state;
 
@@ -251,12 +252,31 @@ export function rejectOffer(state: GameState): GameState {
     casesToOpenThisRound: ROUND_SCHEDULE[nextRoundIndex] ?? 1,
     casesOpenedThisRound: [],
     currentOffer: null,
+    finalCaseNumber: null,
+  };
+}
+
+export function chooseFinalCase(state: GameState, caseNumber: number): GameState {
+  if (state.phase !== 'final-choice') return state;
+  const validFinalCase = state.cases.some(
+    (c) => c.number === caseNumber && (c.number === state.playerCaseNumber || c.status === 'available'),
+  );
+  if (!validFinalCase) return state;
+
+  return {
+    ...state,
+    phase: 'finished',
+    finalCaseNumber: caseNumber,
   };
 }
 
 // --- selectors -----------------------------------------------------------
 export function getPlayerCase(state: GameState): CaseState | null {
   return state.cases.find((c) => c.number === state.playerCaseNumber) ?? null;
+}
+
+export function getFinalCase(state: GameState): CaseState | null {
+  return state.cases.find((c) => c.number === (state.finalCaseNumber ?? state.playerCaseNumber)) ?? null;
 }
 
 export function getEliminatedQbIds(state: GameState): Set<string> {
@@ -292,6 +312,7 @@ export type GameAction =
   | { type: 'OPEN_CASE'; caseNumber: number }
   | { type: 'ACCEPT_OFFER' }
   | { type: 'REJECT_OFFER' }
+  | { type: 'CHOOSE_FINAL_CASE'; caseNumber: number }
   | { type: 'LOAD_STATE'; state: GameState };
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -306,6 +327,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return acceptOffer(state);
     case 'REJECT_OFFER':
       return rejectOffer(state);
+    case 'CHOOSE_FINAL_CASE':
+      return chooseFinalCase(state, action.caseNumber);
     case 'LOAD_STATE':
       return action.state;
     default:

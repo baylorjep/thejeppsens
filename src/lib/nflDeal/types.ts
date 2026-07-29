@@ -53,6 +53,7 @@ export interface GameState {
   currentOffer: BankOffer | null;
   offerHistory: BankOffer[];
   dealAccepted: BankOffer | null;
+  finalCaseNumber?: number | null;
 }
 
 export interface DynastyRunState {

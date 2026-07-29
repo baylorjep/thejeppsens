@@ -56,6 +56,11 @@ function isValidGameState(value: unknown): value is GameState {
   if (s.roundIndex < 0 || s.roundIndex >= ROUND_SCHEDULE.length) return false;
   if (s.casesToOpenThisRound < 0) return false;
   if (!Array.isArray(s.casesOpenedThisRound) || !Array.isArray(s.offerHistory)) return false;
+  if (s.finalCaseNumber != null) {
+    if (typeof s.finalCaseNumber !== 'number') return false;
+    const finalCase = s.cases.find((c) => c.number === s.finalCaseNumber);
+    if (!finalCase || (finalCase.number !== s.playerCaseNumber && finalCase.status !== 'available')) return false;
+  }
 
   return true;
 }

@@ -61,6 +61,7 @@ function SealedCase({ number }: { number: number }) {
 
 export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLabel = 'Play Again', onReveal }: Props) {
   const dealAccepted = state.dealAccepted;
+  const tradedFinalCase = !dealAccepted && state.finalCaseNumber != null && state.finalCaseNumber !== state.playerCaseNumber;
   // If no deal was accepted, state.currentOffer still holds the final offer
   // they turned down (see rejectOffer in gameLogic.ts).
   const declinedOffer = !dealAccepted ? state.currentOffer : null;
@@ -138,7 +139,9 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
           </div>
           <span className="text-xl font-black text-slate-600">vs</span>
           <div className="flex flex-col items-center gap-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Your case</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              {tradedFinalCase ? 'Chosen case' : 'Your case'}
+            </p>
             <SealedCase number={playerCase.number} />
           </div>
         </div>
@@ -191,7 +194,7 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
         {dealAccepted ? 'DEAL!' : 'NO DEAL'}
       </h2>
       <p className="animate-case-reveal mt-1 text-sm text-slate-400">
-        {dealAccepted ? 'You took the offer.' : 'You kept your case.'}
+        {dealAccepted ? 'You took the offer.' : tradedFinalCase ? 'You traded for the last case.' : 'You kept your case.'}
       </p>
 
       <div className="animate-case-reveal mx-auto mt-6 flex flex-col items-center gap-2">

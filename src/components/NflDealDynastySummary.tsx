@@ -105,39 +105,108 @@ function ResultCard({
   );
 }
 
+function hydrateLeaderboardPlayer(position: PositionId, player: DynastyLeaderboardEntry['players'][PositionId]): Player {
+  const boardPlayer = POSITIONS[position].board.find((candidate) => candidate.id === player.id);
+  return {
+    ...(boardPlayer ?? {
+      id: player.id,
+      name: player.name,
+      rank: 999,
+      espnId: null,
+    }),
+    name: player.name,
+    ovr: player.ovr,
+  };
+}
+
+function LeaderboardPlayerChip({ position, player }: { position: PositionId; player: Player }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const headshotUrl = espnHeadshotUrl(player);
+
+  return (
+    <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-950/70 p-2">
+      <div className="flex items-center gap-2">
+        <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-slate-700 bg-slate-800">
+          {headshotUrl && !imgFailed ? (
+            <Image
+              src={headshotUrl}
+              alt=""
+              fill
+              sizes="36px"
+              className={player.isTeam ? 'object-contain p-1' : 'object-cover'}
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-slate-300">
+              {player.name.split(' ').map((p) => p[0]).join('')}
+            </div>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">{POSITIONS[position].shortLabel}</p>
+          <p className="truncate text-[11px] font-semibold text-white">{player.name}</p>
+        </div>
+      </div>
+      <p className="mt-1 text-right text-xs font-black text-teal-300">{player.ovr}</p>
+    </div>
+  );
+}
+
 function DynastyLeaderboard({ entries }: { entries: DynastyLeaderboardEntry[] }) {
   if (entries.length === 0) return null;
 
   return (
-    <div className="animate-case-reveal mx-auto mt-5 max-w-3xl rounded-xl border border-slate-700 bg-slate-950/80 p-5 text-left">
+    <div className="animate-case-reveal mx-auto mt-5 max-w-4xl rounded-xl border border-amber-500/25 bg-slate-950/85 p-5 text-left shadow-2xl">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500">Dynasty Leaderboard</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300">All-Time Dynasty Leaderboard</p>
           <h3 className="mt-1 text-xl font-black text-white">Top 5 Teams</h3>
+          <p className="mt-1 text-xs font-semibold text-slate-500">Best saved teams across everyone who plays.</p>
         </div>
-        <Trophy className="h-6 w-6 text-amber-300" aria-hidden />
+        <div className="flex h-11 w-11 items-center justify-center rounded-full border border-amber-400/40 bg-amber-400/10">
+          <Trophy className="h-6 w-6 text-amber-300" aria-hidden />
+        </div>
       </div>
-      <div className="mt-4 space-y-2">
-        {entries.map((entry, index) => (
-          <div key={entry.id} className="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-black text-white">
-                  #{index + 1} {entry.teamName}
-                </p>
-                <p className="mt-1 truncate text-xs font-semibold text-slate-400">
-                  {DYNASTY_POSITIONS.map((pos) => `${POSITIONS[pos].shortLabel}: ${entry.players[pos].name} ${entry.players[pos].ovr}`).join(' | ')}
-                </p>
+      <div className="mt-4 space-y-3">
+        {entries.map((entry, index) => {
+          const hydratedPlayers = DYNASTY_POSITIONS.map((pos) => ({
+            position: pos,
+            player: hydrateLeaderboardPlayer(pos, entry.players[pos]),
+          }));
+
+          return (
+            <div key={entry.id} className="rounded-xl border border-slate-800 bg-slate-900/75 p-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-xs font-black text-amber-300">
+                      #{index + 1}
+                    </span>
+                    <p className="truncate text-base font-black text-white">{entry.teamName}</p>
+                  </div>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">{entry.finish}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-left sm:grid-cols-[auto_auto] sm:text-right">
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+                    <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Rating</p>
+                    <p className="text-2xl font-black text-teal-300">{entry.rating}</p>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+                    <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Record</p>
+                    <p className="text-2xl font-black text-white">
+                      {entry.wins}-{entry.losses}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="shrink-0 text-right">
-                <p className="text-xl font-black text-teal-300">{entry.rating}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                  {entry.wins}-{entry.losses}
-                </p>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-5">
+                {hydratedPlayers.map(({ position, player }) => (
+                  <LeaderboardPlayerChip key={position} position={position} player={player} />
+                ))}
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
