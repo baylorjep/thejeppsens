@@ -1,5 +1,5 @@
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
-import { DYNASTY_POSITIONS } from '@/lib/nflDeal/positions';
+import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
 import type { DynastyLeaderboardEntry, PositionId } from '@/lib/nflDeal/types';
 import { NextResponse } from 'next/server';
 
@@ -41,6 +41,30 @@ function isValidLeaderboardEntry(value: unknown): value is DynastyLeaderboardEnt
 }
 
 function rowToEntry(row: LeaderboardRow): DynastyLeaderboardEntry {
+  // Ensure all player records have espnId and isTeam fields (for backward compat with legacy entries)
+  const players = DYNASTY_POSITIONS.reduce(
+    (acc, pos) => {
+      const p = row.players[pos];
+      let espnId = p?.espnId;
+
+      // If espnId is missing, try to look it up from the player boards
+      if (!espnId && p?.id) {
+        const boardPlayer = POSITIONS[pos].board.find((candidate) => candidate.id === p.id);
+        espnId = boardPlayer?.espnId ?? null;
+      }
+
+      acc[pos] = {
+        id: p?.id ?? '',
+        name: p?.name ?? '',
+        ovr: p?.ovr ?? 0,
+        espnId: espnId ?? null,
+        isTeam: p?.isTeam ?? undefined,
+      };
+      return acc;
+    },
+    {} as DynastyLeaderboardEntry['players'],
+  );
+
   return {
     id: row.id,
     teamName: row.team_name,
@@ -48,7 +72,7 @@ function rowToEntry(row: LeaderboardRow): DynastyLeaderboardEntry {
     wins: row.wins,
     losses: row.losses,
     finish: row.finish,
-    players: row.players,
+    players,
     createdAt: row.created_at,
   };
 }
