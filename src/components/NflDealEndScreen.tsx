@@ -70,8 +70,10 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
   const declinedOffer = !dealAccepted ? state.currentOffer : null;
   const knownOffer = dealAccepted ?? declinedOffer;
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
-  const [stage, setStage] = useState<'stakes' | 'revealed'>(() => (knownOffer ? 'stakes' : 'revealed'));
+  const [stage, setStage] = useState<'stakes' | 'flipping' | 'revealed'>(() => (knownOffer && isFinalChoice ? 'stakes' : knownOffer ? 'stakes' : 'revealed'));
   const onRevealFiredRef = useRef(false);
+  const flipDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flipTransitionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const beatCase = dealAccepted ? dealAccepted.offerOvr > playerCase.quarterback.ovr : null;
   const beatDeclinedOffer = declinedOffer ? playerCase.quarterback.ovr > declinedOffer.offerOvr : null;
@@ -97,6 +99,28 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
   }, []);
+
+  // Auto-transition for final-choice: stakes → flipping → revealed
+  useEffect(() => {
+    if (stage !== 'stakes' || !isFinalChoice) return;
+    // Delay before flipping animation starts
+    flipDelayRef.current = setTimeout(() => setStage('flipping'), 1200);
+    return () => {
+      if (flipDelayRef.current) clearTimeout(flipDelayRef.current);
+    };
+  }, [stage, isFinalChoice]);
+
+  useEffect(() => {
+    if (stage !== 'flipping') return;
+    // Flip animation duration: 1.2s
+    flipTransitionRef.current = setTimeout(() => {
+      revealOutcomeNow();
+    }, 1200);
+    return () => {
+      if (flipTransitionRef.current) clearTimeout(flipTransitionRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
 
   useEffect(() => {
     if (stage !== 'stakes') return;
@@ -125,6 +149,95 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
     if (outcome) onReveal(outcome);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
+
+  if (stage === 'flipping' && isFinalChoice && declinedFinalCase && playerCase) {
+    return (
+      <div className="flex min-h-[420px] flex-col items-center justify-center gap-8 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-8 text-center sm:p-10">
+        <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">Revealing cases...</p>
+        <div className="flex items-center gap-8 sm:gap-12">
+          {/* Left case flip - traded away */}
+          <div className="flex flex-col items-center gap-3">
+            <div
+              className="relative h-32 w-40 sm:h-40 sm:w-48 rounded-lg border-2 border-teal-500/60"
+              style={{
+                transformStyle: 'preserve-3d',
+                animation: 'flip3d 1.2s ease-in-out forwards',
+              }}
+            >
+              {/* Sealed side */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-gradient-to-b from-slate-600 to-slate-900 border-2 border-teal-500/60" style={{ backfaceVisibility: 'hidden' }}>
+                <div className="text-center">
+                  <div className="h-3 w-10 rounded-t-md border-2 border-b-0 border-slate-400 mx-auto mb-2" />
+                  <div className="text-xl font-bold text-slate-200">?</div>
+                </div>
+              </div>
+              {/* Revealed side */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-slate-800" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                <div className="text-center">
+                  <div className="relative h-12 w-12 overflow-hidden rounded-full border border-slate-600 bg-slate-700 mx-auto mb-2 sm:h-14 sm:w-14">
+                    {espnHeadshotUrl(declinedFinalCase.quarterback) ? (
+                      <Image src={espnHeadshotUrl(declinedFinalCase.quarterback)!} alt="" fill sizes="56px" className="object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs font-bold text-slate-300">
+                        {declinedFinalCase.quarterback.name.split(' ').map((p) => p[0]).join('')}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs font-bold text-white">{declinedFinalCase.quarterback.name.split(' ').slice(-1)[0]}</p>
+                  <p className="text-lg font-black text-rose-300">{declinedFinalCase.quarterback.ovr}</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mt-2">Traded away</p>
+          </div>
+
+          {/* Right case flip - received */}
+          <div className="flex flex-col items-center gap-3">
+            <div
+              className="relative h-32 w-40 sm:h-40 sm:w-48 rounded-lg border-2 border-teal-500/60"
+              style={{
+                transformStyle: 'preserve-3d',
+                animation: 'flip3d 1.2s ease-in-out forwards',
+              }}
+            >
+              {/* Sealed side */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-gradient-to-b from-slate-600 to-slate-900 border-2 border-teal-500/60" style={{ backfaceVisibility: 'hidden' }}>
+                <div className="text-center">
+                  <div className="h-3 w-10 rounded-t-md border-2 border-b-0 border-slate-400 mx-auto mb-2" />
+                  <div className="text-xl font-bold text-slate-200">?</div>
+                </div>
+              </div>
+              {/* Revealed side */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-slate-800" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                <div className="text-center">
+                  <div className="relative h-12 w-12 overflow-hidden rounded-full border border-slate-600 bg-slate-700 mx-auto mb-2 sm:h-14 sm:w-14">
+                    {espnHeadshotUrl(playerCase.quarterback) ? (
+                      <Image src={espnHeadshotUrl(playerCase.quarterback)!} alt="" fill sizes="56px" className="object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs font-bold text-slate-300">
+                        {playerCase.quarterback.name.split(' ').map((p) => p[0]).join('')}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs font-bold text-white">{playerCase.quarterback.name.split(' ').slice(-1)[0]}</p>
+                  <p className="text-lg font-black text-teal-300">{playerCase.quarterback.ovr}</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mt-2">Received</p>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes flip3d {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(90deg); }
+            100% { transform: rotateY(180deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   if (stage === 'stakes' && knownOffer) {
     // For final-choice rounds, show both the chosen case and the passed case

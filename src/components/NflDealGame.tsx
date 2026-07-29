@@ -225,7 +225,7 @@ export default function NflDealGame() {
   const finalCase = getFinalCase(state);
   const tradeCase = state.phase === 'final-choice' ? state.cases.find((c) => c.status === 'available') ?? null : null;
   const eliminatedIds = getEliminatedQbIds(state);
-  const showYourCase = playerCase && state.phase !== 'selecting-case' && state.phase !== 'finished';
+  const showYourCase = playerCase && state.phase !== 'selecting-case' && state.phase !== 'finished' && state.phase !== 'final-choice';
   const positionConfig = POSITIONS[state.position];
   const offerTier = state.currentOffer ? classifyOfferTier(state.currentOffer) : null;
   const dynastyNameMissing = selectedMode === 'DYNASTY' && dynastyTeamName.trim().length === 0;
