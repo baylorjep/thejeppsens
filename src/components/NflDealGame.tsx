@@ -46,7 +46,7 @@ const MODE_OPTIONS: { id: Mode; label: string }[] = [
 ];
 
 function modeSubtitle(mode: Mode): string {
-  if (mode === 'DYNASTY') return 'QB, RB, WR, TE, then D/ST. Build a dynasty, one case at a time.';
+  if (mode === 'DYNASTY') return 'Build a five-position roster through QB, RB, WR, TE, and D/ST. One Deal or No Deal round per position.';
   return `32 ${POSITIONS[mode].pluralLabel}. One sealed case. The Bank is watching.`;
 }
 
