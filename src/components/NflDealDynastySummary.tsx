@@ -100,7 +100,7 @@ function ResultCard({
           </div>
         ))}
       </div>
-      <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Baylor & Isabel Deal or No Deal Dynasty</p>
+      <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Deal or No Deal Dynasty</p>
     </div>
   );
 }
