@@ -42,6 +42,21 @@ function isValidLeaderboardEntry(value: unknown): value is DynastyLeaderboardEnt
   return true;
 }
 
+function inferPlayoffWins(finish: string): number {
+  switch (finish) {
+    case 'Super Bowl Champions':
+      return 4;
+    case 'Super Bowl Runner-Up':
+      return 3;
+    case 'Conference Championship':
+      return 2;
+    case 'Divisional Round':
+      return 1;
+    default:
+      return 0;
+  }
+}
+
 function rowToEntry(row: LeaderboardRow): DynastyLeaderboardEntry {
   // Ensure all player records have espnId and isTeam fields (for backward compat with legacy entries)
   const players = DYNASTY_POSITIONS.reduce(
@@ -67,13 +82,16 @@ function rowToEntry(row: LeaderboardRow): DynastyLeaderboardEntry {
     {} as DynastyLeaderboardEntry['players'],
   );
 
+  // For legacy entries with playoff_wins = 0, infer from finish string
+  const playoffWins = row.playoff_wins === 0 && row.finish !== 'Missed Playoffs' && row.finish !== 'Wild Card Round' ? inferPlayoffWins(row.finish) : row.playoff_wins;
+
   return {
     id: row.id,
     teamName: row.team_name,
     rating: Number(row.rating),
     wins: row.wins,
     losses: row.losses,
-    playoffWins: row.playoff_wins,
+    playoffWins,
     finish: row.finish,
     players,
     createdAt: row.created_at,
