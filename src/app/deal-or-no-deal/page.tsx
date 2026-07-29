@@ -4,7 +4,7 @@ import NflDealGameLoader from '@/components/NflDealGameLoader';
 
 export const metadata: Metadata = {
   title: 'Baylor & Isabel - Deal or No Deal',
-  description: 'QB, RB, WR, or build a Dynasty. 32 sealed cases. Deal, or no deal?',
+  description: 'QB, RB, WR, TE, D/ST, or build a Dynasty. 32 sealed cases. Deal, or no deal?',
 };
 
 export default function DealOrNoDealPage() {

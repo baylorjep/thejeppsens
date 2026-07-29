@@ -2,14 +2,15 @@ import { buildBoard } from './playerData';
 
 export { espnHeadshotUrl } from './playerData';
 
-// Starter board: current QB1 for each of the 32 NFL teams, Madden NFL 27
-// overall ratings. Kansas City kept as Mahomes (Madden's rated QB1 and the
+// Starter board: current QB1 for each of the 32 NFL teams. Uses official
+// Madden NFL 27 reveals where available, then MaddenRatings-listed OVRs for
+// unrevealed players. Kansas City kept as Mahomes (Madden's rated QB1 and the
 // long-term starter) even though Justin Fields is projected to open the
 // 2026 season while Mahomes rehabs a torn ACL/LCL.
 // espnId powers the case-reveal headshot (see espnHeadshotUrl in playerData).
 const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
   ['Josh Allen', 99, '3918298'],
-  ['Matthew Stafford', 98, '12483'],
+  ['Matthew Stafford', 99, '12483'],
   ['Joe Burrow', 96, '3915511'],
   ['Lamar Jackson', 94, '3916387'],
   ['Drake Maye', 93, '4431452'],

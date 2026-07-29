@@ -15,6 +15,10 @@ export interface NflDealAudioHandle {
    * wraps it up shortly after -- lets a player who taps through a case
    * reveal skip the suspense without losing the sting's punchline. */
   skipCurrentCue: () => void;
+  /** Skips the banker phone-ring lead-in and jumps straight to the
+   * "deal or no deal" prompt. Used when the player taps the waiting offer
+   * panel instead of sitting through the full banker call. */
+  skipBankOfferIntro: () => void;
   /** Plays the deal-accepted crowd-reaction clip sized to how big the offer
    * was. Call the instant the Deal button is clicked, before dispatching the
    * state change -- the caller is responsible for delaying that dispatch at
@@ -95,9 +99,9 @@ const CUES: Record<
   bankOffer: { videoId: '2wo6bN035RI', kind: 'loop' },
   bankOfferLarge: { videoId: 'b1b6SnLAok8', kind: 'loop' },
   // Crowd reaction to a Deal being made, sized to how big the offer was.
-  dealAcceptedBig: { videoId: 'iMkkUQOgOjE', start: 0, end: 19, kind: 'oneshot' },
-  dealAcceptedMedium: { videoId: 'SRp82c7m4jc', start: 0, end: 13, kind: 'oneshot' },
-  dealAcceptedSmall: { videoId: 'GsN1dPo7Vrg', start: 0, end: 9, kind: 'oneshot' },
+  dealAcceptedBig: { videoId: 'iMkkUQOgOjE', end: 19, kind: 'oneshot' },
+  dealAcceptedMedium: { videoId: 'SRp82c7m4jc', end: 13, kind: 'oneshot' },
+  dealAcceptedSmall: { videoId: 'GsN1dPo7Vrg', end: 9, kind: 'oneshot' },
   // Crowd reaction to a No Deal.
   noDealAccepted: { videoId: 'wEw4c5sHqFM', start: 6040.5, end: 6046, kind: 'oneshot' },
   credits: { videoId: 'A8430xpRh8o', kind: 'loop' },
@@ -108,8 +112,11 @@ type CueKey = keyof typeof CUES;
 
 const INTRO_SEQUENCE: CueKey[] = ['introReady', 'introMonologue', 'pickCasePrompt'];
 const DEFAULT_ONESHOT_MS = 5000; // fallback for any cue without an explicit start/end
-const RING_REPEAT_COUNT = 2; // rings 1 (initial) + this many more before the offer loop takes over
-const RING_START_DELAY_MS = 2000; // beat after the elimination sting before the ring kicks in
+const SKIP_PAYOFF_LEAD_SECONDS: Partial<Record<CueKey, number>> = {
+  goodElimination: 1.5,
+  badElimination: 1,
+};
+const BANK_RING_COUNT = 2; // total rings before the "deal or no deal" prompt
 const DEAL_ACCEPTED_CUE_BY_TIER: Record<OfferTier, CueKey> = {
   big: 'dealAcceptedBig',
   medium: 'dealAcceptedMedium',
@@ -118,7 +125,7 @@ const DEAL_ACCEPTED_CUE_BY_TIER: Record<OfferTier, CueKey> = {
 
 function cueDurationMs(key: CueKey): number {
   const cue = CUES[key];
-  return cue.start != null && cue.end != null ? (cue.end - cue.start) * 1000 : DEFAULT_ONESHOT_MS;
+  return cue.end != null ? (cue.end - (cue.start ?? 0)) * 1000 : DEFAULT_ONESHOT_MS;
 }
 
 function resolvePhaseCue(
@@ -153,16 +160,23 @@ interface EliminationEvent {
 
 const NflDealAudioController = forwardRef<
   NflDealAudioHandle,
-  { phase: GamePhase; eliminationEvent: EliminationEvent | null; enabled: boolean; roundIndex: number; offerTier: OfferTier | null }
->(function NflDealAudioController({ phase, eliminationEvent, enabled, roundIndex, offerTier }, ref) {
+  {
+    phase: GamePhase;
+    eliminationEvent: EliminationEvent | null;
+    enabled: boolean;
+    roundIndex: number;
+    offerTier: OfferTier | null;
+    onBankOfferPromptReady?: () => void;
+  }
+>(function NflDealAudioController({ phase, eliminationEvent, enabled, roundIndex, offerTier, onBankOfferPromptReady }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLAudioElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
   const activeCueRef = useRef<CueKey | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const ringDelayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queueRef = useRef<CueKey[]>([]);
   const lastEliminationKeyRef = useRef(0);
+  const bankOfferSequenceRef = useRef(0);
 
   const [playerReady, setPlayerReady] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -253,6 +267,19 @@ const NflDealAudioController = forwardRef<
     }
   }
 
+  function stopRing() {
+    const ring = ringRef.current;
+    if (!ring) return;
+    ring.pause();
+    ring.currentTime = 0;
+    ring.onended = null;
+  }
+
+  function cancelBankOfferIntro() {
+    bankOfferSequenceRef.current += 1;
+    stopRing();
+  }
+
   function finishOneshot(cueKey: CueKey) {
     playerRef.current?.pauseVideo();
     if (INTRO_SEQUENCE.includes(cueKey)) {
@@ -292,7 +319,7 @@ const NflDealAudioController = forwardRef<
     if (cue.kind !== 'oneshot' || cue.end == null) return;
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    const payoffLeadSeconds = 1;
+    const payoffLeadSeconds = SKIP_PAYOFF_LEAD_SECONDS[cueKey] ?? 1;
     const seekTarget = Math.max(cue.start ?? 0, cue.end - payoffLeadSeconds);
     player.seekTo(seekTarget, true);
     timeoutRef.current = setTimeout(() => finishOneshot(cueKey), payoffLeadSeconds * 1000);
@@ -306,12 +333,14 @@ const NflDealAudioController = forwardRef<
   // resolvePhaseCue treats as silent).
   function playDealAccepted(tier: OfferTier) {
     if (!playerReady || muted) return;
+    cancelBankOfferIntro();
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     playCue(DEAL_ACCEPTED_CUE_BY_TIER[tier]);
   }
 
   function playNoDealAccepted() {
     if (!playerReady || muted) return;
+    cancelBankOfferIntro();
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     playCue('noDealAccepted');
   }
@@ -322,6 +351,8 @@ const NflDealAudioController = forwardRef<
   }
 
   function startBankOfferSequence() {
+    const sequenceId = bankOfferSequenceRef.current + 1;
+    bankOfferSequenceRef.current = sequenceId;
     activeCueRef.current = offerTier === 'big' ? 'bankOfferLarge' : 'bankOffer'; // claim it now so this doesn't re-trigger on every render
     // A still-pending cleanup timeout from whatever cue played right before
     // this (e.g. an elimination sting) would otherwise fire later and stomp
@@ -329,22 +360,36 @@ const NflDealAudioController = forwardRef<
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     const ring = ringRef.current;
     if (!ring) {
+      onBankOfferPromptReady?.();
       playCue('dealOrNoDealChant');
       return;
     }
     ring.volume = 0.8;
     let ringsPlayed = 0;
     const playNextRing = () => {
+      if (bankOfferSequenceRef.current !== sequenceId) return;
       ringsPlayed += 1;
-      if (ringsPlayed > RING_REPEAT_COUNT) {
+      if (ringsPlayed > BANK_RING_COUNT) {
+        onBankOfferPromptReady?.();
         playCue('dealOrNoDealChant');
         return;
       }
       ring.currentTime = 0;
-      ring.play().catch(() => playCue('dealOrNoDealChant')); // no ring file present -- just start the chant
+      ring.play().catch(() => {
+        onBankOfferPromptReady?.();
+        playCue('dealOrNoDealChant');
+      }); // no ring file present -- just start the chant
     };
     ring.onended = playNextRing;
     playNextRing();
+  }
+
+  function skipBankOfferIntro() {
+    const cueKey = activeCueRef.current;
+    if (cueKey !== 'bankOffer' && cueKey !== 'bankOfferLarge') return;
+    cancelBankOfferIntro();
+    onBankOfferPromptReady?.();
+    playCue('dealOrNoDealChant');
   }
 
   // Call any time -- safe to call repeatedly, never restarts a cue that's
@@ -361,7 +406,7 @@ const NflDealAudioController = forwardRef<
     const desired = resolvePhaseCue(phase, introDone, revealDone, openingCasesCue, offerTier);
     if (!desired) {
       playerRef.current?.pauseVideo();
-      ringRef.current?.pause();
+      cancelBankOfferIntro();
       activeCueRef.current = null;
       return;
     }
@@ -370,8 +415,7 @@ const NflDealAudioController = forwardRef<
       // Claim it immediately so a repeat call during the delay window
       // (re-renders, unmute, etc.) doesn't restart the wait.
       activeCueRef.current = desired;
-      if (ringDelayTimeoutRef.current) clearTimeout(ringDelayTimeoutRef.current);
-      ringDelayTimeoutRef.current = setTimeout(startBankOfferSequence, RING_START_DELAY_MS);
+      startBankOfferSequence();
     } else {
       playCue(desired);
     }
@@ -401,6 +445,7 @@ const NflDealAudioController = forwardRef<
       startForCurrentPhase();
     },
     skipCurrentCue,
+    skipBankOfferIntro,
     playDealAccepted,
     playNoDealAccepted,
   }));
@@ -411,9 +456,8 @@ const NflDealAudioController = forwardRef<
     window.localStorage.setItem(MUTE_STORAGE_KEY, String(next));
     if (next) {
       playerRef.current?.pauseVideo();
-      ringRef.current?.pause();
+      cancelBankOfferIntro();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (ringDelayTimeoutRef.current) clearTimeout(ringDelayTimeoutRef.current);
       return;
     }
     // Unmuting happens inside this click handler, so starting playback here

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
 import type { CaseState } from '@/lib/nflDeal/types';
@@ -33,6 +33,21 @@ function shuffledOrder(count: number): number[] {
   return order;
 }
 
+function mixStyle(visualIndex: number): CSSProperties {
+  const col = visualIndex % 6;
+  const row = Math.floor(visualIndex / 6);
+  const centerCol = 2.5;
+  const centerRow = 2.5;
+  const x = (centerCol - col) * 72;
+  const y = (centerRow - row) * 56;
+  const rotation = ((visualIndex * 47) % 34) - 17;
+  return {
+    '--mix-x': `${x}px`,
+    '--mix-y': `${y}px`,
+    '--mix-rot': `${rotation}deg`,
+  } as CSSProperties;
+}
+
 function IntroTile({ caseState, stage }: { caseState: CaseState; stage: Stage }) {
   const [imgFailed, setImgFailed] = useState(false);
   const headshotUrl = espnHeadshotUrl(caseState.quarterback);
@@ -44,7 +59,7 @@ function IntroTile({ caseState, stage }: { caseState: CaseState; stage: Stage })
       className={[
         'relative flex aspect-[5/4] w-full items-center justify-center overflow-hidden rounded-lg border transition-colors duration-300',
         showPlayer ? 'border-slate-600 bg-slate-800/80' : 'border-slate-700 bg-gradient-to-b from-slate-600 to-slate-900',
-        stage === 'seal' ? 'animate-case-reveal' : stage === 'settle' ? 'animate-case-tumble-in' : '',
+        stage === 'seal' ? 'animate-case-reveal' : stage === 'shuffle' ? 'animate-case-mix' : stage === 'settle' ? 'animate-case-tumble-in' : '',
       ].join(' ')}
     >
       {showPlayer ? (
@@ -122,9 +137,16 @@ export default function NflDealCaseIntroSequence({ cases, onSkip }: { cases: Cas
       <p className="animate-case-reveal mb-4 text-center text-xs font-semibold uppercase tracking-[0.3em] text-slate-500" key={stage}>
         {STAGE_LABEL[stage]}
       </p>
-      <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 sm:gap-3">
         {cases.map((c, i) => (
-          <div key={c.number} style={{ order: order[i] }} className="w-[calc(25%-6px)] sm:w-[calc(16.6667%-10px)]">
+          <div
+            key={c.number}
+            style={{ order: order[i], ...mixStyle(order[i]) }}
+            className={[
+              'transition-transform duration-700 ease-in-out',
+              stage === 'shuffle' ? 'z-10 translate-x-[var(--mix-x)] translate-y-[var(--mix-y)] scale-75 rotate-[var(--mix-rot)]' : '',
+            ].join(' ')}
+          >
             <IntroTile caseState={c} stage={stage} />
           </div>
         ))}

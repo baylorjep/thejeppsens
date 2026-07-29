@@ -29,10 +29,6 @@ import type { Player, PositionId } from '@/lib/nflDeal/types';
 // nudge per-outcome if it drifts out of sync with the clips.
 const REVEAL_DELAY_MS_BY_OUTCOME: Record<'good' | 'bad', number> = { good: 4500, bad: 5000 };
 const REVEAL_HOLD_MS = 1500;
-// Extra room after the reveal for the banker's-call ring before the offer
-// modal actually appears, so a round-ending case doesn't cut straight from
-// "here's who you lost" to the offer with no beat in between.
-const OFFER_MODAL_DELAY_MS = 1800;
 const CASE_SELECTED_SRC = '/sounds/nfl-deal/case-selected.mp3';
 
 type Mode = PositionId | 'DYNASTY';
@@ -47,7 +43,7 @@ const MODE_OPTIONS: { id: Mode; label: string }[] = [
 ];
 
 function modeSubtitle(mode: Mode): string {
-  if (mode === 'DYNASTY') return 'QB, then RB, then WR. Build a dynasty, one case at a time.';
+  if (mode === 'DYNASTY') return 'QB, RB, WR, TE, then D/ST. Build a dynasty, one case at a time.';
   return `32 ${POSITIONS[mode].pluralLabel}. One sealed case. The Bank is watching.`;
 }
 
@@ -69,9 +65,8 @@ export default function NflDealGame() {
     return createInitialGameState('QB');
   });
   const [selectedMode, setSelectedMode] = useState<Mode>(state.position);
-  // Only set while playing a Dynasty run: tracks which of the three
-  // positions we're on and the winning player banked from each finished
-  // stage so far.
+  // Only set while playing a Dynasty run: tracks which stage we're on and
+  // the winning player banked from each finished stage so far.
   const [dynasty, setDynasty] = useState<{ index: number; results: Partial<Record<PositionId, Player>> } | null>(null);
   const [dynastyDone, setDynastyDone] = useState(false);
   const [ceremonyCaseNumber, setCeremonyCaseNumber] = useState<number | null>(null);
@@ -80,30 +75,35 @@ export default function NflDealGame() {
   const [hasStarted, setHasStarted] = useState(false);
   const [introVisualStage, setIntroVisualStage] = useState<'rules' | 'board'>('rules');
   const [offerModalReady, setOfferModalReady] = useState(false);
+  const [offerDecisionReady, setOfferDecisionReady] = useState(false);
   // The case intro sequence (reveal/seal/shuffle/settle) is still playing
   // for a fresh board -- don't let a click register on the real grid until
   // it's done (or skipped).
   const [boardSettled, setBoardSettled] = useState(false);
   const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const offerModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const offerDecisionFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boardSettledTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const eliminationCounterRef = useRef(0);
   const prevPhaseRef = useRef(state.phase);
   const audioRef = useRef<NflDealAudioHandle>(null);
 
-  // Re-arms every time a fresh case-selection board appears (each NEW_GAME
-  // dispatch gets its own seed), including Dynasty's later stages, which
-  // skip the rules intro but still tumble in a brand new board.
+  // Re-arms every time a fresh case-selection board is actually shown. The
+  // first stage can spend a while in the rules intro, so don't let the board
+  // intro's timer burn down while that separate screen is mounted.
   useEffect(() => {
     if (state.phase !== 'selecting-case') return;
+    if (introVisualStage !== 'board') {
+      setBoardSettled(false);
+      return;
+    }
     setBoardSettled(false);
     if (boardSettledTimeoutRef.current) clearTimeout(boardSettledTimeoutRef.current);
     boardSettledTimeoutRef.current = setTimeout(() => setBoardSettled(true), CASE_INTRO_TOTAL_MS);
     return () => {
       if (boardSettledTimeoutRef.current) clearTimeout(boardSettledTimeoutRef.current);
     };
-  }, [state.seed, state.phase]);
+  }, [state.seed, state.phase, introVisualStage]);
 
   // Lets the case intro sequence's own click-to-skip end the wait early too.
   function skipBoardIntro() {
@@ -111,23 +111,25 @@ export default function NflDealGame() {
     setBoardSettled(true);
   }
 
-  // Don't show the offer modal the instant phase flips to bank-offer/final-
-  // choice -- let the case reveal finish holding, then give the banker's
-  // ring a moment, so a round-ending case doesn't jump straight to the
-  // offer with the reveal barely visible.
+  // As soon as the last case reveal closes, show the banker-call panel and
+  // let the audio controller unlock the real decision when the "deal or no
+  // deal" prompt starts. A fallback keeps muted/audio-failed games playable.
   useEffect(() => {
     const isOfferPhase = state.phase === 'bank-offer' || state.phase === 'final-choice';
-    if (offerModalTimeoutRef.current) clearTimeout(offerModalTimeoutRef.current);
+    if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
     if (!isOfferPhase) {
       setOfferModalReady(false);
+      setOfferDecisionReady(false);
       return;
     }
     if (pendingReveal) return; // still showing/holding the case reveal
-    offerModalTimeoutRef.current = setTimeout(() => setOfferModalReady(true), OFFER_MODAL_DELAY_MS);
+    setOfferModalReady(true);
+    setOfferDecisionReady(false);
+    offerDecisionFallbackTimeoutRef.current = setTimeout(() => setOfferDecisionReady(true), 8000);
     return () => {
-      if (offerModalTimeoutRef.current) clearTimeout(offerModalTimeoutRef.current);
+      if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
     };
-  }, [state.phase, pendingReveal]);
+  }, [state.phase, state.currentOffer, pendingReveal]);
 
   function handleStartGame() {
     // The mode selector defaults to whatever position a resumed game was
@@ -193,6 +195,7 @@ export default function NflDealGame() {
     setPendingReveal(null);
     if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
     if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
+    if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
   }
 
   // Called when a single-position game finishes and the player wants to
@@ -272,6 +275,7 @@ export default function NflDealGame() {
   }
 
   const dynastyStageLabel = dynasty ? `Dynasty — Stage ${dynasty.index + 1} of ${DYNASTY_POSITIONS.length}: ${positionConfig.pluralLabel}` : null;
+  const visibleOffer = hasStarted && offerModalReady && !dynastyDone ? state.currentOffer : null;
 
   return (
     <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.08),transparent_60%)] pb-20 text-slate-100">
@@ -282,6 +286,10 @@ export default function NflDealGame() {
         enabled={hasStarted}
         roundIndex={state.roundIndex}
         offerTier={offerTier}
+        onBankOfferPromptReady={() => {
+          if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
+          setOfferDecisionReady(true);
+        }}
       />
 
       {!hasStarted ? (
@@ -394,6 +402,23 @@ export default function NflDealGame() {
                   else if (state.phase === 'opening-cases') openCase(caseNumber);
                 }}
               />
+              {visibleOffer && (
+                <NflDealOfferModal
+                  offer={visibleOffer}
+                  isFinal={state.phase === 'final-choice'}
+                  roundIndex={state.roundIndex}
+                  decisionReady={offerDecisionReady}
+                  onSkipIntro={() => {
+                    if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
+                    setOfferDecisionReady(true);
+                    audioRef.current?.skipBankOfferIntro();
+                  }}
+                  onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
+                  onDealChosen={() => audioRef.current?.playDealAccepted(offerTier ?? 'medium')}
+                  onNoDeal={() => dispatch({ type: 'REJECT_OFFER' })}
+                  onNoDealChosen={() => audioRef.current?.playNoDealAccepted()}
+                />
+              )}
             </div>
             <div className="lg:col-start-2 lg:row-start-1 lg:row-span-2">
               <NflDealQbBoard
@@ -411,18 +436,6 @@ export default function NflDealGame() {
           </div>
         )}
       </div>
-      )}
-
-      {hasStarted && offerModalReady && state.currentOffer && !dynastyDone && (
-        <NflDealOfferModal
-          offer={state.currentOffer}
-          isFinal={state.phase === 'final-choice'}
-          roundIndex={state.roundIndex}
-          onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
-          onDealChosen={() => audioRef.current?.playDealAccepted(offerTier ?? 'medium')}
-          onNoDeal={() => dispatch({ type: 'REJECT_OFFER' })}
-          onNoDealChosen={() => audioRef.current?.playNoDealAccepted()}
-        />
       )}
 
       {pendingReveal && (

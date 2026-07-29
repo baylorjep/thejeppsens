@@ -1,18 +1,18 @@
 import { buildBoard } from './playerData';
 
-// Best WR per team, current Madden NFL 27 OVR + ESPN athlete ID (all IDs
-// verified against real headshots, not just name matches). Reflects real
-// 2026 offseason moves/depth-chart shifts vs last cycle -- e.g. Mike Evans
-// (TB->SF), A.J. Brown (PHI->NE). Two judgment calls where the roster's
-// top-two were within 1 OVR point: Jacksonville's Travis Hunter kept over
-// Jakobi Meyers (both 82) for relevance as the team's headline rookie;
-// Arizona's Michael Wilson (81) edges Marvin Harrison Jr (80) on rating
-// alone despite MHJ's higher profile.
+// Best WR per team, current Madden NFL 27 OVR + ESPN athlete ID. Uses
+// official Madden NFL 27 reveals where available, then MaddenRatings-listed
+// OVRs for unrevealed players. Reflects real 2026 offseason moves/depth-chart
+// shifts vs last cycle -- e.g. Mike Evans (TB->SF), A.J. Brown (PHI->NE). Two
+// judgment calls where the roster's top-two were within 1 OVR point:
+// Jacksonville's Travis Hunter kept over Jakobi Meyers (both 82) for relevance
+// as the team's headline rookie; Arizona's Michael Wilson (81) edges Marvin
+// Harrison Jr (80) on rating alone despite MHJ's higher profile.
 const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
   ["Ja'Marr Chase", 99, '4362628'],
+  ['Jaxon Smith-Njigba', 99, '4430878'],
   ['Puka Nacua', 97, '4426515'],
   ['Amon-Ra St. Brown', 96, '4374302'],
-  ['Jaxon Smith-Njigba', 95, '4430878'],
   ['Justin Jefferson', 94, '4262921'],
   ['CeeDee Lamb', 93, '4241389'],
   ['Drake London', 92, '4426502'],

@@ -21,4 +21,4 @@ export const POSITIONS: Record<PositionId, PositionConfig> = {
   DST: { id: 'DST', label: 'Defense', shortLabel: 'D/ST', pluralLabel: 'Defenses', board: DST_BOARD },
 };
 
-export const DYNASTY_POSITIONS: PositionId[] = ['QB', 'RB', 'WR'];
+export const DYNASTY_POSITIONS: PositionId[] = ['QB', 'RB', 'WR', 'TE', 'DST'];

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Confetti from 'react-confetti';
-import { RotateCcw, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowRight, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react';
 import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
 import type { CaseState, GameState, Player } from '@/lib/nflDeal/types';
 
@@ -79,6 +79,7 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
   const isGood = outcome === 'good';
   const isBad = outcome === 'bad';
   const celebrate = isGood || playerCase.quarterback.ovr >= 90;
+  const isRestartCta = ctaLabel === 'Play Again';
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
@@ -292,7 +293,7 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLa
         onClick={onPlayAgain}
         className="mx-auto mt-8 flex items-center gap-2 rounded-lg bg-teal-500 px-5 py-3 text-sm font-bold uppercase tracking-wide text-slate-950 transition-colors hover:bg-teal-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200"
       >
-        <RotateCcw className="h-4 w-4" aria-hidden />
+        {isRestartCta ? <RotateCcw className="h-4 w-4" aria-hidden /> : <ArrowRight className="h-4 w-4" aria-hidden />}
         {ctaLabel}
       </button>
     </div>
