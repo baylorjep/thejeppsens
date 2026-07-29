@@ -379,7 +379,10 @@ export default function NflDealGame() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             {dynastyStageLabel && (
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-400">{dynastyStageLabel}</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-400">
+                {dynastyStageLabel}
+                <span className="ml-2 text-slate-500">{dynasty?.teamName}</span>
+              </p>
             )}
             <h1 className="text-xl font-black tracking-tight text-white sm:text-2xl">Deal or No Deal</h1>
             <p className="text-xs text-slate-400">
