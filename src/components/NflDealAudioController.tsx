@@ -19,6 +19,8 @@ export interface NflDealAudioHandle {
    * caller is responsible for delaying that dispatch at least as long as
    * this clip runs, since a phase change silences whatever's playing. */
   playDealAccepted: () => void;
+  /** Same idea as playDealAccepted, for the No Deal button. */
+  playNoDealAccepted: () => void;
 }
 
 // YouTube's official embed API -- streams straight from YouTube, nothing
@@ -64,6 +66,7 @@ const CUES: Record<
   | 'dealOrNoDealChant'
   | 'bankOffer'
   | 'dealAccepted'
+  | 'noDealAccepted'
   | 'credits'
   | 'goodElimination'
   | 'badElimination',
@@ -80,6 +83,8 @@ const CUES: Record<
   bankOffer: { videoId: '2wo6bN035RI', kind: 'loop' },
   // Crowd reaction to a Deal being made.
   dealAccepted: { videoId: 'jmCyu3P4bwk', start: 1111.5, end: 1116, kind: 'oneshot' },
+  // Crowd reaction to a No Deal.
+  noDealAccepted: { videoId: 'wEw4c5sHqFM', start: 6040.5, end: 6046, kind: 'oneshot' },
   credits: { videoId: 'A8430xpRh8o', kind: 'loop' },
   goodElimination: { videoId: 'jrEriKj1C44', start: 185, end: 191, kind: 'oneshot' },
   badElimination: { videoId: 'jrEriKj1C44', start: 209, end: 215.5, kind: 'oneshot' },
@@ -252,14 +257,22 @@ const NflDealAudioController = forwardRef<
     timeoutRef.current = setTimeout(() => finishOneshot(cueKey), payoffLeadSeconds * 1000);
   }
 
-  // Triggered directly by the Deal button, not by phase -- by the time the
-  // caller's delayed state change lands (see NflDealOfferModal), this cue's
-  // own timeout has already wrapped it up, so the phase-driven "silence on
-  // finished-but-not-revealed" effect below doesn't cut it off mid-clip.
+  // Triggered directly by the Deal/No Deal buttons, not by phase -- by the
+  // time the caller's delayed state change lands (see NflDealOfferModal),
+  // these cues' own timeouts have already wrapped them up, so the phase-
+  // driven "silence on a non-audio phase" effect below doesn't cut them off
+  // mid-clip (both a Deal and a No Deal change `phase` to something
+  // resolvePhaseCue treats as silent).
   function playDealAccepted() {
     if (!playerReady || muted) return;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     playCue('dealAccepted');
+  }
+
+  function playNoDealAccepted() {
+    if (!playerReady || muted) return;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    playCue('noDealAccepted');
   }
 
   function startIntroSequence() {
@@ -348,6 +361,7 @@ const NflDealAudioController = forwardRef<
     },
     skipCurrentCue,
     playDealAccepted,
+    playNoDealAccepted,
   }));
 
   function toggleMute() {

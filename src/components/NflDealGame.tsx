@@ -398,6 +398,7 @@ export default function NflDealGame() {
           onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
           onDealChosen={() => audioRef.current?.playDealAccepted()}
           onNoDeal={() => dispatch({ type: 'REJECT_OFFER' })}
+          onNoDealChosen={() => audioRef.current?.playNoDealAccepted()}
         />
       )}
 

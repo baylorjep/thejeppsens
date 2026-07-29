@@ -16,16 +16,18 @@ interface Props {
    * NflDealAudioController's `playDealAccepted`). */
   onDealChosen: () => void;
   onNoDeal: () => void;
+  /** Fires the instant No Deal is clicked, before the reaction delay -- see
+   * onDealChosen. */
+  onNoDealChosen: () => void;
 }
 
-const NO_DEAL_REACTION_DELAY_MS = 1100;
-// Matches the length of the deal-accepted YouTube clip (18:31.5-18:36) so
-// the game doesn't advance to the finished phase -- which silences
+// Both match the length of their respective YouTube crowd-reaction clips so
+// the game doesn't advance past bank-offer/final-choice -- which silences
 // whatever's playing -- before the clip has actually finished.
-const DEAL_REACTION_DELAY_MS = 4500;
-const NO_DEAL_STING_SRC = '/sounds/nfl-deal/no-deal-sting.mp3';
+const DEAL_REACTION_DELAY_MS = 4500; // deal-accepted clip: 18:31.5-18:36
+const NO_DEAL_REACTION_DELAY_MS = 5500; // no-deal-accepted clip: 1:40:40.5-1:40:46
 
-export default function NflDealOfferModal({ offer, isFinal, roundIndex, onDeal, onDealChosen, onNoDeal }: Props) {
+export default function NflDealOfferModal({ offer, isFinal, roundIndex, onDeal, onDealChosen, onNoDeal, onNoDealChosen }: Props) {
   const dealButtonRef = useRef<HTMLButtonElement>(null);
   const [imgFailed, setImgFailed] = useState(false);
   const [reaction, setReaction] = useState<'deal' | 'no-deal' | null>(null);
@@ -43,7 +45,7 @@ export default function NflDealOfferModal({ offer, isFinal, roundIndex, onDeal, 
 
   function handleNoDeal() {
     setReaction('no-deal');
-    new Audio(NO_DEAL_STING_SRC).play().catch(() => {});
+    onNoDealChosen();
     setTimeout(onNoDeal, NO_DEAL_REACTION_DELAY_MS);
   }
 
