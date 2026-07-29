@@ -114,7 +114,7 @@ const CUES: Record<
   dealAcceptedSmall: { videoId: 'GsN1dPo7Vrg', end: 9, kind: 'oneshot' },
   // Crowd reaction to a No Deal.
   noDealAccepted: { videoId: 'wEw4c5sHqFM', start: 6040.5, end: 6046, kind: 'oneshot' },
-  credits: { videoId: 'A8430xpRh8o', kind: 'loop' },
+  credits: { videoId: 'A8430xpRh8o', kind: 'oneshot' },
   goodElimination: { videoId: 'jrEriKj1C44', start: 185, end: 191, kind: 'oneshot' },
   badElimination: { videoId: 'jrEriKj1C44', start: 209, end: 215.5, kind: 'oneshot' },
 };
