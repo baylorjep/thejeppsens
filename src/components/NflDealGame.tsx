@@ -201,6 +201,12 @@ export default function NflDealGame() {
   const positionConfig = POSITIONS[state.position];
   const offerTier = state.currentOffer ? classifyOfferTier(state.currentOffer) : null;
 
+  function handleSelectMode(mode: Mode) {
+    setSelectedMode(mode);
+    if (mode === 'DYNASTY') audioRef.current?.playDynastyNamingMusic();
+    else audioRef.current?.stopPregameMusic();
+  }
+
   function backToModePicker() {
     clearSavedGame();
     resumedRef.current = false;
@@ -213,6 +219,7 @@ export default function NflDealGame() {
     if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
     if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
     if (offerDecisionFallbackTimeoutRef.current) clearTimeout(offerDecisionFallbackTimeoutRef.current);
+    audioRef.current?.stopPregameMusic();
   }
 
   // Called when a single-position game finishes and the player wants to
@@ -322,7 +329,7 @@ export default function NflDealGame() {
                 type="button"
                 role="radio"
                 aria-checked={selectedMode === opt.id}
-                onClick={() => setSelectedMode(opt.id)}
+                onClick={() => handleSelectMode(opt.id)}
                 className={[
                   'rounded-lg border px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300',
                   selectedMode === opt.id
@@ -360,8 +367,7 @@ export default function NflDealGame() {
           onComplete={() => setIntroVisualStage('board')}
           label={positionConfig.label}
           pluralLabel={positionConfig.pluralLabel}
-          variant={dynasty ? 'dynasty' : 'single'}
-          teamName={dynasty?.teamName}
+          heading={dynasty ? `Round ${dynasty.index + 1}: ${positionConfig.pluralLabel}` : undefined}
         />
       ) : (
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">

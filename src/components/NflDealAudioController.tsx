@@ -27,6 +27,11 @@ export interface NflDealAudioHandle {
   playDealAccepted: (tier: OfferTier) => void;
   /** Same idea as playDealAccepted, for the No Deal button. */
   playNoDealAccepted: () => void;
+  /** Dynasty pregame: plays the "ready" sting once, then settles into the
+   * case-selection bed while the player names their team. */
+  playDynastyNamingMusic: () => void;
+  /** Stops any pregame bed if the player backs out of Dynasty before start. */
+  stopPregameMusic: () => void;
 }
 
 // YouTube's official embed API -- streams straight from YouTube, nothing
@@ -177,6 +182,7 @@ const NflDealAudioController = forwardRef<
   const queueRef = useRef<CueKey[]>([]);
   const lastEliminationKeyRef = useRef(0);
   const bankOfferSequenceRef = useRef(0);
+  const pendingDynastyNamingMusicRef = useRef(false);
 
   const [playerReady, setPlayerReady] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -345,6 +351,31 @@ const NflDealAudioController = forwardRef<
     playCue('noDealAccepted');
   }
 
+  function stopPregameMusic() {
+    pendingDynastyNamingMusicRef.current = false;
+    if (activeCueRef.current === 'introReady' || activeCueRef.current === 'caseSelection') {
+      playerRef.current?.pauseVideo();
+      activeCueRef.current = null;
+      queueRef.current = [];
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
+  }
+
+  function playDynastyNamingMusic() {
+    if (muted) {
+      setMuted(false);
+      window.localStorage.setItem(MUTE_STORAGE_KEY, 'false');
+    }
+    pendingDynastyNamingMusicRef.current = true;
+    if (!playerReady || !playerRef.current) return;
+    pendingDynastyNamingMusicRef.current = false;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    cancelBankOfferIntro();
+    setIntroDone(false);
+    queueRef.current = ['caseSelection'];
+    playCue('introReady');
+  }
+
   function startIntroSequence() {
     queueRef.current = INTRO_SEQUENCE.slice(1);
     playCue(INTRO_SEQUENCE[0]);
@@ -428,6 +459,12 @@ const NflDealAudioController = forwardRef<
   }, [enabled, phase, introDone, revealDone, playerReady, muted, openingCasesCue, offerTier]);
 
   useEffect(() => {
+    if (!pendingDynastyNamingMusicRef.current || !playerReady || muted) return;
+    playDynastyNamingMusic();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerReady, muted]);
+
+  useEffect(() => {
     if (!eliminationEvent || eliminationEvent.key === lastEliminationKeyRef.current) return;
     if (!enabled || !playerReady || muted) return;
     lastEliminationKeyRef.current = eliminationEvent.key;
@@ -448,6 +485,8 @@ const NflDealAudioController = forwardRef<
     skipBankOfferIntro,
     playDealAccepted,
     playNoDealAccepted,
+    playDynastyNamingMusic,
+    stopPregameMusic,
   }));
 
   function toggleMute() {
