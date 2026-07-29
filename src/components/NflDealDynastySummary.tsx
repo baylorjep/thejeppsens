@@ -65,6 +65,46 @@ interface WeekResult {
   note: string;
 }
 
+function ResultCard({
+  teamName,
+  season,
+  toneText,
+  results,
+}: {
+  teamName: string;
+  season: SeasonResult;
+  toneText: string;
+  results: Partial<Record<PositionId, Player>>;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-700 bg-slate-950/90 p-5 text-left shadow-2xl">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500">Result Card</p>
+          <h3 className="mt-1 text-2xl font-black text-white">{teamName}</h3>
+          <p className={`text-sm font-black uppercase tracking-wide ${toneText}`}>{season.title}</p>
+        </div>
+        <div className="text-left sm:text-right">
+          <p className="text-4xl font-black text-white">
+            {season.wins}-{season.losses}
+          </p>
+          <p className="text-sm font-semibold text-slate-400">{season.finish}</p>
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {DYNASTY_POSITIONS.map((pos) => (
+          <div key={pos} className="rounded-lg border border-slate-800 bg-slate-900/70 p-2">
+            <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">{POSITIONS[pos].shortLabel}</p>
+            <p className="truncate text-xs font-semibold text-white">{results[pos]!.name}</p>
+            <p className="text-sm font-black text-teal-300">{results[pos]!.ovr}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Baylor & Isabel Deal or No Deal Dynasty</p>
+    </div>
+  );
+}
+
 const POSITION_WEIGHTS: Record<PositionId, number> = {
   QB: 0.3,
   RB: 0.13,
@@ -224,6 +264,7 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
   const [stage, setStage] = useState<'roster' | 'simulating' | 'revealed'>('roster');
   const [visibleWeeks, setVisibleWeeks] = useState(0);
+  const [showResultCardModal, setShowResultCardModal] = useState(false);
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
@@ -262,8 +303,12 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
 
   useEffect(() => {
     if (stage === 'simulating') onSimulationStart?.();
-    if (stage === 'revealed') onSeasonReveal?.();
-  }, [onSeasonReveal, onSimulationStart, stage]);
+    if (stage === 'revealed') {
+      onSeasonReveal?.();
+      setShowResultCardModal(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
 
   if (missingPositions.length > 0) {
     return (
@@ -320,7 +365,7 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
         <div className="animate-case-reveal mx-auto mt-8 max-w-2xl rounded-xl border border-slate-700 bg-slate-950/60 p-4 sm:p-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">Week by week</p>
           <div className="mt-4 max-h-72 space-y-2 overflow-hidden text-left">
-            {weeks.slice(0, visibleWeeks).map((week) => (
+            {weeks.slice(0, visibleWeeks).reverse().map((week) => (
               <div key={week.week} className="grid grid-cols-[56px_1fr_auto] items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2">
                 <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Wk {week.week}</span>
                 <span className="min-w-0 truncate text-sm font-semibold text-slate-200">vs {week.opponent}</span>
@@ -353,30 +398,29 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
       )}
 
       {stage === 'revealed' && (
-        <div className="animate-case-reveal mx-auto mt-5 max-w-3xl rounded-xl border border-slate-700 bg-slate-950/70 p-5 text-left">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500">Result Card</p>
-              <h3 className="mt-1 text-2xl font-black text-white">{teamName}</h3>
-              <p className={`text-sm font-black uppercase tracking-wide ${tone.text}`}>{season.title}</p>
-            </div>
-            <div className="text-left sm:text-right">
-              <p className="text-4xl font-black text-white">
-                {season.wins}-{season.losses}
-              </p>
-              <p className="text-sm font-semibold text-slate-400">{season.finish}</p>
-            </div>
+        <div className="animate-case-reveal mx-auto mt-5 max-w-3xl">
+          <ResultCard teamName={teamName} season={season} toneText={tone.text} results={results} />
+        </div>
+      )}
+
+      {showResultCardModal && stage === 'revealed' && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Dynasty result card"
+          onClick={() => setShowResultCardModal(false)}
+          className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-sm"
+        >
+          <div className="w-full max-w-3xl" onClick={(event) => event.stopPropagation()}>
+            <ResultCard teamName={teamName} season={season} toneText={tone.text} results={results} />
+            <button
+              type="button"
+              onClick={() => setShowResultCardModal(false)}
+              className="mt-4 w-full rounded-lg border border-slate-600 bg-slate-900/90 px-5 py-3 text-sm font-bold uppercase tracking-wide text-slate-200 transition-colors hover:border-slate-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200"
+            >
+              View Full Summary
+            </button>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {DYNASTY_POSITIONS.map((pos) => (
-              <div key={pos} className="rounded-lg border border-slate-800 bg-slate-900/70 p-2">
-                <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">{POSITIONS[pos].shortLabel}</p>
-                <p className="truncate text-xs font-semibold text-white">{results[pos]!.name}</p>
-                <p className="text-sm font-black text-teal-300">{results[pos]!.ovr}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">Baylor & Isabel Deal or No Deal Dynasty</p>
         </div>
       )}
 
