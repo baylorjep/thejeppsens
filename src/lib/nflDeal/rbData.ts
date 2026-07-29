@@ -1,8 +1,10 @@
 import { buildBoard } from './playerData';
 
-// Best RB per team, current Madden OVR + ESPN athlete ID. IDs verified
-// against ESPN's search API; a few OVRs are informed estimates where the
-// player wasn't in the source's Top-100 (see rbData research notes).
+// Best RB per team, current Madden NFL 27 OVR + ESPN athlete ID (all IDs
+// verified against real headshots, not just name matches). Reflects several
+// real 2026 offseason moves: Kenneth Walker III (SEA->KC), Rico Dowdle
+// (CAR->PIT), Travis Etienne Jr (JAX->NO). Minnesota and Washington were
+// near-ties resolved in favor of the confirmed 2026 depth-chart starter.
 const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
   ['Jahmyr Gibbs', 98, '4429795'],
   ['Christian McCaffrey', 96, '3117251'],
@@ -28,14 +30,14 @@ const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
   ['Tony Pollard', 83, '3916148'],
   ['Chase Brown', 82, '4362238'],
   ['TreVeyon Henderson', 82, '4432710'],
+  ['Zach Charbonnet', 82, '4426385'],
   ['Cam Skattebo', 81, '4696981'],
   ['Chuba Hubbard', 81, '4241416'],
-  ['Jordan Mason', 81, '4360569'],
   ['Omarion Hampton', 81, '4685382'],
   ['Quinshon Judkins', 81, '4685702'],
+  ['Aaron Jones Sr', 80, '3042519'],
   ['Jacory Croskey-Merritt', 78, '4575131'],
   ['Bhayshul Tuten', 76, '4882093'],
-  ['Kareem Hunt', 75, '3059915'],
 ];
 
 export const RB_BOARD = buildBoard(RAW_BOARD);

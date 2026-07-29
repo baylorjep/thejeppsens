@@ -362,9 +362,11 @@ export default function NflDealGame() {
       {ceremonyCaseNumber !== null && (
         <div
           onClick={() => setCeremonyCaseNumber(null)}
-          className="fixed inset-0 z-50 flex cursor-pointer flex-col items-center justify-center gap-5 bg-black/85 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex cursor-pointer flex-col items-center justify-center gap-5 bg-black/85 px-4 backdrop-blur-sm"
         >
-          <div className="scale-[1.8]">
+          {/* Unscaled on narrow phones -- at 1.8x the case+text box overflows
+           * a small viewport width, so only scale up once there's room. */}
+          <div className="scale-100 sm:scale-125 md:scale-[1.8]">
             <NflDealYourCase number={ceremonyCaseNumber} />
           </div>
           <div className="mt-6 text-center">

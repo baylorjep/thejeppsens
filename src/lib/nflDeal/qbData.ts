@@ -2,7 +2,10 @@ import { buildBoard } from './playerData';
 
 export { espnHeadshotUrl } from './playerData';
 
-// Starter board: 32 QBs ranked by (roughly) Madden overall.
+// Starter board: current QB1 for each of the 32 NFL teams, Madden NFL 27
+// overall ratings. Kansas City kept as Mahomes (Madden's rated QB1 and the
+// long-term starter) even though Justin Fields is projected to open the
+// 2026 season while Mahomes rehabs a torn ACL/LCL.
 // espnId powers the case-reveal headshot (see espnHeadshotUrl in playerData).
 const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
   ['Josh Allen', 99, '3918298'],
@@ -29,14 +32,14 @@ const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
   ['C.J. Stroud', 77, '4432577'],
   ['Tyler Shough', 77, '4360689'],
   ['Jaxson Dart', 76, '4689114'],
-  ['Philip Rivers', 76, '5529'],
   ['Jacoby Brissett', 75, '2578570'],
   ['Kyler Murray', 75, '3917315'],
-  ['Mac Jones', 74, '4241464'],
   ['Tua Tagovailoa', 74, '4241479'],
-  ['Cam Ward', 73, '4688380'],
-  ['Joe Flacco', 73, '11252'],
+  ['Cameron Ward', 73, '4688380'],
   ['Kirk Cousins', 73, '14880'],
+  ['Malik Willis', 71, '4242512'],
+  ['Geno Smith', 70, '15864'],
+  ['Deshaun Watson', 69, '3122840'],
 ];
 
 export const QB_BOARD = buildBoard(RAW_BOARD);

@@ -66,7 +66,7 @@ export default function NflDealDynastySummary({ results, onPlayAgain }: Props) {
         <p className="text-5xl font-black text-teal-300 sm:text-6xl">{overallRating}</p>
       </div>
 
-      <div className="mx-auto mt-8 grid max-w-lg grid-cols-3 gap-3">
+      <div className="mx-auto mt-8 grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-3">
         {DYNASTY_POSITIONS.map((pos) => (
           <RosterCard key={pos} position={pos} player={results[pos]} />
         ))}
