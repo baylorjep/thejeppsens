@@ -58,7 +58,7 @@ const CUES: Record<
   bankOffer: { videoId: '2wo6bN035RI', kind: 'loop' },
   reveal: { videoId: 'ogJj9pX8Pvs', kind: 'oneshot' },
   credits: { videoId: 'A8430xpRh8o', kind: 'loop' },
-  goodElimination: { videoId: 'jrEriKj1C44', start: 185, end: 189, kind: 'oneshot' },
+  goodElimination: { videoId: 'jrEriKj1C44', start: 185, end: 191, kind: 'oneshot' },
   badElimination: { videoId: 'jrEriKj1C44', start: 209, end: 215, kind: 'oneshot' },
 };
 type CueKey = keyof typeof CUES;
@@ -93,8 +93,8 @@ interface EliminationEvent {
 
 const NflDealAudioController = forwardRef<
   NflDealAudioHandle,
-  { phase: GamePhase; eliminationEvent: EliminationEvent | null }
->(function NflDealAudioController({ phase, eliminationEvent }, ref) {
+  { phase: GamePhase; eliminationEvent: EliminationEvent | null; enabled: boolean }
+>(function NflDealAudioController({ phase, eliminationEvent, enabled }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLAudioElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -199,6 +199,10 @@ const NflDealAudioController = forwardRef<
 
   function startBankOfferSequence() {
     activeCueRef.current = 'bankOffer'; // claim it now so this doesn't re-trigger on every render
+    // A still-pending cleanup timeout from whatever cue played right before
+    // this (e.g. an elimination sting) would otherwise fire later and stomp
+    // activeCueRef back to null, breaking the loop-restart logic below.
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     const ring = ringRef.current;
     if (!ring) {
       playCue('bankOffer');
@@ -210,8 +214,13 @@ const NflDealAudioController = forwardRef<
     ring.play().catch(() => playCue('bankOffer')); // no ring file present -- just start the loop
   }
 
-  useEffect(() => {
-    if (!playerReady || muted) return;
+  // Call any time -- safe to call repeatedly, never restarts a cue that's
+  // already the right one. `enabled` (only true once the Start Game click
+  // has fired) is what actually gates whether this does anything passively;
+  // it can still be called directly from a click handler (unlockAndPlay,
+  // the mute toggle) regardless of `enabled`, since a real click is its own
+  // permission.
+  function startForCurrentPhase() {
     if (phase === 'selecting-case' && !introDone) {
       if (activeCueRef.current == null || !INTRO_SEQUENCE.includes(activeCueRef.current)) startIntroSequence();
       return;
@@ -226,30 +235,22 @@ const NflDealAudioController = forwardRef<
     if (activeCueRef.current === desired) return;
     if (desired === 'bankOffer') startBankOfferSequence();
     else playCue(desired);
+  }
+
+  useEffect(() => {
+    if (!enabled || !playerReady || muted) return;
+    startForCurrentPhase();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, introDone, revealDone, playerReady, muted]);
+  }, [enabled, phase, introDone, revealDone, playerReady, muted]);
 
   useEffect(() => {
     if (!eliminationEvent || eliminationEvent.key === lastEliminationKeyRef.current) return;
     lastEliminationKeyRef.current = eliminationEvent.key;
-    if (!playerReady || muted) return;
+    if (!enabled || !playerReady || muted) return;
     queueRef.current = [];
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     playCue(eliminationEvent.outcome === 'good' ? 'goodElimination' : 'badElimination');
-  }, [eliminationEvent, playerReady, muted]);
-
-  // Call only from inside a real click handler -- this is what makes the
-  // resulting playback count as user-gesture-initiated instead of blocked
-  // autoplay.
-  function startForCurrentPhase() {
-    if (phase === 'selecting-case' && !introDone) {
-      startIntroSequence();
-      return;
-    }
-    const desired = resolvePhaseCue(phase, introDone, revealDone);
-    if (desired === 'bankOffer') startBankOfferSequence();
-    else if (desired) playCue(desired);
-  }
+  }, [eliminationEvent, enabled, playerReady, muted]);
 
   useImperativeHandle(ref, () => ({
     unlockAndPlay: () => {

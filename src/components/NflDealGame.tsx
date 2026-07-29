@@ -18,7 +18,17 @@ import NflDealEndScreen from './NflDealEndScreen';
 import NflDealYourCase from './NflDealYourCase';
 import NflDealAudioController, { type NflDealAudioHandle } from './NflDealAudioController';
 import NflDealCaseRevealPopup from './NflDealCaseRevealPopup';
-import type { CaseState } from '@/lib/nflDeal/types';
+import type { Quarterback } from '@/lib/nflDeal/types';
+
+// How long the sound plays before the result actually shows -- timed to
+// land near the end of each ~6s elimination clip. Best-effort estimate;
+// nudge if it doesn't match the clips.
+const REVEAL_DELAY_MS = 5000;
+const REVEAL_HOLD_MS = 1500;
+// Extra room after the reveal for the banker's-call ring before the offer
+// modal actually appears, so a round-ending case doesn't cut straight from
+// "here's who you lost" to the offer with no beat in between.
+const OFFER_MODAL_DELAY_MS = 1800;
 
 export default function NflDealGame() {
   const [state, dispatch] = useReducer(gameReducer, undefined, () => {
@@ -31,13 +41,34 @@ export default function NflDealGame() {
     return createInitialGameState();
   });
   const [ceremonyCaseNumber, setCeremonyCaseNumber] = useState<number | null>(null);
-  const [revealedCase, setRevealedCase] = useState<CaseState | null>(null);
+  const [pendingReveal, setPendingReveal] = useState<{ number: number; quarterback: Quarterback | null } | null>(null);
   const [eliminationEvent, setEliminationEvent] = useState<{ key: number; outcome: 'good' | 'bad' } | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [offerModalReady, setOfferModalReady] = useState(false);
+  const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const offerModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const eliminationCounterRef = useRef(0);
   const prevPhaseRef = useRef(state.phase);
   const audioRef = useRef<NflDealAudioHandle>(null);
+
+  // Don't show the offer modal the instant phase flips to bank-offer/final-
+  // choice -- let the case reveal finish holding, then give the banker's
+  // ring a moment, so a round-ending case doesn't jump straight to the
+  // offer with the reveal barely visible.
+  useEffect(() => {
+    const isOfferPhase = state.phase === 'bank-offer' || state.phase === 'final-choice';
+    if (offerModalTimeoutRef.current) clearTimeout(offerModalTimeoutRef.current);
+    if (!isOfferPhase) {
+      setOfferModalReady(false);
+      return;
+    }
+    if (pendingReveal) return; // still showing/holding the case reveal
+    offerModalTimeoutRef.current = setTimeout(() => setOfferModalReady(true), OFFER_MODAL_DELAY_MS);
+    return () => {
+      if (offerModalTimeoutRef.current) clearTimeout(offerModalTimeoutRef.current);
+    };
+  }, [state.phase, pendingReveal]);
 
   function handleStartGame() {
     setHasStarted(true);
@@ -74,37 +105,40 @@ export default function NflDealGame() {
   function newGame() {
     clearSavedGame();
     setCeremonyCaseNumber(null);
-    setRevealedCase(null);
+    setPendingReveal(null);
+    if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
     if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
     dispatch({ type: 'NEW_GAME' });
   }
 
   function openCase(caseNumber: number) {
+    if (pendingReveal) return; // one reveal plays out fully before the next case can open
     const opening = state.cases.find((c) => c.number === caseNumber);
-    if (opening) {
-      if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
-      setRevealedCase(opening);
-      revealTimeoutRef.current = setTimeout(() => setRevealedCase(null), 1500);
+    if (!opening) return;
 
-      const stillHidden = [
-        ...(playerCase ? [playerCase.quarterback] : []),
-        ...state.cases.filter((c) => c.status === 'available').map((c) => c.quarterback),
-      ];
-      if (stillHidden.length > 0) {
-        const avgHiddenOvr = stillHidden.reduce((sum, q) => sum + q.ovr, 0) / stillHidden.length;
-        eliminationCounterRef.current += 1;
-        setEliminationEvent({
-          key: eliminationCounterRef.current,
-          outcome: opening.quarterback.ovr < avgHiddenOvr ? 'good' : 'bad',
-        });
-      }
-    }
-    dispatch({ type: 'OPEN_CASE', caseNumber });
+    // Good = a bottom-half (worst-ranked) QB got knocked off the board;
+    // bad = a top-half (best-ranked) QB did. Ranks are fixed 1 (best) -> 32
+    // (worst) regardless of who's still hidden.
+    const outcome: 'good' | 'bad' = opening.quarterback.rank > 16 ? 'good' : 'bad';
+
+    // Start the sound and show the case sealed first -- the actual reveal
+    // (and the game-state update) lands later, timed to the sound's payoff.
+    eliminationCounterRef.current += 1;
+    setEliminationEvent({ key: eliminationCounterRef.current, outcome });
+    setPendingReveal({ number: caseNumber, quarterback: null });
+
+    if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
+    pendingTimeoutRef.current = setTimeout(() => {
+      dispatch({ type: 'OPEN_CASE', caseNumber });
+      setPendingReveal({ number: caseNumber, quarterback: opening.quarterback });
+      if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
+      revealTimeoutRef.current = setTimeout(() => setPendingReveal(null), REVEAL_HOLD_MS);
+    }, REVEAL_DELAY_MS);
   }
 
   return (
     <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.08),transparent_60%)] pb-20 text-slate-100">
-      <NflDealAudioController ref={audioRef} phase={state.phase} eliminationEvent={eliminationEvent} />
+      <NflDealAudioController ref={audioRef} phase={state.phase} eliminationEvent={eliminationEvent} enabled={hasStarted} />
 
       {!hasStarted ? (
         <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center">
@@ -139,7 +173,16 @@ export default function NflDealGame() {
 
         {state.phase === 'finished' && playerCase ? (
           <div className="mt-6">
-            <NflDealEndScreen state={state} playerCase={playerCase} unopenedCases={unopenedAtFinish} onPlayAgain={newGame} />
+            <NflDealEndScreen
+              state={state}
+              playerCase={playerCase}
+              unopenedCases={unopenedAtFinish}
+              onPlayAgain={newGame}
+              onReveal={(outcome) => {
+                eliminationCounterRef.current += 1;
+                setEliminationEvent({ key: eliminationCounterRef.current, outcome });
+              }}
+            />
           </div>
         ) : (
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -150,7 +193,8 @@ export default function NflDealGame() {
                 cases={state.cases}
                 phase={state.phase}
                 playerCaseNumber={state.playerCaseNumber}
-                activeRevealNumber={revealedCase?.number ?? null}
+                activeRevealNumber={pendingReveal?.number ?? null}
+                locked={pendingReveal !== null}
                 onOpen={(caseNumber) => {
                   if (state.phase === 'selecting-case') dispatch({ type: 'SELECT_CASE', caseNumber });
                   else if (state.phase === 'opening-cases') openCase(caseNumber);
@@ -165,7 +209,7 @@ export default function NflDealGame() {
       </div>
       )}
 
-      {hasStarted && (state.phase === 'bank-offer' || state.phase === 'final-choice') && state.currentOffer && (
+      {hasStarted && offerModalReady && state.currentOffer && (
         <NflDealOfferModal
           offer={state.currentOffer}
           isFinal={state.phase === 'final-choice'}
@@ -174,13 +218,13 @@ export default function NflDealGame() {
         />
       )}
 
-      {revealedCase && (
+      {pendingReveal && (
         <NflDealCaseRevealPopup
-          caseNumber={revealedCase.number}
-          quarterback={revealedCase.quarterback}
+          caseNumber={pendingReveal.number}
+          quarterback={pendingReveal.quarterback}
           onDismiss={() => {
             if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
-            setRevealedCase(null);
+            setPendingReveal(null);
           }}
         />
       )}

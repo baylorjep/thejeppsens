@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Confetti from 'react-confetti';
 import { RotateCcw, TrendingDown, TrendingUp } from 'lucide-react';
@@ -12,10 +12,13 @@ interface Props {
   playerCase: CaseState;
   unopenedCases: CaseState[];
   onPlayAgain: () => void;
+  /** Fires once, right as the reveal stage begins, with whether the
+   * decision (deal taken or case kept) turned out to be the right call. */
+  onReveal: (outcome: 'good' | 'bad') => void;
 }
 
 const SUSPENSE_STEP_MS = 850;
-const STAKES_STAGE_MS = 2000;
+const STAKES_STAGE_MS = 3200;
 
 function QbChip({ qb, size = 40 }: { qb: Quarterback; size?: number }) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -52,10 +55,11 @@ function SealedCase({ number }: { number: number }) {
   );
 }
 
-export default function NflDealEndScreen({ state, playerCase, unopenedCases, onPlayAgain }: Props) {
+export default function NflDealEndScreen({ state, playerCase, unopenedCases, onPlayAgain, onReveal }: Props) {
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
   const [countdown, setCountdown] = useState(3);
   const [stage, setStage] = useState<'suspense' | 'stakes' | 'revealed'>('suspense');
+  const onRevealFiredRef = useRef(false);
 
   const dealAccepted = state.dealAccepted;
   // If no deal was accepted, state.currentOffer still holds the final offer
@@ -70,6 +74,16 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
   }, []);
+
+  useEffect(() => {
+    if (stage !== 'revealed' || onRevealFiredRef.current) return;
+    onRevealFiredRef.current = true;
+    const good = beatCase === true || beatDeclinedOffer === true;
+    const bad = beatCase === false || beatDeclinedOffer === false;
+    if (good) onReveal('good');
+    else if (bad) onReveal('bad');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
 
   useEffect(() => {
     if (stage !== 'suspense') return;

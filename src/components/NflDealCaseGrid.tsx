@@ -6,11 +6,12 @@ interface Props {
   phase: GamePhase;
   playerCaseNumber: number | null;
   activeRevealNumber: number | null;
+  locked: boolean;
   onOpen: (caseNumber: number) => void;
 }
 
-export default function NflDealCaseGrid({ cases, phase, playerCaseNumber, activeRevealNumber, onOpen }: Props) {
-  const casesAreClickable = phase === 'selecting-case' || phase === 'opening-cases';
+export default function NflDealCaseGrid({ cases, phase, playerCaseNumber, activeRevealNumber, locked, onOpen }: Props) {
+  const casesAreClickable = !locked && (phase === 'selecting-case' || phase === 'opening-cases');
   // Opened cases drop off the board once their reveal popup has been shown,
   // so the grid only keeps showing what's still worth deciding on.
   const boardCases = cases.filter(

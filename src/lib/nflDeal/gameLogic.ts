@@ -98,17 +98,24 @@ function computeBankOffer(state: GameState): { offer: BankOffer; cursor: number 
   const normalizedSpread = INITIAL_SPREAD > 0 ? spread / INITIAL_SPREAD : 0;
   const trend = clamp((expectedValueOvr - INITIAL_AVG_OVR) / INITIAL_AVG_OVR, -0.15, 0.15);
 
-  const roundProgress = state.roundIndex / (ROUND_SCHEDULE.length - 1);
-  const baseGenerosity = 0.72 + 0.25 * roundProgress;
-  const offerFraction = clamp(baseGenerosity - normalizedSpread * 0.12 - trend * 0.4, 0.45, 0.99);
-  const targetOvr = expectedValueOvr * offerFraction;
-
-  const { values, cursor } = drawRandom(state, 1);
-  const [tieBreakRoll] = values;
-
   const hiddenOvrs = remainingHidden.map((q) => q.ovr);
   const hiddenMin = Math.min(...hiddenOvrs);
   const hiddenMax = Math.max(...hiddenOvrs);
+
+  const roundProgress = state.roundIndex / (ROUND_SCHEDULE.length - 1);
+  const baseGenerosity = 0.72 + 0.25 * roundProgress;
+  const offerFraction = clamp(baseGenerosity - normalizedSpread * 0.12 - trend * 0.4, 0.45, 0.99);
+  // Interpolate between the worst remaining outcome and the true expected
+  // value, rather than taking a flat fraction of expected value directly --
+  // a flat fraction routinely lands far below the achievable range (e.g.
+  // ~50 OVR when the pool is 73-99), which made the "closest valid
+  // candidate" fallback do all the work and drowned out the round/spread/
+  // trend signals above. Interpolating keeps every signal meaningfully in
+  // play across the whole game.
+  const targetOvr = hiddenMin + offerFraction * (expectedValueOvr - hiddenMin);
+
+  const { values, cursor } = drawRandom(state, 1);
+  const [tieBreakRoll] = values;
 
   const recentOfferIds = new Set(state.offerHistory.slice(-2).map((o) => o.quarterback.id));
   const sorted = [...QB_BOARD].sort((a, b) => Math.abs(a.ovr - targetOvr) - Math.abs(b.ovr - targetOvr));
