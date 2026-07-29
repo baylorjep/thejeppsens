@@ -396,6 +396,7 @@ export default function NflDealGame() {
           isFinal={state.phase === 'final-choice'}
           roundIndex={state.roundIndex}
           onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
+          onDealChosen={() => audioRef.current?.playDealAccepted()}
           onNoDeal={() => dispatch({ type: 'REJECT_OFFER' })}
         />
       )}

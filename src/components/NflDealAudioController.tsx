@@ -14,6 +14,11 @@ export interface NflDealAudioHandle {
    * wraps it up shortly after -- lets a player who taps through a case
    * reveal skip the suspense without losing the sting's punchline. */
   skipCurrentCue: () => void;
+  /** Plays the "deal, accepted" crowd-reaction clip. Call the instant the
+   * Deal button is clicked, before dispatching the state change -- the
+   * caller is responsible for delaying that dispatch at least as long as
+   * this clip runs, since a phase change silences whatever's playing. */
+  playDealAccepted: () => void;
 }
 
 // YouTube's official embed API -- streams straight from YouTube, nothing
@@ -58,6 +63,7 @@ const CUES: Record<
   | 'caseSelection'
   | 'dealOrNoDealChant'
   | 'bankOffer'
+  | 'dealAccepted'
   | 'credits'
   | 'goodElimination'
   | 'badElimination',
@@ -72,6 +78,8 @@ const CUES: Record<
   // underneath the modal takes over.
   dealOrNoDealChant: { videoId: 'jmCyu3P4bwk', start: 545, end: 551, kind: 'oneshot' },
   bankOffer: { videoId: '2wo6bN035RI', kind: 'loop' },
+  // Crowd reaction to a Deal being made.
+  dealAccepted: { videoId: 'jmCyu3P4bwk', start: 1111.5, end: 1116, kind: 'oneshot' },
   credits: { videoId: 'A8430xpRh8o', kind: 'loop' },
   goodElimination: { videoId: 'jrEriKj1C44', start: 185, end: 191, kind: 'oneshot' },
   badElimination: { videoId: 'jrEriKj1C44', start: 209, end: 215.5, kind: 'oneshot' },
@@ -244,6 +252,16 @@ const NflDealAudioController = forwardRef<
     timeoutRef.current = setTimeout(() => finishOneshot(cueKey), payoffLeadSeconds * 1000);
   }
 
+  // Triggered directly by the Deal button, not by phase -- by the time the
+  // caller's delayed state change lands (see NflDealOfferModal), this cue's
+  // own timeout has already wrapped it up, so the phase-driven "silence on
+  // finished-but-not-revealed" effect below doesn't cut it off mid-clip.
+  function playDealAccepted() {
+    if (!playerReady || muted) return;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    playCue('dealAccepted');
+  }
+
   function startIntroSequence() {
     queueRef.current = INTRO_SEQUENCE.slice(1);
     playCue(INTRO_SEQUENCE[0]);
@@ -329,6 +347,7 @@ const NflDealAudioController = forwardRef<
       startForCurrentPhase();
     },
     skipCurrentCue,
+    playDealAccepted,
   }));
 
   function toggleMute() {
