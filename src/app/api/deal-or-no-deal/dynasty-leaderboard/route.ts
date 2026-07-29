@@ -84,8 +84,8 @@ async function loadTopEntries() {
   const { data, error } = await supabase
     .from('dynasty_leaderboard_entries')
     .select('id, team_name, rating, wins, losses, finish, players, created_at')
-    .order('rating', { ascending: false })
     .order('wins', { ascending: false })
+    .order('rating', { ascending: false })
     .order('created_at', { ascending: true })
     .limit(5);
 
