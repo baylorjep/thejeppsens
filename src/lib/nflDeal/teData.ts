@@ -6,6 +6,7 @@ import { RATING_SOURCE_OFFICIAL, buildBoard } from './playerData';
 // Njoku signed with the Chargers, so Cleveland's TE1 is now rookie Harold
 // Fannin Jr.
 const RAW_BOARD: Array<[name: string, ovr: number, espnId: string, ratingSource?: string]> = [
+  ['Kyle Pitts Sr.', 99, '4360248'],
   ['Trey McBride', 99, '4361307', RATING_SOURCE_OFFICIAL],
   ['George Kittle', 98, '3040151'],
   ['Brock Bowers', 93, '4432665'],
@@ -23,7 +24,6 @@ const RAW_BOARD: Array<[name: string, ovr: number, espnId: string, ratingSource?
   ['Dalton Kincaid', 81, '4385690'],
   ['David Njoku', 81, '3123076'],
   ['Harold Fannin Jr.', 80, '5083076'],
-  ['Kyle Pitts Sr.', 80, '4360248'],
   ['Juwan Johnson', 79, '3929645'],
   ['Pat Freiermuth', 79, '4361411'],
   ['Evan Engram', 78, '3051876'],
