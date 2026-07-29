@@ -398,19 +398,27 @@ export default function NflDealGame() {
               />
             </label>
           )}
-          <button
-            type="button"
-            onClick={handleStartGame}
-            disabled={dynastyNameMissing}
-            className={[
-              'rounded-xl px-10 py-4 text-lg font-black uppercase tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200',
-              dynastyNameMissing
-                ? 'cursor-not-allowed bg-slate-700 text-slate-500'
-                : 'bg-teal-500 text-slate-950 hover:bg-teal-400',
-            ].join(' ')}
-          >
-            Start Game
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={handleStartGame}
+              disabled={dynastyNameMissing}
+              className={[
+                'rounded-xl px-10 py-4 text-lg font-black uppercase tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200',
+                dynastyNameMissing
+                  ? 'cursor-not-allowed bg-slate-700 text-slate-500'
+                  : 'bg-teal-500 text-slate-950 hover:bg-teal-400',
+              ].join(' ')}
+            >
+              Start Game
+            </button>
+            <a
+              href="/deal-or-no-deal/leaderboard"
+              className="rounded-lg border border-slate-700 px-8 py-3 text-center font-semibold uppercase tracking-wide text-slate-300 transition-colors hover:border-slate-600 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+            >
+              View Leaderboard
+            </a>
+          </div>
         </div>
       ) : introVisualStage === 'rules' ? (
         <NflDealRulesIntro
