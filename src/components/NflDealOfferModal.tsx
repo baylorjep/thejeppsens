@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { espnHeadshotUrl } from '@/lib/nflDeal/qbData';
-import { classifyOfferTier, ROUND_SCHEDULE, type OfferTier } from '@/lib/nflDeal/gameLogic';
+import { ROUND_SCHEDULE } from '@/lib/nflDeal/gameLogic';
 import type { BankOffer } from '@/lib/nflDeal/types';
 
 interface Props {
@@ -26,15 +26,6 @@ interface Props {
   onNoDealTransitionStart?: () => void;
 }
 
-// Matches the length of whichever deal-accepted clip corresponds to this
-// offer's size (see classifyOfferTier) so the game doesn't advance past
-// bank-offer/final-choice -- which silences whatever's playing -- before
-// the clip has actually finished.
-const DEAL_REACTION_DELAY_MS_BY_TIER: Record<OfferTier, number> = {
-  big: 19000, // 19s clip
-  medium: 13000, // 13s clip
-  small: 9000, // 9s clip
-};
 const DEAL_REACTION_OVERLAY_MS = 1200;
 const NO_DEAL_REACTION_OVERLAY_MS = 1200;
 const NO_DEAL_REACTION_DELAY_MS = 5500; // no-deal-accepted clip: 1:40:40.5-1:40:46
@@ -53,7 +44,6 @@ export default function NflDealOfferModal({
 }: Props) {
   const dealButtonRef = useRef<HTMLButtonElement>(null);
   const dealOverlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noDealOverlayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noDealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imgFailed, setImgFailed] = useState(false);
@@ -68,7 +58,6 @@ export default function NflDealOfferModal({
   useEffect(() => {
     return () => {
       if (dealOverlayTimeoutRef.current) clearTimeout(dealOverlayTimeoutRef.current);
-      if (dealTimeoutRef.current) clearTimeout(dealTimeoutRef.current);
       if (noDealOverlayTimeoutRef.current) clearTimeout(noDealOverlayTimeoutRef.current);
       if (noDealTimeoutRef.current) clearTimeout(noDealTimeoutRef.current);
     };
@@ -79,8 +68,10 @@ export default function NflDealOfferModal({
     setResolving(true);
     setReaction('deal');
     onDealChosen();
-    dealOverlayTimeoutRef.current = setTimeout(() => setReaction(null), DEAL_REACTION_OVERLAY_MS);
-    dealTimeoutRef.current = setTimeout(onDeal, DEAL_REACTION_DELAY_MS_BY_TIER[classifyOfferTier(offer)]);
+    dealOverlayTimeoutRef.current = setTimeout(() => {
+      setReaction(null);
+      onDeal();
+    }, DEAL_REACTION_OVERLAY_MS);
   }
 
   function handleNoDeal() {

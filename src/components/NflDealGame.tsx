@@ -415,6 +415,8 @@ export default function NflDealGame() {
               results={dynasty.results as Record<PositionId, Player>}
               teamName={dynasty.teamName}
               onPlayAgain={backToModePicker}
+              onSimulationStart={() => audioRef.current?.playSeasonSimulationMusic()}
+              onSeasonReveal={() => audioRef.current?.playCreditsMusic()}
             />
           </div>
         ) : state.phase === 'finished' && playerCase ? (

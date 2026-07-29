@@ -12,6 +12,8 @@ interface Props {
   results: Partial<Record<PositionId, Player>>;
   teamName: string;
   onPlayAgain: () => void;
+  onSimulationStart?: () => void;
+  onSeasonReveal?: () => void;
 }
 
 function RosterCard({ position, player }: { position: PositionId; player: Player }) {
@@ -218,7 +220,7 @@ function tierTone(tier: SeasonTier): { border: string; text: string; glow: strin
   }
 }
 
-export default function NflDealDynastySummary({ results, teamName, onPlayAgain }: Props) {
+export default function NflDealDynastySummary({ results, teamName, onPlayAgain, onSimulationStart, onSeasonReveal }: Props) {
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
   const [stage, setStage] = useState<'roster' | 'simulating' | 'revealed'>('roster');
   const [visibleWeeks, setVisibleWeeks] = useState(0);
@@ -257,6 +259,11 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain }
     const t = setTimeout(() => setVisibleWeeks((count) => count + 1), visibleWeeks < 4 ? 420 : 260);
     return () => clearTimeout(t);
   }, [stage, visibleWeeks, weeks.length]);
+
+  useEffect(() => {
+    if (stage === 'simulating') onSimulationStart?.();
+    if (stage === 'revealed') onSeasonReveal?.();
+  }, [onSeasonReveal, onSimulationStart, stage]);
 
   if (missingPositions.length > 0) {
     return (

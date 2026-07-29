@@ -20,10 +20,8 @@ export interface NflDealAudioHandle {
    * panel instead of sitting through the full banker call. */
   skipBankOfferIntro: () => void;
   /** Plays the deal-accepted crowd-reaction clip sized to how big the offer
-   * was. Call the instant the Deal button is clicked, before dispatching the
-   * state change -- the caller is responsible for delaying that dispatch at
-   * least as long as this clip runs, since a phase change silences whatever's
-   * playing. */
+   * was. Call the instant the Deal button is clicked, before the visual flow
+   * advances to the end screen. */
   playDealAccepted: (tier: OfferTier) => void;
   /** Same idea as playDealAccepted, for the No Deal button. */
   playNoDealAccepted: () => void;
@@ -32,6 +30,10 @@ export interface NflDealAudioHandle {
   playDynastyNamingMusic: () => void;
   /** Stops any pregame bed if the player backs out of Dynasty before start. */
   stopPregameMusic: () => void;
+  /** Uses the round bed under Dynasty season simulation. */
+  playSeasonSimulationMusic: () => void;
+  /** Returns to the end-credits bed after the Dynasty season reveal. */
+  playCreditsMusic: () => void;
 }
 
 // YouTube's official embed API -- streams straight from YouTube, nothing
@@ -380,6 +382,20 @@ const NflDealAudioController = forwardRef<
     playCue('introReady');
   }
 
+  function playSeasonSimulationMusic() {
+    if (!playerReady || muted) return;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    cancelBankOfferIntro();
+    playCue(openingCasesCue);
+  }
+
+  function playCreditsMusic() {
+    if (!playerReady || muted) return;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    cancelBankOfferIntro();
+    playCue('credits');
+  }
+
   function startIntroSequence() {
     queueRef.current = INTRO_SEQUENCE.slice(1);
     playCue(INTRO_SEQUENCE[0]);
@@ -491,6 +507,8 @@ const NflDealAudioController = forwardRef<
     playNoDealAccepted,
     playDynastyNamingMusic,
     stopPregameMusic,
+    playSeasonSimulationMusic,
+    playCreditsMusic,
   }));
 
   function toggleMute() {
