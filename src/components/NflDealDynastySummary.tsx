@@ -505,7 +505,7 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
     const players = DYNASTY_POSITIONS.reduce(
       (picked, pos) => {
         const player = results[pos]!;
-        picked[pos] = { id: player.id, name: player.name, ovr: player.ovr };
+        picked[pos] = { id: player.id, name: player.name, ovr: player.ovr, espnId: player.espnId, isTeam: player.isTeam };
         return picked;
       },
       {} as DynastyLeaderboardEntry['players'],

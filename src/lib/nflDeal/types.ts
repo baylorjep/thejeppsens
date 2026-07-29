@@ -69,6 +69,6 @@ export interface DynastyLeaderboardEntry {
   wins: number;
   losses: number;
   finish: string;
-  players: Record<PositionId, Pick<Player, 'id' | 'name' | 'ovr'>>;
+  players: Record<PositionId, Pick<Player, 'id' | 'name' | 'ovr' | 'espnId' | 'isTeam'>>;
   createdAt: string;
 }

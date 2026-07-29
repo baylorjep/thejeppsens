@@ -33,6 +33,8 @@ function isValidLeaderboardEntry(value: unknown): value is DynastyLeaderboardEnt
     if (typeof player.id !== 'string' || player.id.length === 0) return false;
     if (typeof player.name !== 'string' || player.name.trim().length === 0 || player.name.length > 80) return false;
     if (typeof player.ovr !== 'number' || player.ovr < 0 || player.ovr > 100) return false;
+    if (player.espnId !== null && typeof player.espnId !== 'string') return false;
+    if (player.isTeam !== undefined && typeof player.isTeam !== 'boolean') return false;
   }
 
   return true;
@@ -89,10 +91,12 @@ export async function POST(request: Request) {
         id: player.id,
         name: player.name.trim(),
         ovr: Math.round(player.ovr),
+        espnId: player.espnId ?? null,
+        isTeam: player.isTeam ?? false,
       };
       return picked;
     },
-    {} as Record<PositionId, { id: string; name: string; ovr: number }>,
+    {} as Record<PositionId, { id: string; name: string; ovr: number; espnId: string | null; isTeam?: boolean }>,
   );
 
   const { error } = await supabase.from('dynasty_leaderboard_entries').upsert(

@@ -5,14 +5,38 @@ import Link from 'next/link';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import type { DynastyLeaderboardEntry, PositionId } from '@/lib/nflDeal/types';
 import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
-function LeaderboardPlayerChip({ position, player }: { position: PositionId; player: { id: string; name: string; ovr: number } }) {
+import Image from 'next/image';
+import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
+
+function LeaderboardPlayerChip({ position, player }: { position: PositionId; player: { id: string; name: string; ovr: number; espnId: string | null; isTeam?: boolean } }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const headshotUrl = espnHeadshotUrl({
+    id: player.id,
+    name: player.name,
+    ovr: player.ovr,
+    rank: 0,
+    espnId: player.espnId,
+    isTeam: player.isTeam,
+  } as any);
+
   return (
     <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-950/70 p-2">
       <div className="flex items-center gap-2">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-800">
-          <span className="text-[10px] font-bold text-slate-300">
-            {player.name.split(' ').map((p) => p[0]).join('')}
-          </span>
+        <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-slate-700 bg-slate-800">
+          {headshotUrl && !imgFailed ? (
+            <Image
+              src={headshotUrl}
+              alt=""
+              fill
+              sizes="36px"
+              className="object-cover"
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-slate-300">
+              {player.name.split(' ').map((p) => p[0]).join('')}
+            </div>
+          )}
         </div>
         <div className="min-w-0">
           <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">{POSITIONS[position].shortLabel}</p>
