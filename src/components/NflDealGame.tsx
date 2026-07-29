@@ -464,7 +464,7 @@ export default function NflDealGame() {
               <NflDealQbBoard
                 board={positionConfig.board}
                 eliminatedIds={eliminatedIds}
-                offerQbId={state.currentOffer?.quarterback.id}
+                offerQbId={offerDecisionReady ? state.currentOffer?.quarterback.id : null}
                 positionLabel={positionConfig.shortLabel}
               />
             </div>
