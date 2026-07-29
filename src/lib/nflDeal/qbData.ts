@@ -1,15 +1,9 @@
-import type { Quarterback } from './types';
+import { buildBoard } from './playerData';
 
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\./g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
+export { espnHeadshotUrl } from './playerData';
 
 // Starter board: 32 QBs ranked by (roughly) Madden overall.
-// espnId powers the case-reveal headshot (see espnHeadshotUrl below).
+// espnId powers the case-reveal headshot (see espnHeadshotUrl in playerData).
 const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
   ['Josh Allen', 99, '3918298'],
   ['Matthew Stafford', 98, '12483'],
@@ -45,14 +39,4 @@ const RAW_BOARD: Array<[name: string, ovr: number, espnId: string]> = [
   ['Kirk Cousins', 73, '14880'],
 ];
 
-export const QB_BOARD: Quarterback[] = RAW_BOARD.map(([name, ovr, espnId], index) => ({
-  id: slugify(name),
-  name,
-  ovr,
-  rank: index + 1,
-  espnId,
-}));
-
-export function espnHeadshotUrl(qb: Pick<Quarterback, 'espnId'>): string | null {
-  return qb.espnId ? `https://a.espncdn.com/i/headshots/nfl/players/full/${qb.espnId}.png` : null;
-}
+export const QB_BOARD = buildBoard(RAW_BOARD);

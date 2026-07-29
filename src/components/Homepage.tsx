@@ -266,6 +266,10 @@ export default function Homepage() {
               className="rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:border-gray-400 transition-colors">
               Keep 4 Game
             </Link>
+            <Link href="/deal-or-no-deal"
+              className="rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:border-gray-400 transition-colors">
+              Deal or No Deal
+            </Link>
           </div>
         </div>
       </section>

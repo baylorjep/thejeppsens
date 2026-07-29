@@ -66,6 +66,7 @@ type CueKey = keyof typeof CUES;
 const INTRO_SEQUENCE: CueKey[] = ['introReady', 'introMonologue', 'pickCasePrompt'];
 const DEFAULT_ONESHOT_MS = 5000; // fallback for cues without an explicit start/end (e.g. `reveal`)
 const RING_REPEAT_COUNT = 2; // rings 1 (initial) + this many more before the offer loop takes over
+const RING_START_DELAY_MS = 2000; // beat after the elimination sting before the ring kicks in
 
 function cueDurationMs(key: CueKey): number {
   const cue = CUES[key];
@@ -101,6 +102,7 @@ const NflDealAudioController = forwardRef<
   const playerRef = useRef<YTPlayer | null>(null);
   const activeCueRef = useRef<CueKey | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ringDelayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queueRef = useRef<CueKey[]>([]);
   const lastEliminationKeyRef = useRef(0);
 
@@ -243,8 +245,15 @@ const NflDealAudioController = forwardRef<
       return;
     }
     if (activeCueRef.current === desired) return;
-    if (desired === 'bankOffer') startBankOfferSequence();
-    else playCue(desired);
+    if (desired === 'bankOffer') {
+      // Claim it immediately so a repeat call during the delay window
+      // (re-renders, unmute, etc.) doesn't restart the wait.
+      activeCueRef.current = 'bankOffer';
+      if (ringDelayTimeoutRef.current) clearTimeout(ringDelayTimeoutRef.current);
+      ringDelayTimeoutRef.current = setTimeout(startBankOfferSequence, RING_START_DELAY_MS);
+    } else {
+      playCue(desired);
+    }
   }
 
   useEffect(() => {
@@ -280,6 +289,7 @@ const NflDealAudioController = forwardRef<
       playerRef.current?.pauseVideo();
       ringRef.current?.pause();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (ringDelayTimeoutRef.current) clearTimeout(ringDelayTimeoutRef.current);
       return;
     }
     // Unmuting happens inside this click handler, so starting playback here

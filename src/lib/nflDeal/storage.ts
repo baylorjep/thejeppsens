@@ -1,34 +1,36 @@
-import { QB_BOARD } from './qbData';
+import { POSITIONS } from './positions';
 import { ROUND_SCHEDULE } from './gameLogic';
-import type { CaseStatus, GamePhase, GameState } from './types';
+import type { CaseStatus, GamePhase, GameState, PositionId } from './types';
 
-const STORAGE_KEY = 'nfl-deal-or-no-deal:v1';
+const STORAGE_KEY = 'deal-or-no-deal:v1';
 
 const VALID_PHASES: GamePhase[] = ['selecting-case', 'opening-cases', 'bank-offer', 'final-choice', 'finished'];
 const VALID_STATUSES: CaseStatus[] = ['available', 'selected', 'opened'];
-const QB_IDS = new Set(QB_BOARD.map((qb) => qb.id));
+const VALID_POSITIONS: PositionId[] = ['QB', 'RB', 'WR'];
 
 // Defensive: only trust a saved state if it could actually have come from a
-// real game (right shape, no duplicate/missing QBs, phase-consistent).
+// real game (right shape, no duplicate/missing players, phase-consistent).
 function isValidGameState(value: unknown): value is GameState {
   if (!value || typeof value !== 'object') return false;
   const s = value as GameState;
 
+  if (!VALID_POSITIONS.includes(s.position)) return false;
   if (typeof s.seed !== 'number' || typeof s.rngCursor !== 'number') return false;
   if (!VALID_PHASES.includes(s.phase)) return false;
   if (!Array.isArray(s.cases) || s.cases.length !== 32) return false;
 
+  const validIds = new Set(POSITIONS[s.position].board.map((p) => p.id));
   const seenNumbers = new Set<number>();
-  const seenQbIds = new Set<string>();
+  const seenIds = new Set<string>();
   for (const c of s.cases) {
     if (typeof c?.number !== 'number' || c.number < 1 || c.number > 32) return false;
     if (seenNumbers.has(c.number)) return false;
     seenNumbers.add(c.number);
 
     if (!VALID_STATUSES.includes(c.status)) return false;
-    if (!c.quarterback || !QB_IDS.has(c.quarterback.id)) return false;
-    if (seenQbIds.has(c.quarterback.id)) return false;
-    seenQbIds.add(c.quarterback.id);
+    if (!c.quarterback || !validIds.has(c.quarterback.id)) return false;
+    if (seenIds.has(c.quarterback.id)) return false;
+    seenIds.add(c.quarterback.id);
   }
 
   const selectedCount = s.cases.filter((c) => c.status === 'selected').length;
@@ -92,7 +94,7 @@ export function clearSavedGame() {
 // actual client-side unmount, never on a hard reload (the JS context is
 // destroyed before cleanup can run). So a sessionStorage flag that's
 // cleared on unmount but survives a reload tells the two apart correctly.
-const SESSION_ACTIVE_KEY = 'nfl-deal-or-no-deal:session-active';
+const SESSION_ACTIVE_KEY = 'deal-or-no-deal:session-active';
 
 export function claimSessionAndCheckIfResuming(): boolean {
   try {

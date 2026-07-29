@@ -8,18 +8,19 @@ import {
   getEliminatedQbIds,
   getPlayerCase,
 } from '@/lib/nflDeal/gameLogic';
-import { QB_BOARD } from '@/lib/nflDeal/qbData';
+import { POSITIONS, DYNASTY_POSITIONS } from '@/lib/nflDeal/positions';
 import { claimSessionAndCheckIfResuming, clearSavedGame, loadGame, releaseSession, saveGame } from '@/lib/nflDeal/storage';
 import NflDealCaseGrid from './NflDealCaseGrid';
 import NflDealQbBoard from './NflDealQbBoard';
 import NflDealOfferModal from './NflDealOfferModal';
 import NflDealRoundPanel from './NflDealRoundPanel';
 import NflDealEndScreen from './NflDealEndScreen';
+import NflDealDynastySummary from './NflDealDynastySummary';
 import NflDealYourCase from './NflDealYourCase';
 import NflDealAudioController, { type NflDealAudioHandle } from './NflDealAudioController';
 import NflDealCaseRevealPopup from './NflDealCaseRevealPopup';
 import NflDealRulesIntro from './NflDealRulesIntro';
-import type { Quarterback } from '@/lib/nflDeal/types';
+import type { Player, PositionId } from '@/lib/nflDeal/types';
 
 // How long the sound plays before the result actually shows -- timed to
 // land near the end of each ~6s elimination clip. Best-effort estimate;
@@ -30,23 +31,46 @@ const REVEAL_HOLD_MS = 1500;
 // modal actually appears, so a round-ending case doesn't cut straight from
 // "here's who you lost" to the offer with no beat in between.
 const OFFER_MODAL_DELAY_MS = 1800;
-// How long the simple rules explainer shows before the case board animates
-// in -- otherwise the board just sits there fully-formed and static while
-// ~45s of intro audio plays, which is dead time with nothing to watch.
-const RULES_STAGE_MS = 10000;
+
+type Mode = PositionId | 'DYNASTY';
+
+const MODE_OPTIONS: { id: Mode; label: string }[] = [
+  { id: 'QB', label: 'Quarterback' },
+  { id: 'RB', label: 'Running Back' },
+  { id: 'WR', label: 'Wide Receiver' },
+  { id: 'DYNASTY', label: 'Dynasty' },
+];
+
+function modeSubtitle(mode: Mode): string {
+  if (mode === 'DYNASTY') return 'QB, then RB, then WR. Build a dynasty, one case at a time.';
+  return `32 ${POSITIONS[mode].pluralLabel}. One sealed case. The Bank is watching.`;
+}
 
 export default function NflDealGame() {
+  // Set once, synchronously, by the useReducer lazy initializer below (which
+  // only ever runs on mount) -- lets handleStartGame tell a genuine resume
+  // apart from a fresh game without re-deriving it from storage a second time.
+  const resumedRef = useRef(false);
   const [state, dispatch] = useReducer(gameReducer, undefined, () => {
     if (claimSessionAndCheckIfResuming()) {
       const saved = loadGame();
-      if (saved) return saved;
+      if (saved) {
+        resumedRef.current = true;
+        return saved;
+      }
     } else {
       clearSavedGame();
     }
-    return createInitialGameState();
+    return createInitialGameState('QB');
   });
+  const [selectedMode, setSelectedMode] = useState<Mode>(state.position);
+  // Only set while playing a Dynasty run: tracks which of the three
+  // positions we're on and the winning player banked from each finished
+  // stage so far.
+  const [dynasty, setDynasty] = useState<{ index: number; results: Partial<Record<PositionId, Player>> } | null>(null);
+  const [dynastyDone, setDynastyDone] = useState(false);
   const [ceremonyCaseNumber, setCeremonyCaseNumber] = useState<number | null>(null);
-  const [pendingReveal, setPendingReveal] = useState<{ number: number; quarterback: Quarterback | null } | null>(null);
+  const [pendingReveal, setPendingReveal] = useState<{ number: number; quarterback: Player | null } | null>(null);
   const [eliminationEvent, setEliminationEvent] = useState<{ key: number; outcome: 'good' | 'bad' } | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
   const [introVisualStage, setIntroVisualStage] = useState<'rules' | 'board'>('rules');
@@ -54,7 +78,6 @@ export default function NflDealGame() {
   const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const offerModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const introVisualTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const eliminationCounterRef = useRef(0);
   const prevPhaseRef = useRef(state.phase);
   const audioRef = useRef<NflDealAudioHandle>(null);
@@ -78,21 +101,29 @@ export default function NflDealGame() {
   }, [state.phase, pendingReveal]);
 
   function handleStartGame() {
+    // The mode selector defaults to whatever position a resumed game was
+    // already on -- if the player leaves that selection alone, Start Game
+    // should continue that game rather than silently discarding it. Picking
+    // a different mode (or Dynasty, which never resumes) starts fresh.
+    const resuming = resumedRef.current && selectedMode === state.position;
+
+    if (!resuming) {
+      if (selectedMode === 'DYNASTY') {
+        setDynasty({ index: 0, results: {} });
+        setDynastyDone(false);
+        dispatch({ type: 'NEW_GAME', position: DYNASTY_POSITIONS[0] });
+      } else {
+        setDynasty(null);
+        setDynastyDone(false);
+        dispatch({ type: 'NEW_GAME', position: selectedMode });
+      }
+    }
     setHasStarted(true);
-    setIntroVisualStage('rules');
+    setIntroVisualStage(resuming && state.phase !== 'selecting-case' ? 'board' : 'rules');
     // Runs inside this click handler, so it's a direct user gesture and
     // won't be blocked by the browser's autoplay policy.
     audioRef.current?.unlockAndPlay();
-
-    if (introVisualTimeoutRef.current) clearTimeout(introVisualTimeoutRef.current);
-    introVisualTimeoutRef.current = setTimeout(() => setIntroVisualStage('board'), RULES_STAGE_MS);
   }
-
-  useEffect(() => {
-    return () => {
-      if (introVisualTimeoutRef.current) clearTimeout(introVisualTimeoutRef.current);
-    };
-  }, []);
 
   useEffect(() => {
     // No need to keep a finished game around -- next load should start fresh.
@@ -117,14 +148,46 @@ export default function NflDealGame() {
   const playerCase = getPlayerCase(state);
   const eliminatedIds = getEliminatedQbIds(state);
   const showYourCase = playerCase && state.phase !== 'selecting-case' && state.phase !== 'finished';
+  const positionConfig = POSITIONS[state.position];
 
-  function newGame() {
+  function backToModePicker() {
     clearSavedGame();
+    resumedRef.current = false;
+    setHasStarted(false);
+    setDynasty(null);
+    setDynastyDone(false);
     setCeremonyCaseNumber(null);
     setPendingReveal(null);
     if (pendingTimeoutRef.current) clearTimeout(pendingTimeoutRef.current);
     if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
-    dispatch({ type: 'NEW_GAME' });
+  }
+
+  // Called when a single-position game finishes and the player wants to
+  // play again -- for a Dynasty run this advances to the next position
+  // instead of resetting to the mode picker.
+  function handleEndScreenContinue() {
+    if (!dynasty || !playerCase) {
+      backToModePicker();
+      return;
+    }
+
+    const won = state.dealAccepted?.quarterback ?? playerCase.quarterback;
+    const results = { ...dynasty.results, [state.position]: won };
+    const nextIndex = dynasty.index + 1;
+
+    if (nextIndex >= DYNASTY_POSITIONS.length) {
+      setDynasty({ index: dynasty.index, results });
+      setDynastyDone(true);
+      return;
+    }
+
+    setDynasty({ index: nextIndex, results });
+    setCeremonyCaseNumber(null);
+    setPendingReveal(null);
+    // Skip the full ~25s rules explainer for stages 2 and 3 -- the player
+    // already knows how the game works, they just need to see the new board.
+    setIntroVisualStage('board');
+    dispatch({ type: 'NEW_GAME', position: DYNASTY_POSITIONS[nextIndex] });
   }
 
   function openCase(caseNumber: number) {
@@ -132,9 +195,9 @@ export default function NflDealGame() {
     const opening = state.cases.find((c) => c.number === caseNumber);
     if (!opening) return;
 
-    // Good = a bottom-half (worst-ranked) QB got knocked off the board;
-    // bad = a top-half (best-ranked) QB did. Ranks are fixed 1 (best) -> 32
-    // (worst) regardless of who's still hidden.
+    // Good = a bottom-half (worst-ranked) player got knocked off the board;
+    // bad = a top-half (best-ranked) player did. Ranks are fixed 1 (best) ->
+    // 32 (worst) regardless of who's still hidden.
     const outcome: 'good' | 'bad' = opening.quarterback.rank > 16 ? 'good' : 'bad';
 
     // Start the sound and show the case sealed first -- the actual reveal
@@ -152,6 +215,8 @@ export default function NflDealGame() {
     }, REVEAL_DELAY_MS_BY_OUTCOME[outcome]);
   }
 
+  const dynastyStageLabel = dynasty ? `Dynasty — Stage ${dynasty.index + 1} of ${DYNASTY_POSITIONS.length}: ${positionConfig.pluralLabel}` : null;
+
   return (
     <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.08),transparent_60%)] pb-20 text-slate-100">
       <NflDealAudioController ref={audioRef} phase={state.phase} eliminationEvent={eliminationEvent} enabled={hasStarted} />
@@ -159,8 +224,27 @@ export default function NflDealGame() {
       {!hasStarted ? (
         <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center">
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">NFL Deal or No Deal</h1>
-            <p className="mt-2 text-sm text-slate-400">32 QBs. One sealed case. The Bank is watching.</p>
+            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Deal or No Deal</h1>
+            <p className="mt-2 text-sm text-slate-400">{modeSubtitle(selectedMode)}</p>
+          </div>
+          <div role="radiogroup" aria-label="Game mode" className="flex flex-wrap justify-center gap-2">
+            {MODE_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                role="radio"
+                aria-checked={selectedMode === opt.id}
+                onClick={() => setSelectedMode(opt.id)}
+                className={[
+                  'rounded-lg border px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300',
+                  selectedMode === opt.id
+                    ? 'border-teal-400 bg-teal-500/15 text-teal-200'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200',
+                ].join(' ')}
+              >
+                {opt.id === 'DYNASTY' ? opt.label : POSITIONS[opt.id as PositionId].shortLabel}
+              </button>
+            ))}
           </div>
           <button
             type="button"
@@ -171,17 +255,26 @@ export default function NflDealGame() {
           </button>
         </div>
       ) : introVisualStage === 'rules' ? (
-        <NflDealRulesIntro />
+        <NflDealRulesIntro
+          onComplete={() => setIntroVisualStage('board')}
+          label={positionConfig.label}
+          pluralLabel={positionConfig.pluralLabel}
+        />
       ) : (
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-black tracking-tight text-white sm:text-2xl">NFL Deal or No Deal</h1>
-            <p className="text-xs text-slate-400">32 QBs. One sealed case. The Bank is watching.</p>
+            {dynastyStageLabel && (
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-400">{dynastyStageLabel}</p>
+            )}
+            <h1 className="text-xl font-black tracking-tight text-white sm:text-2xl">Deal or No Deal</h1>
+            <p className="text-xs text-slate-400">
+              32 {positionConfig.pluralLabel}. One sealed case. The Bank is watching.
+            </p>
           </div>
           <button
             type="button"
-            onClick={newGame}
+            onClick={backToModePicker}
             className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-300 transition-colors hover:border-slate-500 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300"
           >
             <RotateCcw className="h-3.5 w-3.5" aria-hidden />
@@ -189,12 +282,26 @@ export default function NflDealGame() {
           </button>
         </div>
 
-        {state.phase === 'finished' && playerCase ? (
+        {dynastyDone && dynasty ? (
+          <div className="mt-6">
+            <NflDealDynastySummary
+              results={dynasty.results as Record<PositionId, Player>}
+              onPlayAgain={backToModePicker}
+            />
+          </div>
+        ) : state.phase === 'finished' && playerCase ? (
           <div className="mt-6">
             <NflDealEndScreen
               state={state}
               playerCase={playerCase}
-              onPlayAgain={newGame}
+              onPlayAgain={handleEndScreenContinue}
+              ctaLabel={
+                dynasty
+                  ? dynasty.index + 1 >= DYNASTY_POSITIONS.length
+                    ? 'See Your Dynasty Team'
+                    : `Continue to ${POSITIONS[DYNASTY_POSITIONS[dynasty.index + 1]].pluralLabel}`
+                  : 'Play Again'
+              }
               onReveal={(outcome) => {
                 eliminationCounterRef.current += 1;
                 setEliminationEvent({ key: eliminationCounterRef.current, outcome });
@@ -219,14 +326,19 @@ export default function NflDealGame() {
               {showYourCase && playerCase && <NflDealYourCase number={playerCase.number} />}
             </div>
             <div>
-              <NflDealQbBoard board={QB_BOARD} eliminatedIds={eliminatedIds} offerQbId={state.currentOffer?.quarterback.id} />
+              <NflDealQbBoard
+                board={positionConfig.board}
+                eliminatedIds={eliminatedIds}
+                offerQbId={state.currentOffer?.quarterback.id}
+                positionLabel={positionConfig.shortLabel}
+              />
             </div>
           </div>
         )}
       </div>
       )}
 
-      {hasStarted && offerModalReady && state.currentOffer && (
+      {hasStarted && offerModalReady && state.currentOffer && !dynastyDone && (
         <NflDealOfferModal
           offer={state.currentOffer}
           isFinal={state.phase === 'final-choice'}

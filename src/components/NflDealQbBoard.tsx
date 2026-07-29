@@ -3,16 +3,17 @@
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { espnHeadshotUrl } from '@/lib/nflDeal/qbData';
-import type { Quarterback } from '@/lib/nflDeal/types';
+import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
+import type { Player } from '@/lib/nflDeal/types';
 
 interface Props {
-  board: Quarterback[];
+  board: Player[];
   eliminatedIds: Set<string>;
   offerQbId?: string | null;
+  positionLabel: string;
 }
 
-function BoardCell({ qb, eliminated, isOffer }: { qb: Quarterback; eliminated: boolean; isOffer: boolean }) {
+function BoardCell({ qb, eliminated, isOffer }: { qb: Player; eliminated: boolean; isOffer: boolean }) {
   const headshotUrl = espnHeadshotUrl(qb);
   const [imgFailed, setImgFailed] = useState(false);
 
@@ -51,7 +52,7 @@ function BoardCell({ qb, eliminated, isOffer }: { qb: Quarterback; eliminated: b
   );
 }
 
-export default function NflDealQbBoard({ board, eliminatedIds, offerQbId }: Props) {
+export default function NflDealQbBoard({ board, eliminatedIds, offerQbId, positionLabel }: Props) {
   const [expanded, setExpanded] = useState(true);
 
   // Classic Deal or No Deal board layout: worst value at top-left, reading
@@ -72,7 +73,7 @@ export default function NflDealQbBoard({ board, eliminatedIds, offerQbId }: Prop
         aria-expanded={expanded}
         className="flex w-full items-center justify-between px-4 py-3 text-left"
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-slate-300">QB Board</span>
+        <span className="text-sm font-semibold uppercase tracking-wide text-slate-300">{positionLabel} Board</span>
         {expanded ? (
           <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden />
         ) : (
@@ -85,7 +86,7 @@ export default function NflDealQbBoard({ board, eliminatedIds, offerQbId }: Prop
             <span>Low</span>
             <span>High</span>
           </div>
-          <div role="list" aria-label="Quarterback board" className="grid grid-cols-2 gap-1.5">
+          <div role="list" aria-label={`${positionLabel} board`} className="grid grid-cols-2 gap-1.5">
             {orderedForBoard.map((qb) => (
               <div role="listitem" key={qb.id}>
                 <BoardCell qb={qb} eliminated={eliminatedIds.has(qb.id)} isOffer={qb.id === offerQbId} />

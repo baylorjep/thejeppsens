@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { espnHeadshotUrl } from '@/lib/nflDeal/qbData';
-import type { Quarterback } from '@/lib/nflDeal/types';
+import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
+import type { Player } from '@/lib/nflDeal/types';
 
 interface Props {
   caseNumber: number;
   /** null while the sound plays and the result is still being held back. */
-  quarterback: Quarterback | null;
+  quarterback: Player | null;
   onDismiss: () => void;
 }
 

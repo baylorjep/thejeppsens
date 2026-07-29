@@ -2,32 +2,43 @@
 
 import { useEffect, useState } from 'react';
 
-const RULES = [
-  '32 sealed cases. Each one hides an NFL quarterback.',
-  "Pick one case to keep sealed — it's yours until the end.",
-  'Open the rest to knock QBs off the board.',
-  'After every round, the Bank makes you an offer.',
-  'Deal… or No Deal?',
-];
+const STEP_MS = 5000;
 
-const STEP_MS = 1800;
+function rulesFor(label: string, pluralLabel: string): string[] {
+  return [
+    `32 sealed cases. Each one hides an NFL ${label.toLowerCase()}.`,
+    "Pick one case to keep sealed — it's yours until the end.",
+    `Open the rest to knock ${pluralLabel} off the board.`,
+    'After every round, the Bank makes you an offer.',
+    'Deal… or No Deal?',
+  ];
+}
 
-export default function NflDealRulesIntro() {
-  const [visibleCount, setVisibleCount] = useState(1);
+interface Props {
+  onComplete: () => void;
+  label: string;
+  pluralLabel: string;
+}
+
+export default function NflDealRulesIntro({ onComplete, label, pluralLabel }: Props) {
+  const [index, setIndex] = useState(0);
+  const RULES = rulesFor(label, pluralLabel);
 
   useEffect(() => {
-    if (visibleCount >= RULES.length) return;
-    const t = setTimeout(() => setVisibleCount((c) => c + 1), STEP_MS);
+    if (index < RULES.length - 1) {
+      const t = setTimeout(() => setIndex((i) => i + 1), STEP_MS);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(onComplete, STEP_MS);
     return () => clearTimeout(t);
-  }, [visibleCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-      {RULES.slice(0, visibleCount).map((line, i) => (
-        <p key={i} className="animate-case-reveal text-lg font-semibold text-slate-200 sm:text-xl">
-          {line}
-        </p>
-      ))}
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <p key={index} className="animate-case-reveal max-w-2xl text-2xl font-bold leading-snug text-slate-100 sm:text-4xl">
+        {RULES[index]}
+      </p>
     </div>
   );
 }

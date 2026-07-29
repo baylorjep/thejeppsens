@@ -4,22 +4,28 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Confetti from 'react-confetti';
 import { RotateCcw, TrendingDown, TrendingUp } from 'lucide-react';
-import { espnHeadshotUrl } from '@/lib/nflDeal/qbData';
-import type { CaseState, GameState, Quarterback } from '@/lib/nflDeal/types';
+import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
+import type { CaseState, GameState, Player } from '@/lib/nflDeal/types';
 
 interface Props {
   state: GameState;
   playerCase: CaseState;
   onPlayAgain: () => void;
-  /** Fires once, right as the reveal stage begins, with whether the
-   * decision (deal taken or case kept) turned out to be the right call. */
+  ctaLabel?: string;
+  /** Fires once, timed so the sound lands right as the reveal happens, with
+   * whether the decision (deal taken or case kept) turned out to be right. */
   onReveal: (outcome: 'good' | 'bad') => void;
 }
 
 const SUSPENSE_STEP_MS = 850;
-const STAKES_STAGE_MS = 3800;
+// Same idea as the case-opening reveals: start the sound partway through the
+// stakes page (so you've had a moment to read it), then land the actual
+// reveal right at the sound's payoff -- these reuse the same elimination
+// clips, so the same calibrated delays apply.
+const STAKES_SOUND_LEAD_MS = 2500;
+const REVEAL_SOUND_DELAY_MS: Record<'good' | 'bad', number> = { good: 4500, bad: 5000 };
 
-function QbChip({ qb, size = 40 }: { qb: Quarterback; size?: number }) {
+function QbChip({ qb, size = 40, tone }: { qb: Player; size?: number; tone?: string }) {
   const [imgFailed, setImgFailed] = useState(false);
   const headshotUrl = espnHeadshotUrl(qb);
 
@@ -36,7 +42,7 @@ function QbChip({ qb, size = 40 }: { qb: Quarterback; size?: number }) {
       </div>
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold text-slate-100">{qb.name}</p>
-        <p className="text-xs font-bold text-teal-300">{qb.ovr} OVR</p>
+        <p className={`text-xs font-bold ${tone ?? 'text-teal-300'}`}>{qb.ovr} OVR</p>
       </div>
     </div>
   );
@@ -54,7 +60,7 @@ function SealedCase({ number }: { number: number }) {
   );
 }
 
-export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onReveal }: Props) {
+export default function NflDealEndScreen({ state, playerCase, onPlayAgain, ctaLabel = 'Play Again', onReveal }: Props) {
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
   const [countdown, setCountdown] = useState(3);
   const [stage, setStage] = useState<'suspense' | 'stakes' | 'revealed'>('suspense');
@@ -68,21 +74,15 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
 
   const beatCase = dealAccepted ? dealAccepted.offerOvr > playerCase.quarterback.ovr : null;
   const beatDeclinedOffer = declinedOffer ? playerCase.quarterback.ovr > declinedOffer.offerOvr : null;
-  const celebrate = beatCase === true || beatDeclinedOffer === true || playerCase.quarterback.ovr >= 90;
+  const outcome: 'good' | 'bad' | null =
+    beatCase === true || beatDeclinedOffer === true ? 'good' : beatCase === false || beatDeclinedOffer === false ? 'bad' : null;
+  const isGood = outcome === 'good';
+  const isBad = outcome === 'bad';
+  const celebrate = isGood || playerCase.quarterback.ovr >= 90;
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
   }, []);
-
-  useEffect(() => {
-    if (stage !== 'revealed' || onRevealFiredRef.current) return;
-    onRevealFiredRef.current = true;
-    const good = beatCase === true || beatDeclinedOffer === true;
-    const bad = beatCase === false || beatDeclinedOffer === false;
-    if (good) onReveal('good');
-    else if (bad) onReveal('bad');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage]);
 
   useEffect(() => {
     if (stage !== 'suspense') return;
@@ -96,8 +96,30 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
 
   useEffect(() => {
     if (stage !== 'stakes') return;
-    const t = setTimeout(() => setStage('revealed'), STAKES_STAGE_MS);
-    return () => clearTimeout(t);
+    const soundTimer = setTimeout(() => {
+      if (outcome && !onRevealFiredRef.current) {
+        onRevealFiredRef.current = true;
+        onReveal(outcome);
+      }
+    }, STAKES_SOUND_LEAD_MS);
+    const revealTimer = setTimeout(
+      () => setStage('revealed'),
+      STAKES_SOUND_LEAD_MS + (outcome ? REVEAL_SOUND_DELAY_MS[outcome] : 0),
+    );
+    return () => {
+      clearTimeout(soundTimer);
+      clearTimeout(revealTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
+
+  // Fallback for the rare case where stakes gets skipped entirely (no offer
+  // ever existed) -- the sound still needs to fire from somewhere.
+  useEffect(() => {
+    if (stage !== 'revealed' || onRevealFiredRef.current) return;
+    onRevealFiredRef.current = true;
+    if (outcome) onReveal(outcome);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
 
   if (stage === 'suspense') {
@@ -149,18 +171,34 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
     );
   }
 
+  const ringTone = isGood ? 'border-green-400/70' : isBad ? 'border-rose-400/70' : 'border-teal-400/60';
+  const ovrTone = isGood ? 'text-green-300' : isBad ? 'text-rose-300' : 'text-teal-300';
+  const containerTone = isGood
+    ? 'border-green-500/40 bg-gradient-to-b from-green-500/10 via-slate-900 to-slate-900'
+    : isBad
+      ? 'border-rose-500/40 bg-gradient-to-b from-rose-500/10 via-slate-900 to-slate-900'
+      : 'border-slate-700 bg-slate-900/80';
+  const boxTone = isGood ? 'border-green-700/40 bg-green-950/20' : isBad ? 'border-rose-700/40 bg-rose-950/20' : 'border-slate-700 bg-slate-800/60';
+
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-900/80 p-6 text-center sm:p-10">
+    <div className={`relative overflow-hidden rounded-2xl border p-6 text-center transition-colors sm:p-10 ${containerTone}`}>
       {celebrate && windowSize && (
         <Confetti
           width={windowSize.w}
           height={windowSize.h}
           recycle={false}
           numberOfPieces={220}
-          colors={['#f59e0b', '#14b8a6', '#3b82f6', '#a855f7', '#f8fafc']}
+          colors={isGood ? ['#22c55e', '#4ade80', '#86efac', '#14b8a6', '#f8fafc'] : ['#f59e0b', '#14b8a6', '#3b82f6', '#a855f7', '#f8fafc']}
         />
       )}
 
+      {outcome && (
+        <p
+          className={`animate-case-reveal mb-1 text-[10px] font-bold uppercase tracking-[0.3em] ${isGood ? 'text-green-400' : 'text-rose-400'}`}
+        >
+          {isGood ? 'Great outcome' : 'Tough break'}
+        </p>
+      )}
       <h2 className="animate-case-reveal text-3xl font-black text-white sm:text-4xl">
         {dealAccepted ? 'DEAL!' : 'NO DEAL'}
       </h2>
@@ -172,7 +210,7 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Case #{playerCase.number} contained
         </p>
-        <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-teal-400/60 bg-slate-800 sm:h-28 sm:w-28">
+        <div className={`relative h-24 w-24 overflow-hidden rounded-full border-2 bg-slate-800 sm:h-28 sm:w-28 ${ringTone}`}>
           {espnHeadshotUrl(playerCase.quarterback) ? (
             <Image src={espnHeadshotUrl(playerCase.quarterback)!} alt="" fill sizes="112px" className="object-cover" />
           ) : (
@@ -182,14 +220,14 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
           )}
         </div>
         <p className="text-xl font-bold text-white sm:text-2xl">{playerCase.quarterback.name}</p>
-        <p className="text-3xl font-black text-teal-300 sm:text-4xl">{playerCase.quarterback.ovr} OVR</p>
+        <p className={`text-3xl font-black sm:text-4xl ${ovrTone}`}>{playerCase.quarterback.ovr} OVR</p>
       </div>
 
       {dealAccepted && (
         <div
           className={[
             'mx-auto mt-5 flex max-w-md items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold',
-            beatCase ? 'bg-teal-500/10 text-teal-300' : dealAccepted.offerOvr < playerCase.quarterback.ovr ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
+            beatCase ? 'bg-green-500/10 text-green-300' : dealAccepted.offerOvr < playerCase.quarterback.ovr ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
           ].join(' ')}
         >
           {beatCase ? (
@@ -209,10 +247,10 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
       )}
 
       {dealAccepted && (
-        <div className="mx-auto mt-5 max-w-xs rounded-xl border border-slate-700 bg-slate-800/60 p-4">
+        <div className={`mx-auto mt-5 max-w-xs rounded-xl border p-4 ${boxTone}`}>
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">You took the deal</p>
           <div className="flex justify-center">
-            <QbChip qb={dealAccepted.quarterback} />
+            <QbChip qb={dealAccepted.quarterback} tone={ovrTone} />
           </div>
         </div>
       )}
@@ -222,7 +260,7 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
           <div
             className={[
               'mx-auto mt-5 flex max-w-md items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold',
-              beatDeclinedOffer ? 'bg-teal-500/10 text-teal-300' : beatDeclinedOffer === false ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
+              beatDeclinedOffer ? 'bg-green-500/10 text-green-300' : beatDeclinedOffer === false ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
             ].join(' ')}
           >
             {beatDeclinedOffer ? (
@@ -240,10 +278,10 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
             )}
           </div>
 
-          <div className="mx-auto mt-5 max-w-xs rounded-xl border border-slate-700 bg-slate-800/60 p-4">
+          <div className={`mx-auto mt-5 max-w-xs rounded-xl border p-4 ${boxTone}`}>
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">You passed on</p>
             <div className="flex justify-center">
-              <QbChip qb={declinedOffer.quarterback} />
+              <QbChip qb={declinedOffer.quarterback} tone={ovrTone} />
             </div>
           </div>
         </>
@@ -255,7 +293,7 @@ export default function NflDealEndScreen({ state, playerCase, onPlayAgain, onRev
         className="mx-auto mt-8 flex items-center gap-2 rounded-lg bg-teal-500 px-5 py-3 text-sm font-bold uppercase tracking-wide text-slate-950 transition-colors hover:bg-teal-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200"
       >
         <RotateCcw className="h-4 w-4" aria-hidden />
-        Play Again
+        {ctaLabel}
       </button>
     </div>
   );

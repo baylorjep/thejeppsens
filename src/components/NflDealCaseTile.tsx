@@ -54,7 +54,7 @@ export default function NflDealCaseTile({ caseState, clickable, enterDelayMs, on
           : clickable
             ? 'cursor-pointer border-slate-600 bg-gradient-to-b from-slate-600 to-slate-900 hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-[0_6px_18px_rgba(20,184,166,0.25)]'
             : 'cursor-not-allowed border-slate-800 bg-gradient-to-b from-slate-800 to-slate-950 opacity-50',
-        justRevealed || enterDelayMs != null ? 'animate-case-reveal' : '',
+        justRevealed ? 'animate-case-reveal' : enterDelayMs != null ? 'animate-case-tumble-in' : '',
       ].join(' ')}
     >
       {isOpened ? (

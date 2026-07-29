@@ -1,4 +1,6 @@
-export interface Quarterback {
+export type PositionId = 'QB' | 'RB' | 'WR';
+
+export interface Player {
   id: string;
   name: string;
   team?: string;
@@ -11,7 +13,7 @@ export type CaseStatus = 'available' | 'selected' | 'opened';
 
 export interface CaseState {
   number: number;
-  quarterback: Quarterback;
+  quarterback: Player;
   status: CaseStatus;
 }
 
@@ -23,16 +25,17 @@ export type GamePhase =
   | 'finished';
 
 export interface BankOffer {
-  quarterback: Quarterback;
+  quarterback: Player;
   round: number;
   expectedValueOvr: number;
   offerOvr: number;
-  /** Every QB that was still hidden (your case + all unopened cases) at the
-   * moment this offer was made -- your case was one of these. */
-  remainingPool: Quarterback[];
+  /** Every player that was still hidden (your case + all unopened cases) at
+   * the moment this offer was made -- your case was one of these. */
+  remainingPool: Player[];
 }
 
 export interface GameState {
+  position: PositionId;
   seed: number;
   rngCursor: number;
   cases: CaseState[];

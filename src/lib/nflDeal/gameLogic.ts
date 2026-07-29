@@ -1,16 +1,24 @@
-import { QB_BOARD } from './qbData';
-import type { BankOffer, CaseState, GamePhase, GameState } from './types';
+import { POSITIONS } from './positions';
+import type { BankOffer, CaseState, GamePhase, GameState, Player, PositionId } from './types';
 
 // Cases opened per round, in order. Once only 1 non-player case remains
 // unopened (i.e. player's case + 1 other), the next offer is the final one.
 export const ROUND_SCHEDULE = [7, 6, 5, 4, 3, 2, 1, 1, 1] as const;
 
-const ALL_OVRS = QB_BOARD.map((qb) => qb.ovr);
-const INITIAL_AVG_OVR = ALL_OVRS.reduce((sum, n) => sum + n, 0) / ALL_OVRS.length;
-const INITIAL_SPREAD = Math.max(...ALL_OVRS) - Math.min(...ALL_OVRS);
-
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
+}
+
+// Each position's board has its own OVR range/average -- cache per position
+// instead of assuming QB's numbers apply everywhere.
+const positionStatsCache = new Map<PositionId, { avgOvr: number; spread: number }>();
+function getPositionStats(position: PositionId) {
+  const cached = positionStatsCache.get(position);
+  if (cached) return cached;
+  const ovrs = POSITIONS[position].board.map((p) => p.ovr);
+  const stats = { avgOvr: average(ovrs), spread: Math.max(...ovrs) - Math.min(...ovrs) };
+  positionStatsCache.set(position, stats);
+  return stats;
 }
 
 // --- deterministic RNG -----------------------------------------------------
@@ -44,8 +52,8 @@ function average(nums: number[]): number {
 }
 
 // --- setup ------------------------------------------------------------------
-function shuffledCases(seed: number): { cases: CaseState[]; cursor: number } {
-  const board = [...QB_BOARD];
+function shuffledCases(position: PositionId, seed: number): { cases: CaseState[]; cursor: number } {
+  const board = [...POSITIONS[position].board];
   const { values, cursor } = drawRandom({ seed, rngCursor: 0 }, board.length - 1);
 
   for (let i = board.length - 1; i > 0; i--) {
@@ -62,9 +70,10 @@ function shuffledCases(seed: number): { cases: CaseState[]; cursor: number } {
   return { cases, cursor };
 }
 
-export function createInitialGameState(seed: number = Date.now()): GameState {
-  const { cases, cursor } = shuffledCases(seed);
+export function createInitialGameState(position: PositionId, seed: number = Date.now()): GameState {
+  const { cases, cursor } = shuffledCases(position, seed);
   return {
+    position,
     seed,
     rngCursor: cursor,
     cases,
@@ -89,14 +98,17 @@ export function createInitialGameState(seed: number = Date.now()): GameState {
 //    lowballs harder (real risk of paying out big); if it's weaker than
 //    average, the bank can afford to be more generous
 function computeBankOffer(state: GameState): { offer: BankOffer; cursor: number } {
+  const board = POSITIONS[state.position].board;
+  const { avgOvr: initialAvgOvr, spread: initialSpread } = getPositionStats(state.position);
+
   const playerCase = state.cases.find((c) => c.number === state.playerCaseNumber);
   const unopened = state.cases.filter((c) => c.status === 'available');
   const remainingHidden = playerCase ? [playerCase.quarterback, ...unopened.map((c) => c.quarterback)] : unopened.map((c) => c.quarterback);
 
   const expectedValueOvr = average(remainingHidden.map((q) => q.ovr));
   const spread = Math.max(...remainingHidden.map((q) => q.ovr)) - Math.min(...remainingHidden.map((q) => q.ovr));
-  const normalizedSpread = INITIAL_SPREAD > 0 ? spread / INITIAL_SPREAD : 0;
-  const trend = clamp((expectedValueOvr - INITIAL_AVG_OVR) / INITIAL_AVG_OVR, -0.15, 0.15);
+  const normalizedSpread = initialSpread > 0 ? spread / initialSpread : 0;
+  const trend = clamp((expectedValueOvr - initialAvgOvr) / initialAvgOvr, -0.15, 0.15);
 
   const hiddenOvrs = remainingHidden.map((q) => q.ovr);
   const hiddenMin = Math.min(...hiddenOvrs);
@@ -118,7 +130,7 @@ function computeBankOffer(state: GameState): { offer: BankOffer; cursor: number 
   const [tieBreakRoll] = values;
 
   const recentOfferIds = new Set(state.offerHistory.slice(-2).map((o) => o.quarterback.id));
-  const sorted = [...QB_BOARD].sort((a, b) => Math.abs(a.ovr - targetOvr) - Math.abs(b.ovr - targetOvr));
+  const sorted = [...board].sort((a, b) => Math.abs(a.ovr - targetOvr) - Math.abs(b.ovr - targetOvr));
 
   // An offer at or below the worst remaining outcome is a guaranteed No
   // Deal (you can never do worse by playing on); an offer at or above the
@@ -238,7 +250,7 @@ export function getUnopenedNonPlayerCases(state: GameState): CaseState[] {
 
 // --- reducer ---------------------------------------------------------------
 export type GameAction =
-  | { type: 'NEW_GAME'; seed?: number }
+  | { type: 'NEW_GAME'; position: PositionId; seed?: number }
   | { type: 'SELECT_CASE'; caseNumber: number }
   | { type: 'OPEN_CASE'; caseNumber: number }
   | { type: 'ACCEPT_OFFER' }
@@ -248,7 +260,7 @@ export type GameAction =
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'NEW_GAME':
-      return createInitialGameState(action.seed);
+      return createInitialGameState(action.position, action.seed);
     case 'SELECT_CASE':
       return selectPlayerCase(state, action.caseNumber);
     case 'OPEN_CASE':

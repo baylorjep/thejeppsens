@@ -10,6 +10,10 @@ interface Props {
   onOpen: (caseNumber: number) => void;
 }
 
+// The board's tumble-in entrance spreads across this whole window instead
+// of a quick stagger, so it has real presence during the intro's dead air.
+const ENTRANCE_SPREAD_MS = 10000;
+
 export default function NflDealCaseGrid({ cases, phase, playerCaseNumber, currentRoundOpenedNumbers, locked, onOpen }: Props) {
   const casesAreClickable = !locked && (phase === 'selecting-case' || phase === 'opening-cases');
   // Cases opened earlier in an already-finished round drop off the board;
@@ -35,7 +39,9 @@ export default function NflDealCaseGrid({ cases, phase, playerCaseNumber, curren
           <NflDealCaseTile
             caseState={caseState}
             clickable={casesAreClickable && caseState.status === 'available'}
-            enterDelayMs={caseState.status === 'available' ? index * 18 : undefined}
+            enterDelayMs={
+              caseState.status === 'available' ? Math.round((index / Math.max(boardCases.length - 1, 1)) * ENTRANCE_SPREAD_MS) : undefined
+            }
             onOpen={onOpen}
           />
         </div>
