@@ -3,9 +3,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ChevronLeft, ChevronRight, Disc3, Utensils, Film, ExternalLink, Globe, Music2 } from 'lucide-react';
 import type { VisitType } from '@/components/WorldMap';
+import { countrySlug } from '@/lib/travel';
 
 const WorldMap = dynamic(() => import('@/components/WorldMap'), { ssr: false });
 
@@ -68,6 +70,7 @@ function visitType(c: Country): VisitType {
 }
 
 export default function Homepage() {
+  const router = useRouter();
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [countries, setCountries] = useState<Country[] | null>(null);
   const [vinyls, setVinyls] = useState<VinylRecord[]>([]);
@@ -98,6 +101,12 @@ export default function Homepage() {
   const visitedMap = useMemo<Map<string, VisitType>>(() => {
     const m = new Map<string, VisitType>();
     for (const c of countries ?? []) m.set(c.geo_name, visitType(c));
+    return m;
+  }, [countries]);
+
+  const countrySlugByGeoName = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const c of countries ?? []) m.set(c.geo_name, countrySlug(c));
     return m;
   }, [countries]);
 
@@ -185,7 +194,13 @@ export default function Homepage() {
                 <div className="h-6 w-6 rounded-full border-2 border-slate-200 border-t-teal-500 animate-spin" />
               </div>
             ) : (
-              <WorldMap visitedMap={visitedMap} />
+              <WorldMap
+                visitedMap={visitedMap}
+                onCountryClick={(geoName) => {
+                  const slug = countrySlugByGeoName.get(geoName);
+                  if (slug) router.push(`/travel/${slug}`);
+                }}
+              />
             )}
           </div>
 

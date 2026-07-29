@@ -21,7 +21,8 @@ export default function Header() {
     { name: 'Cliplash', href: 'https://scene-it-baylor.vercel.app/host', external: true },
     { name: 'Movie Trivia', href: 'https://scene-it-baylor.vercel.app/host', external: true },
     { name: 'Bracket', href: '/bracket' },
-    { name: 'Keep 4', href: '/keep4' }
+    { name: 'Keep 4', href: '/keep4' },
+    { name: 'NFL Deal or No Deal', href: '/deal-or-no-deal' }
   ];
 
   // Close dropdown when clicking outside
