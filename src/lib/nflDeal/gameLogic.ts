@@ -1,37 +1,17 @@
 import { QB_BOARD } from './qbData';
-import type { BankOffer, CaseState, GamePhase, GameState, Quarterback } from './types';
+import type { BankOffer, CaseState, GamePhase, GameState } from './types';
 
 // Cases opened per round, in order. Once only 1 non-player case remains
 // unopened (i.e. player's case + 1 other), the next offer is the final one.
 export const ROUND_SCHEDULE = [7, 6, 5, 4, 3, 2, 1, 1, 1] as const;
-const ROUND_GENEROSITY = [0.76, 0.8, 0.84, 0.88, 0.91, 0.94, 0.97, 0.97, 0.97] as const;
 
-const ELITE_THRESHOLD = 90;
-const LOW_THRESHOLD = 80;
+const ALL_OVRS = QB_BOARD.map((qb) => qb.ovr);
+const INITIAL_AVG_OVR = ALL_OVRS.reduce((sum, n) => sum + n, 0) / ALL_OVRS.length;
+const INITIAL_SPREAD = Math.max(...ALL_OVRS) - Math.min(...ALL_OVRS);
 
-const MESSAGE_POOLS = {
-  final: [
-    'This is it. One case, one decision.',
-    "No more cases after this. Just you and the number.",
-  ],
-  justLostElite: [
-    "You lost a monster. I'm not paying superstar prices now.",
-    "That one hurt your board. My offer reflects it.",
-  ],
-  clearedBottom: [
-    "You cleaned up the bottom. Annoying for me, good for you.",
-    "Nice work clearing the scrubs. The board's looking dangerous now.",
-  ],
-  eliteRemaining: [
-    "The top of your board is still dangerous, so I can't go cheap.",
-    "There's still a superstar in play. I have to respect that.",
-  ],
-  generic: [
-    "Here's my number. Think it over.",
-    'The board is what it is. This is my offer.',
-    "I've run the numbers. This is where I land.",
-  ],
-};
+function clamp(n: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, n));
+}
 
 // --- deterministic RNG -----------------------------------------------------
 // A given seed + draw count always reproduces the same sequence, so a game
@@ -100,33 +80,31 @@ export function createInitialGameState(seed: number = Date.now()): GameState {
 }
 
 // --- bank offer ---------------------------------------------------------
-function pickBankMessage(
-  remainingHidden: Quarterback[],
-  justOpened: Quarterback[],
-  isFinal: boolean,
-  roll: number,
-): string {
-  if (isFinal) return pickFrom(MESSAGE_POOLS.final, roll);
-  if (justOpened.some((q) => q.ovr >= ELITE_THRESHOLD)) return pickFrom(MESSAGE_POOLS.justLostElite, roll);
-  if (justOpened.length > 0 && justOpened.every((q) => q.ovr < LOW_THRESHOLD)) {
-    return pickFrom(MESSAGE_POOLS.clearedBottom, roll);
-  }
-  if (remainingHidden.some((q) => q.ovr >= ELITE_THRESHOLD)) return pickFrom(MESSAGE_POOLS.eliteRemaining, roll);
-  return pickFrom(MESSAGE_POOLS.generic, roll);
-}
-
-function computeBankOffer(state: GameState, isFinal: boolean): { offer: BankOffer; cursor: number } {
+// The offer is a fraction of the remaining hidden pool's expected value.
+// That fraction moves on three signals:
+//  - round progress: later offers approach EV, early ones stay well below it
+//  - spread: more remaining variance = bigger discount (protects against a
+//    lucky huge case still being out there)
+//  - trend: if what's left is stronger than a truly average board, the bank
+//    lowballs harder (real risk of paying out big); if it's weaker than
+//    average, the bank can afford to be more generous
+function computeBankOffer(state: GameState): { offer: BankOffer; cursor: number } {
   const playerCase = state.cases.find((c) => c.number === state.playerCaseNumber);
   const unopened = state.cases.filter((c) => c.status === 'available');
   const remainingHidden = playerCase ? [playerCase.quarterback, ...unopened.map((c) => c.quarterback)] : unopened.map((c) => c.quarterback);
 
   const expectedValueOvr = average(remainingHidden.map((q) => q.ovr));
   const spread = Math.max(...remainingHidden.map((q) => q.ovr)) - Math.min(...remainingHidden.map((q) => q.ovr));
-  const generosity = ROUND_GENEROSITY[Math.min(state.roundIndex, ROUND_GENEROSITY.length - 1)];
-  const targetOvr = expectedValueOvr * generosity - spread * 0.05;
+  const normalizedSpread = INITIAL_SPREAD > 0 ? spread / INITIAL_SPREAD : 0;
+  const trend = clamp((expectedValueOvr - INITIAL_AVG_OVR) / INITIAL_AVG_OVR, -0.15, 0.15);
 
-  const { values, cursor } = drawRandom(state, 2);
-  const [tieBreakRoll, messageRoll] = values;
+  const roundProgress = state.roundIndex / (ROUND_SCHEDULE.length - 1);
+  const baseGenerosity = 0.72 + 0.25 * roundProgress;
+  const offerFraction = clamp(baseGenerosity - normalizedSpread * 0.12 - trend * 0.4, 0.45, 0.99);
+  const targetOvr = expectedValueOvr * offerFraction;
+
+  const { values, cursor } = drawRandom(state, 1);
+  const [tieBreakRoll] = values;
 
   const recentOfferIds = new Set(state.offerHistory.slice(-2).map((o) => o.quarterback.id));
   const sorted = [...QB_BOARD].sort((a, b) => Math.abs(a.ovr - targetOvr) - Math.abs(b.ovr - targetOvr));
@@ -138,16 +116,9 @@ function computeBankOffer(state: GameState, isFinal: boolean): { offer: BankOffe
   const tiedCandidates = pool.filter((qb) => Math.abs(qb.ovr - targetOvr) - bestDistance <= 1);
   const chosen = pickFrom(tiedCandidates, tieBreakRoll);
 
-  const justOpened = state.casesOpenedThisRound
-    .map((num) => state.cases.find((c) => c.number === num)?.quarterback)
-    .filter((q): q is Quarterback => Boolean(q));
-
-  const message = pickBankMessage(remainingHidden, justOpened, isFinal, messageRoll);
-
   return {
     offer: {
       quarterback: chosen,
-      message,
       round: state.roundIndex + 1,
       expectedValueOvr: Math.round(expectedValueOvr * 10) / 10,
       offerOvr: chosen.ovr,
@@ -189,7 +160,7 @@ export function openCase(state: GameState, caseNumber: number): GameState {
   const roundCompleteState: GameState = { ...state, cases, casesOpenedThisRound, casesToOpenThisRound: 0 };
   const unopenedNonPlayer = cases.filter((c) => c.status === 'available').length;
   const isFinal = unopenedNonPlayer === 1;
-  const { offer, cursor } = computeBankOffer(roundCompleteState, isFinal);
+  const { offer, cursor } = computeBankOffer(roundCompleteState);
 
   const phase: GamePhase = isFinal ? 'final-choice' : 'bank-offer';
 

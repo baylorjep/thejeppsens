@@ -16,7 +16,7 @@ export default function NflDealCaseGrid({ cases, phase, playerCaseNumber, onOpen
     <div
       role="group"
       aria-label="Briefcases"
-      className="grid grid-cols-4 gap-2 sm:grid-cols-6 sm:gap-3 md:grid-cols-8"
+      className="grid grid-cols-4 gap-2 sm:grid-cols-6 sm:gap-3"
     >
       {boardCases.map((caseState) => (
         <NflDealCaseTile

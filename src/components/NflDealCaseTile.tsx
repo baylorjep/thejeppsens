@@ -44,7 +44,7 @@ export default function NflDealCaseTile({ caseState, clickable, onOpen }: Props)
       onClick={() => onOpen(caseState.number)}
       aria-label={ariaLabel}
       className={[
-        'group relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-lg border text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400',
+        'group relative flex aspect-[5/4] w-full items-center justify-center overflow-hidden rounded-lg border text-center transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400',
         isOpened
           ? 'border-slate-700 bg-slate-800/80'
           : clickable
@@ -54,8 +54,8 @@ export default function NflDealCaseTile({ caseState, clickable, onOpen }: Props)
       ].join(' ')}
     >
       {isOpened ? (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-1 py-2">
-          <div className="relative h-11 w-11 overflow-hidden rounded-full bg-slate-700 sm:h-12 sm:w-12">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-1.5 py-1.5">
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-700 ring-2 ring-slate-600 sm:h-12 sm:w-12">
             {headshotUrl && !imgFailed ? (
               <Image
                 src={headshotUrl}
@@ -73,13 +73,13 @@ export default function NflDealCaseTile({ caseState, clickable, onOpen }: Props)
                   .join('')}
               </div>
             )}
+            <span className="absolute -bottom-1 -right-1 rounded-full border border-slate-800 bg-teal-500 px-1 py-px text-[8px] font-bold leading-tight text-teal-950 sm:text-[9px]">
+              {caseState.quarterback.ovr}
+            </span>
           </div>
-          <p className="line-clamp-1 w-full truncate text-[10px] font-medium leading-tight text-slate-200 sm:text-xs">
+          <p className="line-clamp-2 w-full text-center text-[9px] font-medium leading-[1.15] text-slate-200 sm:text-[10.5px]">
             {caseState.quarterback.name}
           </p>
-          <span className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] font-bold text-teal-300">
-            {caseState.quarterback.ovr}
-          </span>
         </div>
       ) : (
         <div className="relative flex h-full w-full items-center justify-center">

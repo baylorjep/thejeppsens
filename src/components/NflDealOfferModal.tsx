@@ -13,14 +13,48 @@ interface Props {
   onNoDeal: () => void;
 }
 
+const REACTION_DELAY_MS = 1100;
+
 export default function NflDealOfferModal({ offer, isFinal, onDeal, onNoDeal }: Props) {
   const dealButtonRef = useRef<HTMLButtonElement>(null);
   const [imgFailed, setImgFailed] = useState(false);
+  const [reaction, setReaction] = useState<'deal' | 'no-deal' | null>(null);
   const headshotUrl = espnHeadshotUrl(offer.quarterback);
 
   useEffect(() => {
     dealButtonRef.current?.focus();
   }, [offer]);
+
+  function handleDeal() {
+    setReaction('deal');
+    setTimeout(onDeal, REACTION_DELAY_MS);
+  }
+
+  function handleNoDeal() {
+    setReaction('no-deal');
+    setTimeout(onNoDeal, REACTION_DELAY_MS);
+  }
+
+  if (reaction) {
+    const isDeal = reaction === 'deal';
+    return (
+      <div
+        role="status"
+        aria-live="assertive"
+        className={[
+          'fixed inset-0 z-50 flex flex-col items-center justify-center gap-2 backdrop-blur-sm',
+          isDeal ? 'bg-green-600/90' : 'bg-red-600/90',
+        ].join(' ')}
+      >
+        <p className="animate-big-reaction text-6xl font-black italic text-white drop-shadow-lg sm:text-7xl">
+          {isDeal ? 'DEAL!' : 'NO DEAL!'}
+        </p>
+        <p className="text-lg font-semibold text-white/90">
+          {isDeal ? `${offer.quarterback.name}, ${offer.offerOvr} OVR` : 'Back to the cases.'}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
@@ -52,23 +86,19 @@ export default function NflDealOfferModal({ offer, isFinal, onDeal, onNoDeal }: 
         <p className="mt-4 text-2xl font-bold text-white">{offer.quarterback.name}</p>
         <p className="mt-1 text-3xl font-black text-amber-300">{offer.offerOvr} OVR</p>
 
-        <p className="mx-auto mt-4 max-w-xs text-sm italic leading-relaxed text-slate-400">
-          &ldquo;{offer.message}&rdquo;
-        </p>
-
         <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
           <button
             type="button"
-            onClick={onNoDeal}
-            className="flex-1 rounded-lg border border-slate-600 px-4 py-3 text-sm font-bold uppercase tracking-wide text-slate-200 transition-colors hover:border-slate-400 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
+            onClick={handleNoDeal}
+            className="flex-1 rounded-lg border-2 border-red-500/70 px-4 py-3 text-sm font-bold uppercase tracking-wide text-red-300 transition-colors hover:bg-red-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
           >
             No Deal
           </button>
           <button
             ref={dealButtonRef}
             type="button"
-            onClick={onDeal}
-            className="flex-1 rounded-lg bg-amber-500 px-4 py-3 text-sm font-bold uppercase tracking-wide text-slate-950 transition-colors hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200"
+            onClick={handleDeal}
+            className="flex-1 rounded-lg bg-green-500 px-4 py-3 text-sm font-bold uppercase tracking-wide text-slate-950 transition-colors hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-200"
           >
             Deal
           </button>

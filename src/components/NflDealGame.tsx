@@ -9,7 +9,7 @@ import {
   getPlayerCase,
 } from '@/lib/nflDeal/gameLogic';
 import { QB_BOARD } from '@/lib/nflDeal/qbData';
-import { clearSavedGame, loadGame, saveGame } from '@/lib/nflDeal/storage';
+import { clearSavedGame, isPageReload, loadGame, saveGame } from '@/lib/nflDeal/storage';
 import NflDealCaseGrid from './NflDealCaseGrid';
 import NflDealQbBoard from './NflDealQbBoard';
 import NflDealOfferModal from './NflDealOfferModal';
@@ -17,14 +17,30 @@ import NflDealRoundPanel from './NflDealRoundPanel';
 import NflDealEndScreen from './NflDealEndScreen';
 import NflDealYourCase from './NflDealYourCase';
 import NflDealAudioController from './NflDealAudioController';
+import NflDealCaseRevealPopup from './NflDealCaseRevealPopup';
+import type { CaseState } from '@/lib/nflDeal/types';
 
 export default function NflDealGame() {
-  const [state, dispatch] = useReducer(gameReducer, undefined, () => loadGame() ?? createInitialGameState());
+  const [state, dispatch] = useReducer(gameReducer, undefined, () => {
+    if (isPageReload()) {
+      const saved = loadGame();
+      if (saved) return saved;
+    } else {
+      clearSavedGame();
+    }
+    return createInitialGameState();
+  });
   const [ceremonyCaseNumber, setCeremonyCaseNumber] = useState<number | null>(null);
+  const [revealedCase, setRevealedCase] = useState<CaseState | null>(null);
+  const [eliminationEvent, setEliminationEvent] = useState<{ key: number; outcome: 'good' | 'bad' } | null>(null);
+  const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const eliminationCounterRef = useRef(0);
   const prevPhaseRef = useRef(state.phase);
 
   useEffect(() => {
-    saveGame(state);
+    // No need to keep a finished game around -- next load should start fresh.
+    if (state.phase === 'finished') clearSavedGame();
+    else saveGame(state);
   }, [state]);
 
   useEffect(() => {
@@ -45,12 +61,37 @@ export default function NflDealGame() {
   function newGame() {
     clearSavedGame();
     setCeremonyCaseNumber(null);
+    setRevealedCase(null);
+    if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
     dispatch({ type: 'NEW_GAME' });
+  }
+
+  function openCase(caseNumber: number) {
+    const opening = state.cases.find((c) => c.number === caseNumber);
+    if (opening) {
+      if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
+      setRevealedCase(opening);
+      revealTimeoutRef.current = setTimeout(() => setRevealedCase(null), 1500);
+
+      const stillHidden = [
+        ...(playerCase ? [playerCase.quarterback] : []),
+        ...state.cases.filter((c) => c.status === 'available').map((c) => c.quarterback),
+      ];
+      if (stillHidden.length > 0) {
+        const avgHiddenOvr = stillHidden.reduce((sum, q) => sum + q.ovr, 0) / stillHidden.length;
+        eliminationCounterRef.current += 1;
+        setEliminationEvent({
+          key: eliminationCounterRef.current,
+          outcome: opening.quarterback.ovr < avgHiddenOvr ? 'good' : 'bad',
+        });
+      }
+    }
+    dispatch({ type: 'OPEN_CASE', caseNumber });
   }
 
   return (
     <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.08),transparent_60%)] pb-20 text-slate-100">
-      <NflDealAudioController phase={state.phase} />
+      <NflDealAudioController phase={state.phase} eliminationEvent={eliminationEvent} />
 
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -83,7 +124,7 @@ export default function NflDealGame() {
                 playerCaseNumber={state.playerCaseNumber}
                 onOpen={(caseNumber) => {
                   if (state.phase === 'selecting-case') dispatch({ type: 'SELECT_CASE', caseNumber });
-                  else if (state.phase === 'opening-cases') dispatch({ type: 'OPEN_CASE', caseNumber });
+                  else if (state.phase === 'opening-cases') openCase(caseNumber);
                 }}
               />
             </div>
@@ -100,6 +141,17 @@ export default function NflDealGame() {
           isFinal={state.phase === 'final-choice'}
           onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
           onNoDeal={() => dispatch({ type: 'REJECT_OFFER' })}
+        />
+      )}
+
+      {revealedCase && (
+        <NflDealCaseRevealPopup
+          caseNumber={revealedCase.number}
+          quarterback={revealedCase.quarterback}
+          onDismiss={() => {
+            if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
+            setRevealedCase(null);
+          }}
         />
       )}
 

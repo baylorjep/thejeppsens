@@ -24,7 +24,6 @@ export type GamePhase =
 
 export interface BankOffer {
   quarterback: Quarterback;
-  message: string;
   round: number;
   expectedValueOvr: number;
   offerOvr: number;

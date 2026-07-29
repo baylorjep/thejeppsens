@@ -76,3 +76,15 @@ export function clearSavedGame() {
     // no-op
   }
 }
+
+// Only an actual browser refresh should resume an in-progress game -- a
+// fresh visit (new tab, back button, returning later) should feel like
+// launching the game again, not walking back into a stale session.
+export function isPageReload(): boolean {
+  try {
+    const [entry] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    return entry?.type === 'reload';
+  } catch {
+    return false;
+  }
+}
