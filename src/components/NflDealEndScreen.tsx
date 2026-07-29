@@ -231,22 +231,59 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
         {dealAccepted ? 'You took the offer.' : tradedFinalCase ? 'You traded for the last case.' : 'You kept your case.'}
       </p>
 
-      <div className="animate-case-reveal mx-auto mt-6 flex flex-col items-center gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Case #{playerCase.number} contained
-        </p>
-        <div className={`relative h-24 w-24 overflow-hidden rounded-full border-2 bg-slate-800 sm:h-28 sm:w-28 ${ringTone}`}>
-          {espnHeadshotUrl(playerCase.quarterback) ? (
-            <Image src={espnHeadshotUrl(playerCase.quarterback)!} alt="" fill sizes="112px" className="object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-slate-300">
-              {playerCase.quarterback.name.split(' ').map((p) => p[0]).join('')}
+      {tradedFinalCase && declinedFinalCase ? (
+        <div className="animate-case-reveal mx-auto mt-6 flex flex-col items-center gap-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Your trade</p>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Traded away</p>
+              <div className={`relative h-20 w-20 overflow-hidden rounded-full border-2 bg-slate-800 sm:h-24 sm:w-24 border-rose-500/60`}>
+                {espnHeadshotUrl(declinedFinalCase.quarterback) ? (
+                  <Image src={espnHeadshotUrl(declinedFinalCase.quarterback)!} alt="" fill sizes="96px" className="object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-300">
+                    {declinedFinalCase.quarterback.name.split(' ').map((p) => p[0]).join('')}
+                  </div>
+                )}
+              </div>
+              <p className="text-center text-sm font-bold text-white">{declinedFinalCase.quarterback.name}</p>
+              <p className="text-2xl font-black text-rose-300">{declinedFinalCase.quarterback.ovr} OVR</p>
             </div>
-          )}
+            <span className="text-xl font-black text-slate-600">→</span>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Received</p>
+              <div className={`relative h-20 w-20 overflow-hidden rounded-full border-2 bg-slate-800 sm:h-24 sm:w-24 ${ringTone}`}>
+                {espnHeadshotUrl(playerCase.quarterback) ? (
+                  <Image src={espnHeadshotUrl(playerCase.quarterback)!} alt="" fill sizes="96px" className="object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-300">
+                    {playerCase.quarterback.name.split(' ').map((p) => p[0]).join('')}
+                  </div>
+                )}
+              </div>
+              <p className="text-center text-sm font-bold text-white">{playerCase.quarterback.name}</p>
+              <p className={`text-2xl font-black ${ovrTone}`}>{playerCase.quarterback.ovr} OVR</p>
+            </div>
+          </div>
         </div>
-        <p className="text-xl font-bold text-white sm:text-2xl">{playerCase.quarterback.name}</p>
-        <p className={`text-3xl font-black sm:text-4xl ${ovrTone}`}>{playerCase.quarterback.ovr} OVR</p>
-      </div>
+      ) : (
+        <div className="animate-case-reveal mx-auto mt-6 flex flex-col items-center gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Case #{playerCase.number} contained
+          </p>
+          <div className={`relative h-24 w-24 overflow-hidden rounded-full border-2 bg-slate-800 sm:h-28 sm:w-28 ${ringTone}`}>
+            {espnHeadshotUrl(playerCase.quarterback) ? (
+              <Image src={espnHeadshotUrl(playerCase.quarterback)!} alt="" fill sizes="112px" className="object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-slate-300">
+                {playerCase.quarterback.name.split(' ').map((p) => p[0]).join('')}
+              </div>
+            )}
+          </div>
+          <p className="text-xl font-bold text-white sm:text-2xl">{playerCase.quarterback.name}</p>
+          <p className={`text-3xl font-black sm:text-4xl ${ovrTone}`}>{playerCase.quarterback.ovr} OVR</p>
+        </div>
+      )}
 
       {dealAccepted && (
         <div
@@ -280,7 +317,28 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
         </div>
       )}
 
-      {declinedOffer && (
+      {tradedFinalCase && declinedFinalCase ? (
+        <div
+          className={[
+            'mx-auto mt-5 flex max-w-md items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold',
+            playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? 'bg-green-500/10 text-green-300' : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
+          ].join(' ')}
+        >
+          {playerCase.quarterback.ovr > declinedFinalCase.quarterback.ovr ? (
+            <>
+              <TrendingUp className="h-4 w-4" aria-hidden />
+              Great trade — you got the better player!
+            </>
+          ) : playerCase.quarterback.ovr < declinedFinalCase.quarterback.ovr ? (
+            <>
+              <TrendingDown className="h-4 w-4" aria-hidden />
+              That trade didn't go your way — you gave up more value.
+            </>
+          ) : (
+            'Even trade between the two cases.'
+          )}
+        </div>
+      ) : declinedOffer ? (
         <>
           <div
             className={[
@@ -310,7 +368,7 @@ export default function NflDealEndScreen({ state, playerCase, declinedFinalCase,
             </div>
           </div>
         </>
-      )}
+      ) : null}
 
       <button
         type="button"
