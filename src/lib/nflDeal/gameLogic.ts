@@ -125,8 +125,14 @@ function computeBankOffer(state: GameState): { offer: BankOffer; cursor: number 
   const hiddenMax = Math.max(...hiddenOvrs);
 
   const roundProgress = state.roundIndex / (ROUND_SCHEDULE.length - 1);
-  const baseGenerosity = 0.72 + 0.25 * roundProgress;
-  const offerFraction = clamp(baseGenerosity - normalizedSpread * 0.12 - trend * 0.4, 0.45, 0.99);
+  // Banker's offer strategy: self-interested based on board state
+  // - trend is PRIMARY (how well the banker is doing):
+  //   * negative trend (player losing) → banker offers HIGH (confident they'll win anyway)
+  //   * positive trend (player winning) → banker offers LOW (desperate to close the deal)
+  // - round is SECONDARY (mild time pressure on banker)
+  // - spread reduces confidence (uncertainty = lower offers)
+  const baseGenerosity = 0.65 + trend * 1.5 + roundProgress * 0.08 - normalizedSpread * 0.08;
+  const offerFraction = clamp(baseGenerosity, 0.45, 0.95);
   // Interpolate between the worst remaining outcome and the true expected
   // value, rather than taking a flat fraction of expected value directly --
   // a flat fraction routinely lands far below the achievable range (e.g.
