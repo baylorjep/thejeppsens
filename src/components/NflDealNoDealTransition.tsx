@@ -42,12 +42,15 @@ export default function NflDealNoDealTransition({ state, onSkip }: Props) {
 
   useEffect(() => {
     const start = setTimeout(() => setAnimating(true), 40);
-    const tighten = setTimeout(() => setCompact(true), 1150);
+    const tighten = setTimeout(() => {
+      setCompact(true);
+      onSkip();
+    }, 1150);
     return () => {
       clearTimeout(start);
       clearTimeout(tighten);
     };
-  }, []);
+  }, [onSkip]);
 
   return (
     <button
