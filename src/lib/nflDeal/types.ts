@@ -1,4 +1,4 @@
-export type PositionId = 'QB' | 'RB' | 'WR';
+export type PositionId = 'QB' | 'RB' | 'WR' | 'TE' | 'DST';
 
 export interface Player {
   id: string;
@@ -7,6 +7,11 @@ export interface Player {
   ovr: number;
   rank: number;
   espnId: string | null;
+  /** True for Defense/Special Teams "players" -- these represent a whole
+   * team, not an individual, so espnId holds an ESPN team abbreviation
+   * (e.g. 'sf') instead of an athlete ID, and espnHeadshotUrl resolves it to
+   * a team logo instead of a headshot. */
+  isTeam?: boolean;
 }
 
 export type CaseStatus = 'available' | 'selected' | 'opened';

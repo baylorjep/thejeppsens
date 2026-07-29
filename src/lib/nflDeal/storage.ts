@@ -6,7 +6,7 @@ const STORAGE_KEY = 'deal-or-no-deal:v1';
 
 const VALID_PHASES: GamePhase[] = ['selecting-case', 'opening-cases', 'bank-offer', 'final-choice', 'finished'];
 const VALID_STATUSES: CaseStatus[] = ['available', 'selected', 'opened'];
-const VALID_POSITIONS: PositionId[] = ['QB', 'RB', 'WR'];
+const VALID_POSITIONS: PositionId[] = ['QB', 'RB', 'WR', 'TE', 'DST'];
 
 // Defensive: only trust a saved state if it could actually have come from a
 // real game (right shape, no duplicate/missing players, phase-consistent).

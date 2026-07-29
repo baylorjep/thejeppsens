@@ -41,6 +41,8 @@ const MODE_OPTIONS: { id: Mode; label: string }[] = [
   { id: 'QB', label: 'Quarterback' },
   { id: 'RB', label: 'Running Back' },
   { id: 'WR', label: 'Wide Receiver' },
+  { id: 'TE', label: 'Tight End' },
+  { id: 'DST', label: 'Defense' },
   { id: 'DYNASTY', label: 'Dynasty' },
 ];
 
