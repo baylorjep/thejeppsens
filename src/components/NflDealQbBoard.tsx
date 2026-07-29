@@ -19,7 +19,7 @@ function BoardCell({ qb, eliminated, isOffer }: { qb: Quarterback; eliminated: b
   return (
     <div
       className={[
-        'flex items-center gap-2 rounded-md border px-2 py-1.5 transition-colors',
+        'flex items-center gap-1.5 rounded-md border px-1.5 py-1 transition-colors',
         isOffer
           ? 'border-teal-400/70 bg-teal-500/10'
           : eliminated
@@ -27,7 +27,7 @@ function BoardCell({ qb, eliminated, isOffer }: { qb: Quarterback; eliminated: b
             : 'border-transparent bg-white/[0.03]',
       ].join(' ')}
     >
-      <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full bg-slate-700">
+      <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded-full bg-slate-700">
         {headshotUrl && !imgFailed ? (
           <Image src={headshotUrl} alt="" fill sizes="24px" className="object-cover" onError={() => setImgFailed(true)} />
         ) : (
@@ -58,9 +58,9 @@ export default function NflDealQbBoard({ board, eliminatedIds, offerQbId }: Prop
   // down the left column then down the right column to the best value at
   // bottom-right. `board` is already ordered best (rank 1) -> worst (rank 32).
   const orderedForBoard = useMemo(() => {
-    const worstFirst = [...board].reverse();
+    const worstFirst = [...board].reverse(); // rank 32 (worst) ... rank 1 (best)
     const leftColumn = worstFirst.slice(0, 16); // worst overall -> mid, top to bottom
-    const rightColumn = worstFirst.slice(16).reverse(); // mid -> best overall, top to bottom
+    const rightColumn = worstFirst.slice(16); // already ascending: mid -> best overall (rank 1) at the bottom
     return leftColumn.flatMap((left, i) => [left, rightColumn[i]]);
   }, [board]);
 
@@ -80,7 +80,7 @@ export default function NflDealQbBoard({ board, eliminatedIds, offerQbId }: Prop
         )}
       </button>
       {expanded && (
-        <div className="max-h-[70vh] overflow-y-auto px-2.5 pb-3">
+        <div className="px-2.5 pb-3">
           <div className="mb-1 flex justify-between px-1 text-[9px] font-semibold uppercase tracking-wide text-slate-500">
             <span>Low</span>
             <span>High</span>

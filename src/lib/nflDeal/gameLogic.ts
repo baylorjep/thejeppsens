@@ -106,12 +106,29 @@ function computeBankOffer(state: GameState): { offer: BankOffer; cursor: number 
   const { values, cursor } = drawRandom(state, 1);
   const [tieBreakRoll] = values;
 
+  const hiddenOvrs = remainingHidden.map((q) => q.ovr);
+  const hiddenMin = Math.min(...hiddenOvrs);
+  const hiddenMax = Math.max(...hiddenOvrs);
+
   const recentOfferIds = new Set(state.offerHistory.slice(-2).map((o) => o.quarterback.id));
   const sorted = [...QB_BOARD].sort((a, b) => Math.abs(a.ovr - targetOvr) - Math.abs(b.ovr - targetOvr));
-  const freshCandidates = sorted.filter((qb) => !recentOfferIds.has(qb.id));
+
+  // An offer at or below the worst remaining outcome is a guaranteed No
+  // Deal (you can never do worse by playing on); an offer at or above the
+  // best remaining outcome is a guaranteed Deal (you can never do better).
+  // Neither is a real decision, so keep the offer strictly between them --
+  // unless every remaining case holds the exact same value, in which case
+  // that value is the only honest number to offer.
+  const withinRange =
+    hiddenMin === hiddenMax
+      ? sorted.filter((qb) => qb.ovr === hiddenMin)
+      : sorted.filter((qb) => qb.ovr > hiddenMin && qb.ovr < hiddenMax);
+  const candidates = withinRange.length > 0 ? withinRange : sorted;
+
+  const freshCandidates = candidates.filter((qb) => !recentOfferIds.has(qb.id));
   // If every close option has already been offered recently, the board
   // "warrants" a repeat rather than picking something oddly far from target.
-  const pool = freshCandidates.length > 0 ? freshCandidates : sorted;
+  const pool = freshCandidates.length > 0 ? freshCandidates : candidates;
   const bestDistance = Math.abs(pool[0].ovr - targetOvr);
   const tiedCandidates = pool.filter((qb) => Math.abs(qb.ovr - targetOvr) - bestDistance <= 1);
   const chosen = pickFrom(tiedCandidates, tieBreakRoll);
@@ -181,7 +198,9 @@ export function acceptOffer(state: GameState): GameState {
 
 export function rejectOffer(state: GameState): GameState {
   if (state.phase === 'final-choice') {
-    return { ...state, phase: 'finished', currentOffer: null };
+    // Keep currentOffer (don't null it) -- the end screen needs it to show
+    // what was turned down, even though the offer modal itself is done.
+    return { ...state, phase: 'finished' };
   }
   if (state.phase !== 'bank-offer') return state;
 

@@ -1,8 +1,16 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import type { GamePhase } from '@/lib/nflDeal/types';
+
+export interface NflDealAudioHandle {
+  /** Unmutes (if needed) and starts whatever cue fits the current phase. Call
+   * this directly inside a click handler (e.g. a "Start Game" button) so the
+   * very first playback is a direct result of a user gesture and isn't
+   * blocked by the browser's autoplay policy. */
+  unlockAndPlay: () => void;
+}
 
 // YouTube's official embed API -- streams straight from YouTube, nothing
 // downloaded or rehosted. https://developers.google.com/youtube/iframe_api_reference
@@ -16,7 +24,7 @@ declare global {
   }
 }
 interface YTPlayer {
-  loadVideoById: (id: string) => void;
+  loadVideoById: (video: string | { videoId: string; startSeconds?: number }) => void;
   playVideo: () => void;
   pauseVideo: () => void;
   seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
@@ -83,13 +91,10 @@ interface EliminationEvent {
   outcome: 'good' | 'bad';
 }
 
-export default function NflDealAudioController({
-  phase,
-  eliminationEvent,
-}: {
-  phase: GamePhase;
-  eliminationEvent: EliminationEvent | null;
-}) {
+const NflDealAudioController = forwardRef<
+  NflDealAudioHandle,
+  { phase: GamePhase; eliminationEvent: EliminationEvent | null }
+>(function NflDealAudioController({ phase, eliminationEvent }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLAudioElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -99,12 +104,12 @@ export default function NflDealAudioController({
   const lastEliminationKeyRef = useRef(0);
 
   const [playerReady, setPlayerReady] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [revealDone, setRevealDone] = useState(false);
 
   useEffect(() => {
-    setMuted(window.localStorage.getItem(MUTE_STORAGE_KEY) !== 'false');
+    setMuted(window.localStorage.getItem(MUTE_STORAGE_KEY) === 'true');
   }, []);
 
   useEffect(() => {
@@ -158,8 +163,12 @@ export default function NflDealAudioController({
     if (!player) return;
     activeCueRef.current = cueKey;
     const cue = CUES[cueKey];
-    player.loadVideoById(cue.videoId);
-    if (cue.start != null) player.seekTo(cue.start, true);
+    // Passing startSeconds as part of the load call (rather than a separate
+    // seekTo right after) avoids racing the video load -- calling seekTo
+    // immediately after loadVideoById often loses to YouTube's own
+    // "start playing from 0" default before the seek can take effect.
+    if (cue.start != null) player.loadVideoById({ videoId: cue.videoId, startSeconds: cue.start });
+    else player.loadVideoById(cue.videoId);
     player.unMute();
     player.setVolume(70);
     player.playVideo();
@@ -229,6 +238,29 @@ export default function NflDealAudioController({
     playCue(eliminationEvent.outcome === 'good' ? 'goodElimination' : 'badElimination');
   }, [eliminationEvent, playerReady, muted]);
 
+  // Call only from inside a real click handler -- this is what makes the
+  // resulting playback count as user-gesture-initiated instead of blocked
+  // autoplay.
+  function startForCurrentPhase() {
+    if (phase === 'selecting-case' && !introDone) {
+      startIntroSequence();
+      return;
+    }
+    const desired = resolvePhaseCue(phase, introDone, revealDone);
+    if (desired === 'bankOffer') startBankOfferSequence();
+    else if (desired) playCue(desired);
+  }
+
+  useImperativeHandle(ref, () => ({
+    unlockAndPlay: () => {
+      if (muted) {
+        setMuted(false);
+        window.localStorage.setItem(MUTE_STORAGE_KEY, 'false');
+      }
+      startForCurrentPhase();
+    },
+  }));
+
   function toggleMute() {
     const next = !muted;
     setMuted(next);
@@ -241,13 +273,7 @@ export default function NflDealAudioController({
     }
     // Unmuting happens inside this click handler, so starting playback here
     // is a direct result of a user gesture and won't be autoplay-blocked.
-    if (phase === 'selecting-case' && !introDone) {
-      startIntroSequence();
-      return;
-    }
-    const desired = resolvePhaseCue(phase, introDone, revealDone);
-    if (desired === 'bankOffer') startBankOfferSequence();
-    else if (desired) playCue(desired);
+    startForCurrentPhase();
   }
 
   return (
@@ -268,4 +294,8 @@ export default function NflDealAudioController({
       </div>
     </>
   );
-}
+});
+
+NflDealAudioController.displayName = 'NflDealAudioController';
+
+export default NflDealAudioController;

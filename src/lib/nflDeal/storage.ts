@@ -78,13 +78,36 @@ export function clearSavedGame() {
 }
 
 // Only an actual browser refresh should resume an in-progress game -- a
-// fresh visit (new tab, back button, returning later) should feel like
-// launching the game again, not walking back into a stale session.
-export function isPageReload(): boolean {
+// fresh visit (new tab, clicking away and back, returning later) should
+// feel like launching the game again, not walking back into a stale
+// session.
+//
+// This can't be answered with the Performance Navigation Timing API: Next's
+// client-side routing means leaving this route and coming back via a <Link>
+// never fires a new "navigation" entry, so that API only ever reflects the
+// tab's last *hard* reload -- once that's ever happened, every later SPA
+// visit would misread as "reload" too.
+//
+// Instead: a clean React unmount (SPA navigation away) only runs on an
+// actual client-side unmount, never on a hard reload (the JS context is
+// destroyed before cleanup can run). So a sessionStorage flag that's
+// cleared on unmount but survives a reload tells the two apart correctly.
+const SESSION_ACTIVE_KEY = 'nfl-deal-or-no-deal:session-active';
+
+export function claimSessionAndCheckIfResuming(): boolean {
   try {
-    const [entry] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-    return entry?.type === 'reload';
+    const wasAlreadyActive = window.sessionStorage.getItem(SESSION_ACTIVE_KEY) === 'true';
+    window.sessionStorage.setItem(SESSION_ACTIVE_KEY, 'true');
+    return wasAlreadyActive;
   } catch {
     return false;
+  }
+}
+
+export function releaseSession() {
+  try {
+    window.sessionStorage.removeItem(SESSION_ACTIVE_KEY);
+  } catch {
+    // no-op
   }
 }

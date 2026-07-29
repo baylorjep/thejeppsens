@@ -21,7 +21,7 @@ export default function NflDealCaseRevealPopup({ caseNumber, quarterback, onDism
       className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/70 backdrop-blur-sm"
     >
       <div className="animate-case-reveal flex flex-col items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-8 py-7 shadow-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Case #{caseNumber}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{caseNumber}</p>
         <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-slate-600 bg-slate-800">
           {headshotUrl && !imgFailed ? (
             <Image src={headshotUrl} alt="" fill sizes="96px" className="object-cover" onError={() => setImgFailed(true)} />

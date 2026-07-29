@@ -15,6 +15,7 @@ interface Props {
 }
 
 const SUSPENSE_STEP_MS = 850;
+const STAKES_STAGE_MS = 2000;
 
 function QbChip({ qb, size = 40 }: { qb: Quarterback; size?: number }) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -39,36 +40,57 @@ function QbChip({ qb, size = 40 }: { qb: Quarterback; size?: number }) {
   );
 }
 
+function SealedCase({ number }: { number: number }) {
+  return (
+    <div className="relative h-16 w-20">
+      <div className="absolute -top-2 left-1/2 h-2.5 w-8 -translate-x-1/2 rounded-t-md border-2 border-b-0 border-slate-500" />
+      <div className="relative flex h-full w-full items-center justify-center rounded-md border-2 border-slate-600 bg-gradient-to-b from-slate-700 to-slate-900">
+        <div className="absolute inset-x-2 top-1/2 h-px -translate-y-1/2 bg-black/25" />
+        <span className="relative text-xl font-black text-slate-200">{number}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function NflDealEndScreen({ state, playerCase, unopenedCases, onPlayAgain }: Props) {
   const [windowSize, setWindowSize] = useState<{ w: number; h: number } | null>(null);
   const [countdown, setCountdown] = useState(3);
-  const [revealed, setRevealed] = useState(false);
+  const [stage, setStage] = useState<'suspense' | 'stakes' | 'revealed'>('suspense');
 
   const dealAccepted = state.dealAccepted;
-  const finalQb = dealAccepted ? dealAccepted.quarterback : playerCase.quarterback;
+  // If no deal was accepted, state.currentOffer still holds the final offer
+  // they turned down (see rejectOffer in gameLogic.ts).
+  const declinedOffer = !dealAccepted ? state.currentOffer : null;
+  const knownOffer = dealAccepted ?? declinedOffer;
+
   const beatCase = dealAccepted ? dealAccepted.offerOvr > playerCase.quarterback.ovr : null;
-  const celebrate = beatCase === true || finalQb.ovr >= 90;
+  const beatDeclinedOffer = declinedOffer ? playerCase.quarterback.ovr > declinedOffer.offerOvr : null;
+  const celebrate = beatCase === true || beatDeclinedOffer === true || playerCase.quarterback.ovr >= 90;
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
   }, []);
 
   useEffect(() => {
-    if (revealed) return;
+    if (stage !== 'suspense') return;
     if (countdown <= 0) {
-      setRevealed(true);
+      setStage(knownOffer ? 'stakes' : 'revealed');
       return;
     }
     const t = setTimeout(() => setCountdown((c) => c - 1), SUSPENSE_STEP_MS);
     return () => clearTimeout(t);
-  }, [countdown, revealed]);
+  }, [countdown, stage, knownOffer]);
 
-  if (!revealed) {
+  useEffect(() => {
+    if (stage !== 'stakes') return;
+    const t = setTimeout(() => setStage('revealed'), STAKES_STAGE_MS);
+    return () => clearTimeout(t);
+  }, [stage]);
+
+  if (stage === 'suspense') {
     return (
       <div className="flex min-h-[420px] flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-10 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-          {dealAccepted ? 'Was it a good deal?' : 'What was in your case?'}
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Was it a good deal?</p>
         <div className="relative flex h-24 w-24 items-center justify-center">
           <div key={countdown} className="absolute inset-0 animate-ping rounded-full bg-teal-500/20" />
           <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-4 border-teal-500/50 bg-slate-900 text-4xl font-black text-teal-300">
@@ -76,6 +98,27 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
           </div>
         </div>
         <p className="text-xs text-slate-500">The Bank is watching too.</p>
+      </div>
+    );
+  }
+
+  if (stage === 'stakes' && knownOffer) {
+    return (
+      <div className="flex min-h-[420px] flex-col items-center justify-center gap-6 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-10 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Here's what was on the line</p>
+        <div className="flex items-center gap-6 sm:gap-10">
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              {dealAccepted ? 'You took' : 'You passed on'}
+            </p>
+            <QbChip qb={knownOffer.quarterback} size={56} />
+          </div>
+          <span className="text-xl font-black text-slate-600">vs</span>
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Your case</p>
+            <SealedCase number={playerCase.number} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -92,25 +135,28 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
         />
       )}
 
-      <p className="animate-case-reveal text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-        {dealAccepted ? "The Bank's offer" : 'Your case'}
-      </p>
-      <h2 className="animate-case-reveal mt-1 text-3xl font-black text-white sm:text-4xl">
+      <h2 className="animate-case-reveal text-3xl font-black text-white sm:text-4xl">
         {dealAccepted ? 'DEAL!' : 'NO DEAL'}
       </h2>
+      <p className="animate-case-reveal mt-1 text-sm text-slate-400">
+        {dealAccepted ? 'You took the offer.' : 'You kept your case.'}
+      </p>
 
       <div className="animate-case-reveal mx-auto mt-6 flex flex-col items-center gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Case #{playerCase.number} contained
+        </p>
         <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-teal-400/60 bg-slate-800 sm:h-28 sm:w-28">
-          {espnHeadshotUrl(finalQb) ? (
-            <Image src={espnHeadshotUrl(finalQb)!} alt="" fill sizes="112px" className="object-cover" />
+          {espnHeadshotUrl(playerCase.quarterback) ? (
+            <Image src={espnHeadshotUrl(playerCase.quarterback)!} alt="" fill sizes="112px" className="object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-slate-300">
-              {finalQb.name.split(' ').map((p) => p[0]).join('')}
+              {playerCase.quarterback.name.split(' ').map((p) => p[0]).join('')}
             </div>
           )}
         </div>
-        <p className="text-xl font-bold text-white sm:text-2xl">{finalQb.name}</p>
-        <p className="text-3xl font-black text-teal-300 sm:text-4xl">{finalQb.ovr} OVR</p>
+        <p className="text-xl font-bold text-white sm:text-2xl">{playerCase.quarterback.name}</p>
+        <p className="text-3xl font-black text-teal-300 sm:text-4xl">{playerCase.quarterback.ovr} OVR</p>
       </div>
 
       {dealAccepted && (
@@ -123,7 +169,7 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
           {beatCase ? (
             <>
               <TrendingUp className="h-4 w-4" aria-hidden />
-              You beat your case!
+              Smart deal — your case would've been worse!
             </>
           ) : dealAccepted.offerOvr < playerCase.quarterback.ovr ? (
             <>
@@ -138,13 +184,43 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
 
       {dealAccepted && (
         <div className="mx-auto mt-5 max-w-xs rounded-xl border border-slate-700 bg-slate-800/60 p-4">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-            Case #{playerCase.number} actually contained
-          </p>
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">You took the deal</p>
           <div className="flex justify-center">
-            <QbChip qb={playerCase.quarterback} />
+            <QbChip qb={dealAccepted.quarterback} />
           </div>
         </div>
+      )}
+
+      {declinedOffer && (
+        <>
+          <div
+            className={[
+              'mx-auto mt-5 flex max-w-md items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold',
+              beatDeclinedOffer ? 'bg-teal-500/10 text-teal-300' : beatDeclinedOffer === false ? 'bg-rose-500/10 text-rose-300' : 'bg-slate-800 text-slate-300',
+            ].join(' ')}
+          >
+            {beatDeclinedOffer ? (
+              <>
+                <TrendingUp className="h-4 w-4" aria-hidden />
+                Great call — you beat the Bank's offer!
+              </>
+            ) : beatDeclinedOffer === false ? (
+              <>
+                <TrendingDown className="h-4 w-4" aria-hidden />
+                The Bank's offer would have been better.
+              </>
+            ) : (
+              "Dead even with the Bank's offer."
+            )}
+          </div>
+
+          <div className="mx-auto mt-5 max-w-xs rounded-xl border border-slate-700 bg-slate-800/60 p-4">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">You passed on</p>
+            <div className="flex justify-center">
+              <QbChip qb={declinedOffer.quarterback} />
+            </div>
+          </div>
+        </>
       )}
 
       {unopenedCases.length > 0 && (
@@ -155,7 +231,7 @@ export default function NflDealEndScreen({ state, playerCase, unopenedCases, onP
           <div className="mx-auto flex max-w-md flex-wrap justify-center gap-4">
             {unopenedCases.map((c) => (
               <div key={c.number} className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2">
-                <p className="mb-1 text-[10px] text-slate-500">Case #{c.number}</p>
+                <p className="mb-1 text-[10px] text-slate-500">{c.number}</p>
                 <QbChip qb={c.quarterback} size={32} />
               </div>
             ))}
