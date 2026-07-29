@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { espnHeadshotUrl } from '@/lib/nflDeal/qbData';
-import { ROUND_SCHEDULE } from '@/lib/nflDeal/gameLogic';
+import { classifyOfferTier, ROUND_SCHEDULE, type OfferTier } from '@/lib/nflDeal/gameLogic';
 import type { BankOffer } from '@/lib/nflDeal/types';
 
 interface Props {
@@ -21,10 +21,15 @@ interface Props {
   onNoDealChosen: () => void;
 }
 
-// Both match the length of their respective YouTube crowd-reaction clips so
-// the game doesn't advance past bank-offer/final-choice -- which silences
-// whatever's playing -- before the clip has actually finished.
-const DEAL_REACTION_DELAY_MS = 4500; // deal-accepted clip: 18:31.5-18:36
+// Matches the length of whichever deal-accepted clip corresponds to this
+// offer's size (see classifyOfferTier) so the game doesn't advance past
+// bank-offer/final-choice -- which silences whatever's playing -- before
+// the clip has actually finished.
+const DEAL_REACTION_DELAY_MS_BY_TIER: Record<OfferTier, number> = {
+  big: 19000, // 19s clip
+  medium: 13000, // 13s clip
+  small: 9000, // 9s clip
+};
 const NO_DEAL_REACTION_DELAY_MS = 5500; // no-deal-accepted clip: 1:40:40.5-1:40:46
 
 export default function NflDealOfferModal({ offer, isFinal, roundIndex, onDeal, onDealChosen, onNoDeal, onNoDealChosen }: Props) {
@@ -40,7 +45,7 @@ export default function NflDealOfferModal({ offer, isFinal, roundIndex, onDeal, 
   function handleDeal() {
     setReaction('deal');
     onDealChosen();
-    setTimeout(onDeal, DEAL_REACTION_DELAY_MS);
+    setTimeout(onDeal, DEAL_REACTION_DELAY_MS_BY_TIER[classifyOfferTier(offer)]);
   }
 
   function handleNoDeal() {

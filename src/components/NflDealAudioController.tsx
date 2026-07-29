@@ -3,6 +3,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import type { GamePhase } from '@/lib/nflDeal/types';
+import type { OfferTier } from '@/lib/nflDeal/gameLogic';
 
 export interface NflDealAudioHandle {
   /** Unmutes (if needed) and starts whatever cue fits the current phase. Call
@@ -14,11 +15,12 @@ export interface NflDealAudioHandle {
    * wraps it up shortly after -- lets a player who taps through a case
    * reveal skip the suspense without losing the sting's punchline. */
   skipCurrentCue: () => void;
-  /** Plays the "deal, accepted" crowd-reaction clip. Call the instant the
-   * Deal button is clicked, before dispatching the state change -- the
-   * caller is responsible for delaying that dispatch at least as long as
-   * this clip runs, since a phase change silences whatever's playing. */
-  playDealAccepted: () => void;
+  /** Plays the deal-accepted crowd-reaction clip sized to how big the offer
+   * was. Call the instant the Deal button is clicked, before dispatching the
+   * state change -- the caller is responsible for delaying that dispatch at
+   * least as long as this clip runs, since a phase change silences whatever's
+   * playing. */
+  playDealAccepted: (tier: OfferTier) => void;
   /** Same idea as playDealAccepted, for the No Deal button. */
   playNoDealAccepted: () => void;
 }
@@ -63,9 +65,14 @@ const CUES: Record<
   | 'introMonologue'
   | 'pickCasePrompt'
   | 'caseSelection'
+  | 'openingCasesA'
+  | 'openingCasesB'
   | 'dealOrNoDealChant'
   | 'bankOffer'
-  | 'dealAccepted'
+  | 'bankOfferLarge'
+  | 'dealAcceptedBig'
+  | 'dealAcceptedMedium'
+  | 'dealAcceptedSmall'
   | 'noDealAccepted'
   | 'credits'
   | 'goodElimination'
@@ -76,13 +83,21 @@ const CUES: Record<
   introMonologue: { videoId: '7onGy0GiMtE', start: 46, end: 82, kind: 'oneshot' },
   pickCasePrompt: { videoId: '7onGy0GiMtE', start: 105, end: 110, kind: 'oneshot' },
   caseSelection: { videoId: '_V6eu74Cm6s', kind: 'loop' },
+  // Ambient background for the actual round-by-round case-opening grind --
+  // ~1 minute each, so one is picked per round (see roundIndex prop) and
+  // looped for however long that round actually takes.
+  openingCasesA: { videoId: '_V6eu74Cm6s', kind: 'loop' },
+  openingCasesB: { videoId: 'bb-joLo9rBU', kind: 'loop' },
   // Howie asking "deal, or no deal?" with the crowd shouting back -- plays
-  // once right as an offer comes in, then the ambient bankOffer loop
-  // underneath the modal takes over.
+  // once right as an offer comes in, then an ambient loop (sized to the
+  // offer, see offerTier prop) underneath the modal takes over.
   dealOrNoDealChant: { videoId: 'jmCyu3P4bwk', start: 545, end: 551, kind: 'oneshot' },
   bankOffer: { videoId: '2wo6bN035RI', kind: 'loop' },
-  // Crowd reaction to a Deal being made.
-  dealAccepted: { videoId: 'jmCyu3P4bwk', start: 1111.5, end: 1116, kind: 'oneshot' },
+  bankOfferLarge: { videoId: 'b1b6SnLAok8', kind: 'loop' },
+  // Crowd reaction to a Deal being made, sized to how big the offer was.
+  dealAcceptedBig: { videoId: 'iMkkUQOgOjE', start: 0, end: 19, kind: 'oneshot' },
+  dealAcceptedMedium: { videoId: 'SRp82c7m4jc', start: 0, end: 13, kind: 'oneshot' },
+  dealAcceptedSmall: { videoId: 'GsN1dPo7Vrg', start: 0, end: 9, kind: 'oneshot' },
   // Crowd reaction to a No Deal.
   noDealAccepted: { videoId: 'wEw4c5sHqFM', start: 6040.5, end: 6046, kind: 'oneshot' },
   credits: { videoId: 'A8430xpRh8o', kind: 'loop' },
@@ -95,20 +110,32 @@ const INTRO_SEQUENCE: CueKey[] = ['introReady', 'introMonologue', 'pickCasePromp
 const DEFAULT_ONESHOT_MS = 5000; // fallback for any cue without an explicit start/end
 const RING_REPEAT_COUNT = 2; // rings 1 (initial) + this many more before the offer loop takes over
 const RING_START_DELAY_MS = 2000; // beat after the elimination sting before the ring kicks in
+const DEAL_ACCEPTED_CUE_BY_TIER: Record<OfferTier, CueKey> = {
+  big: 'dealAcceptedBig',
+  medium: 'dealAcceptedMedium',
+  small: 'dealAcceptedSmall',
+};
 
 function cueDurationMs(key: CueKey): number {
   const cue = CUES[key];
   return cue.start != null && cue.end != null ? (cue.end - cue.start) * 1000 : DEFAULT_ONESHOT_MS;
 }
 
-function resolvePhaseCue(phase: GamePhase, introDone: boolean, revealDone: boolean): CueKey | null {
+function resolvePhaseCue(
+  phase: GamePhase,
+  introDone: boolean,
+  revealDone: boolean,
+  openingCasesCue: 'openingCasesA' | 'openingCasesB',
+  offerTier: OfferTier | null,
+): CueKey | null {
   if (phase === 'selecting-case') return introDone ? 'caseSelection' : null; // intro sequence handles this until done
-  if (phase === 'bank-offer' || phase === 'final-choice') return 'bankOffer';
+  if (phase === 'opening-cases') return openingCasesCue;
+  if (phase === 'bank-offer' || phase === 'final-choice') return offerTier === 'big' ? 'bankOfferLarge' : 'bankOffer';
   // The good/bad elimination sting (fired via `eliminationEvent`, not this
   // phase-driven resolver) doubles as the final-outcome reveal sound -- stay
   // silent until it finishes and flips revealDone, then roll into credits.
   if (phase === 'finished') return revealDone ? 'credits' : null;
-  return null; // silent while opening cases each round
+  return null;
 }
 
 // Not from the show -- a generic free phone-ring effect. Drop a file here to
@@ -126,8 +153,8 @@ interface EliminationEvent {
 
 const NflDealAudioController = forwardRef<
   NflDealAudioHandle,
-  { phase: GamePhase; eliminationEvent: EliminationEvent | null; enabled: boolean }
->(function NflDealAudioController({ phase, eliminationEvent, enabled }, ref) {
+  { phase: GamePhase; eliminationEvent: EliminationEvent | null; enabled: boolean; roundIndex: number; offerTier: OfferTier | null }
+>(function NflDealAudioController({ phase, eliminationEvent, enabled, roundIndex, offerTier }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLAudioElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -141,10 +168,23 @@ const NflDealAudioController = forwardRef<
   const [muted, setMuted] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [revealDone, setRevealDone] = useState(false);
+  // Which of the two ~1-minute ambient tracks underlies the current round's
+  // case-opening grind -- re-rolled once per round (not per click), so it
+  // doesn't restart mid-round just because something else re-renders.
+  const [openingCasesCue, setOpeningCasesCue] = useState<'openingCasesA' | 'openingCasesB'>(() =>
+    Math.random() < 0.5 ? 'openingCasesA' : 'openingCasesB',
+  );
+  const prevRoundIndexRef = useRef(roundIndex);
 
   useEffect(() => {
     setMuted(window.localStorage.getItem(MUTE_STORAGE_KEY) === 'true');
   }, []);
+
+  useEffect(() => {
+    if (roundIndex === prevRoundIndexRef.current) return;
+    prevRoundIndexRef.current = roundIndex;
+    setOpeningCasesCue(Math.random() < 0.5 ? 'openingCasesA' : 'openingCasesB');
+  }, [roundIndex]);
 
   useEffect(() => {
     if (phase === 'selecting-case') {
@@ -233,9 +273,10 @@ const NflDealAudioController = forwardRef<
       return;
     }
     // The "deal, or no deal?" chant is a one-off sting -- once it's done,
-    // the ambient bank-offer loop takes over underneath the offer modal.
+    // an ambient loop (sized to how big this offer is) takes over
+    // underneath the offer modal.
     if (cueKey === 'dealOrNoDealChant') {
-      playCue('bankOffer');
+      playCue(offerTier === 'big' ? 'bankOfferLarge' : 'bankOffer');
     }
   }
 
@@ -263,10 +304,10 @@ const NflDealAudioController = forwardRef<
   // driven "silence on a non-audio phase" effect below doesn't cut them off
   // mid-clip (both a Deal and a No Deal change `phase` to something
   // resolvePhaseCue treats as silent).
-  function playDealAccepted() {
+  function playDealAccepted(tier: OfferTier) {
     if (!playerReady || muted) return;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    playCue('dealAccepted');
+    playCue(DEAL_ACCEPTED_CUE_BY_TIER[tier]);
   }
 
   function playNoDealAccepted() {
@@ -281,7 +322,7 @@ const NflDealAudioController = forwardRef<
   }
 
   function startBankOfferSequence() {
-    activeCueRef.current = 'bankOffer'; // claim it now so this doesn't re-trigger on every render
+    activeCueRef.current = offerTier === 'big' ? 'bankOfferLarge' : 'bankOffer'; // claim it now so this doesn't re-trigger on every render
     // A still-pending cleanup timeout from whatever cue played right before
     // this (e.g. an elimination sting) would otherwise fire later and stomp
     // activeCueRef back to null, breaking the loop-restart logic below.
@@ -317,7 +358,7 @@ const NflDealAudioController = forwardRef<
       if (activeCueRef.current == null || !INTRO_SEQUENCE.includes(activeCueRef.current)) startIntroSequence();
       return;
     }
-    const desired = resolvePhaseCue(phase, introDone, revealDone);
+    const desired = resolvePhaseCue(phase, introDone, revealDone, openingCasesCue, offerTier);
     if (!desired) {
       playerRef.current?.pauseVideo();
       ringRef.current?.pause();
@@ -325,10 +366,10 @@ const NflDealAudioController = forwardRef<
       return;
     }
     if (activeCueRef.current === desired) return;
-    if (desired === 'bankOffer') {
+    if (desired === 'bankOffer' || desired === 'bankOfferLarge') {
       // Claim it immediately so a repeat call during the delay window
       // (re-renders, unmute, etc.) doesn't restart the wait.
-      activeCueRef.current = 'bankOffer';
+      activeCueRef.current = desired;
       if (ringDelayTimeoutRef.current) clearTimeout(ringDelayTimeoutRef.current);
       ringDelayTimeoutRef.current = setTimeout(startBankOfferSequence, RING_START_DELAY_MS);
     } else {
@@ -340,7 +381,7 @@ const NflDealAudioController = forwardRef<
     if (!enabled || !playerReady || muted) return;
     startForCurrentPhase();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, phase, introDone, revealDone, playerReady, muted]);
+  }, [enabled, phase, introDone, revealDone, playerReady, muted, openingCasesCue, offerTier]);
 
   useEffect(() => {
     if (!eliminationEvent || eliminationEvent.key === lastEliminationKeyRef.current) return;

@@ -248,6 +248,24 @@ export function getUnopenedNonPlayerCases(state: GameState): CaseState[] {
   return state.cases.filter((c) => c.status === 'available');
 }
 
+export type OfferTier = 'big' | 'medium' | 'small';
+
+// Where the offer sits within what's realistically still possible right now
+// (the remaining pool's own range), not the position's full original board
+// -- an 85 OVR offer feels huge once only 70s-80s are left on the table, and
+// unremarkable if 90+ is still in play. Used to pick audio cues by "how big
+// a deal is this."
+export function classifyOfferTier(offer: BankOffer): OfferTier {
+  const ovrs = offer.remainingPool.map((p) => p.ovr);
+  const min = Math.min(...ovrs);
+  const max = Math.max(...ovrs);
+  if (max === min) return 'medium';
+  const frac = (offer.offerOvr - min) / (max - min);
+  if (frac >= 2 / 3) return 'big';
+  if (frac >= 1 / 3) return 'medium';
+  return 'small';
+}
+
 // --- reducer ---------------------------------------------------------------
 export type GameAction =
   | { type: 'NEW_GAME'; position: PositionId; seed?: number }

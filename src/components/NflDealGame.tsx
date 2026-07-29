@@ -3,6 +3,7 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import {
+  classifyOfferTier,
   createInitialGameState,
   gameReducer,
   getEliminatedQbIds,
@@ -170,6 +171,7 @@ export default function NflDealGame() {
   const eliminatedIds = getEliminatedQbIds(state);
   const showYourCase = playerCase && state.phase !== 'selecting-case' && state.phase !== 'finished';
   const positionConfig = POSITIONS[state.position];
+  const offerTier = state.currentOffer ? classifyOfferTier(state.currentOffer) : null;
 
   function backToModePicker() {
     clearSavedGame();
@@ -263,7 +265,14 @@ export default function NflDealGame() {
 
   return (
     <div className="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.08),transparent_60%)] pb-20 text-slate-100">
-      <NflDealAudioController ref={audioRef} phase={state.phase} eliminationEvent={eliminationEvent} enabled={hasStarted} />
+      <NflDealAudioController
+        ref={audioRef}
+        phase={state.phase}
+        eliminationEvent={eliminationEvent}
+        enabled={hasStarted}
+        roundIndex={state.roundIndex}
+        offerTier={offerTier}
+      />
 
       {!hasStarted ? (
         <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center">
@@ -396,7 +405,7 @@ export default function NflDealGame() {
           isFinal={state.phase === 'final-choice'}
           roundIndex={state.roundIndex}
           onDeal={() => dispatch({ type: 'ACCEPT_OFFER' })}
-          onDealChosen={() => audioRef.current?.playDealAccepted()}
+          onDealChosen={() => audioRef.current?.playDealAccepted(offerTier ?? 'medium')}
           onNoDeal={() => dispatch({ type: 'REJECT_OFFER' })}
           onNoDealChosen={() => audioRef.current?.playNoDealAccepted()}
         />
