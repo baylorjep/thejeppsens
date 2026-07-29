@@ -16,6 +16,7 @@ import NflDealCaseGrid from './NflDealCaseGrid';
 import NflDealCaseIntroSequence, { CASE_INTRO_TOTAL_MS } from './NflDealCaseIntroSequence';
 import NflDealQbBoard from './NflDealQbBoard';
 import NflDealOfferModal from './NflDealOfferModal';
+import NflDealFinalCaseModal from './NflDealFinalCaseModal';
 import NflDealRoundPanel from './NflDealRoundPanel';
 import NflDealEndScreen from './NflDealEndScreen';
 import NflDealDynastySummary from './NflDealDynastySummary';
@@ -84,6 +85,7 @@ export default function NflDealGame() {
   const [offerDecisionReady, setOfferDecisionReady] = useState(false);
   const [noDealTransitioning, setNoDealTransitioning] = useState(false);
   const [finalCasePromptOpen, setFinalCasePromptOpen] = useState(false);
+  const [finalCaseDecisionReady, setFinalCaseDecisionReady] = useState(false);
   // The case intro sequence (reveal/seal/shuffle/settle) is still playing
   // for a fresh board -- don't let a click register on the real grid until
   // it's done (or skipped).
@@ -91,6 +93,7 @@ export default function NflDealGame() {
   const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const offerDecisionFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finalCaseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boardSettledTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const offerPanelRef = useRef<HTMLDivElement>(null);
   const eliminationCounterRef = useRef(0);
@@ -148,6 +151,20 @@ export default function NflDealGame() {
     state.currentOffer?.offerOvr,
     pendingReveal,
   ]);
+
+  // When final case prompt opens, ready the decision after a brief delay
+  useEffect(() => {
+    if (!finalCasePromptOpen) {
+      setFinalCaseDecisionReady(false);
+      if (finalCaseTimeoutRef.current) clearTimeout(finalCaseTimeoutRef.current);
+      return;
+    }
+    setFinalCaseDecisionReady(false);
+    finalCaseTimeoutRef.current = setTimeout(() => setFinalCaseDecisionReady(true), 1500);
+    return () => {
+      if (finalCaseTimeoutRef.current) clearTimeout(finalCaseTimeoutRef.current);
+    };
+  }, [finalCasePromptOpen]);
 
   function handleStartGame() {
     // The mode selector defaults to whatever position a resumed game was
@@ -475,34 +492,6 @@ export default function NflDealGame() {
                     dispatch({ type: 'REJECT_OFFER' });
                   }}
                 />
-              ) : finalCasePromptOpen && playerCase && tradeCase ? (
-                <div className="animate-case-reveal rounded-xl border border-amber-500/35 bg-slate-900/80 p-5 text-center shadow-[0_14px_34px_rgba(0,0,0,0.35)] sm:p-7">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-300">Final choice</p>
-                  <h2 className="mt-1 text-2xl font-black text-white sm:text-3xl">Keep your case, or trade?</h2>
-                  <p className="mx-auto mt-2 max-w-lg text-sm text-slate-400">
-                    One case is left besides yours. Pick which sealed case you want to ride with.
-                  </p>
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => dispatch({ type: 'CHOOSE_FINAL_CASE', caseNumber: playerCase.number })}
-                      className="rounded-xl border border-teal-500/45 bg-teal-500/10 p-5 text-left transition-colors hover:border-teal-300 hover:bg-teal-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200"
-                    >
-                      <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-teal-300">Keep</span>
-                      <span className="mt-2 block text-3xl font-black text-white">Case #{playerCase.number}</span>
-                      <span className="mt-1 block text-sm text-slate-400">The case you picked at the start.</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => dispatch({ type: 'CHOOSE_FINAL_CASE', caseNumber: tradeCase.number })}
-                      className="rounded-xl border border-amber-500/45 bg-amber-500/10 p-5 text-left transition-colors hover:border-amber-300 hover:bg-amber-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200"
-                    >
-                      <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">Trade</span>
-                      <span className="mt-2 block text-3xl font-black text-white">Case #{tradeCase.number}</span>
-                      <span className="mt-1 block text-sm text-slate-400">Swap for the last unopened case.</span>
-                    </button>
-                  </div>
-                </div>
               ) : (
                 <>
                   <NflDealRoundPanel state={state} />
@@ -555,6 +544,25 @@ export default function NflDealGame() {
                   />
                 )}
               </div>
+              {finalCasePromptOpen && playerCase && tradeCase && (
+                <div>
+                  <NflDealFinalCaseModal
+                    playerCase={playerCase}
+                    tradeCase={tradeCase}
+                    decisionReady={finalCaseDecisionReady}
+                    onKeep={() => dispatch({ type: 'CHOOSE_FINAL_CASE', caseNumber: playerCase.number })}
+                    onKeptChosen={() => {
+                      setFinalCaseDecisionReady(false);
+                      audioRef.current?.playNoDealAccepted();
+                    }}
+                    onTrade={() => dispatch({ type: 'CHOOSE_FINAL_CASE', caseNumber: tradeCase.number })}
+                    onTradeChosen={() => {
+                      setFinalCaseDecisionReady(false);
+                      audioRef.current?.playNoDealAccepted();
+                    }}
+                  />
+                </div>
+              )}
             </div>
             <div className="lg:col-start-2 lg:row-start-1 lg:row-span-2">
               <NflDealQbBoard

@@ -3,7 +3,7 @@ import Header from '@/components/Header';
 import NflDealGameLoader from '@/components/NflDealGameLoader';
 
 export const metadata: Metadata = {
-  title: 'Baylor & Isabel - Deal or No Deal',
+  title: 'Deal or No Deal - NFL',
   description: 'QB, RB, WR, TE, D/ST, or build a Dynasty. 32 sealed cases. Deal, or no deal?',
 };
 
