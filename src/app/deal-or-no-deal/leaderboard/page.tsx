@@ -48,9 +48,25 @@ function LeaderboardPlayerChip({ position, player }: { position: PositionId; pla
   );
 }
 
+type SortBy = 'playoffs' | 'record' | 'rating';
+
+function sortEntries(entries: DynastyLeaderboardEntry[], sortBy: SortBy): DynastyLeaderboardEntry[] {
+  const sorted = [...entries];
+  switch (sortBy) {
+    case 'playoffs':
+      return sorted.sort((a, b) => b.playoffWins - a.playoffWins || b.wins - a.wins || b.rating - a.rating);
+    case 'record':
+      return sorted.sort((a, b) => b.wins - a.wins || b.playoffWins - a.playoffWins || b.rating - a.rating);
+    case 'rating':
+      return sorted.sort((a, b) => b.rating - a.rating || b.playoffWins - a.playoffWins || b.wins - a.wins);
+  }
+}
+
 export default function LeaderboardPage() {
   const [entries, setEntries] = useState<DynastyLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<SortBy>('playoffs');
+  const [rawEntries, setRawEntries] = useState<DynastyLeaderboardEntry[]>([]);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -58,13 +74,17 @@ export default function LeaderboardPage() {
       if (response.ok) {
         const data = (await response.json()) as { entries?: DynastyLeaderboardEntry[] };
         if (Array.isArray(data.entries)) {
-          setEntries(data.entries.sort((a, b) => b.rating - a.rating || b.wins - a.wins));
+          setRawEntries(data.entries);
         }
       }
       setLoading(false);
     };
     fetchLeaderboard();
   }, []);
+
+  useEffect(() => {
+    setEntries(sortEntries(rawEntries, sortBy));
+  }, [rawEntries, sortBy]);
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 sm:px-6 lg:px-8">
@@ -75,11 +95,31 @@ export default function LeaderboardPage() {
         </Link>
 
         <div className="rounded-2xl border border-amber-500/25 bg-slate-900/85 p-8 shadow-2xl">
-          <div className="flex items-center gap-3 mb-8">
-            <Trophy className="h-8 w-8 text-amber-300" />
-            <div>
-              <h1 className="text-3xl font-black text-white sm:text-4xl">Dynasty Leaderboard</h1>
-              <p className="mt-1 text-sm font-semibold text-slate-400">All-Time Top Rosters</p>
+          <div className="flex flex-col gap-6 mb-8">
+            <div className="flex items-center gap-3">
+              <Trophy className="h-8 w-8 text-amber-300" />
+              <div>
+                <h1 className="text-3xl font-black text-white sm:text-4xl">Dynasty Leaderboard</h1>
+                <p className="mt-1 text-sm font-semibold text-slate-400">All-Time Top Rosters</p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 flex-wrap">
+              {(['playoffs', 'record', 'rating'] as const).map((sort) => (
+                <button
+                  key={sort}
+                  onClick={() => setSortBy(sort)}
+                  className={`px-4 py-2 rounded-lg font-semibold uppercase text-xs transition-colors ${
+                    sortBy === sort
+                      ? 'bg-amber-500 text-slate-950'
+                      : 'border border-slate-700 text-slate-300 hover:border-slate-600 hover:text-white'
+                  }`}
+                >
+                  {sort === 'playoffs' && '🏆 Playoff Run'}
+                  {sort === 'record' && '📊 Record'}
+                  {sort === 'rating' && '⭐ Rating'}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -107,14 +147,18 @@ export default function LeaderboardPage() {
                     </div>
                     <div className="flex flex-wrap gap-4 text-right sm:text-right">
                       <div className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Rating</p>
-                        <p className="text-2xl font-black text-teal-300">{entry.rating}</p>
+                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Playoff Wins</p>
+                        <p className="text-2xl font-black text-amber-300">{entry.playoffWins}</p>
                       </div>
                       <div className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
                         <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Record</p>
                         <p className="text-2xl font-black text-white">
                           {entry.wins}-{entry.losses}
                         </p>
+                      </div>
+                      <div className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Rating</p>
+                        <p className="text-2xl font-black text-teal-300">{entry.rating}</p>
                       </div>
                     </div>
                   </div>
