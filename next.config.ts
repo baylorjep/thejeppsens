@@ -1,6 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/deal-or-no-deal",
+        destination: "https://ballornoball.vercel.app",
+        permanent: false,
+      },
+      {
+        source: "/deal-or-no-deal/:path*",
+        destination: "https://ballornoball.vercel.app/:path*",
+        permanent: false,
+      },
+    ];
+  },
   outputFileTracingIncludes: {
     "/api/mp3/convert": ["./bin/yt-dlp", "./node_modules/ffmpeg-static/**"],
   },

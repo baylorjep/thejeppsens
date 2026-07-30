@@ -266,10 +266,10 @@ export default function Homepage() {
               className="rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:border-gray-400 transition-colors">
               Keep 4 Game
             </Link>
-            <Link href="/deal-or-no-deal"
-              className="rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:border-gray-400 transition-colors">
-              Deal or No Deal
-            </Link>
+            <a href="https://ballornoball.vercel.app" target="_blank" rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:border-gray-400 transition-colors">
+              Deal or No Deal <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
+            </a>
           </div>
         </div>
       </section>
