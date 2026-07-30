@@ -52,6 +52,7 @@ interface SeasonResult {
   wins: number;
   losses: number;
   playoffWins: number;
+  playoffWeeks: WeekResult[];
   finish: string;
   title: string;
   tier: SeasonTier;
@@ -290,62 +291,93 @@ function rosterJitter(results: Partial<Record<PositionId, Player>>): number {
   return (hash % 9) - 4;
 }
 
-function simulatePlayoffGame(teamRating: number, teamJitter: number, opponentRating: number, seed: number): boolean {
-  // Team wins if their strength beats opponent strength
-  // Higher seed bonus (lower seed number = higher seed = stronger team)
+function simulatePlayoffGame(teamRating: number, teamJitter: number, opponentRating: number, seed: number): { won: boolean; teamScore: number; oppScore: number } {
   const seedBonus = (8 - seed) * 0.3;
-  return teamRating + teamJitter + seedBonus > opponentRating + (Math.random() * 4 - 2);
+  const teamStrength = teamRating + teamJitter + seedBonus;
+  const oppStrength = opponentRating + (Math.random() * 4 - 2);
+  const won = teamStrength > oppStrength;
+  const teamScore = Math.round(20 + Math.random() * 10 + (won ? 3 : -2));
+  const oppScore = Math.round(20 + Math.random() * 10 + (won ? -3 : 2));
+  return { won, teamScore, oppScore };
 }
 
-function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: number): { finish: string; title: string; tier: SeasonTier; summary: string; playoffWins: number } {
+function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: number, startWeek: number): { weeks: WeekResult[]; finish: string; title: string; tier: SeasonTier; summary: string; playoffWins: number } {
+  const weeks: WeekResult[] = [];
   if (wins < 7) {
-    return { finish: 'Missed Playoffs', title: 'Rebuild Year', tier: 'bad', summary: 'The Bank kept the better roster.', playoffWins: 0 };
+    return { weeks, finish: 'Missed Playoffs', title: 'Rebuild Year', tier: 'bad', summary: 'The Bank kept the better roster.', playoffWins: 0 };
   }
 
   let currentSeed = seed;
   let playoffWins = 0;
-  let round = 'Wild Card';
+  let weekIndex = startWeek;
 
   // Determine starting round based on seed
   if (seed <= 2) {
-    round = 'Bye Week';
+    // #1-2 seeds get bye, start at Divisional (week 19)
+    weekIndex = startWeek + 1;
   } else if (seed <= 6) {
-    // Wild Card game
+    // Wild Card game (week 18)
     const opponentRating = 75 + Math.random() * 12;
-    if (simulatePlayoffGame(rating, jitter, opponentRating, currentSeed)) {
-      playoffWins = 1;
-      round = 'Divisional';
-    } else {
-      return { finish: 'Wild Card Round', title: 'Wild Card Exit', tier: 'decent', summary: 'So close, yet the playoffs had other plans.', playoffWins };
+    const game = simulatePlayoffGame(rating, jitter, opponentRating, currentSeed);
+    weeks.push({
+      week: weekIndex + 1,
+      opponent: 'Wild Card Opponent',
+      won: game.won,
+      score: `${game.teamScore}-${game.oppScore}`,
+      note: '',
+    });
+    if (!game.won) {
+      return { weeks, finish: 'Wild Card Round', title: 'Wild Card Exit', tier: 'decent', summary: 'So close, yet the playoffs had other plans.', playoffWins };
     }
+    playoffWins = 1;
+    weekIndex += 1;
   }
 
-  // Divisional Round
+  // Divisional Round (week 19)
   const divisionalOpp = 85 + Math.random() * 8;
-  if (simulatePlayoffGame(rating, jitter, divisionalOpp, currentSeed + 1)) {
-    playoffWins += 1;
-    round = 'Conference Championship';
-  } else {
-    return { finish: 'Divisional Round', title: 'Divisional Exit', tier: 'good', summary: 'A valiant effort ended by a stronger foe.', playoffWins };
+  const divisionalGame = simulatePlayoffGame(rating, jitter, divisionalOpp, currentSeed + 1);
+  weeks.push({
+    week: weekIndex + 1,
+    opponent: 'Divisional Opponent',
+    won: divisionalGame.won,
+    score: `${divisionalGame.teamScore}-${divisionalGame.oppScore}`,
+    note: '',
+  });
+  if (!divisionalGame.won) {
+    return { weeks, finish: 'Divisional Round', title: 'Divisional Exit', tier: 'good', summary: 'A valiant effort ended by a stronger foe.', playoffWins };
   }
+  playoffWins += 1;
 
-  // Conference Championship
+  // Conference Championship (week 20)
   const confChampOpp = 87 + Math.random() * 8;
-  if (simulatePlayoffGame(rating, jitter, confChampOpp, currentSeed + 2)) {
-    playoffWins += 1;
-    round = 'Super Bowl';
-  } else {
-    return { finish: 'Conference Championship', title: 'Conference Champion', tier: 'elite', summary: 'One game away from immortality, but it wasn\'t meant to be.', playoffWins };
+  const confGame = simulatePlayoffGame(rating, jitter, confChampOpp, currentSeed + 2);
+  weeks.push({
+    week: weekIndex + 2,
+    opponent: 'Conference Championship',
+    won: confGame.won,
+    score: `${confGame.teamScore}-${confGame.oppScore}`,
+    note: '',
+  });
+  if (!confGame.won) {
+    return { weeks, finish: 'Conference Championship', title: 'Conference Champion', tier: 'elite', summary: 'One game away from immortality, but it wasn\'t meant to be.', playoffWins };
   }
+  playoffWins += 1;
 
-  // Super Bowl
+  // Super Bowl (week 21)
   const superbowlOpp = 88 + Math.random() * 7;
-  if (simulatePlayoffGame(rating, jitter, superbowlOpp, currentSeed + 3)) {
+  const sbGame = simulatePlayoffGame(rating, jitter, superbowlOpp, currentSeed + 3);
+  weeks.push({
+    week: weekIndex + 3,
+    opponent: 'Super Bowl',
+    won: sbGame.won,
+    score: `${sbGame.teamScore}-${sbGame.oppScore}`,
+    note: '',
+  });
+  if (sbGame.won) {
     playoffWins += 1;
-    return { finish: 'Super Bowl Champions', title: 'Dynasty', tier: 'dynasty', summary: 'The season ends with confetti and a ring.', playoffWins };
-  } else {
-    return { finish: 'Super Bowl Runner-Up', title: 'Elite Contender', tier: 'elite', summary: 'A monster season, one win short of immortality.', playoffWins };
+    return { weeks, finish: 'Super Bowl Champions', title: 'Dynasty', tier: 'dynasty', summary: 'The season ends with confetti and a ring.', playoffWins };
   }
+  return { weeks, finish: 'Super Bowl Runner-Up', title: 'Elite Contender', tier: 'elite', summary: 'A monster season, one win short of immortality.', playoffWins };
 }
 
 function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
@@ -392,9 +424,9 @@ function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
   else if (wins >= 9) seed = 6;
   else if (wins >= 7) seed = 7;
 
-  const playoff = simulatePlayoffs(rating, wins, jitter, seed);
+  const playoff = simulatePlayoffs(rating, wins, jitter, seed, 17);
 
-  return { rating, wins, losses, playoffWins: playoff.playoffWins, finish: playoff.finish, title: playoff.title, tier: playoff.tier, summary: playoff.summary };
+  return { rating, wins, losses, playoffWins: playoff.playoffWins, playoffWeeks: playoff.weeks, finish: playoff.finish, title: playoff.title, tier: playoff.tier, summary: playoff.summary };
 }
 
 const NFL_OPPONENTS = [
@@ -432,7 +464,7 @@ function buildWeekResults(season: SeasonResult, teamName: string, results: Parti
   }).sort((a, b) => b.wobble - a.wobble);
   const winIndexes = new Set(weeks.slice(0, season.wins).map((week) => week.index));
 
-  return Array.from({ length: 17 }, (_, index) => {
+  const regularSeasonWeeks = Array.from({ length: 17 }, (_, index) => {
     const won = winIndexes.has(index);
     const margin = Math.abs(((seed + index * 11) % 18) - 6) + 1;
     const base = 18 + ((seed + index * 7) % 17);
@@ -457,6 +489,8 @@ function buildWeekResults(season: SeasonResult, teamName: string, results: Parti
       note,
     };
   });
+
+  return [...regularSeasonWeeks, ...season.playoffWeeks];
 }
 
 function tierTone(tier: SeasonTier): { border: string; text: string; glow: string; confetti: string[] } {
@@ -509,6 +543,7 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
   const [editingTeamName, setEditingTeamName] = useState(false);
   const [newTeamName, setNewTeamName] = useState(teamName);
   const [savingTeamName, setSavingTeamName] = useState(false);
+  const weeksDisplayRef = useRef<HTMLDivElement>(null);
   const savedLeaderboardIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -574,6 +609,15 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
+
+  useEffect(() => {
+    // Auto-scroll to weeks display on mobile during simulation
+    if (stage === 'simulating' && visibleWeeks > 0 && window.innerWidth < 768) {
+      setTimeout(() => {
+        weeksDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [visibleWeeks, stage]);
 
   useEffect(() => {
     if (stage !== 'revealed' || missingPositions.length > 0) return;
@@ -756,7 +800,7 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
       </div>
 
       {stage === 'simulating' && (
-        <div className="animate-case-reveal mx-auto mt-8 max-w-2xl rounded-xl border border-slate-700 bg-slate-950/60 p-4 sm:p-6">
+        <div ref={weeksDisplayRef} className="animate-case-reveal mx-auto mt-8 max-w-2xl rounded-xl border border-slate-700 bg-slate-950/60 p-4 sm:p-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">Week by week</p>
           <div className="mt-4 max-h-72 space-y-2 overflow-hidden text-left">
             {weeks.slice(0, visibleWeeks).reverse().map((week) => (
