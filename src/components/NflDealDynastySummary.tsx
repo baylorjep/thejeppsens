@@ -242,6 +242,19 @@ function recalculateEntryStats(entry: DynastyLeaderboardEntry): DynastyLeaderboa
   return { ...entry, rating: newRating, wins: newWins, losses: newLosses };
 }
 
+async function updateTeamName(entryId: string, newName: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/deal-or-no-deal/update-team-name', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: entryId, teamName: newName }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 async function fetchDynastyLeaderboard(): Promise<DynastyLeaderboardEntry[]> {
   const response = await fetch('/api/deal-or-no-deal/dynasty-leaderboard', { cache: 'no-store' });
   if (!response.ok) return [];
@@ -493,6 +506,9 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
   const [showResultCardModal, setShowResultCardModal] = useState(false);
   const [leaderboard, setLeaderboard] = useState<DynastyLeaderboardEntry[]>([]);
   const [playoffSeed, setPlayoffSeed] = useState(7);
+  const [editingTeamName, setEditingTeamName] = useState(false);
+  const [newTeamName, setNewTeamName] = useState(teamName);
+  const [savingTeamName, setSavingTeamName] = useState(false);
   const savedLeaderboardIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -666,9 +682,64 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
       )}
 
       <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ${tone.text}`}>Your Dynasty</p>
-      <h2 className="animate-case-reveal mt-1 text-3xl font-black text-white sm:text-4xl">
-        {stage === 'revealed' ? teamName : stage === 'simulating' ? 'Season Simulation' : teamName}
-      </h2>
+      <div className="flex items-center justify-center gap-3">
+        <h2 className="animate-case-reveal mt-1 text-3xl font-black text-white sm:text-4xl">
+          {stage === 'revealed' ? newTeamName : stage === 'simulating' ? 'Season Simulation' : newTeamName}
+        </h2>
+        {stage === 'revealed' && (
+          <button
+            onClick={() => setEditingTeamName(true)}
+            className="mt-1 rounded-lg border border-slate-700 p-2 text-slate-400 transition-colors hover:border-slate-500 hover:text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+            title="Edit team name"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {editingTeamName && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl sm:max-w-sm w-full">
+            <h3 className="text-lg font-black text-white">Edit Team Name</h3>
+            <input
+              type="text"
+              value={newTeamName}
+              onChange={(e) => setNewTeamName(e.target.value.slice(0, 40))}
+              className="mt-4 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-white outline-none transition-colors focus:border-teal-400"
+              placeholder="Team name"
+              maxLength={40}
+              autoFocus
+            />
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setEditingTeamName(false)}
+                className="flex-1 rounded-lg border border-slate-700 px-4 py-2 font-semibold text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (newTeamName.trim().length === 0) return;
+                  setSavingTeamName(true);
+                  const entryId = `${newTeamName}|${DYNASTY_POSITIONS.map((pos) => results[pos]?.id ?? pos).join('|')}`;
+                  const success = await updateTeamName(entryId, newTeamName);
+                  setSavingTeamName(false);
+                  if (success) {
+                    setEditingTeamName(false);
+                    setLeaderboard([]);
+                  }
+                }}
+                disabled={savingTeamName || newTeamName.trim().length === 0}
+                className="flex-1 rounded-lg bg-teal-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-teal-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500"
+              >
+                {savingTeamName ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <p className="mt-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
         {stage === 'revealed' ? season.title : stage === 'simulating' ? `${currentRecord.wins}-${currentRecord.losses}` : 'Team Complete'}
       </p>
