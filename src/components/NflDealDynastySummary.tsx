@@ -52,6 +52,7 @@ interface SeasonResult {
   wins: number;
   losses: number;
   playoffWins: number;
+  regularSeasonWeeks: WeekResult[];
   playoffWeeks: WeekResult[];
   finish: string;
   title: string;
@@ -291,14 +292,71 @@ function rosterJitter(results: Partial<Record<PositionId, Player>>): number {
   return (hash % 9) - 4;
 }
 
+function simulateRegularSeasonGame(rating: number, synergy: number, jitter: number, opponentRating: number): { won: boolean; teamScore: number; oppScore: number } {
+  const teamStrength = rating + synergy + jitter + (Math.random() * 16 - 8);
+  const oppStrength = opponentRating + (Math.random() * 12 - 6);
+  const won = teamStrength > oppStrength;
+  const margin = Math.abs(teamStrength - oppStrength);
+  const base = 18 + Math.random() * 12;
+  const teamScore = Math.max(3, Math.round(base + (won ? margin * 0.35 : -margin * 0.2)));
+  const oppScore = Math.max(3, Math.round(base + (won ? -margin * 0.2 : margin * 0.35)));
+  return { won, teamScore, oppScore };
+}
+
+function simulateRegularSeason(rating: number, synergy: number, jitter: number): { wins: number; losses: number; weeks: WeekResult[] } {
+  let wins = 0;
+  const weeks: WeekResult[] = [];
+  for (let i = 0; i < 17; i++) {
+    // League-wide opponent strength spread -- every week is its own contest,
+    // so even a dominant roster can drop a game to a hot underdog.
+    const opponentRating = 72 + Math.random() * 22;
+    const game = simulateRegularSeasonGame(rating, synergy, jitter, opponentRating);
+    if (game.won) wins += 1;
+    const margin = Math.abs(game.teamScore - game.oppScore);
+    const note = game.won
+      ? margin >= 14
+        ? 'Statement win'
+        : 'Found a way'
+      : margin >= 14
+        ? 'Rough Sunday'
+        : 'Close loss';
+    weeks.push({
+      week: i + 1,
+      opponent: NFL_OPPONENTS[i % NFL_OPPONENTS.length],
+      won: game.won,
+      score: `${game.teamScore}-${game.oppScore}`,
+      note,
+    });
+  }
+  return { wins, losses: 17 - wins, weeks };
+}
+
 function simulatePlayoffGame(teamRating: number, teamJitter: number, opponentRating: number, seed: number): { won: boolean; teamScore: number; oppScore: number } {
   const seedBonus = (8 - seed) * 0.3;
   const teamStrength = teamRating + teamJitter + seedBonus;
-  const oppStrength = opponentRating + (Math.random() * 4 - 2);
+  const oppStrength = opponentRating + (Math.random() * 8 - 4);
   const won = teamStrength > oppStrength;
   const teamScore = Math.round(20 + Math.random() * 10 + (won ? 3 : -2));
   const oppScore = Math.round(20 + Math.random() * 10 + (won ? -3 : 2));
   return { won, teamScore, oppScore };
+}
+
+// Achievement tier, not a literal game count -- #1/#2 seeds play one fewer
+// game (bye), so counting actual wins would under-credit them versus a
+// wildcard team that reaches the same round.
+function playoffWinsForFinish(finish: string): number {
+  switch (finish) {
+    case 'Super Bowl Champions':
+      return 4;
+    case 'Super Bowl Runner-Up':
+      return 3;
+    case 'Conference Championship':
+      return 2;
+    case 'Divisional Round':
+      return 1;
+    default:
+      return 0;
+  }
 }
 
 function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: number, startWeek: number): { weeks: WeekResult[]; finish: string; title: string; tier: SeasonTier; summary: string; playoffWins: number } {
@@ -308,7 +366,6 @@ function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: nu
   }
 
   let currentSeed = seed;
-  let playoffWins = 0;
   let weekIndex = startWeek;
 
   // Determine starting round based on seed
@@ -327,9 +384,9 @@ function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: nu
       note: '',
     });
     if (!game.won) {
-      return { weeks, finish: 'Wild Card Round', title: 'Wild Card Exit', tier: 'decent', summary: 'So close, yet the playoffs had other plans.', playoffWins };
+      const finish = 'Wild Card Round';
+      return { weeks, finish, title: 'Wild Card Exit', tier: 'decent', summary: 'So close, yet the playoffs had other plans.', playoffWins: playoffWinsForFinish(finish) };
     }
-    playoffWins = 1;
     weekIndex += 1;
   }
 
@@ -344,9 +401,9 @@ function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: nu
     note: '',
   });
   if (!divisionalGame.won) {
-    return { weeks, finish: 'Divisional Round', title: 'Divisional Exit', tier: 'good', summary: 'A valiant effort ended by a stronger foe.', playoffWins };
+    const finish = 'Divisional Round';
+    return { weeks, finish, title: 'Divisional Exit', tier: 'good', summary: 'A valiant effort ended by a stronger foe.', playoffWins: playoffWinsForFinish(finish) };
   }
-  playoffWins += 1;
 
   // Conference Championship (week 20)
   const confChampOpp = 87 + Math.random() * 8;
@@ -359,9 +416,9 @@ function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: nu
     note: '',
   });
   if (!confGame.won) {
-    return { weeks, finish: 'Conference Championship', title: 'Conference Champion', tier: 'elite', summary: 'One game away from immortality, but it wasn\'t meant to be.', playoffWins };
+    const finish = 'Conference Championship';
+    return { weeks, finish, title: 'Conference Champion', tier: 'elite', summary: 'One game away from immortality, but it wasn\'t meant to be.', playoffWins: playoffWinsForFinish(finish) };
   }
-  playoffWins += 1;
 
   // Super Bowl (week 21)
   const superbowlOpp = 88 + Math.random() * 7;
@@ -374,10 +431,11 @@ function simulatePlayoffs(rating: number, wins: number, jitter: number, seed: nu
     note: '',
   });
   if (sbGame.won) {
-    playoffWins += 1;
-    return { weeks, finish: 'Super Bowl Champions', title: 'Dynasty', tier: 'dynasty', summary: 'The season ends with confetti and a ring.', playoffWins };
+    const finish = 'Super Bowl Champions';
+    return { weeks, finish, title: 'Dynasty', tier: 'dynasty', summary: 'The season ends with confetti and a ring.', playoffWins: playoffWinsForFinish(finish) };
   }
-  return { weeks, finish: 'Super Bowl Runner-Up', title: 'Elite Contender', tier: 'elite', summary: 'A monster season, one win short of immortality.', playoffWins };
+  const finish = 'Super Bowl Runner-Up';
+  return { weeks, finish, title: 'Elite Contender', tier: 'elite', summary: 'A monster season, one win short of immortality.', playoffWins: playoffWinsForFinish(finish) };
 }
 
 function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
@@ -410,9 +468,7 @@ function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
   if (qb < 75) synergy -= 0.5;
 
   const jitter = rosterJitter(results);
-  const projectedWins = Math.round((rating - 74) * 0.48 + 5.5 + jitter * 0.28 + synergy);
-  const wins = Math.min(17, Math.max(1, projectedWins));
-  const losses = 17 - wins;
+  const { wins, losses, weeks: regularSeasonWeeks } = simulateRegularSeason(rating, synergy, jitter);
 
   // Determine playoff seed (1-7 based on wins, 1 seed = 14+ wins)
   let seed = 7;
@@ -426,7 +482,18 @@ function seasonFor(results: Partial<Record<PositionId, Player>>): SeasonResult {
 
   const playoff = simulatePlayoffs(rating, wins, jitter, seed, 17);
 
-  return { rating, wins, losses, playoffWins: playoff.playoffWins, playoffWeeks: playoff.weeks, finish: playoff.finish, title: playoff.title, tier: playoff.tier, summary: playoff.summary };
+  return {
+    rating,
+    wins,
+    losses,
+    playoffWins: playoff.playoffWins,
+    regularSeasonWeeks,
+    playoffWeeks: playoff.weeks,
+    finish: playoff.finish,
+    title: playoff.title,
+    tier: playoff.tier,
+    summary: playoff.summary,
+  };
 }
 
 const NFL_OPPONENTS = [
@@ -449,48 +516,8 @@ const NFL_OPPONENTS = [
   'Chicago',
 ];
 
-function hashString(value: string): number {
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) hash = (hash * 33 + value.charCodeAt(i)) % 104729;
-  return hash;
-}
-
-function buildWeekResults(season: SeasonResult, teamName: string, results: Partial<Record<PositionId, Player>>): WeekResult[] {
-  const seed = hashString(`${teamName}|${DYNASTY_POSITIONS.map((pos) => results[pos]?.id ?? pos).join('|')}`);
-  const weeks = Array.from({ length: 17 }, (_, index) => {
-    const wobble = ((seed + index * 37) % 13) - 6;
-    const opponent = NFL_OPPONENTS[(seed + index * 5) % NFL_OPPONENTS.length];
-    return { index, wobble, opponent };
-  }).sort((a, b) => b.wobble - a.wobble);
-  const winIndexes = new Set(weeks.slice(0, season.wins).map((week) => week.index));
-
-  const regularSeasonWeeks = Array.from({ length: 17 }, (_, index) => {
-    const won = winIndexes.has(index);
-    const margin = Math.abs(((seed + index * 11) % 18) - 6) + 1;
-    const base = 18 + ((seed + index * 7) % 17);
-    const high = base + margin;
-    const low = Math.max(6, base - Math.max(1, Math.floor(margin / 2)));
-    const note = won
-      ? index >= 14 && season.wins >= 10
-        ? 'Playoff push'
-        : margin >= 14
-          ? 'Statement win'
-          : 'Found a way'
-      : margin >= 14
-        ? 'Rough Sunday'
-        : index >= 14 && season.wins < 9
-          ? 'Season slipping'
-          : 'Close loss';
-    return {
-      week: index + 1,
-      opponent: weeks.find((week) => week.index === index)?.opponent ?? NFL_OPPONENTS[index],
-      won,
-      score: won ? `${high}-${low}` : `${low}-${high}`,
-      note,
-    };
-  });
-
-  return [...regularSeasonWeeks, ...season.playoffWeeks];
+function buildWeekResults(season: SeasonResult): WeekResult[] {
+  return [...season.regularSeasonWeeks, ...season.playoffWeeks];
 }
 
 function tierTone(tier: SeasonTier): { border: string; text: string; glow: string; confetti: string[] } {
@@ -572,7 +599,7 @@ export default function NflDealDynastySummary({ results, teamName, onPlayAgain, 
   const season = useMemo(() => seasonFor(results), [results]);
   const tone = tierTone(season.tier);
   const celebrate = season.tier === 'dynasty' || season.tier === 'elite';
-  const weeks = useMemo(() => buildWeekResults(season, teamName, results), [results, season, teamName]);
+  const weeks = useMemo(() => buildWeekResults(season), [season]);
   const currentRecord = weeks.slice(0, visibleWeeks).reduce(
     (record, week) => {
       if (week.won) record.wins += 1;
