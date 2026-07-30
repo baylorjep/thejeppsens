@@ -18,6 +18,20 @@ interface LeaderboardRow {
   created_at: string;
 }
 
+type LeaderboardPeriod = 'daily' | 'weekly' | 'monthly' | 'all-time';
+
+function parsePeriod(value: string | null): LeaderboardPeriod {
+  return value === 'daily' || value === 'weekly' || value === 'monthly' ? value : 'all-time';
+}
+
+function periodStart(period: LeaderboardPeriod): string | null {
+  if (period === 'all-time') return null;
+  const start = new Date();
+  const days = period === 'daily' ? 1 : period === 'weekly' ? 7 : 30;
+  start.setDate(start.getDate() - days);
+  return start.toISOString();
+}
+
 function isValidLeaderboardEntry(value: unknown): value is DynastyLeaderboardEntry {
   if (!value || typeof value !== 'object') return false;
   const entry = value as DynastyLeaderboardEntry;
@@ -99,22 +113,27 @@ function rowToEntry(row: LeaderboardRow): DynastyLeaderboardEntry {
   };
 }
 
-async function loadTopEntries() {
+async function loadTopEntries(period: LeaderboardPeriod = 'all-time') {
   const supabase = getSupabaseServerClient();
   if (!supabase) return { entries: null, error: 'No DB' };
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('dynasty_leaderboard_entries')
     .select('id, team_name, rating, wins, losses, playoff_wins, finish, players, created_at')
     .limit(100);
+  const start = periodStart(period);
+  if (start) query = query.gte('created_at', start);
+
+  const { data, error } = await query;
 
   if (error) return { entries: null, error: error.message };
   const entries = (data as LeaderboardRow[]).map(rowToEntry);
   return { entries: sortDynastyLeaderboardEntries(entries).slice(0, 5), error: null };
 }
 
-export async function GET() {
-  const { entries, error } = await loadTopEntries();
+export async function GET(request: Request) {
+  const period = parsePeriod(new URL(request.url).searchParams.get('period'));
+  const { entries, error } = await loadTopEntries(period);
   if (error) return NextResponse.json({ error }, { status: error === 'No DB' ? 503 : 500 });
   return NextResponse.json({ entries });
 }

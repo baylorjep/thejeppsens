@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Confetti from 'react-confetti';
-import { RotateCcw, Trophy } from 'lucide-react';
+import { ArrowUpRight, RotateCcw, Trophy } from 'lucide-react';
 import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
 import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
 import { sortDynastyLeaderboardEntries } from '@/lib/nflDeal/leaderboardRanking';
@@ -171,6 +172,13 @@ function DynastyLeaderboard({ entries }: { entries: DynastyLeaderboardEntry[] })
           <Trophy className="h-6 w-6 text-amber-300" aria-hidden />
         </div>
       </div>
+      <Link
+        href="/deal-or-no-deal/leaderboard"
+        className="mt-3 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-teal-300 transition-colors hover:text-teal-200"
+      >
+        View full leaderboard
+        <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+      </Link>
       <div className="mt-4 space-y-3">
         {entries.map((entry, index) => {
           const hydratedPlayers = DYNASTY_POSITIONS.map((pos) => ({

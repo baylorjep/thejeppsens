@@ -50,6 +50,21 @@ function LeaderboardPlayerChip({ position, player }: { position: PositionId; pla
 }
 
 type SortBy = 'playoffs' | 'record' | 'rating';
+type LeaderboardPeriod = 'daily' | 'weekly' | 'monthly' | 'all-time';
+
+const PERIOD_LABELS: Record<LeaderboardPeriod, string> = {
+  daily: 'Daily',
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  'all-time': 'All Time',
+};
+
+const PERIOD_EMPTY_MESSAGE: Record<LeaderboardPeriod, string> = {
+  daily: 'No dynasty rosters saved in the last day. Build one to get on the leaderboard!',
+  weekly: 'No dynasty rosters saved in the last week. Build one to get on the leaderboard!',
+  monthly: 'No dynasty rosters saved in the last month. Build one to get on the leaderboard!',
+  'all-time': 'No dynasty rosters yet. Build one to get on the leaderboard!',
+};
 
 function sortEntries(entries: DynastyLeaderboardEntry[], sortBy: SortBy): DynastyLeaderboardEntry[] {
   const sorted = [...entries];
@@ -67,11 +82,13 @@ export default function LeaderboardPage() {
   const [entries, setEntries] = useState<DynastyLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortBy>('playoffs');
+  const [period, setPeriod] = useState<LeaderboardPeriod>('all-time');
   const [rawEntries, setRawEntries] = useState<DynastyLeaderboardEntry[]>([]);
 
   useEffect(() => {
+    setLoading(true);
     const fetchLeaderboard = async () => {
-      const response = await fetch('/api/deal-or-no-deal/dynasty-leaderboard', { cache: 'no-store' });
+      const response = await fetch(`/api/deal-or-no-deal/dynasty-leaderboard?period=${period}`, { cache: 'no-store' });
       if (response.ok) {
         const data = (await response.json()) as { entries?: DynastyLeaderboardEntry[] };
         if (Array.isArray(data.entries)) {
@@ -81,7 +98,7 @@ export default function LeaderboardPage() {
       setLoading(false);
     };
     fetchLeaderboard();
-  }, []);
+  }, [period]);
 
   useEffect(() => {
     setEntries(sortEntries(rawEntries, sortBy));
@@ -101,8 +118,25 @@ export default function LeaderboardPage() {
               <Trophy className="h-8 w-8 text-amber-300" />
               <div>
                 <h1 className="text-3xl font-black text-white sm:text-4xl">Dynasty Leaderboard</h1>
-                <p className="mt-1 text-sm font-semibold text-slate-400">All-Time Top Rosters</p>
+                <p className="mt-1 text-sm font-semibold text-slate-400">{PERIOD_LABELS[period]} Top Rosters</p>
               </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(PERIOD_LABELS) as LeaderboardPeriod[]).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setPeriod(option)}
+                  className={`rounded-lg px-4 py-2 text-xs font-semibold uppercase transition-colors ${
+                    period === option
+                      ? 'bg-teal-400 text-slate-950'
+                      : 'border border-slate-700 text-slate-300 hover:border-slate-600 hover:text-white'
+                  }`}
+                >
+                  {PERIOD_LABELS[option]}
+                </button>
+              ))}
             </div>
 
             <div className="flex gap-2 flex-wrap">
@@ -130,7 +164,7 @@ export default function LeaderboardPage() {
             </div>
           ) : entries.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-slate-400">No dynasty rosters yet. Build one to get on the leaderboard!</p>
+              <p className="text-slate-400">{PERIOD_EMPTY_MESSAGE[period]}</p>
             </div>
           ) : (
             <div className="space-y-3">
