@@ -17,7 +17,7 @@ const DEAL_MS = 2200;
 export const CASE_INTRO_TOTAL_MS = REVEAL_MS + SEAL_MS + GATHER_MS + DEAL_MS;
 
 const STAGE_LABEL: Record<Stage, string> = {
-  reveal: "Here's the board...",
+  reveal: 'Shuffling the cases...',
   seal: 'Sealing the cases...',
   gather: 'Bringing out the cases...',
   deal: 'Numbering the board...',
@@ -43,7 +43,9 @@ function caseMotionStyle(index: number): CSSProperties {
 function IntroTile({ caseState, stage, index }: { caseState: CaseState; stage: Stage; index: number }) {
   const [imgFailed, setImgFailed] = useState(false);
   const headshotUrl = espnHeadshotUrl(caseState.quarterback);
-  const showPlayer = stage === 'reveal';
+  // Keep player assignments hidden during the intro. The same case positions
+  // become selectable after numbering, so showing them here leaks the board.
+  const showPlayer = false;
   const showNumber = stage === 'deal';
 
   return (
