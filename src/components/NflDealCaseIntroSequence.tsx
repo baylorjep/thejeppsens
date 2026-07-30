@@ -16,6 +16,15 @@ const DEAL_MS = 2200;
 // board locked (and this component mounted) for at least this long.
 export const CASE_INTRO_TOTAL_MS = REVEAL_MS + SEAL_MS + GATHER_MS + DEAL_MS;
 
+function shuffleIntroCases(cases: CaseState[]): CaseState[] {
+  const shuffled = [...cases];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 const STAGE_LABEL: Record<Stage, string> = {
   reveal: 'Shuffling the cases...',
   seal: 'Sealing the cases...',
@@ -43,9 +52,7 @@ function caseMotionStyle(index: number): CSSProperties {
 function IntroTile({ caseState, stage, index }: { caseState: CaseState; stage: Stage; index: number }) {
   const [imgFailed, setImgFailed] = useState(false);
   const headshotUrl = espnHeadshotUrl(caseState.quarterback);
-  // Keep player assignments hidden during the intro. The same case positions
-  // become selectable after numbering, so showing them here leaks the board.
-  const showPlayer = false;
+  const showPlayer = stage === 'reveal';
   const showNumber = stage === 'deal';
 
   return (
@@ -94,6 +101,9 @@ function IntroTile({ caseState, stage, index }: { caseState: CaseState; stage: S
 
 export default function NflDealCaseIntroSequence({ cases, onSkip }: { cases: CaseState[]; onSkip: () => void }) {
   const [stage, setStage] = useState<Stage>('reveal');
+  // The reveal is intentionally decoupled from the real case order. Players
+  // can see the roster, but cannot map a revealed player to a case number.
+  const [introCases] = useState(() => shuffleIntroCases(cases));
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
@@ -117,7 +127,7 @@ export default function NflDealCaseIntroSequence({ cases, onSkip }: { cases: Cas
         {STAGE_LABEL[stage]}
       </p>
       <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 sm:gap-3">
-        {cases.map((c, i) => (
+        {introCases.map((c, i) => (
           <div
             key={c.number}
             style={caseMotionStyle(i)}
