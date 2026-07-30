@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import type { DynastyLeaderboardEntry, PositionId } from '@/lib/nflDeal/types';
+import { playoffFinishRank, sortDynastyLeaderboardEntries } from '@/lib/nflDeal/leaderboardRanking';
 import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
 import Image from 'next/image';
 import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
@@ -54,11 +55,11 @@ function sortEntries(entries: DynastyLeaderboardEntry[], sortBy: SortBy): Dynast
   const sorted = [...entries];
   switch (sortBy) {
     case 'playoffs':
-      return sorted.sort((a, b) => b.playoffWins - a.playoffWins || b.wins - a.wins || b.rating - a.rating);
+      return sortDynastyLeaderboardEntries(sorted);
     case 'record':
-      return sorted.sort((a, b) => b.wins - a.wins || b.playoffWins - a.playoffWins || b.rating - a.rating);
+      return sorted.sort((a, b) => b.wins - a.wins || playoffFinishRank(b.finish) - playoffFinishRank(a.finish) || b.rating - a.rating);
     case 'rating':
-      return sorted.sort((a, b) => b.rating - a.rating || b.playoffWins - a.playoffWins || b.wins - a.wins);
+      return sorted.sort((a, b) => b.rating - a.rating || playoffFinishRank(b.finish) - playoffFinishRank(a.finish) || b.wins - a.wins);
   }
 }
 
@@ -146,10 +147,6 @@ export default function LeaderboardPage() {
                       <p className="mt-2 text-sm font-semibold text-slate-500">{entry.finish}</p>
                     </div>
                     <div className="flex flex-wrap gap-4 text-right sm:text-right">
-                      <div className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Playoff Wins</p>
-                        <p className="text-2xl font-black text-amber-300">{entry.playoffWins}</p>
-                      </div>
                       <div className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
                         <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Record</p>
                         <p className="text-2xl font-black text-white">

@@ -1,4 +1,5 @@
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
+import { sortDynastyLeaderboardEntries } from '@/lib/nflDeal/leaderboardRanking';
 import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
 import type { DynastyLeaderboardEntry, PositionId } from '@/lib/nflDeal/types';
 import { NextResponse } from 'next/server';
@@ -105,14 +106,11 @@ async function loadTopEntries() {
   const { data, error } = await supabase
     .from('dynasty_leaderboard_entries')
     .select('id, team_name, rating, wins, losses, playoff_wins, finish, players, created_at')
-    .order('playoff_wins', { ascending: false })
-    .order('wins', { ascending: false })
-    .order('rating', { ascending: false })
-    .order('created_at', { ascending: true })
-    .limit(5);
+    .limit(100);
 
   if (error) return { entries: null, error: error.message };
-  return { entries: (data as LeaderboardRow[]).map(rowToEntry), error: null };
+  const entries = (data as LeaderboardRow[]).map(rowToEntry);
+  return { entries: sortDynastyLeaderboardEntries(entries).slice(0, 5), error: null };
 }
 
 export async function GET() {

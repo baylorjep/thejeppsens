@@ -6,6 +6,7 @@ import Confetti from 'react-confetti';
 import { RotateCcw, Trophy } from 'lucide-react';
 import { espnHeadshotUrl } from '@/lib/nflDeal/playerData';
 import { DYNASTY_POSITIONS, POSITIONS } from '@/lib/nflDeal/positions';
+import { sortDynastyLeaderboardEntries } from '@/lib/nflDeal/leaderboardRanking';
 import type { DynastyLeaderboardEntry, Player, PositionId } from '@/lib/nflDeal/types';
 
 interface Props {
@@ -263,7 +264,7 @@ async function fetchDynastyLeaderboard(): Promise<DynastyLeaderboardEntry[]> {
   const data = (await response.json()) as { entries?: DynastyLeaderboardEntry[] };
   const entries = Array.isArray(data.entries) ? data.entries : [];
   // Recalculate all entries with current synergy rules
-  return entries.map(recalculateEntryStats).sort((a, b) => b.rating - a.rating || b.wins - a.wins);
+  return sortDynastyLeaderboardEntries(entries.map(recalculateEntryStats));
 }
 
 async function saveDynastyLeaderboardEntry(entry: DynastyLeaderboardEntry): Promise<DynastyLeaderboardEntry[]> {
