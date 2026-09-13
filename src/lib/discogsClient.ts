@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 
 export type DiscogsMoney = { currency: string; value: number };
 
+// A handful of 5-star votes shouldn't outrank a release with a real track
+// record of ratings, so "highest rated" requires a minimum sample size.
+const MIN_RATINGS_FOR_HIGHEST = 10;
+
 export type DiscogsValueResponse = {
   grade: string;
   isGuess: boolean;
@@ -122,7 +126,7 @@ export function useCollectionValue(records: VinylRecord[]) {
             mostWanted = { record, want: recordValue.want };
           }
         }
-        if (typeof recordValue?.ratingAverage === "number" && (recordValue.ratingCount ?? 0) > 0) {
+        if (typeof recordValue?.ratingAverage === "number" && (recordValue.ratingCount ?? 0) >= MIN_RATINGS_FOR_HIGHEST) {
           if (!highestRated || recordValue.ratingAverage > highestRated.average) {
             highestRated = { record, average: recordValue.ratingAverage, count: recordValue.ratingCount ?? 0 };
           }
