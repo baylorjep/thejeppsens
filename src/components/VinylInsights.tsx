@@ -135,25 +135,64 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     (a) => a.label.toLowerCase() !== "various artists",
   );
 
-  const genrePct =
-    allRecords.length > 0 ? Math.round((snapshot.topGenre.count / allRecords.length) * 100) : 0;
-  const dna =
-    allRecords.length > 0
-      ? `${genrePct}% of the collection is ${snapshot.topGenre.value}, led by ${topRealArtist?.label ?? snapshot.topArtist.value}, mostly from the ${snapshot.topReleaseEra.value}.`
-      : "";
+  const narrative = useMemo(() => {
+    if (!allRecords.length) return [];
 
-  const span = useMemo(() => {
+    const lines: string[] = [];
+    const total = allRecords.length;
+    const genrePct = Math.round((snapshot.topGenre.count / total) * 100);
+
+    lines.push(
+      `${genrePct}% of your collection is ${snapshot.topGenre.value}, led by ${topRealArtist?.label ?? snapshot.topArtist.value} with ${(topRealArtist ?? snapshot.artistBreakdown[0])?.count ?? 0} records, mostly from the ${snapshot.topReleaseEra.value}.`,
+    );
+
+    const [firstGenre, secondGenre] = snapshot.genreBreakdown;
+    if (firstGenre && secondGenre) {
+      const combinedPct = Math.round(((firstGenre.count + secondGenre.count) / total) * 100);
+      lines.push(`${firstGenre.label} and ${secondGenre.label} together make up ${combinedPct}% of what you own.`);
+    }
+
+    const [firstDecade, secondDecade] = snapshot.releaseDecadeBreakdown;
+    if (firstDecade && secondDecade) {
+      lines.push(
+        `Most of your records come from the ${firstDecade.label}, with the ${secondDecade.label} close behind at ${secondDecade.count} records.`,
+      );
+    } else if (firstDecade) {
+      lines.push(`Most of your records come from the ${firstDecade.label}.`);
+    }
+
     const withYear = allRecords.filter(
       (record): record is VinylRecord & { releaseYear: number } => typeof record.releaseYear === "number",
     );
-    if (withYear.length < 2) return "";
+    if (withYear.length >= 2) {
+      const oldest = withYear.reduce((a, b) => (b.releaseYear < a.releaseYear ? b : a));
+      const newest = withYear.reduce((a, b) => (b.releaseYear > a.releaseYear ? b : a));
+      if (oldest.id !== newest.id) {
+        lines.push(
+          `Your oldest record is ${oldest.title} (${oldest.releaseYear}), and your newest is ${newest.title} (${newest.releaseYear}), a ${newest.releaseYear - oldest.releaseYear}-year span.`,
+        );
+      }
+    }
 
-    const oldest = withYear.reduce((a, b) => (b.releaseYear < a.releaseYear ? b : a));
-    const newest = withYear.reduce((a, b) => (b.releaseYear > a.releaseYear ? b : a));
-    if (oldest.id === newest.id) return "";
+    if (snapshot.topMood.value !== "None") {
+      lines.push(
+        `When it comes to mood, ${snapshot.topMood.value} is your most-tagged vibe, showing up on ${snapshot.topMood.count} records.`,
+      );
+    }
 
-    return `Her oldest record is ${oldest.title} (${oldest.releaseYear}), and her newest is ${newest.title} (${newest.releaseYear}) — a ${newest.releaseYear - oldest.releaseYear}-year span.`;
-  }, [allRecords]);
+    const [firstFormat] = snapshot.formatBreakdown;
+    if (firstFormat && snapshot.formats > 1) {
+      const formatPct = Math.round((firstFormat.count / total) * 100);
+      lines.push(`${formatPct}% of your records are ${firstFormat.label}, spread across ${snapshot.formats} different formats in total.`);
+    }
+
+    if (snapshot.favorites > 0) {
+      const ratio = Math.round(total / snapshot.favorites);
+      lines.push(`You've marked ${snapshot.favorites} records as favorites, about 1 in every ${ratio} you own.`);
+    }
+
+    return lines;
+  }, [allRecords, snapshot, topRealArtist]);
 
   const discogsLinkedCount = useMemo(
     () => allRecords.filter((record) => record.discogsReleaseId).length,
@@ -198,7 +237,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             Vinyl insights
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-gray-600 sm:text-lg">
-            A deeper look at the shape of Isabel&apos;s collection, from decades and genres to the
+            A deeper look at the shape of your collection, from decades and genres to the
             artists and moods that show up the most.
           </p>
         </div>
@@ -219,13 +258,18 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       </div>
 
       {/* Collection DNA */}
-      {dna && (
+      {narrative.length > 0 && (
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-400">
             Collection DNA
           </p>
-          <p className="text-sm leading-relaxed text-gray-700 sm:text-base">{dna}</p>
-          {span ? <p className="mt-2 text-sm leading-relaxed text-gray-700 sm:text-base">{span}</p> : null}
+          <div className="space-y-2">
+            {narrative.map((line, index) => (
+              <p key={index} className="text-sm leading-relaxed text-gray-700 sm:text-base">
+                {line}
+              </p>
+            ))}
+          </div>
         </div>
       )}
 
@@ -481,7 +525,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       {collectionValue?.byFormat && collectionValue.byFormat.length > 1 ? (
         <section className="rounded-lg border border-gray-200 bg-white p-5">
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Value by format</h2>
-          <p className="mt-1 text-xs text-gray-400">Estimated value split across the formats in her collection.</p>
+          <p className="mt-1 text-xs text-gray-400">Estimated value split across the formats in your collection.</p>
           <div className="mt-5">
             <DonutChart
               items={collectionValue.byFormat.map((entry) => ({ label: entry.format, count: Math.round(entry.total) }))}

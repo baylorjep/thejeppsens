@@ -43,7 +43,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   // Favorites
   { id: "fav-10", category: "favorites", metric: "favorites", threshold: 10, emoji: "❤️", title: "Picking Favorites", description: "Mark 10 favorites" },
   { id: "fav-25", category: "favorites", metric: "favorites", threshold: 25, emoji: "❤️", title: "Favorites, Plural", description: "Mark 25 favorites" },
-  { id: "fav-50", category: "favorites", metric: "favorites", threshold: 50, emoji: "💖", title: "Half Her Heart", description: "Mark 50 favorites" },
+  { id: "fav-50", category: "favorites", metric: "favorites", threshold: 50, emoji: "💖", title: "All Heart", description: "Mark 50 favorites" },
   { id: "fav-75", category: "favorites", metric: "favorites", threshold: 75, emoji: "💖", title: "Favorite-Prone", description: "Mark 75 favorites" },
   { id: "fav-100", category: "favorites", metric: "favorites", threshold: 100, emoji: "💝", title: "100 Favorites", description: "Mark 100 favorites" },
 

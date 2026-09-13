@@ -201,8 +201,8 @@ export default function DiscogsMatcher() {
           <h1 className="text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">Match to Discogs</h1>
           <p className="mt-4 text-base leading-7 text-gray-600">
             Each record is auto-searched on Discogs by artist and title. Compare the thumbnail (or open the full
-            listing on Discogs) against your copy, pick the right pressing from the dropdown, and confirm — nothing
-            gets linked without that confirm.
+            listing on Discogs) against your copy, pick the right pressing from the dropdown, and confirm.
+            Nothing gets linked without that confirm.
           </p>
         </div>
         <Link
@@ -216,7 +216,7 @@ export default function DiscogsMatcher() {
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
         {isLoadingRecords
           ? "Loading records..."
-          : `${totalUnmatched} record${totalUnmatched === 1 ? "" : "s"} still need a Discogs link. ${linkedIds.size} linked this session.${deferredIds.size ? ` ${deferredIds.size} skipped for now — reload the page to see them again.` : ""}`}
+          : `${totalUnmatched} record${totalUnmatched === 1 ? "" : "s"} still need a Discogs link. ${linkedIds.size} linked this session.${deferredIds.size ? ` ${deferredIds.size} skipped for now. Reload the page to see them again.` : ""}`}
       </div>
 
       <div className="space-y-4">
@@ -291,7 +291,7 @@ export default function DiscogsMatcher() {
                   ) : (
                     <>
                       {state.status === "no-results" ? (
-                        <p className="text-sm text-gray-500">No matches found — try refining the search below.</p>
+                        <p className="text-sm text-gray-500">No matches found. Try refining the search below.</p>
                       ) : state.status === "error" ? (
                         <p className="text-sm text-red-600">Could not link that release. Try again.</p>
                       ) : (
@@ -383,7 +383,7 @@ export default function DiscogsMatcher() {
 
       {!isLoadingRecords && !visibleRecords.length ? (
         <p className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500">
-          {totalUnmatched === 0 ? "Every record is linked to Discogs." : "All visible records handled — nice work."}
+          {totalUnmatched === 0 ? "Every record is linked to Discogs." : "All visible records handled. Nice work."}
         </p>
       ) : null}
 
@@ -414,7 +414,7 @@ export default function DiscogsMatcher() {
                   className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
                 >
                   <span className="min-w-0 truncate text-gray-700">
-                    {record.title} — {record.artist}
+                    {record.title} · {record.artist}
                   </span>
                   <button
                     type="button"

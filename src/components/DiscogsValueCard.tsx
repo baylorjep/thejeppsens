@@ -72,7 +72,7 @@ export default function DiscogsValueCard({
               rel="noopener noreferrer"
               className="mt-3 inline-block text-xs text-gray-500 underline-offset-4 hover:text-gray-950 hover:underline"
             >
-              {value.numForSale} for sale now from {formatDiscogsMoney(value.lowestListing)} — see listings
+              {value.numForSale} for sale now from {formatDiscogsMoney(value.lowestListing)} · see listings
             </a>
           ) : null}
         </div>
@@ -85,7 +85,7 @@ export default function DiscogsValueCard({
             rel="noopener noreferrer"
             className="mt-1 inline-block text-xs text-gray-500 underline-offset-4 hover:text-gray-950 hover:underline"
           >
-            Lowest of {value.numForSale} copies currently listed — see listings
+            Lowest of {value.numForSale} copies currently listed · see listings
           </a>
         </div>
       ) : (
@@ -93,7 +93,7 @@ export default function DiscogsValueCard({
       )}
       {status === "ready" && (value?.estimate || value?.lowestListing) && !verifiedPressing ? (
         <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
-          Approximate — this pressing hasn&apos;t been manually confirmed, so it may not be the exact one
+          Approximate. This pressing hasn&apos;t been manually confirmed, so it may not be the exact one
           priced here. Edit this record and confirm the match under &quot;Discogs&quot; to sharpen this
           estimate.
         </p>

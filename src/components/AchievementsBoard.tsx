@@ -24,8 +24,8 @@ const CATEGORY_LABELS: Record<AchievementCategory, string> = {
   favorites: "Favorites",
   artists: "Artists",
   genres: "Genres",
-  discogsLinked: "Discogs — linked",
-  discogsVerified: "Discogs — confirmed",
+  discogsLinked: "Discogs links",
+  discogsVerified: "Discogs confirmations",
   value: "Collection value",
 };
 
