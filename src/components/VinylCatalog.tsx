@@ -1,7 +1,10 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
+import AchievementCelebration from "@/components/AchievementCelebration";
 import DiscogsValueCard from "@/components/DiscogsValueCard";
+import { computeInstantStats } from "@/lib/achievements";
+import { useAchievementUnlocks } from "@/lib/achievementUnlocks";
 import {
   getCollectionSnapshot,
   getStatusTone,
@@ -500,6 +503,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const shouldUseModal = !isTouchDevice;
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
+  const instantAchievementStats = useMemo(() => computeInstantStats(allRecords), [allRecords]);
+  const { newlyUnlocked: newlyUnlockedAchievements, dismiss: dismissAchievement } =
+    useAchievementUnlocks(instantAchievementStats);
   const ownedShelfRecords = useMemo(
     () => allRecords.filter((record) => record.status !== "wishlist"),
     [allRecords],
@@ -899,6 +905,8 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
 
   return (
     <div>
+      <AchievementCelebration achievements={newlyUnlockedAchievements} onDismiss={dismissAchievement} />
+
       <div className="mb-10 overflow-x-auto pb-1">
         <div className="grid w-max grid-cols-5 gap-3 md:w-auto">
           <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">

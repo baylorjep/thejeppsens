@@ -1,6 +1,7 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
+import DonutChart from "@/components/DonutChart";
 import { formatDiscogsMoney, useCollectionValue } from "@/lib/discogsClient";
 import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
 import { fetchVinylRecords } from "@/lib/vinylApi";
@@ -163,6 +164,17 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     [allRecords],
   );
 
+  const needsAttention = useMemo(
+    () => ({
+      missingPhotos: allRecords.filter(
+        (record) => record.status === "owned" && (!record.coverImage || !record.backCoverImage),
+      ).length,
+      notLinked: allRecords.filter((record) => !record.discogsReleaseId && !record.discogsNoMatch).length,
+      unverifiedLinked: allRecords.filter((record) => record.discogsReleaseId && !record.discogsVerified).length,
+    }),
+    [allRecords],
+  );
+
   const statCards = [
     { label: "Records", value: allRecords.length },
     { label: "Artists", value: snapshot.artists },
@@ -190,12 +202,20 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             artists and moods that show up the most.
           </p>
         </div>
-        <Link
-          href="/vinyl"
-          className="inline-flex w-fit shrink-0 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
-        >
-          Back to catalog
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/vinyl/achievements"
+            className="inline-flex w-fit shrink-0 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+          >
+            Achievements
+          </Link>
+          <Link
+            href="/vinyl"
+            className="inline-flex w-fit shrink-0 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+          >
+            Back to catalog
+          </Link>
+        </div>
       </div>
 
       {/* Collection DNA */}
@@ -208,6 +228,37 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           {span ? <p className="mt-2 text-sm leading-relaxed text-gray-700 sm:text-base">{span}</p> : null}
         </div>
       )}
+
+      {/* Needs attention */}
+      {allRecords.length > 0 &&
+      (needsAttention.missingPhotos > 0 || needsAttention.notLinked > 0 || needsAttention.unverifiedLinked > 0) ? (
+        <div className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Needs attention</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Link
+              href="/vinyl/manage"
+              className="rounded-lg border border-gray-200 p-4 transition-colors hover:border-gray-400"
+            >
+              <p className="text-2xl font-semibold text-gray-950">{needsAttention.missingPhotos}</p>
+              <p className="mt-1 text-sm text-gray-600">owned records missing a front or back photo</p>
+            </Link>
+            <Link
+              href="/vinyl/manage/match"
+              className="rounded-lg border border-gray-200 p-4 transition-colors hover:border-gray-400"
+            >
+              <p className="text-2xl font-semibold text-gray-950">{needsAttention.notLinked}</p>
+              <p className="mt-1 text-sm text-gray-600">records not yet linked to Discogs</p>
+            </Link>
+            <Link
+              href="/vinyl/manage/match"
+              className="rounded-lg border border-gray-200 p-4 transition-colors hover:border-gray-400"
+            >
+              <p className="text-2xl font-semibold text-gray-950">{needsAttention.unverifiedLinked}</p>
+              <p className="mt-1 text-sm text-gray-600">linked records with an unconfirmed pressing</p>
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       {/* Stats — unified 8-card grid */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
@@ -279,12 +330,12 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         </div>
       ) : null}
 
-      {/* Discogs rarity */}
-      {collectionValue?.rarest || collectionValue?.mostWanted ? (
+      {/* Discogs community stats */}
+      {collectionValue?.rarest || collectionValue?.mostWanted || collectionValue?.highestRated ? (
         <div className="rounded-lg border border-gray-200 bg-white p-5">
-          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Rarity, via Discogs</h2>
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Community stats, via Discogs</h2>
           <p className="mt-1 text-xs text-gray-400">
-            Based on how many Discogs users report owning or wanting each exact pressing.
+            Based on how many Discogs users report owning, wanting, or rating each exact pressing.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {collectionValue.rarest ? (
@@ -309,6 +360,18 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                 <p className="mt-1 text-sm font-medium text-gray-950">{collectionValue.mostWanted.record.title}</p>
                 <p className="text-xs text-gray-500">
                   {collectionValue.mostWanted.want} people want this pressing
+                </p>
+              </Link>
+            ) : null}
+            {collectionValue.highestRated ? (
+              <Link
+                href={`/vinyl/${collectionValue.highestRated.record.id}`}
+                className="rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-400"
+              >
+                <p className="text-xs text-gray-500">Highest rated</p>
+                <p className="mt-1 text-sm font-medium text-gray-950">{collectionValue.highestRated.record.title}</p>
+                <p className="text-xs text-gray-500">
+                  {collectionValue.highestRated.average.toFixed(1)} / 5 ({collectionValue.highestRated.count} ratings)
                 </p>
               </Link>
             ) : null}
@@ -407,13 +470,26 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           barColor="bg-violet-500"
           linkBase="/vinyl?mood="
         />
-        <BreakdownSection
-          title="By status"
-          items={snapshot.statusBreakdown}
-          totalCount={allRecords.length}
-          barColor="bg-slate-500"
-        />
+        <section className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">By status</h2>
+          <div className="mt-5">
+            <DonutChart items={snapshot.statusBreakdown} />
+          </div>
+        </section>
       </div>
+
+      {collectionValue?.byFormat && collectionValue.byFormat.length > 1 ? (
+        <section className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Value by format</h2>
+          <p className="mt-1 text-xs text-gray-400">Estimated value split across the formats in her collection.</p>
+          <div className="mt-5">
+            <DonutChart
+              items={collectionValue.byFormat.map((entry) => ({ label: entry.format, count: Math.round(entry.total) }))}
+              formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
+            />
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

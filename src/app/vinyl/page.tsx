@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import VinylCatalog from "@/components/VinylCatalog";
 import { vinyls } from "@/data/vinyls";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -26,6 +26,13 @@ export default function VinylPage() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/vinyl/achievements"
+              className="inline-flex w-fit items-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500"
+            >
+              <Trophy className="h-4 w-4" />
+              Achievements
+            </Link>
             <Link
               href="/vinyl/insights"
               className="inline-flex w-fit items-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500"
