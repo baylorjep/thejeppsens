@@ -1,7 +1,12 @@
 "use client";
 
 import { DiscogsValueResponse, fetchDiscogsValue, formatDiscogsMoney } from "@/lib/discogsClient";
+import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
+
+function marketplaceUrl(releaseId: number) {
+  return `https://www.discogs.com/sell/release/${releaseId}?sort=price&sort_order=asc`;
+}
 
 export default function DiscogsValueCard({
   releaseId,
@@ -15,7 +20,7 @@ export default function DiscogsValueCard({
   const [value, setValue] = useState<DiscogsValueResponse | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
 
-  useEffect(() => {
+  const load = () => {
     let active = true;
     setStatus("loading");
 
@@ -32,13 +37,26 @@ export default function DiscogsValueCard({
     return () => {
       active = false;
     };
-  }, [releaseId, condition]);
+  };
+
+  useEffect(load, [releaseId, condition]);
 
   if (status === "unavailable") return null;
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-6">
-      <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Estimated value</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Estimated value</h3>
+        <button
+          type="button"
+          onClick={load}
+          disabled={status === "loading"}
+          className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 disabled:opacity-50"
+          aria-label="Refresh estimate"
+        >
+          <RotateCw className={`h-3.5 w-3.5 ${status === "loading" ? "animate-spin" : ""}`} />
+        </button>
+      </div>
       {status === "loading" ? (
         <div className="mt-3 h-7 w-24 animate-pulse rounded bg-gray-200" />
       ) : value?.estimate ? (
@@ -48,17 +66,27 @@ export default function DiscogsValueCard({
             {value.isGuess ? "Assuming" : "Based on"} {value.grade} condition, via Discogs
           </p>
           {value.lowestListing ? (
-            <p className="mt-3 text-xs text-gray-500">
-              {value.numForSale} for sale now from {formatDiscogsMoney(value.lowestListing)}
-            </p>
+            <a
+              href={marketplaceUrl(releaseId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-block text-xs text-gray-500 underline-offset-4 hover:text-gray-950 hover:underline"
+            >
+              {value.numForSale} for sale now from {formatDiscogsMoney(value.lowestListing)} — see listings
+            </a>
           ) : null}
         </div>
       ) : value?.lowestListing ? (
         <div className="mt-2">
           <p className="text-2xl font-semibold text-gray-950">{formatDiscogsMoney(value.lowestListing)}</p>
-          <p className="mt-1 text-xs text-gray-500">
-            Lowest of {value.numForSale} copies currently listed on Discogs
-          </p>
+          <a
+            href={marketplaceUrl(releaseId)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-block text-xs text-gray-500 underline-offset-4 hover:text-gray-950 hover:underline"
+          >
+            Lowest of {value.numForSale} copies currently listed — see listings
+          </a>
         </div>
       ) : (
         <p className="mt-2 text-sm text-gray-500">No Discogs price data for this pressing yet.</p>
