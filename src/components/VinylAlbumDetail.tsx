@@ -419,7 +419,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       if (discCount) updateEditForm("discCount", String(discCount));
       if (genres.length) updateEditForm("genres", genres.join(", "));
       if (trackList.length) updateEditForm("trackList", trackList.join("\n"));
-      if (coverImage) updateEditForm("coverImage", coverImage);
+      if (coverImage && !editForm?.coverImage) updateEditForm("coverImage", coverImage);
       updateEditForm("discogsReleaseId", String(result.id));
       setDiscogsResults([]);
       setDiscogsQuery("");

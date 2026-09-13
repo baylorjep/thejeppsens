@@ -27,12 +27,20 @@ export default function VinylManagePage() {
               into the collection.
             </p>
           </div>
-          <Link
-            href="/vinyl"
-            className="inline-flex w-fit rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
-          >
-            View catalog
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/vinyl/manage/match"
+              className="inline-flex w-fit rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+            >
+              Match to Discogs
+            </Link>
+            <Link
+              href="/vinyl"
+              className="inline-flex w-fit rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
+            >
+              View catalog
+            </Link>
+          </div>
         </div>
 
         <VinylManager />
