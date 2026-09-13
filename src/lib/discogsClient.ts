@@ -111,7 +111,6 @@ export type CollectionValueSummary = {
   currentlyListedCount: number;
   originalCount: number;
   reissueCount: number;
-  byCountry: { country: string; count: number }[];
 };
 
 function aggregateCollectionValue(
@@ -133,7 +132,6 @@ function aggregateCollectionValue(
   const byFormatMap = new Map<string, { total: number; count: number }>();
   const byDecadeMap = new Map<string, { total: number; count: number }>();
   const byGenreMap = new Map<string, { total: number; count: number }>();
-  const byCountryMap = new Map<string, number>();
 
   for (const { record, value: recordValue } of results) {
     const priced = recordValue?.estimate ?? recordValue?.lowestListing;
@@ -172,10 +170,6 @@ function aggregateCollectionValue(
       else originalCount += 1;
     }
 
-    if (recordValue?.country) {
-      byCountryMap.set(recordValue.country, (byCountryMap.get(recordValue.country) ?? 0) + 1);
-    }
-
     if (typeof recordValue?.have === "number") {
       if (!rarest || recordValue.have < rarest.have) {
         rarest = { record, have: recordValue.have };
@@ -206,10 +200,6 @@ function aggregateCollectionValue(
     .sort((a, b) => b.total - a.total)
     .slice(0, 8);
 
-  const byCountry = [...byCountryMap.entries()]
-    .map(([country, count]) => ({ country, count }))
-    .sort((a, b) => b.count - a.count);
-
   return {
     total,
     currency,
@@ -227,7 +217,6 @@ function aggregateCollectionValue(
     currentlyListedCount,
     originalCount,
     reissueCount,
-    byCountry,
   };
 }
 

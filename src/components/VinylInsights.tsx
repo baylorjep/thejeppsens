@@ -280,6 +280,20 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     [allRecords],
   );
 
+  const foundStories = useMemo(() => {
+    const ownedRecords = allRecords.filter((record) => record.status === "owned");
+    const withStory = ownedRecords.filter((record) => record.whereWeGotIt?.trim());
+    // Shuffle so the same few stories aren't pinned to the top forever.
+    const samples = [...withStory].sort(() => Math.random() - 0.5).slice(0, 3);
+
+    return {
+      total: ownedRecords.length,
+      told: withStory.length,
+      missing: ownedRecords.length - withStory.length,
+      samples,
+    };
+  }, [allRecords]);
+
   const statCards = [
     { label: "Records", value: allRecords.length },
     { label: "Artists", value: snapshot.artists },
@@ -660,30 +674,39 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         </section>
       ) : null}
 
-      {collectionValue?.byCountry && collectionValue.byCountry.length > 1 ? (
+      {foundStories.total > 0 && (
         <section className="rounded-lg border border-gray-200 bg-white p-5">
-          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Country of origin</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
-            Your pressings come from {collectionValue.byCountry.length} different countries, mostly{" "}
-            {collectionValue.byCountry[0].country}.
-          </p>
-          <div className="mt-5">
-            <DonutChart
-              items={
-                collectionValue.byCountry.length > 6
-                  ? [
-                      ...collectionValue.byCountry.slice(0, 6).map((entry) => ({ label: entry.country, count: entry.count })),
-                      {
-                        label: "Other",
-                        count: collectionValue.byCountry.slice(6).reduce((sum, entry) => sum + entry.count, 0),
-                      },
-                    ]
-                  : collectionValue.byCountry.map((entry) => ({ label: entry.country, count: entry.count }))
-              }
-            />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Where you found them</h2>
+            <span className="text-xs text-gray-400">
+              {foundStories.told} of {foundStories.total} stories told
+            </span>
           </div>
+          {foundStories.missing > 0 ? (
+            <Link
+              href="/vinyl/manage"
+              className="mt-3 inline-flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700 transition-colors hover:bg-amber-100"
+            >
+              {foundStories.missing} owned record{foundStories.missing === 1 ? "" : "s"} still {foundStories.missing === 1 ? "doesn't" : "don't"} have a story. Add one.
+            </Link>
+          ) : null}
+          {foundStories.samples.length > 0 ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {foundStories.samples.map((record) => (
+                <Link
+                  key={record.id}
+                  href={`/vinyl/${record.id}`}
+                  className="rounded-lg border border-gray-200 p-4 transition-colors hover:border-gray-400"
+                >
+                  <p className="text-sm font-medium text-gray-950">{record.title}</p>
+                  <p className="text-xs text-gray-500">{record.artist}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-gray-600 line-clamp-4">{record.whereWeGotIt}</p>
+                </Link>
+              ))}
+            </div>
+          ) : null}
         </section>
-      ) : null}
+      )}
     </div>
   );
 }
