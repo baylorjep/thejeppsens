@@ -13,9 +13,14 @@ export type DiscogsValueResponse = {
 
 export function formatDiscogsMoney({ currency, value }: DiscogsMoney) {
   try {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(value);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
   } catch {
-    return `${currency} ${value.toFixed(2)}`;
+    return `${currency} ${Math.round(value)}`;
   }
 }
 
