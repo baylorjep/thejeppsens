@@ -45,7 +45,7 @@ function BreakdownSection({
           const inner = (
             <>
               <div className="mb-1.5 flex items-center justify-between gap-2 text-xs sm:text-sm">
-                <span className="truncate font-medium text-gray-900">{item.label}</span>
+                <span className="min-w-0 flex-1 truncate font-medium text-gray-900">{item.label}</span>
                 <span className="shrink-0 tabular-nums text-gray-500">
                   {formatCount(item.count)} · {pct}%
                 </span>

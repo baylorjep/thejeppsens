@@ -22,6 +22,7 @@ export type DiscogsValueResponse = {
   formatDescriptions: string[];
   country: string | null;
   artists: string[];
+  cached: boolean;
 };
 
 const REISSUE_KEYWORDS = ["reissue", "repress", "remaster"];
@@ -61,9 +62,14 @@ const DISCOGS_FETCH_DELAY_MS = 2000;
 let discogsQueueTail: Promise<unknown> = Promise.resolve();
 const discogsValueCache = new Map<string, Promise<DiscogsValueResponse | null>>();
 
-async function rawFetchDiscogsValue(releaseId: number, condition?: string): Promise<DiscogsValueResponse | null> {
+async function rawFetchDiscogsValue(
+  releaseId: number,
+  condition?: string,
+  forceRefresh?: boolean,
+): Promise<DiscogsValueResponse | null> {
   const url = new URL(`/api/discogs/value/${releaseId}`, window.location.origin);
   if (condition) url.searchParams.set("condition", condition);
+  if (forceRefresh) url.searchParams.set("refresh", "true");
 
   const response = await fetch(url);
   if (!response.ok) return null;
@@ -80,8 +86,12 @@ export function fetchDiscogsValue(releaseId: number, condition?: string): Promis
     () => rawFetchDiscogsValue(releaseId, condition),
     () => rawFetchDiscogsValue(releaseId, condition),
   );
+  // A response the server already had cached costs Discogs nothing, so only
+  // the actual live-fetch path needs to wait out the pacing delay - letting
+  // cache hits skip it means a warm cache loads at full speed instead of
+  // being throttled to one every couple seconds for no reason.
   discogsQueueTail = run.then(
-    () => new Promise((resolve) => setTimeout(resolve, DISCOGS_FETCH_DELAY_MS)),
+    (result) => (result?.cached ? undefined : new Promise((resolve) => setTimeout(resolve, DISCOGS_FETCH_DELAY_MS))),
     () => new Promise((resolve) => setTimeout(resolve, DISCOGS_FETCH_DELAY_MS)),
   );
 
@@ -103,10 +113,12 @@ export function fetchDiscogsValueDirect(
   const key = `${releaseId}::${condition ?? ""}`;
   if (options.forceRefresh) discogsValueCache.delete(key);
 
-  const cached = discogsValueCache.get(key);
-  if (cached) return cached;
+  if (!options.forceRefresh) {
+    const cached = discogsValueCache.get(key);
+    if (cached) return cached;
+  }
 
-  const run = rawFetchDiscogsValue(releaseId, condition);
+  const run = rawFetchDiscogsValue(releaseId, condition, options.forceRefresh);
   discogsValueCache.set(key, run);
   return run;
 }
