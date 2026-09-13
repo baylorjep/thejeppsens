@@ -41,6 +41,7 @@ type FormState = {
   coverImage: string;
   backCoverImage: string;
   discogsReleaseId: string;
+  discogsVerified: boolean;
 };
 
 type AppleAlbumSearchResult = {
@@ -113,6 +114,7 @@ const emptyForm: FormState = {
   coverImage: "",
   backCoverImage: "",
   discogsReleaseId: "",
+  discogsVerified: false,
 };
 
 function recordToForm(record: VinylRecord): FormState {
@@ -147,6 +149,7 @@ function recordToForm(record: VinylRecord): FormState {
     coverImage: record.coverImage ?? "",
     backCoverImage: record.backCoverImage ?? "",
     discogsReleaseId: record.discogsReleaseId?.toString() ?? "",
+    discogsVerified: Boolean(record.discogsVerified),
   };
 }
 
@@ -358,8 +361,9 @@ export default function VinylManager() {
         trackList: trackList.length ? trackList.join("\n") : current.trackList,
         status: editingId ? current.status : "wishlist",
         source: current.source || "Discogs",
-        coverImage: coverImage ?? current.coverImage,
+        coverImage: current.coverImage || coverImage || current.coverImage,
         discogsReleaseId: String(result.id),
+        discogsVerified: true,
       }));
       setImageFile(undefined);
       setMessage(
@@ -456,6 +460,7 @@ export default function VinylManager() {
       backCoverImage: form.backCoverImage || undefined,
       favorite: form.favorite,
       discogsReleaseId: form.discogsReleaseId ? Number(form.discogsReleaseId) : undefined,
+      discogsVerified: form.discogsReleaseId ? form.discogsVerified : undefined,
     };
     const isNewRecord = !editingId;
 
@@ -656,7 +661,7 @@ export default function VinylManager() {
             {form.discogsReleaseId ? (
               <button
                 type="button"
-                onClick={() => updateForm("discogsReleaseId", "")}
+                onClick={() => setForm((current) => ({ ...current, discogsReleaseId: "", discogsVerified: false }))}
                 className="text-xs font-medium text-gray-500 underline-offset-4 hover:underline"
               >
                 Linked to release {form.discogsReleaseId} · unlink

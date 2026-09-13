@@ -49,6 +49,7 @@ type AlbumEditForm = {
   coverImage: string;
   backCoverImage: string;
   discogsReleaseId: string;
+  discogsVerified: boolean;
 };
 
 function recordToEditForm(record: VinylRecord): AlbumEditForm {
@@ -83,6 +84,7 @@ function recordToEditForm(record: VinylRecord): AlbumEditForm {
     coverImage: record.coverImage ?? "",
     backCoverImage: record.backCoverImage ?? "",
     discogsReleaseId: record.discogsReleaseId?.toString() ?? "",
+    discogsVerified: Boolean(record.discogsVerified),
   };
 }
 
@@ -183,8 +185,9 @@ function DiscogsValueCard({
       )}
       {status === "ready" && (value?.estimate || value?.lowestListing) && !verifiedPressing ? (
         <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
-          Approximate — this record has no catalog number saved, so we can&apos;t confirm this is the exact
-          pressing priced here. Add the catalog number from the label to sharpen this estimate.
+          Approximate — this pressing hasn&apos;t been manually confirmed, so it may not be the exact one
+          priced here. Edit this record and confirm the match under &quot;Discogs&quot; to sharpen this
+          estimate.
         </p>
       ) : null}
     </div>
@@ -421,6 +424,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       if (trackList.length) updateEditForm("trackList", trackList.join("\n"));
       if (coverImage && !editForm?.coverImage) updateEditForm("coverImage", coverImage);
       updateEditForm("discogsReleaseId", String(result.id));
+      updateEditForm("discogsVerified", true);
       setDiscogsResults([]);
       setDiscogsQuery("");
     } finally {
@@ -487,6 +491,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       coverImage: editForm.coverImage || undefined,
       backCoverImage: editForm.backCoverImage || undefined,
       discogsReleaseId: editForm.discogsReleaseId ? Number(editForm.discogsReleaseId) : undefined,
+      discogsVerified: editForm.discogsReleaseId ? editForm.discogsVerified : undefined,
       dateAdded: record.dateAdded,
     };
 
@@ -872,7 +877,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               <DiscogsValueCard
                 releaseId={record.discogsReleaseId}
                 condition={record.condition}
-                verifiedPressing={Boolean(record.catalogNumber)}
+                verifiedPressing={Boolean(record.discogsVerified)}
               />
             ) : null}
 
@@ -1015,7 +1020,10 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 {editForm?.discogsReleaseId ? (
                   <button
                     type="button"
-                    onClick={() => updateEditForm("discogsReleaseId", "")}
+                    onClick={() => {
+                      updateEditForm("discogsReleaseId", "");
+                      updateEditForm("discogsVerified", false);
+                    }}
                     className="text-xs font-medium text-gray-500 underline-offset-4 hover:underline"
                   >
                     Linked to release {editForm.discogsReleaseId} · unlink

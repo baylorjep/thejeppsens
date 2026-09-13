@@ -31,6 +31,7 @@ export type VinylRecord = {
   backCoverImage?: string;
   favorite?: boolean;
   discogsReleaseId?: number;
+  discogsVerified?: boolean;
 };
 
 export const vinyls: VinylRecord[] = [

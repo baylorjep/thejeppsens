@@ -65,6 +65,7 @@ export function applyDiscogsMatchToRecord(record: VinylRecord, release: DiscogsR
   return {
     ...record,
     discogsReleaseId: release.id,
+    discogsVerified: true,
     label: primaryLabel?.name ?? record.label,
     catalogNumber: primaryLabel?.catno ?? record.catalogNumber,
     format: record.format || format || record.format,

@@ -1,0 +1,1169 @@
+[
+  {
+    "id": "hello-dolly-new-broadway-cast-recording",
+    "title": "Hello, Dolly! (New Broadway Cast Recording)",
+    "artist": "Bette Midler, David Hyde Pierce, and Company",
+    "candidates": []
+  },
+  {
+    "id": "musical-memories-of-germany",
+    "title": "Musical Memories of Germany",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "the-five-pennies-original-soundtrack",
+    "title": "The Five Pennies (Original Soundtrack)",
+    "artist": "Danny Kaye, Louis Armstrong",
+    "candidates": []
+  },
+  {
+    "id": "moana-the-songs",
+    "title": "Moana: The Songs",
+    "artist": "Various Artists / Disney",
+    "candidates": []
+  },
+  {
+    "id": "the-apostle-paul-and-his-epistle-to-the-romans-l-p-no-1-and-4-parts-i-and-iv",
+    "title": "The Apostle Paul and His Epistle to the Romans (L.P. No. 1 and 4, Parts I and IV)",
+    "artist": "Edyth Armstrong Hoyt",
+    "candidates": []
+  },
+  {
+    "id": "adele-25",
+    "title": "25",
+    "artist": "Adele",
+    "candidates": []
+  },
+  {
+    "id": "various-artists-swingin-stereo-with-ten-big-bands",
+    "title": "Swingin' Stereo! With Ten Big Bands",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "the-ink-spots-greatest-hits",
+    "title": "Greatest Hits",
+    "artist": "The Ink Spots",
+    "candidates": [
+      {
+        "id": 3526750,
+        "title": "The Ink Spots* - The Ink Spots' Greatest Hits",
+        "catno": "CST 144",
+        "label": "Crown Records",
+        "score": 0.57
+      },
+      {
+        "id": 7779130,
+        "title": "The Ink Spots* - The Ink Spots' Greatest Hits",
+        "year": "1959",
+        "catno": "CLP 5112",
+        "label": "Crown Records",
+        "score": 0.57
+      },
+      {
+        "id": 3769036,
+        "title": "The Ink Spots* - The Ink Spots' Greatest Hits",
+        "year": "1981",
+        "catno": "EV-4116",
+        "label": "Everest",
+        "score": 0.57
+      }
+    ]
+  },
+  {
+    "id": "pr-lude-l-apr-s-midi-d-un-faune-bol-ro-l-apprenti-sorcier-espa-a",
+    "title": "Prélude à l'après-midi d'un faune / Boléro / L'Apprenti Sorcier / España",
+    "artist": "Wiener Symphoniker, conducted by Eduard van Remoortel",
+    "candidates": []
+  },
+  {
+    "id": "divide-ed-sheeran",
+    "title": "÷ (Divide)",
+    "artist": "Ed Sheeran",
+    "candidates": [
+      {
+        "id": 9917395,
+        "title": "Ed Sheeran - ÷ (Divide)",
+        "year": "2017",
+        "catno": "0190295859015",
+        "label": "Asylum Records",
+        "score": 0.53
+      },
+      {
+        "id": 28997410,
+        "title": "Ed Sheeran - ÷ (Divide)",
+        "year": "2017",
+        "catno": "0190295859015",
+        "label": "Asylum Records",
+        "score": 0.53
+      },
+      {
+        "id": 10717262,
+        "title": "Ed Sheeran - ÷ (Divide)",
+        "year": "2017",
+        "catno": "559579",
+        "label": "Atlantic",
+        "score": 0.38
+      }
+    ]
+  },
+  {
+    "id": "jeppsen-family-and-friends-jeppsen-wedding-voice-recordings",
+    "title": "Jeppsen Wedding Voice Recordings",
+    "artist": "The Jeppsens",
+    "candidates": []
+  },
+  {
+    "id": "the-jeppsens-la-vie-en-rose-wedding-mix",
+    "title": "The Jeppsens Wedding Mix",
+    "artist": "The Jeppsens",
+    "candidates": []
+  },
+  {
+    "id": "hairspray-original-motion-picture-soundtrack",
+    "title": "Hairspray — Soundtrack to the Motion Picture",
+    "artist": "Various Artists (Marc Shaiman)",
+    "candidates": []
+  },
+  {
+    "id": "return-to-casablanca",
+    "title": "Return to Casablanca",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "internationales-dixieland-festival-dresden-1985-86",
+    "title": "Internationales Dixieland Festival Dresden 1985/86",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "ice-castles-original-soundtrack-album",
+    "title": "Ice Castles (Original Soundtrack Album)",
+    "artist": "Marvin Hamlisch",
+    "candidates": []
+  },
+  {
+    "id": "jon-bellion-translations-through-speakers",
+    "title": "Translations Through Speakers",
+    "artist": "Jon Bellion",
+    "candidates": []
+  },
+  {
+    "id": "various-artists-big-band-75",
+    "title": "Big Bands Greatest Hits",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "new-years-eve-with-guy-lombardo-and-his-royal-canadians",
+    "title": "New Year's Eve with Guy Lombardo and His Royal Canadians",
+    "artist": "Guy Lombardo and His Royal Canadians",
+    "candidates": [
+      {
+        "id": 5115226,
+        "title": "Guy Lombardo And His Royal Canadians - New Year's Eve",
+        "catno": "DL 74177",
+        "label": "Decca",
+        "score": 0.65
+      },
+      {
+        "id": 3763442,
+        "title": "Guy Lombardo And His Royal Canadians - New Year's Eve",
+        "year": "1963",
+        "catno": "DL 74177",
+        "label": "Decca",
+        "score": 0.65
+      },
+      {
+        "id": 13073044,
+        "title": "Guy Lombardo And His Royal Canadians - New Year's Eve",
+        "catno": "DL 74177",
+        "label": "Decca",
+        "score": 0.65
+      }
+    ]
+  },
+  {
+    "id": "the-original-hit-performances-into-the-fifties",
+    "title": "The Original Hit Performances! Into the Fifties",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "louis-armstrong-hello-dolly",
+    "title": "Hello, Dolly! This Is Louis Armstrong",
+    "artist": "Louis Armstrong and The All Stars",
+    "candidates": [
+      {
+        "id": 10034481,
+        "title": "Louis Armstrong And The All Stars* - Hello, Dolly!",
+        "year": "1964",
+        "catno": "KL-1364",
+        "label": "Kapp Records",
+        "score": 0.71
+      },
+      {
+        "id": 24533507,
+        "title": "Louis Armstrong - Hello, Dolly!",
+        "catno": "KS-3364",
+        "label": "Kapp Records",
+        "score": 0.3
+      }
+    ]
+  },
+  {
+    "id": "frank-sinatra-the-voice",
+    "title": "The Voice of Frank Sinatra",
+    "artist": "Frank Sinatra",
+    "candidates": [
+      {
+        "id": 6315538,
+        "title": "Frank Sinatra - The Voice",
+        "year": "1955",
+        "catno": "CL 743",
+        "label": "Columbia",
+        "score": 0.67
+      },
+      {
+        "id": 1954540,
+        "title": "Frank Sinatra - The Voice",
+        "year": "1955",
+        "catno": "CL 743",
+        "label": "Columbia",
+        "score": 0.67
+      },
+      {
+        "id": 2875143,
+        "title": "Frank Sinatra - The Voice",
+        "year": "1955",
+        "catno": "CL 743",
+        "label": "Columbia",
+        "score": 0.67
+      }
+    ]
+  },
+  {
+    "id": "various-artists-the-fault-in-our-stars-music-from-the-motion-picture",
+    "title": "The Fault in Our Stars (Music from the Motion Picture)",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "the-smithsonian-collection-of-classic-jazz",
+    "title": "The Smithsonian Collection of Classic Jazz",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "fell-in-love-without-you-deluxe",
+    "title": "Fell In Love Without You (Deluxe)",
+    "artist": "Motion City Soundtrack",
+    "candidates": []
+  },
+  {
+    "id": "duke-ellington-the-uncollected-1947-vol-4",
+    "title": "The Uncollected — Duke Ellington and His Orchestra 1947, Vol. 4",
+    "artist": "Duke Ellington and His Orchestra",
+    "candidates": []
+  },
+  {
+    "id": "la-la-land-original-motion-picture-score",
+    "title": "La La Land: Original Motion Picture Score",
+    "artist": "Justin Hurwitz",
+    "candidates": [
+      {
+        "id": 9515150,
+        "title": "Justin Hurwitz - La La Land (Original Motion Picture Soundtrack)",
+        "year": "2016",
+        "catno": "B0025619-01",
+        "label": "Interscope Records",
+        "score": 0.6
+      },
+      {
+        "id": 10248377,
+        "title": "Justin Hurwitz - La La Land (Original Motion Picture Score)",
+        "year": "2017",
+        "catno": "B0026093-01",
+        "label": "Interscope Records",
+        "score": 0.52
+      },
+      {
+        "id": 9740448,
+        "title": "Justin Hurwitz - La La Land  (Original Motion Picture Soundtrack)",
+        "year": "2017",
+        "catno": "B0025619-01",
+        "label": "Interscope Records",
+        "score": 0.52
+      }
+    ]
+  },
+  {
+    "id": "la-mer-rapsodie-espagnole",
+    "title": "La Mer / Rapsodie Espagnole",
+    "artist": "Claude Debussy / Maurice Ravel; Boston Symphony Orchestra, Charles Munch",
+    "candidates": [
+      {
+        "id": 8069064,
+        "title": "Debussy* / Ravel* - Charles Munch, Boston Symphony* - Debussy - La Mer / Ravel - Rapsodie Espagnole",
+        "year": "1967",
+        "catno": "VICS-1041",
+        "label": "RCA Victrola",
+        "score": 0.29
+      }
+    ]
+  },
+  {
+    "id": "walt-disney-presents-the-story-of-treasure-island",
+    "title": "Walt Disney Presents The Story of Treasure Island",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "christmas-america-a-musical-souvenir-of-christmas-in-the-united-states-of-america",
+    "title": "Christmas America: A Musical Souvenir of Christmas in the United States of America",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "gigi-original-motion-picture-soundtrack",
+    "title": "Gigi (Original Motion Picture Soundtrack)",
+    "artist": "Various; MGM Studio Orchestra conducted by André Previn",
+    "candidates": []
+  },
+  {
+    "id": "national-anthems-nationalhymnen",
+    "title": "National Anthems / Nationalhymnen",
+    "artist": "The Central Band of the Royal Australian Air Force",
+    "candidates": []
+  },
+  {
+    "id": "don-t-smile-at-me",
+    "title": "don't smile at me",
+    "artist": "Billie Eilish",
+    "candidates": []
+  },
+  {
+    "id": "original-broadway-cast-of-dear-evan-hansen-dear-evan-hansen-original-broadway-cast-recording",
+    "title": "Dear Evan Hansen: Original Broadway Cast Recording",
+    "artist": "Original Broadway Cast of Dear Evan Hansen",
+    "candidates": [
+      {
+        "id": 15397102,
+        "title": "Benj Pasek, Justin Paul (5) - Dear Evan Hansen: Original Broadway Cast Recording",
+        "year": "2017",
+        "catno": "007568661815",
+        "label": "Atlantic",
+        "score": 0.63
+      }
+    ]
+  },
+  {
+    "id": "its-a-small-world-18-favorite-folk-songs",
+    "title": "It's a Small World: 18 Favorite Folk Songs",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "wonderful-day-doris-day",
+    "title": "Wonderful Day",
+    "artist": "Doris Day",
+    "candidates": []
+  },
+  {
+    "id": "soundtrack-factory-singin-in-the-rain-original-motion-picture-soundtrack",
+    "title": "Singin' in the Rain (Original Motion Picture Soundtrack)",
+    "artist": "Gene Kelly / Debbie Reynolds / Donald O'Connor",
+    "candidates": [
+      {
+        "id": 13304226,
+        "title": "Gene Kelly / Donald O'Connor / Debbie Reynolds - Singin' In The Rain - Original Motion Picture Soundtrack",
+        "year": "2018",
+        "catno": "SF 579423",
+        "label": "Soundtrack Factory",
+        "score": 0.71
+      },
+      {
+        "id": 3007983,
+        "title": "Various - Singin' In The Rain (Original Soundtrack Recording)",
+        "year": "1986",
+        "catno": "MCA-39044",
+        "label": "MCA Records",
+        "score": 0.55
+      },
+      {
+        "id": 7718949,
+        "title": "Various - Singin' In The Rain (Original Motion Picture Soundtrack)",
+        "year": "2015",
+        "catno": "WTM39722",
+        "label": "WaterTower Music",
+        "score": 0.55
+      }
+    ]
+  },
+  {
+    "id": "boyz-ii-men-legacy-the-greatest-hits-collection",
+    "title": "Legacy: The Greatest Hits Collection",
+    "artist": "Boyz II Men",
+    "candidates": []
+  },
+  {
+    "id": "yo-volvere",
+    "title": "Yo Volveré",
+    "artist": "Zoraida Marrero",
+    "candidates": [
+      {
+        "id": 7715382,
+        "title": "Zoraida Marrero - Yo Volvere",
+        "catno": "FM-188",
+        "label": "Montilla",
+        "score": 0.48
+      },
+      {
+        "id": 6004412,
+        "title": "Zoraida Marrero - Yo Volvere",
+        "catno": "FM-188",
+        "label": "Montilla",
+        "score": 0.48
+      }
+    ]
+  },
+  {
+    "id": "badlands-halsey",
+    "title": "Badlands",
+    "artist": "Halsey",
+    "candidates": []
+  },
+  {
+    "id": "golden-moments-from-the-silver-screen",
+    "title": "Golden Moments From The Silver Screen",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "lullaby-in-rhythm-featuring-charlie-parker",
+    "title": "Lullaby in Rhythm (featuring Charlie Parker)",
+    "artist": "Barry Ulanov's All Star Modern Jazz Musicians / Howard McGhee Quintet",
+    "candidates": [
+      {
+        "id": 4278500,
+        "title": "Charlie Parker - Lullaby In Rhythm Featuring Charlie Parker",
+        "year": "1972",
+        "catno": "107",
+        "label": "Spotlite Records",
+        "score": 0.28
+      }
+    ]
+  },
+  {
+    "id": "tijuana-a-gogo",
+    "title": "Tijuana A Gogo",
+    "artist": "Dick Smede",
+    "candidates": [
+      {
+        "id": 2734332,
+        "title": "Unknown Artist - Tijuana A Gogo",
+        "year": "1971",
+        "catno": "SXL 0852",
+        "label": "Pronit",
+        "score": 0.63
+      }
+    ]
+  },
+  {
+    "id": "tchaikovsky-waltzes-andre-kostelanetz-and-his-orchestra",
+    "title": "Tchaikovsky Waltzes",
+    "artist": "Andre Kostelanetz and His Orchestra",
+    "candidates": []
+  },
+  {
+    "id": "walt-disneys-bambi",
+    "title": "Walt Disney's Bambi",
+    "artist": "Various Artists",
+    "candidates": [
+      {
+        "id": 717124,
+        "title": "Various - Stay Awake (Various Interpretations Of Music From Vintage Disney Films)",
+        "year": "1988",
+        "catno": "SP 3918",
+        "label": "A&M Records",
+        "score": 0.15
+      },
+      {
+        "id": 2553940,
+        "title": "Various - Stay Awake (Various Interpretations Of Music From Vintage Disney Films)",
+        "year": "1988",
+        "catno": "393 918-1",
+        "label": "A&M Records",
+        "score": 0.15
+      },
+      {
+        "id": 12844977,
+        "title": "Various - Stay Awake (Various Interpretations Of Music From Vintage Disney Films)",
+        "year": "2018",
+        "catno": "B0029005-01",
+        "label": "A&M Records",
+        "score": 0.15
+      }
+    ]
+  },
+  {
+    "id": "the-best-of-jerome-kern-various-artists-orchestral-arrangements",
+    "title": "The Best of Jerome Kern",
+    "artist": "Various Artists (orchestral arrangements)",
+    "candidates": []
+  },
+  {
+    "id": "memories",
+    "title": "Memories",
+    "artist": "Barbra Streisand",
+    "candidates": []
+  },
+  {
+    "id": "music-a-design-for-listening-third-edition-side-7-side-18-various-berlioz-r-stra",
+    "title": "Music — A Design for Listening, Third Edition (Side 7 / Side 18)",
+    "artist": "Various (Berlioz / R. Strauss excerpts)",
+    "candidates": []
+  },
+  {
+    "id": "mendelssohn-concerto-in-e-minor-for-violin-music-appreciation-record-fredell-lac",
+    "title": "Mendelssohn — Concerto in E Minor for Violin (Music Appreciation Record)",
+    "artist": "Fredell Lack / Stadium Concerts Symphony Orchestra / Alexander Smallens / Thomas Scherman",
+    "candidates": []
+  },
+  {
+    "id": "debussy-la-mer-music-appreciation-record-music-appreciation-symphony-orchestra-p",
+    "title": "Debussy — La Mer (Music Appreciation Record)",
+    "artist": "Music Appreciation Symphony Orchestra / Philharmonia Orchestra",
+    "candidates": []
+  },
+  {
+    "id": "the-head-and-the-heart-lets-be-still",
+    "title": "Let's Be Still",
+    "artist": "The Head and the Heart",
+    "candidates": []
+  },
+  {
+    "id": "messiah",
+    "title": "Messiah",
+    "artist": "George Frideric Handel; The Philadelphia Orchestra; The Mormon Tabernacle Choir; Eileen Farrell; Martha Lipton; Davis Cunningham; William Warfield",
+    "candidates": []
+  },
+  {
+    "id": "bad-bunny-debi-tirar-m-s-fotos",
+    "title": "Debi tirar más fotos",
+    "artist": "Bad Bunny",
+    "candidates": [
+      {
+        "id": 36352420,
+        "title": "Bad Bunny - Debí Tirar Más Fotos",
+        "year": "2026",
+        "catno": "none",
+        "label": "Rimas Entertainment",
+        "score": 0.67
+      },
+      {
+        "id": 33861543,
+        "title": "Bad Bunny - Debí Tirar Más Fotos",
+        "year": "2025",
+        "catno": "BB0007VN",
+        "label": "Rimas Entertainment",
+        "score": 0.67
+      },
+      {
+        "id": 36450621,
+        "title": "Bad Bunny - Debí Tirar Más Fotos",
+        "year": "2026",
+        "catno": "BB0009VN",
+        "label": "Rimas Entertainment",
+        "score": 0.67
+      }
+    ]
+  },
+  {
+    "id": "beloved-mormon-hymns",
+    "title": "Beloved Mormon Hymns",
+    "artist": "Hollywood Symphonia, conducted by Crawford Gates",
+    "candidates": []
+  },
+  {
+    "id": "formula-vol-1",
+    "title": "Fórmula, Vol. 1",
+    "artist": "Romeo Santos",
+    "candidates": [
+      {
+        "id": 5010907,
+        "title": "Romeo Santos - Formula Vol 1",
+        "year": "2011",
+        "catno": "88765408921",
+        "label": "Sony Music Latin",
+        "score": 0.6
+      },
+      {
+        "id": 20282278,
+        "title": "Romeo Santos - Formula Vol. 1",
+        "year": "2021",
+        "catno": "19439901341",
+        "label": "Sony Music Latin",
+        "score": 0.52
+      },
+      {
+        "id": 31509206,
+        "title": "Romeo Santos - Formula Vol. 1",
+        "year": "2023",
+        "catno": "19439901341",
+        "label": "Sony Music Latin",
+        "score": 0.52
+      }
+    ]
+  },
+  {
+    "id": "theodore-shapiro-the-secret-life-of-walter-mitty-original-motion-picture-score",
+    "title": "The Secret Life of Walter Mitty (Original Motion Picture Score)",
+    "artist": "Theodore Shapiro",
+    "candidates": [
+      {
+        "id": 37800816,
+        "title": "Theodore Shapiro Featuring José González - The Secret Life Of Walter Mitty (Original Motion Picture Score)",
+        "year": "2026",
+        "catno": "MOVATM049",
+        "label": "Music On Vinyl",
+        "score": 0.65
+      }
+    ]
+  },
+  {
+    "id": "beethoven-symphony-no-5-in-c-minor-music-appreciation-record-london-symphony-orc",
+    "title": "Beethoven Symphony No. 5 in C Minor (Music Appreciation Record)",
+    "artist": "London Symphony Orchestra / Thomas Scherman / Norman Del Mar",
+    "candidates": [
+      {
+        "id": 1892425,
+        "title": "Beethoven* - London Symphony Orchestra, Norman Del Mar, Thomas Scherman - Symphony No. 5 In C Minor",
+        "catno": "MAR 81",
+        "label": "Music-Appreciation Records",
+        "score": 0.39
+      }
+    ]
+  },
+  {
+    "id": "various-artists-50s-60s-the-hitwave-presents-the-authentic-hits",
+    "title": "The Greatest Hits of the Century, Vol. III and IV (50's and 60's)",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "ravel-concerto-in-g-major-for-piano-and-orchestra-music-appreciation-record-nico",
+    "title": "Ravel — Concerto in G Major for Piano and Orchestra (Music Appreciation Record)",
+    "artist": "Nicole Henriot / Eileen Flissler / Thomas Scherman / Music Appreciation Symphony Orchestra",
+    "candidates": [
+      {
+        "id": 2520979,
+        "title": "Music Appreciation Symphony Orchestra - Ravel* - Musical Treasures Of The World:  Music-Appreciation Record",
+        "catno": "MAR 5424",
+        "label": "Music-Appreciation Records",
+        "score": 0.3
+      }
+    ]
+  },
+  {
+    "id": "louis-armstrong-y-su-orquesta-historia-del-jazz",
+    "title": "Historia del Jazz: Louis Armstrong y su Orquesta (Grabaciones en 1944-1945)",
+    "artist": "Louis Armstrong and His Orchestra",
+    "candidates": [
+      {
+        "id": 7269704,
+        "title": "Louis Armstrong Y Su Orquesta* - Louis Armstrong Y Su Orquesta (Grabaciones En 1944-1945)",
+        "year": "1974",
+        "catno": "GM-350",
+        "label": "Gramusic",
+        "score": 0.65
+      }
+    ]
+  },
+  {
+    "id": "bix-beiderbecke-story-vol-2-bix-and-tram",
+    "title": "The Bix Beiderbecke Story Vol. 2 — Bix and Tram",
+    "artist": "Bix Beiderbecke / Frankie Trumbauer",
+    "candidates": [
+      {
+        "id": 3082520,
+        "title": "Bix Beiderbecke - The Bix Beiderbecke Story / Volume 2 - Bix And Tram",
+        "year": "1956",
+        "catno": "CL 845",
+        "label": "Columbia",
+        "score": 0.71
+      },
+      {
+        "id": 6245364,
+        "title": "Bix Beiderbecke - The Bix Beiderbecke Story / Volume 2 - Bix And Tram",
+        "catno": "CL 845",
+        "label": "Columbia",
+        "score": 0.71
+      },
+      {
+        "id": 15796501,
+        "title": "Bix Beiderbecke - The Bix Beiderbecke Story / Volume 2 - Bix And Tram",
+        "year": "1962",
+        "catno": "CL 845",
+        "label": "Columbia",
+        "score": 0.71
+      }
+    ]
+  },
+  {
+    "id": "venice-by-night",
+    "title": "Venice By Night",
+    "artist": "Grand Orchestra conducted by F. C. Mainardi",
+    "candidates": []
+  },
+  {
+    "id": "sweet-adelines-meet-me-in-st-louis-33rd-international-convention",
+    "title": "Meet Me in St. Louis — 33rd International Convention",
+    "artist": "Sweet Adelines, Inc.",
+    "candidates": []
+  },
+  {
+    "id": "walt-disney-alice-in-wonderland",
+    "title": "Walt Disney's Alice in Wonderland: The Story • The Songs • The Music",
+    "artist": "Various Disney performers",
+    "candidates": []
+  },
+  {
+    "id": "la-la-land-original-motion-picture-soundtrack",
+    "title": "La La Land: Original Motion Picture Soundtrack",
+    "artist": "Various Artists / Justin Hurwitz",
+    "candidates": []
+  },
+  {
+    "id": "let-s-take-a-sentimental-journey-various-artists",
+    "title": "Let's Take a Sentimental Journey",
+    "artist": "Various Artists",
+    "candidates": [
+      {
+        "id": 19307452,
+        "title": "Various - Let's Take A Sentimental Journey:  Warm And Wonderful Musical Memories For Listening And Relaxation",
+        "year": "1970",
+        "catno": "RDA 84-A",
+        "label": "Reader's Digest",
+        "score": 0.54
+      }
+    ]
+  },
+  {
+    "id": "walt-disneys-story-and-songs-from-pinocchio",
+    "title": "Walt Disney's Story and Songs from Pinocchio",
+    "artist": "Walt Disney / Jiminy Cricket",
+    "candidates": []
+  },
+  {
+    "id": "summer-of-42-original-motion-picture-score",
+    "title": "Summer of '42 (Original Motion Picture Score)",
+    "artist": "Michel Legrand",
+    "candidates": []
+  },
+  {
+    "id": "baseball-traveler-warm-glow-ep",
+    "title": "Baseball / Traveler / Warm Glow (EP)",
+    "artist": "Hippo Campus",
+    "candidates": [
+      {
+        "id": 11127891,
+        "title": "Hippo Campus - Warm Glow",
+        "year": "2017",
+        "catno": "GJ0037-1",
+        "label": "Grand Jury",
+        "score": 0.65
+      }
+    ]
+  },
+  {
+    "id": "boyz-ii-men-ii",
+    "title": "II",
+    "artist": "Boyz II Men",
+    "candidates": [
+      {
+        "id": 18261367,
+        "title": "Boyz II Men - ll ",
+        "year": "2016",
+        "catno": "B0025089-01",
+        "label": "Motown",
+        "score": 0.53
+      },
+      {
+        "id": 31353055,
+        "title": "Boyz II Men - ll ",
+        "year": "2016",
+        "catno": "B0025089-01",
+        "label": "Motown",
+        "score": 0.53
+      },
+      {
+        "id": 11866015,
+        "title": "Boyz II Men - ll ",
+        "year": "2018",
+        "catno": "B0025089-01",
+        "label": "Motown",
+        "score": 0.45
+      }
+    ]
+  },
+  {
+    "id": "frank-sinatra-september-of-my-years-expanded-edition",
+    "title": "September of My Years (Expanded Edition)",
+    "artist": "Frank Sinatra",
+    "candidates": []
+  },
+  {
+    "id": "strange-trails",
+    "title": "Strange Trails",
+    "artist": "Lord Huron",
+    "candidates": []
+  },
+  {
+    "id": "song-seeds",
+    "title": "Song Seeds",
+    "artist": "The Lumineers",
+    "candidates": []
+  },
+  {
+    "id": "america-s-top-20",
+    "title": "America's Top 20",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "mozart-symphony-no-39-in-e-flat-major-k-543-music-appreciation-record-george-sze",
+    "title": "Mozart — Symphony No. 39 in E Flat Major, K. 543 (Music Appreciation Record)",
+    "artist": "George Szell and His Symphony Orchestra / Thomas Scherman",
+    "candidates": []
+  },
+  {
+    "id": "frank-sinatra-watertown-deluxe-edition-2022-mix",
+    "title": "Watertown (Deluxe Edition / 2022 Mix)",
+    "artist": "Frank Sinatra",
+    "candidates": []
+  },
+  {
+    "id": "o-tannenbaum-les-plus-beaux-no-ls-allemands",
+    "title": "O Tannenbaum — Les plus beaux noëls allemands",
+    "artist": "Orchestre Saint Nicolas avec chœurs et cloches",
+    "candidates": [
+      {
+        "id": 4973673,
+        "title": "Orchestre Saint Nicolas Avec Chœurs Et Cloches* - O Tannenbaum (Les Plus Beaux Noëls Allemands)",
+        "catno": "2538 061",
+        "label": "Deutsche Grammophon",
+        "score": 0.59
+      },
+      {
+        "id": 9308953,
+        "title": "Orchestre Saint Nicolas Avec Chœurs Et Cloches* - O Tannenbaum (Les Plus Beaux Noëls Allemands)",
+        "catno": "2538 061",
+        "label": "Deutsche Grammophon",
+        "score": 0.59
+      },
+      {
+        "id": 26846045,
+        "title": "Orchestre Saint Nicolas Avec Chœurs Et Cloches* - O Tannenbaum (Les Plus Beaux Noëls Allemands)",
+        "catno": "2538 061",
+        "label": "Deutsche Grammophon",
+        "score": 0.59
+      }
+    ]
+  },
+  {
+    "id": "all-the-hits-with-all-the-stars-vol-3",
+    "title": "All the Hits with All the Stars, Vol. 3",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "our-best-to-you-today-s-great-hits-today-s-great-stars-various-artists-tony-benn",
+    "title": "Our Best to You — Today's Great Hits, Today's Great Stars",
+    "artist": "Various Artists (Tony Bennett, Ray Conniff, Percy Faith, Barbra Streisand, Andy Williams, et al.)",
+    "candidates": []
+  },
+  {
+    "id": "symphony-no-8-in-b-minor-unfinished-symphony-no-8-in-f-major-op-93",
+    "title": "Symphony No. 8 in B Minor (\"Unfinished\") / Symphony No. 8 in F Major, Op. 93",
+    "artist": "Schubert / Beethoven; Sir Thomas Beecham conducting the Royal Philharmonic Orchestra",
+    "candidates": []
+  },
+  {
+    "id": "danny-elfman-spider-man-original-motion-picture-score",
+    "title": "Spider-Man: Original Motion Picture Score",
+    "artist": "Danny Elfman",
+    "candidates": [
+      {
+        "id": 25468195,
+        "title": "Danny Elfman - Spider-Man (Original Motion Picture Score)",
+        "year": "2022",
+        "catno": "19658728951-S1",
+        "label": "Sony Classical",
+        "score": 0.52
+      },
+      {
+        "id": 25461154,
+        "title": "Danny Elfman - Spider-Man (Original Motion Picture Score)",
+        "year": "2022",
+        "catno": "19658728941",
+        "label": "Sony Classical",
+        "score": 0.52
+      },
+      {
+        "id": 25495624,
+        "title": "Danny Elfman - Spider-Man (Original Motion Picture Score)",
+        "year": "2022",
+        "catno": "19658714801",
+        "label": "Sony Classical",
+        "score": 0.52
+      }
+    ]
+  },
+  {
+    "id": "frank-sinatra-and-ant-nio-carlos-jobim-francis-albert-sinatra-and-antonio-carlos-jobim-50th-anniversary-edition",
+    "title": "Francis Albert Sinatra & Antonio Carlos Jobim (50th Anniversary Edition)",
+    "artist": "Frank Sinatra & Antônio Carlos Jobim",
+    "candidates": []
+  },
+  {
+    "id": "walt-disneys-story-and-songs-from-snow-white-and-the-seven-dwarfs",
+    "title": "Walt Disney's Story and Songs from Snow White and the Seven Dwarfs",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "songs-america-loves-best-vol-iii-the-twenties",
+    "title": "Songs America Loves Best, Vol. III — The Twenties",
+    "artist": "Mormon Tabernacle Choir; Columbia Orchestra",
+    "candidates": []
+  },
+  {
+    "id": "high-society-original-soundtrack",
+    "title": "High Society (Original Soundtrack)",
+    "artist": "Bing Crosby, Grace Kelly, Frank Sinatra, Louis Armstrong and His Band",
+    "candidates": [
+      {
+        "id": 7444545,
+        "title": "Various - High Society",
+        "year": "1985",
+        "catno": "ECS-50124",
+        "label": "Capitol Records",
+        "score": 0.55
+      },
+      {
+        "id": 26167730,
+        "title": "Various - Alta Sociedad (Banda Sonora Original De La Película)",
+        "catno": "8282",
+        "label": "Capitol Records",
+        "score": 0
+      },
+      {
+        "id": 35036837,
+        "title": "Various - Alta Sociedad (Banda Sonora Original De La Película)",
+        "catno": "SW 750",
+        "label": "Capitol Records",
+        "score": 0
+      }
+    ]
+  },
+  {
+    "id": "tanze-mit-mir-in-den-morgen-eine-oldie-party",
+    "title": "Tanze mit mir in den Morgen / Eine Oldie-Party",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "the-best-of-cole-porter-various-artists-orchestral-arrangements",
+    "title": "The Best of Cole Porter",
+    "artist": "Various Artists (orchestral arrangements)",
+    "candidates": []
+  },
+  {
+    "id": "mendelssohn-piano-concerto-no-1-in-g-minor-op-25-octet-in-e-flat-major-for-strin",
+    "title": "Mendelssohn — Piano Concerto No. 1 in G Minor, Op. 25 / Octet in E Flat Major for Strings, Op. 20",
+    "artist": "Emil Gilels / State Orchestra of the U.S.S.R. / The Kroll String Quartet",
+    "candidates": []
+  },
+  {
+    "id": "john-williams-the-empire-strikes-back",
+    "title": "The Empire Strikes Back",
+    "artist": "John Williams",
+    "candidates": [
+      {
+        "id": 19732918,
+        "title": "John Williams (4), National Philharmonic Orchestra, Charles Gerhardt - The Empire Strikes Back",
+        "year": "2021",
+        "catno": "VSD00357",
+        "label": "Varèse Sarabande",
+        "score": 0.64
+      },
+      {
+        "id": 1306165,
+        "title": "John Williams (4), The London Symphony Orchestra* - Star Wars / The Empire Strikes Back",
+        "year": "1980",
+        "catno": "RS-2-4201",
+        "label": "RSO",
+        "score": 0.53
+      },
+      {
+        "id": 8729469,
+        "title": "John Williams (4), The London Symphony Orchestra* - Star Wars / The Empire Strikes Back",
+        "year": "1980",
+        "catno": "RS-2-4201",
+        "label": "RSO",
+        "score": 0.53
+      }
+    ]
+  },
+  {
+    "id": "beethoven-piano-sonata-no-14-moonlight-op-27-no-2-mozart-piano-sonata-no-15-in-c",
+    "title": "Beethoven — Piano Sonata No. 14 \"Moonlight\" Op. 27 No. 2 / Mozart — Piano Sonata No. 15 in C Major, K. 545 (Music Appreciation Record)",
+    "artist": "Eileen Flissler / Guiomar Novaes / Thomas Scherman",
+    "candidates": [
+      {
+        "id": 15318777,
+        "title": "Thomas Scherman - Beethoven* - Mozart* - Piano Sonata No. 14 In C Sharp Minor Op. 27 No. 2 / Piano Sonata No. 15 In C Major",
+        "year": "1955",
+        "catno": "MAR 5953",
+        "label": "Music-Appreciation Records",
+        "score": 0.65
+      },
+      {
+        "id": 1890996,
+        "title": "Thomas Scherman - Beethoven* - Mozart* - Musical Treasures Of The World:  Music-Appreciation Record",
+        "year": "1955",
+        "catno": "MAR 5953",
+        "label": "Book-Of-The Month Club",
+        "score": 0.3
+      }
+    ]
+  },
+  {
+    "id": "beauty-and-the-beast-the-songs",
+    "title": "Beauty and the Beast: The Songs",
+    "artist": "Various Artists",
+    "candidates": []
+  },
+  {
+    "id": "jim-croce-photographs-and-memories-his-greatest-hits",
+    "title": "Photographs & Memories: His Greatest Hits",
+    "artist": "Jim Croce",
+    "candidates": []
+  },
+  {
+    "id": "tyler-bates-guardians-of-the-galaxy-vol-2-deluxe-edition",
+    "title": "Guardians of the Galaxy: Deluxe Vinyl Edition",
+    "artist": "Various Artists / Tyler Bates",
+    "candidates": []
+  },
+  {
+    "id": "engelbert-humperdinck-live-in-concert-all-of-me-and-a-little-bit-more",
+    "title": "Engelbert Humperdinck: Live in Concert and All of Me",
+    "artist": "Engelbert Humperdinck",
+    "candidates": [
+      {
+        "id": 2351759,
+        "title": "Engelbert Humperdinck - Live In Concert And All Of Me / A Double Album",
+        "year": "1980",
+        "catno": "E2X 36782",
+        "label": "Epic",
+        "score": 0.62
+      },
+      {
+        "id": 7886169,
+        "title": "Engelbert Humperdinck - Live In Concert And All Of Me /  A Double Album",
+        "year": "1980",
+        "catno": "E2X 36782",
+        "label": "Epic",
+        "score": 0.62
+      },
+      {
+        "id": 11206339,
+        "title": "Engelbert Humperdinck - Live In Concert And All Of Me / A Double Album",
+        "year": "1980",
+        "catno": "40-3P-262-3",
+        "label": "Epic",
+        "score": 0.62
+      }
+    ]
+  },
+  {
+    "id": "art-blakey-and-the-jazz-messengers-recorded-live-at-bubba-s-featuring-wynton-mar",
+    "title": "Art Blakey and the Jazz Messengers — Recorded Live at Bubba's (featuring Wynton Marsalis)",
+    "artist": "Art Blakey and the Jazz Messengers",
+    "candidates": [
+      {
+        "id": 5407234,
+        "title": "Art Blakey And The Jazz Messengers* Featuring Wynton Marsalis - Live At Bubba's Jazz Restaurant",
+        "year": "1981",
+        "catno": "WWLP 21019",
+        "label": "Who's Who In Jazz",
+        "score": 0.52
+      },
+      {
+        "id": 14898110,
+        "title": "Art Blakey And The Jazz Messengers* Featuring Wynton Marsalis - Live At Bubba's Jazz Restaurant",
+        "catno": "WWLP 21019",
+        "label": "Dargil",
+        "score": 0.44
+      }
+    ]
+  },
+  {
+    "id": "the-sting-original-motion-picture-soundtrack-scott-joplin-conducted-and-adapted-",
+    "title": "The Sting (Original Motion Picture Soundtrack)",
+    "artist": "Scott Joplin; conducted and adapted by Marvin Hamlisch",
+    "candidates": []
+  },
+  {
+    "id": "in-between-dreams-second-copy-jack-johnson",
+    "title": "In Between Dreams (second copy)",
+    "artist": "Jack Johnson",
+    "candidates": []
+  },
+  {
+    "id": "hamilton-an-american-musical-original-broadway-cast-recording-lin-manuel-miranda",
+    "title": "Hamilton: An American Musical (Original Broadway Cast Recording)",
+    "artist": "Lin-Manuel Miranda / Original Broadway Cast",
+    "candidates": []
+  },
+  {
+    "id": "la-familia-sinatra-les-desea-una-feliz-navidad",
+    "title": "La Familia Sinatra Les Desea Una Feliz Navidad",
+    "artist": "Frank Sinatra, Nancy Sinatra, Tina Sinatra, Frank Sinatra Jr.",
+    "candidates": [
+      {
+        "id": 25477411,
+        "title": "La Familia Sinatra* - Les Desea Una Feliz Navidad",
+        "year": "1980",
+        "catno": "S 90.294",
+        "label": "Reprise Records",
+        "score": 0.62
+      }
+    ]
+  },
+  {
+    "id": "the-lux-radio-theater-presents-to-have-and-have-not",
+    "title": "The Lux Radio Theater Presents \"To Have And Have Not\"",
+    "artist": "Humphrey Bogart & Lauren Bacall (radio drama)",
+    "candidates": []
+  },
+  {
+    "id": "blue-skies-original-soundtrack-recording",
+    "title": "Blue Skies (Original Soundtrack Recording)",
+    "artist": "Bing Crosby, Fred Astaire, Joan Caulfield",
+    "candidates": [
+      {
+        "id": 4079588,
+        "title": "Bing Crosby, Fred Astaire, Joan Caulfield - Blue Skies - Original Soundtrack Recording",
+        "year": "1976",
+        "catno": "STK-104",
+        "label": "Sountrak",
+        "score": 1.08
+      }
+    ]
+  }
+]

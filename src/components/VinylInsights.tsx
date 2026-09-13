@@ -158,7 +158,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         total += priced.value;
         currency = priced.currency;
         pricedCount += 1;
-        if (!record.catalogNumber) unverifiedCount += 1;
+        if (!record.discogsVerified) unverifiedCount += 1;
         if (!mostValuable || priced.value > mostValuable.value) {
           mostValuable = { record, value: priced.value };
         }
@@ -279,7 +279,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                 {collectionValue.unverifiedCount > 0 ? (
                   <p className="mt-1 text-xs text-amber-600">
                     Includes {collectionValue.unverifiedCount} record{collectionValue.unverifiedCount === 1 ? "" : "s"}{" "}
-                    with no catalog number saved, so the exact pressing isn&apos;t confirmed
+                    with an unconfirmed pressing match
                   </p>
                 ) : null}
               </div>

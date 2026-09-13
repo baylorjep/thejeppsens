@@ -28,7 +28,10 @@ type RowState = {
 };
 
 function optionLabel(result: DiscogsSearchResult) {
-  return [result.catno, result.label?.[0], result.format?.[0], result.year].filter(Boolean).join(" · ") || result.title;
+  return (
+    [result.catno, result.label?.[0], result.format?.[0], result.country, result.year].filter(Boolean).join(" · ") ||
+    result.title
+  );
 }
 
 export default function DiscogsMatcher() {
@@ -172,26 +175,44 @@ export default function DiscogsMatcher() {
       <div className="space-y-3">
         {visibleRecords.map((record) => {
           const state = rowStates[record.id];
+          const selectedResult = state?.results.find((result) => result.id === state.selectedId);
 
           return (
             <div
               key={record.id}
-              className="grid gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:grid-cols-[64px_minmax(0,1fr)_minmax(240px,0.7fr)_auto] sm:items-center"
+              className="grid gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:grid-cols-[148px_minmax(0,1fr)_minmax(240px,0.7fr)_auto] sm:items-center"
             >
-              <div className="relative aspect-square overflow-hidden rounded bg-gray-100">
-                {record.coverImage ? (
-                  <Image
-                    src={record.coverImage}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    unoptimized={record.coverImage.startsWith("data:")}
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <Disc3 className="h-6 w-6 text-gray-300" />
+              <div className="flex gap-2">
+                <div>
+                  <div className="relative aspect-square w-16 overflow-hidden rounded bg-gray-100">
+                    {record.coverImage ? (
+                      <Image
+                        src={record.coverImage}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        unoptimized={record.coverImage.startsWith("data:")}
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <Disc3 className="h-6 w-6 text-gray-300" />
+                      </div>
+                    )}
                   </div>
-                )}
+                  <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-gray-400">Yours</p>
+                </div>
+                <div>
+                  <div className="relative aspect-square w-16 overflow-hidden rounded bg-gray-100">
+                    {selectedResult?.thumb ? (
+                      <Image src={selectedResult.thumb} alt="" fill className="object-cover" unoptimized />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <Disc3 className="h-6 w-6 text-gray-300" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-gray-400">Discogs</p>
+                </div>
               </div>
 
               <div className="min-w-0">
