@@ -288,6 +288,16 @@ export function useCollectionValue(records: VinylRecord[]) {
   return { value, isLoading };
 }
 
+// Discogs credits this one specifically to "The Sinatra Family" as its own
+// act, which is the technically-correct read (same as Simon & Garfunkel not
+// splitting into Paul Simon), but Isabel wants this particular record to
+// count toward Frank Sinatra anyway - a deliberate one-off exception, not a
+// general rule, so it's called out by record id rather than folded into the
+// Discogs-credit logic above.
+const ARTIST_CREDIT_OVERRIDES: Record<string, string[]> = {
+  "la-familia-sinatra-les-desea-una-feliz-navidad": ["Frank Sinatra"],
+};
+
 /**
  * A record's `artist` field is one free-text string, so a collaboration
  * credit ("Frank Sinatra & Antônio Carlos Jobim") counts as its own bucket
@@ -306,14 +316,16 @@ export function useDiscogsArtistBreakdown(records: VinylRecord[]) {
 
   useEffect(() => {
     const linkedRecords = records.filter((record) => record.discogsReleaseId);
-    setBreakdown(getBreakdown(records.map((record) => record.artist)));
+    setBreakdown(getBreakdown(records.map((record) => ARTIST_CREDIT_OVERRIDES[record.id]?.[0] ?? record.artist)));
 
     if (!linkedRecords.length) return;
 
     let cancelled = false;
-    const creditsByRecordId = new Map<string, string[]>();
+    const creditsByRecordId = new Map<string, string[]>(Object.entries(ARTIST_CREDIT_OVERRIDES));
 
     linkedRecords.forEach((record) => {
+      if (ARTIST_CREDIT_OVERRIDES[record.id]) return;
+
       fetchDiscogsValue(record.discogsReleaseId!, record.condition).then((recordValue) => {
         if (cancelled) return;
         if (recordValue?.artists.length) creditsByRecordId.set(record.id, recordValue.artists);
