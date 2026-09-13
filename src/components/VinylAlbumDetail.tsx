@@ -2,6 +2,7 @@
 
 import { VinylRecord } from "@/data/vinyls";
 import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
+import DiscogsRarityCard from "@/components/DiscogsRarityCard";
 import DiscogsValueCard from "@/components/DiscogsValueCard";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { getStatusTone } from "@/lib/vinylAnalytics";
@@ -809,6 +810,10 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 condition={record.condition}
                 verifiedPressing={Boolean(record.discogsVerified)}
               />
+            ) : null}
+
+            {record.discogsReleaseId ? (
+              <DiscogsRarityCard releaseId={record.discogsReleaseId} condition={record.condition} />
             ) : null}
 
             <dl className="grid grid-cols-2 gap-2 text-[11px] leading-tight sm:grid-cols-2 sm:gap-3 sm:text-sm xl:grid-cols-3">

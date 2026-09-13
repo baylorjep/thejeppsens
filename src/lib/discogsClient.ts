@@ -111,7 +111,21 @@ export type CollectionValueSummary = {
   currentlyListedCount: number;
   originalCount: number;
   reissueCount: number;
+  rarestRecords: { record: VinylRecord; have: number }[];
+  mostWantedRecords: { record: VinylRecord; want: number }[];
+  rarityTiers: { tier: string; count: number }[];
 };
+
+export const RARITY_TIERS = [
+  { label: "Ultra rare", max: 100 },
+  { label: "Rare", max: 500 },
+  { label: "Uncommon", max: 2000 },
+  { label: "Common", max: Infinity },
+] as const;
+
+export function rarityTierLabel(have: number) {
+  return RARITY_TIERS.find((tier) => have < tier.max)?.label ?? RARITY_TIERS[RARITY_TIERS.length - 1].label;
+}
 
 function aggregateCollectionValue(
   results: { record: VinylRecord; value: DiscogsValueResponse | null }[],
@@ -123,8 +137,6 @@ function aggregateCollectionValue(
   let unverifiedCount = 0;
   let mostValuable: { record: VinylRecord; value: number } | undefined;
   let cheapest: { record: VinylRecord; value: number } | undefined;
-  let rarest: { record: VinylRecord; have: number } | undefined;
-  let mostWanted: { record: VinylRecord; want: number } | undefined;
   let highestRated: { record: VinylRecord; average: number; count: number } | undefined;
   let currentlyListedCount = 0;
   let originalCount = 0;
@@ -132,6 +144,8 @@ function aggregateCollectionValue(
   const byFormatMap = new Map<string, { total: number; count: number }>();
   const byDecadeMap = new Map<string, { total: number; count: number }>();
   const byGenreMap = new Map<string, { total: number; count: number }>();
+  const haveEntries: { record: VinylRecord; have: number }[] = [];
+  const wantEntries: { record: VinylRecord; want: number }[] = [];
 
   for (const { record, value: recordValue } of results) {
     const priced = recordValue?.estimate ?? recordValue?.lowestListing;
@@ -171,14 +185,10 @@ function aggregateCollectionValue(
     }
 
     if (typeof recordValue?.have === "number") {
-      if (!rarest || recordValue.have < rarest.have) {
-        rarest = { record, have: recordValue.have };
-      }
+      haveEntries.push({ record, have: recordValue.have });
     }
     if (typeof recordValue?.want === "number") {
-      if (!mostWanted || recordValue.want > mostWanted.want) {
-        mostWanted = { record, want: recordValue.want };
-      }
+      wantEntries.push({ record, want: recordValue.want });
     }
     if (typeof recordValue?.ratingAverage === "number" && (recordValue.ratingCount ?? 0) >= MIN_RATINGS_FOR_HIGHEST) {
       if (!highestRated || recordValue.ratingAverage > highestRated.average) {
@@ -200,6 +210,18 @@ function aggregateCollectionValue(
     .sort((a, b) => b.total - a.total)
     .slice(0, 8);
 
+  const rarestRecords = [...haveEntries].sort((a, b) => a.have - b.have).slice(0, 10);
+  const mostWantedRecords = [...wantEntries].sort((a, b) => b.want - a.want).slice(0, 10);
+
+  const tierCounts = new Map(RARITY_TIERS.map((tier) => [tier.label, 0]));
+  for (const entry of haveEntries) {
+    const tier = rarityTierLabel(entry.have);
+    tierCounts.set(tier, (tierCounts.get(tier) ?? 0) + 1);
+  }
+  const rarityTiers = RARITY_TIERS.map((tier) => ({ tier: tier.label, count: tierCounts.get(tier.label) ?? 0 })).filter(
+    (entry) => entry.count > 0,
+  );
+
   return {
     total,
     currency,
@@ -208,8 +230,8 @@ function aggregateCollectionValue(
     unverifiedCount,
     mostValuable,
     cheapest,
-    rarest,
-    mostWanted,
+    rarest: rarestRecords[0],
+    mostWanted: mostWantedRecords[0],
     highestRated,
     byFormat,
     byDecade,
@@ -217,6 +239,9 @@ function aggregateCollectionValue(
     currentlyListedCount,
     originalCount,
     reissueCount,
+    rarestRecords,
+    mostWantedRecords,
+    rarityTiers,
   };
 }
 

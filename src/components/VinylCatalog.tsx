@@ -2,6 +2,7 @@
 
 import { VinylRecord } from "@/data/vinyls";
 import AchievementCelebration from "@/components/AchievementCelebration";
+import DiscogsRarityCard from "@/components/DiscogsRarityCard";
 import DiscogsValueCard from "@/components/DiscogsValueCard";
 import { computeInstantStats } from "@/lib/achievements";
 import { useAchievementUnlocks } from "@/lib/achievementUnlocks";
@@ -1823,6 +1824,10 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       condition={selectedRecord.condition}
                       verifiedPressing={Boolean(selectedRecord.discogsVerified)}
                     />
+                  ) : null}
+
+                  {selectedRecord.discogsReleaseId ? (
+                    <DiscogsRarityCard releaseId={selectedRecord.discogsReleaseId} condition={selectedRecord.condition} />
                   ) : null}
 
                   <div className="grid gap-3 text-sm sm:grid-cols-2">
