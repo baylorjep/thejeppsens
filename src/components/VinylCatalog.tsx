@@ -1,6 +1,7 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
+import DiscogsValueCard from "@/components/DiscogsValueCard";
 import { formatDiscogsMoney, useCollectionValue } from "@/lib/discogsClient";
 import {
   getCollectionSnapshot,
@@ -1820,6 +1821,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
                       Front cover photo is missing for this owned record.
                     </div>
+                  ) : null}
+
+                  {selectedRecord.discogsReleaseId ? (
+                    <DiscogsValueCard
+                      releaseId={selectedRecord.discogsReleaseId}
+                      condition={selectedRecord.condition}
+                      verifiedPressing={Boolean(selectedRecord.discogsVerified)}
+                    />
                   ) : null}
 
                   <div className="grid gap-3 text-sm sm:grid-cols-2">
