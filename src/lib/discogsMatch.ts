@@ -9,6 +9,7 @@ export type DiscogsSearchResult = {
   label?: string[];
   catno?: string;
   country?: string;
+  uri?: string;
 };
 
 export type DiscogsReleaseDetails = {
@@ -24,8 +25,19 @@ export type DiscogsReleaseDetails = {
   images?: { type?: string; uri?: string }[];
 };
 
+function stripParentheticals(value: string) {
+  return value.replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/\s+/g, " ").trim();
+}
+
 export function buildDiscogsMatchQuery(record: VinylRecord) {
-  return [record.artist, record.title, record.catalogNumber].filter(Boolean).join(" ");
+  const cleanTitle = stripParentheticals(record.title) || record.title;
+  const primaryArtist = record.artist.split(/[,/]| and | & /i)[0].trim() || record.artist;
+
+  return [primaryArtist, cleanTitle, record.catalogNumber].filter(Boolean).join(" ");
+}
+
+export function discogsReleaseUrl(result: { id: number; uri?: string }) {
+  return result.uri ? `https://www.discogs.com${result.uri}` : `https://www.discogs.com/release/${result.id}`;
 }
 
 export async function searchDiscogsReleases(query: string): Promise<DiscogsSearchResult[]> {

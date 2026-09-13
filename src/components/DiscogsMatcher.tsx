@@ -5,18 +5,19 @@ import {
   DiscogsSearchResult,
   applyDiscogsMatchToRecord,
   buildDiscogsMatchQuery,
+  discogsReleaseUrl,
   fetchDiscogsReleaseDetails,
   searchDiscogsReleases,
 } from "@/lib/discogsMatch";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { statusLabel } from "@/lib/vinylRecordUtils";
-import { CheckCircle2, Disc3, Search, SkipForward } from "lucide-react";
+import { CheckCircle2, Disc3, ExternalLink, Search, Undo2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 8;
 
 type RowStatus = "searching" | "ready" | "no-results" | "linking" | "error";
 
@@ -38,10 +39,10 @@ export default function DiscogsMatcher() {
   const [records, setRecords] = useState<VinylRecord[]>([]);
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [linkedIds, setLinkedIds] = useState<Set<string>>(new Set());
-  const [skippedIds, setSkippedIds] = useState<Set<string>>(new Set());
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const [rowStates, setRowStates] = useState<Record<string, RowState>>({});
   const [queryDrafts, setQueryDrafts] = useState<Record<string, string>>({});
+  const [showSkipped, setShowSkipped] = useState(false);
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -56,15 +57,20 @@ export default function DiscogsMatcher() {
   const unmatchedRecords = useMemo(
     () =>
       records
-        .filter((record) => !record.discogsReleaseId && !linkedIds.has(record.id) && !skippedIds.has(record.id))
+        .filter((record) => !record.discogsReleaseId && !record.discogsNoMatch && !linkedIds.has(record.id))
         .sort((a, b) => {
           if (a.status !== b.status) return a.status === "owned" ? -1 : b.status === "owned" ? 1 : 0;
           return a.title.localeCompare(b.title);
         }),
-    [records, linkedIds, skippedIds],
+    [records, linkedIds],
   );
 
-  const totalUnmatched = useMemo(() => records.filter((record) => !record.discogsReleaseId).length, [records]);
+  const skippedRecords = useMemo(() => records.filter((record) => record.discogsNoMatch), [records]);
+
+  const totalUnmatched = useMemo(
+    () => records.filter((record) => !record.discogsReleaseId && !record.discogsNoMatch).length,
+    [records],
+  );
   const visibleRecords = unmatchedRecords.slice(0, visibleCount);
   const visibleIdsKey = visibleRecords.map((record) => record.id).join(",");
 
@@ -142,8 +148,28 @@ export default function DiscogsMatcher() {
     setLinkedIds((current) => new Set(current).add(record.id));
   };
 
-  const skipRecord = (recordId: string) => {
-    setSkippedIds((current) => new Set(current).add(recordId));
+  const markNoMatch = async (record: VinylRecord) => {
+    const nextRecord = { ...record, discogsNoMatch: true };
+    setRecords((current) => current.map((item) => (item.id === record.id ? nextRecord : item)));
+
+    try {
+      const response = await saveVinylRecord(nextRecord);
+      setRecords((current) => current.map((item) => (item.id === response.record.id ? response.record : item)));
+    } catch {
+      // local state already updated above
+    }
+  };
+
+  const undoNoMatch = async (record: VinylRecord) => {
+    const nextRecord = { ...record, discogsNoMatch: undefined };
+    setRecords((current) => current.map((item) => (item.id === record.id ? nextRecord : item)));
+
+    try {
+      const response = await saveVinylRecord(nextRecord);
+      setRecords((current) => current.map((item) => (item.id === response.record.id ? response.record : item)));
+    } catch {
+      // local state already updated above
+    }
   };
 
   return (
@@ -153,9 +179,9 @@ export default function DiscogsMatcher() {
           <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-gray-500">Bulk tool</p>
           <h1 className="text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">Match to Discogs</h1>
           <p className="mt-4 text-base leading-7 text-gray-600">
-            Each record is auto-searched on Discogs by artist and title. Pick the matching pressing from the
-            dropdown and confirm — nothing gets linked without that confirm, so a wrong guess never silently
-            attaches the wrong record&apos;s value.
+            Each record is auto-searched on Discogs by artist and title. Compare the thumbnail (or open the full
+            listing on Discogs) against your copy, pick the right pressing from the dropdown, and confirm — nothing
+            gets linked without that confirm.
           </p>
         </div>
         <Link
@@ -172,123 +198,135 @@ export default function DiscogsMatcher() {
           : `${totalUnmatched} record${totalUnmatched === 1 ? "" : "s"} still need a Discogs link. ${linkedIds.size} linked this session.`}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {visibleRecords.map((record) => {
           const state = rowStates[record.id];
           const selectedResult = state?.results.find((result) => result.id === state.selectedId);
 
           return (
-            <div
-              key={record.id}
-              className="grid gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:grid-cols-[148px_minmax(0,1fr)_minmax(240px,0.7fr)_auto] sm:items-center"
-            >
-              <div className="flex gap-2">
-                <div>
-                  <div className="relative aspect-square w-16 overflow-hidden rounded bg-gray-100">
-                    {record.coverImage ? (
-                      <Image
-                        src={record.coverImage}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        unoptimized={record.coverImage.startsWith("data:")}
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <Disc3 className="h-6 w-6 text-gray-300" />
-                      </div>
-                    )}
-                  </div>
-                  <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-gray-400">Yours</p>
-                </div>
-                <div>
-                  <div className="relative aspect-square w-16 overflow-hidden rounded bg-gray-100">
-                    {selectedResult?.thumb ? (
-                      <Image src={selectedResult.thumb} alt="" fill className="object-cover" unoptimized />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <Disc3 className="h-6 w-6 text-gray-300" />
-                      </div>
-                    )}
-                  </div>
-                  <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-gray-400">Discogs</p>
-                </div>
-              </div>
-
-              <div className="min-w-0">
-                <p className="truncate font-medium text-gray-950">{record.title}</p>
-                <p className="truncate text-sm text-gray-600">{record.artist}</p>
-                <p className="mt-1 text-xs uppercase tracking-[0.12em] text-gray-400">{statusLabel(record.status)}</p>
-              </div>
-
-              <div className="min-w-0 space-y-2">
-                {!state || state.status === "searching" ? (
-                  <p className="text-sm text-gray-500">Searching Discogs...</p>
-                ) : (
-                  <>
-                    {state.status === "no-results" ? (
-                      <p className="text-sm text-gray-500">No matches found.</p>
-                    ) : state.status === "error" ? (
-                      <p className="text-sm text-red-600">Could not link that release. Try again.</p>
-                    ) : (
-                      <select
-                        value={state.selectedId ?? ""}
-                        onChange={(event) => selectOption(record.id, Number(event.target.value))}
-                        className="w-full rounded-md border border-gray-300 bg-white px-2 py-2 text-sm text-gray-900 outline-none focus:border-gray-950"
-                      >
-                        {state.results.map((result) => (
-                          <option key={result.id} value={result.id}>
-                            {optionLabel(result)}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                    <div className="flex gap-2">
-                      <input
-                        value={queryDrafts[record.id] ?? state.query}
-                        onChange={(event) =>
-                          setQueryDrafts((current) => ({ ...current, [record.id]: event.target.value }))
-                        }
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            retrySearch(record);
-                          }
-                        }}
-                        className="w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 outline-none focus:border-gray-950"
-                        placeholder="Refine search..."
-                      />
-                      <button
-                        type="button"
-                        onClick={() => retrySearch(record)}
-                        className="shrink-0 rounded-md border border-gray-200 p-1.5 text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-950"
-                        aria-label="Search again"
-                      >
-                        <Search className="h-3.5 w-3.5" />
-                      </button>
+            <div key={record.id} className="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <div className="flex shrink-0 gap-3">
+                  <div>
+                    <div className="relative aspect-square w-20 overflow-hidden rounded bg-gray-100">
+                      {record.coverImage ? (
+                        <Image
+                          src={record.coverImage}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          unoptimized={record.coverImage.startsWith("data:")}
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <Disc3 className="h-6 w-6 text-gray-300" />
+                        </div>
+                      )}
                     </div>
-                  </>
-                )}
-              </div>
+                    <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-gray-400">Yours</p>
+                  </div>
+                  <div>
+                    <div className="relative aspect-square w-20 overflow-hidden rounded bg-gray-100">
+                      {selectedResult?.thumb ? (
+                        <Image src={selectedResult.thumb} alt="" fill className="object-cover" unoptimized />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <Disc3 className="h-6 w-6 text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-gray-400">Discogs</p>
+                  </div>
+                </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => confirmMatch(record)}
-                  disabled={!state?.selectedId || state.status === "linking"}
-                  className="inline-flex items-center gap-2 rounded-md bg-gray-950 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  {state?.status === "linking" ? "Linking..." : "Confirm"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => skipRecord(record.id)}
-                  className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500"
-                >
-                  <SkipForward className="h-4 w-4" />
-                  Skip
-                </button>
+                <div className="min-w-0 flex-1 space-y-3">
+                  <div>
+                    <p className="font-medium leading-snug text-gray-950">{record.title}</p>
+                    <p className="text-sm text-gray-600">{record.artist}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.12em] text-gray-400">{statusLabel(record.status)}</p>
+                  </div>
+
+                  {!state || state.status === "searching" ? (
+                    <p className="text-sm text-gray-500">Searching Discogs...</p>
+                  ) : (
+                    <>
+                      {state.status === "no-results" ? (
+                        <p className="text-sm text-gray-500">No matches found — try refining the search below.</p>
+                      ) : state.status === "error" ? (
+                        <p className="text-sm text-red-600">Could not link that release. Try again.</p>
+                      ) : (
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                          <select
+                            value={state.selectedId ?? ""}
+                            onChange={(event) => selectOption(record.id, Number(event.target.value))}
+                            className="w-full rounded-md border border-gray-300 bg-white px-2 py-2 text-sm text-gray-900 outline-none focus:border-gray-950 sm:flex-1"
+                          >
+                            {state.results.map((result) => (
+                              <option key={result.id} value={result.id}>
+                                {optionLabel(result)}
+                              </option>
+                            ))}
+                          </select>
+                          {selectedResult ? (
+                            <a
+                              href={discogsReleaseUrl(selectedResult)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:border-gray-500"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                              View on Discogs
+                            </a>
+                          ) : null}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <input
+                          value={queryDrafts[record.id] ?? state.query}
+                          onChange={(event) =>
+                            setQueryDrafts((current) => ({ ...current, [record.id]: event.target.value }))
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              retrySearch(record);
+                            }
+                          }}
+                          className="w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 outline-none focus:border-gray-950"
+                          placeholder="Refine search..."
+                        />
+                        <button
+                          type="button"
+                          onClick={() => retrySearch(record)}
+                          className="shrink-0 rounded-md border border-gray-200 p-1.5 text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-950"
+                          aria-label="Search again"
+                        >
+                          <Search className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex shrink-0 flex-row gap-2 sm:flex-col">
+                  <button
+                    type="button"
+                    onClick={() => confirmMatch(record)}
+                    disabled={!state?.selectedId || state.status === "linking"}
+                    className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-950 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    {state?.status === "linking" ? "Linking..." : "Confirm"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => markNoMatch(record)}
+                    className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500"
+                  >
+                    <X className="h-4 w-4" />
+                    Not on Discogs
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -309,6 +347,40 @@ export default function DiscogsMatcher() {
         >
           Load {Math.min(BATCH_SIZE, unmatchedRecords.length - visibleCount)} more
         </button>
+      ) : null}
+
+      {skippedRecords.length ? (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <button
+            type="button"
+            onClick={() => setShowSkipped((current) => !current)}
+            className="text-sm font-medium text-gray-700 underline-offset-4 hover:underline"
+          >
+            {showSkipped ? "Hide" : "Show"} {skippedRecords.length} marked &quot;not on Discogs&quot;
+          </button>
+          {showSkipped ? (
+            <div className="mt-3 space-y-2">
+              {skippedRecords.map((record) => (
+                <div
+                  key={record.id}
+                  className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+                >
+                  <span className="min-w-0 truncate text-gray-700">
+                    {record.title} — {record.artist}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => undoNoMatch(record)}
+                    className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-950"
+                  >
+                    <Undo2 className="h-3.5 w-3.5" />
+                    Undo
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

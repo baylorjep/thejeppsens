@@ -32,6 +32,7 @@ export type VinylRecord = {
   favorite?: boolean;
   discogsReleaseId?: number;
   discogsVerified?: boolean;
+  discogsNoMatch?: boolean;
 };
 
 export const vinyls: VinylRecord[] = [
