@@ -12,7 +12,7 @@ import {
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { statusLabel } from "@/lib/vinylRecordUtils";
-import { CheckCircle2, Disc3, ExternalLink, Search, SkipForward, Undo2, X } from "lucide-react";
+import { CheckCircle2, Disc3, ExternalLink, FlipHorizontal, Search, SkipForward, Undo2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -40,6 +40,7 @@ export default function DiscogsMatcher() {
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [linkedIds, setLinkedIds] = useState<Set<string>>(new Set());
   const [deferredIds, setDeferredIds] = useState<Set<string>>(new Set());
+  const [flippedIds, setFlippedIds] = useState<Set<string>>(new Set());
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const [rowStates, setRowStates] = useState<Record<string, RowState>>({});
   const [queryDrafts, setQueryDrafts] = useState<Record<string, string>>({});
@@ -159,6 +160,15 @@ export default function DiscogsMatcher() {
     setDeferredIds((current) => new Set(current).add(recordId));
   };
 
+  const toggleFlip = (recordId: string) => {
+    setFlippedIds((current) => {
+      const next = new Set(current);
+      if (next.has(recordId)) next.delete(recordId);
+      else next.add(recordId);
+      return next;
+    });
+  };
+
   const markNoMatch = async (record: VinylRecord) => {
     const nextRecord = { ...record, discogsNoMatch: true };
     setRecords((current) => current.map((item) => (item.id === record.id ? nextRecord : item)));
@@ -219,22 +229,41 @@ export default function DiscogsMatcher() {
               <div className="flex flex-col gap-4 sm:flex-row">
                 <div className="flex shrink-0 gap-3">
                   <div>
-                    <div className="relative aspect-square w-20 overflow-hidden rounded bg-gray-100">
-                      {record.coverImage ? (
-                        <Image
-                          src={record.coverImage}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          unoptimized={record.coverImage.startsWith("data:")}
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <Disc3 className="h-6 w-6 text-gray-300" />
+                    {(() => {
+                      const isFlipped = flippedIds.has(record.id) && Boolean(record.backCoverImage);
+                      const shownImage = isFlipped ? record.backCoverImage : record.coverImage;
+
+                      return (
+                        <div className="relative aspect-square w-20 overflow-hidden rounded bg-gray-100">
+                          {shownImage ? (
+                            <Image
+                              src={shownImage}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              unoptimized={shownImage.startsWith("data:")}
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center">
+                              <Disc3 className="h-6 w-6 text-gray-300" />
+                            </div>
+                          )}
+                          {record.backCoverImage ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleFlip(record.id)}
+                              className="absolute bottom-0.5 right-0.5 rounded bg-black/60 p-1 text-white transition-colors hover:bg-black/80"
+                              aria-label="Flip to see the other side"
+                            >
+                              <FlipHorizontal className="h-3 w-3" />
+                            </button>
+                          ) : null}
                         </div>
-                      )}
-                    </div>
-                    <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-gray-400">Yours</p>
+                      );
+                    })()}
+                    <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-gray-400">
+                      Yours{record.backCoverImage ? (flippedIds.has(record.id) ? " (back)" : " (front)") : ""}
+                    </p>
                   </div>
                   <div>
                     <div className="relative aspect-square w-20 overflow-hidden rounded bg-gray-100">

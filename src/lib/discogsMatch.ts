@@ -33,7 +33,7 @@ export function buildDiscogsMatchQuery(record: VinylRecord) {
   const cleanTitle = stripParentheticals(record.title) || record.title;
   const primaryArtist = record.artist.split(/[,/]| and | & /i)[0].trim() || record.artist;
 
-  return [primaryArtist, cleanTitle, record.catalogNumber].filter(Boolean).join(" ");
+  return [primaryArtist, cleanTitle, record.label, record.catalogNumber].filter(Boolean).join(" ");
 }
 
 export function discogsReleaseUrl(result: { id: number; uri?: string }) {
