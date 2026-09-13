@@ -12,7 +12,7 @@ import {
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { statusLabel } from "@/lib/vinylRecordUtils";
-import { CheckCircle2, Disc3, ExternalLink, Search, Undo2, X } from "lucide-react";
+import { CheckCircle2, Disc3, ExternalLink, Search, SkipForward, Undo2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -39,6 +39,7 @@ export default function DiscogsMatcher() {
   const [records, setRecords] = useState<VinylRecord[]>([]);
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [linkedIds, setLinkedIds] = useState<Set<string>>(new Set());
+  const [deferredIds, setDeferredIds] = useState<Set<string>>(new Set());
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const [rowStates, setRowStates] = useState<Record<string, RowState>>({});
   const [queryDrafts, setQueryDrafts] = useState<Record<string, string>>({});
@@ -57,12 +58,18 @@ export default function DiscogsMatcher() {
   const unmatchedRecords = useMemo(
     () =>
       records
-        .filter((record) => !record.discogsReleaseId && !record.discogsNoMatch && !linkedIds.has(record.id))
+        .filter(
+          (record) =>
+            !record.discogsReleaseId &&
+            !record.discogsNoMatch &&
+            !linkedIds.has(record.id) &&
+            !deferredIds.has(record.id),
+        )
         .sort((a, b) => {
           if (a.status !== b.status) return a.status === "owned" ? -1 : b.status === "owned" ? 1 : 0;
           return a.title.localeCompare(b.title);
         }),
-    [records, linkedIds],
+    [records, linkedIds, deferredIds],
   );
 
   const skippedRecords = useMemo(() => records.filter((record) => record.discogsNoMatch), [records]);
@@ -148,6 +155,10 @@ export default function DiscogsMatcher() {
     setLinkedIds((current) => new Set(current).add(record.id));
   };
 
+  const deferRecord = (recordId: string) => {
+    setDeferredIds((current) => new Set(current).add(recordId));
+  };
+
   const markNoMatch = async (record: VinylRecord) => {
     const nextRecord = { ...record, discogsNoMatch: true };
     setRecords((current) => current.map((item) => (item.id === record.id ? nextRecord : item)));
@@ -195,7 +206,7 @@ export default function DiscogsMatcher() {
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
         {isLoadingRecords
           ? "Loading records..."
-          : `${totalUnmatched} record${totalUnmatched === 1 ? "" : "s"} still need a Discogs link. ${linkedIds.size} linked this session.`}
+          : `${totalUnmatched} record${totalUnmatched === 1 ? "" : "s"} still need a Discogs link. ${linkedIds.size} linked this session.${deferredIds.size ? ` ${deferredIds.size} skipped for now — reload the page to see them again.` : ""}`}
       </div>
 
       <div className="space-y-4">
@@ -320,11 +331,19 @@ export default function DiscogsMatcher() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => markNoMatch(record)}
+                    onClick={() => deferRecord(record.id)}
                     className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500"
                   >
-                    <X className="h-4 w-4" />
-                    Not on Discogs
+                    <SkipForward className="h-4 w-4" />
+                    Not sure, skip for now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => markNoMatch(record)}
+                    className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-gray-500 transition-colors hover:text-gray-950"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    Confirm not on Discogs
                   </button>
                 </div>
               </div>
