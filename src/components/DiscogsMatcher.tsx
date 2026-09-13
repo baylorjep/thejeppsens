@@ -333,7 +333,7 @@ export default function DiscogsMatcher() {
                             }
                           }}
                           className="w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 outline-none focus:border-gray-950"
-                          placeholder="Refine search..."
+                          placeholder="Refine search, e.g. add the catalog number from the label..."
                         />
                         <button
                           type="button"
