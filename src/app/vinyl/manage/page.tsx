@@ -27,7 +27,7 @@ export default function VinylManagePage() {
               into the collection.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/vinyl/manage/match"
               className="inline-flex w-fit rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"

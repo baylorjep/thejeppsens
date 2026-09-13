@@ -16,12 +16,14 @@ type VinylInsightsProps = {
 
 function BreakdownSection({
   title,
+  narrative,
   items,
   totalCount,
   barColor = "bg-gray-950",
   linkBase,
 }: {
   title: string;
+  narrative?: string;
   items: { label: string; count: number }[];
   totalCount: number;
   barColor?: string;
@@ -34,6 +36,7 @@ function BreakdownSection({
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-5">
       <h2 className="text-base font-semibold text-gray-950 sm:text-xl">{title}</h2>
+      {narrative ? <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{narrative}</p> : null}
       <div className="mt-5 space-y-3">
         {visible.map((item) => {
           const pct = totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0;
@@ -203,6 +206,59 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     [allRecords],
   );
 
+  const categoryNarratives = useMemo(() => {
+    const pctOf = (count: number, total: number) => (total > 0 ? Math.round((count / total) * 100) : 0);
+    const lines: Record<string, string | undefined> = {};
+
+    const [topGenre, secondGenre] = snapshot.genreBreakdown;
+    if (topGenre) {
+      lines.genre = secondGenre
+        ? `${topGenre.label} is your most common genre at ${pctOf(topGenre.count, genreTotal)}%, followed by ${secondGenre.label}.`
+        : `${topGenre.label} is your only genre so far, across ${topGenre.count} records.`;
+    }
+
+    const [topArtist] = snapshot.artistBreakdown;
+    if (topArtist) {
+      lines.artist = `${topArtist.label} tops your artist list with ${topArtist.count} record${topArtist.count === 1 ? "" : "s"}, out of ${snapshot.artists} artists in all.`;
+    }
+
+    const [topReleaseDecade] = snapshot.releaseDecadeBreakdown;
+    if (topReleaseDecade) {
+      lines.releaseDecade = `The ${topReleaseDecade.label} is your best-represented decade, with ${topReleaseDecade.count} records (${pctOf(topReleaseDecade.count, allRecords.length)}%).`;
+    }
+
+    const [topRecordingDecade] = snapshot.recordingDecadeBreakdown;
+    if (topRecordingDecade) {
+      lines.recordingDecade = `Most of your music was originally recorded in the ${topRecordingDecade.label}.`;
+    }
+
+    const [topFormatCount, secondFormatCount] = snapshot.formatBreakdown;
+    if (topFormatCount) {
+      lines.format = secondFormatCount
+        ? `${topFormatCount.label} makes up ${pctOf(topFormatCount.count, allRecords.length)}% of your collection, with ${snapshot.formats - 1} other formats mixed in.`
+        : `Every record you own is ${topFormatCount.label} so far.`;
+    }
+
+    const [topLabelCount] = snapshot.labelBreakdown;
+    if (topLabelCount && topLabelCount.label !== "Unknown") {
+      lines.label = `${topLabelCount.label} presses more of your records than any other label, with ${topLabelCount.count} titles.`;
+    }
+
+    const [topMoodCount] = snapshot.moodBreakdown;
+    if (topMoodCount) {
+      lines.mood = `${topMoodCount.label} is the mood you reach for most, tagged on ${topMoodCount.count} records.`;
+    }
+
+    if (allRecords.length > 0) {
+      const parts = [`${snapshot.owned} owned`];
+      if (snapshot.wishlist > 0) parts.push(`${snapshot.wishlist} on the wishlist`);
+      if (snapshot.upgrade > 0) parts.push(`${snapshot.upgrade} marked for an upgrade`);
+      lines.status = `${parts.join(", ")}.`;
+    }
+
+    return lines;
+  }, [allRecords.length, snapshot, genreTotal]);
+
   const needsAttention = useMemo(
     () => ({
       missingPhotos: allRecords.filter(
@@ -241,7 +297,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             artists and moods that show up the most.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/vinyl/achievements"
             className="inline-flex w-fit shrink-0 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500"
@@ -471,6 +527,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       <div className="grid gap-6 lg:grid-cols-2">
         <BreakdownSection
           title="By genre"
+          narrative={categoryNarratives.genre}
           items={snapshot.genreBreakdown}
           totalCount={genreTotal}
           barColor="bg-teal-500"
@@ -478,12 +535,14 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         />
         <BreakdownSection
           title="Top artists"
+          narrative={categoryNarratives.artist}
           items={snapshot.artistBreakdown}
           totalCount={allRecords.length}
           barColor="bg-blue-500"
         />
         <BreakdownSection
           title="By release decade"
+          narrative={categoryNarratives.releaseDecade}
           items={snapshot.releaseDecadeBreakdown}
           totalCount={allRecords.length}
           barColor="bg-amber-500"
@@ -491,24 +550,28 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         />
         <BreakdownSection
           title="By recording decade"
+          narrative={categoryNarratives.recordingDecade}
           items={snapshot.recordingDecadeBreakdown}
           totalCount={allRecords.length}
           barColor="bg-orange-400"
         />
         <BreakdownSection
           title="By format"
+          narrative={categoryNarratives.format}
           items={snapshot.formatBreakdown}
           totalCount={allRecords.length}
           barColor="bg-purple-500"
         />
         <BreakdownSection
           title="By label"
+          narrative={categoryNarratives.label}
           items={snapshot.labelBreakdown}
           totalCount={allRecords.length}
           barColor="bg-rose-500"
         />
         <BreakdownSection
           title="Top moods"
+          narrative={categoryNarratives.mood}
           items={snapshot.moodBreakdown}
           totalCount={moodTotal}
           barColor="bg-violet-500"
@@ -516,6 +579,9 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         />
         <section className="rounded-lg border border-gray-200 bg-white p-5">
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">By status</h2>
+          {categoryNarratives.status ? (
+            <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{categoryNarratives.status}</p>
+          ) : null}
           <div className="mt-5">
             <DonutChart items={snapshot.statusBreakdown} />
           </div>

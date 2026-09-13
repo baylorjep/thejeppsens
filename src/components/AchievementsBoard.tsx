@@ -24,7 +24,6 @@ const CATEGORY_LABELS: Record<AchievementCategory, string> = {
   favorites: "Favorites",
   artists: "Artists",
   genres: "Genres",
-  discogsLinked: "Discogs links",
   discogsVerified: "Discogs confirmations",
   value: "Collection value",
 };
@@ -34,7 +33,6 @@ const CATEGORY_ORDER: AchievementCategory[] = [
   "favorites",
   "artists",
   "genres",
-  "discogsLinked",
   "discogsVerified",
   "value",
 ];

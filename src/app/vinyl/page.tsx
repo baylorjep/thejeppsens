@@ -25,24 +25,24 @@ export default function VinylPage() {
               Vinyl catalog
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
             <Link
               href="/vinyl/achievements"
-              className="inline-flex w-fit items-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500 sm:w-fit"
             >
               <Trophy className="h-4 w-4" />
               Achievements
             </Link>
             <Link
               href="/vinyl/insights"
-              className="inline-flex w-fit items-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500 sm:w-fit"
             >
               <Sparkles className="h-4 w-4" />
               Analytics
             </Link>
             <Link
               href="/vinyl/manage"
-              className="inline-flex w-fit rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+              className="col-span-2 inline-flex items-center justify-center rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 sm:col-span-1 sm:w-fit"
             >
               Add records
             </Link>

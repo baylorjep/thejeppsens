@@ -14,7 +14,6 @@ export type AchievementCategory =
   | "favorites"
   | "artists"
   | "genres"
-  | "discogsLinked"
   | "discogsVerified"
   | "value";
 
@@ -60,13 +59,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "genres-100", category: "genres", metric: "genres", threshold: 100, emoji: "🧭", title: "Genre-Bending", description: "100 different genres" },
   { id: "genres-150", category: "genres", metric: "genres", threshold: 150, emoji: "🧭", title: "150 Genres", description: "150 different genres" },
   { id: "genres-200", category: "genres", metric: "genres", threshold: 200, emoji: "🗺️", title: "All Over the Map", description: "200 different genres" },
-
-  // Discogs linked
-  { id: "linked-25", category: "discogsLinked", metric: "discogsLinked", threshold: 25, emoji: "🔗", title: "First Links", description: "25 records linked to Discogs" },
-  { id: "linked-50", category: "discogsLinked", metric: "discogsLinked", threshold: 50, emoji: "🔗", title: "50 Linked", description: "50 records linked to Discogs" },
-  { id: "linked-100", category: "discogsLinked", metric: "discogsLinked", threshold: 100, emoji: "🔗", title: "100 Linked", description: "100 records linked to Discogs" },
-  { id: "linked-150", category: "discogsLinked", metric: "discogsLinked", threshold: 150, emoji: "🔗", title: "150 Linked", description: "150 records linked to Discogs" },
-  { id: "linked-200", category: "discogsLinked", metric: "discogsLinked", threshold: 200, emoji: "🔗", title: "200 Linked", description: "200 records linked to Discogs" },
 
   // Discogs verified
   { id: "verified-10", category: "discogsVerified", metric: "discogsVerified", threshold: 10, emoji: "✅", title: "First Confirmations", description: "10 pressings confirmed" },
