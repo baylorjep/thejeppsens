@@ -43,13 +43,19 @@ export async function searchDiscogsReleases(query: string) {
   const url = new URL(`${DISCOGS_API_BASE}/database/search`);
   url.searchParams.set("q", query);
   url.searchParams.set("type", "release");
-  url.searchParams.set("per_page", "8");
+  url.searchParams.set("format", "Vinyl");
+  url.searchParams.set("per_page", "12");
 
   const response = await fetch(url, { headers: discogsHeaders() });
   if (!response.ok) throw new Error(`Discogs search failed (${response.status})`);
 
   const data = (await response.json()) as { results?: DiscogsSearchResult[] };
-  return data.results ?? [];
+  const results = data.results ?? [];
+
+  // Belt-and-suspenders: Discogs' own format filter isn't airtight, so drop
+  // anything that slips through without "Vinyl" in its format list (CDs, DVDs,
+  // cassettes of the same title do turn up otherwise).
+  return results.filter((result) => (result.format ?? []).some((format) => format.toLowerCase() === "vinyl"));
 }
 
 export async function fetchDiscogsRelease(releaseId: string) {
