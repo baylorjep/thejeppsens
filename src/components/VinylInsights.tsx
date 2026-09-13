@@ -147,8 +147,13 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     const total = allRecords.length;
     const genrePct = Math.round((snapshot.topGenre.count / total) * 100);
 
+    const leadingArtist = topRealArtist?.label ?? snapshot.topArtist.value;
+    const escapedArtist = leadingArtist.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const leadingArtistPattern = new RegExp(escapedArtist, "i");
+    const leadingArtistCount = allRecords.filter((record) => leadingArtistPattern.test(record.artist)).length;
+
     lines.push(
-      `${genrePct}% of your collection is ${snapshot.topGenre.value}, led by ${topRealArtist?.label ?? snapshot.topArtist.value} with ${(topRealArtist ?? snapshot.artistBreakdown[0])?.count ?? 0} records, mostly from the ${snapshot.topReleaseEra.value}.`,
+      `${genrePct}% of your collection is ${snapshot.topGenre.value}, led by ${leadingArtist} with ${leadingArtistCount} records, mostly from the ${snapshot.topReleaseEra.value}.`,
     );
 
     const [firstGenre, secondGenre] = snapshot.genreBreakdown;
