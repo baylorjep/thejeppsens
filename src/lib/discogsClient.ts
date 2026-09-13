@@ -11,16 +11,18 @@ export type DiscogsValueResponse = {
   numForSale: number;
 };
 
-export function formatDiscogsMoney({ currency, value }: DiscogsMoney) {
+export function formatDiscogsMoney({ currency, value }: DiscogsMoney, options: { cents?: boolean } = {}) {
+  const { cents = true } = options;
+
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: cents ? 2 : 0,
+      maximumFractionDigits: cents ? 2 : 0,
     }).format(value);
   } catch {
-    return `${currency} ${Math.round(value)}`;
+    return `${currency} ${cents ? value.toFixed(2) : Math.round(value)}`;
   }
 }
 

@@ -914,7 +914,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               {isLoadingCollectionValue ? (
                 <span className="inline-block h-6 w-16 animate-pulse rounded bg-gray-200 align-middle" />
               ) : collectionValue ? (
-                formatDiscogsMoney({ currency: collectionValue.currency, value: collectionValue.total })
+                formatDiscogsMoney({ currency: collectionValue.currency, value: collectionValue.total }, { cents: false })
               ) : (
                 "—"
               )}
