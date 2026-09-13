@@ -34,6 +34,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "a.espncdn.com",
       },
+      {
+        protocol: "https",
+        hostname: "img.discogs.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i.discogs.com",
+      },
     ],
   },
 };

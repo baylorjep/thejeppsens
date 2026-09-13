@@ -1,6 +1,7 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
+import { fetchDiscogsValue, formatDiscogsMoney } from "@/lib/discogsClient";
 import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
 import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
@@ -10,6 +11,14 @@ import { useEffect, useMemo, useState } from "react";
 
 type VinylInsightsProps = {
   records: VinylRecord[];
+};
+
+type CollectionValueSummary = {
+  total: number;
+  currency: string;
+  pricedCount: number;
+  linkedCount: number;
+  mostValuable?: { record: VinylRecord; value: number };
 };
 
 function BreakdownSection({
@@ -115,6 +124,52 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
 
+  const [collectionValue, setCollectionValue] = useState<CollectionValueSummary | null>(null);
+  const [isLoadingValue, setIsLoadingValue] = useState(false);
+
+  useEffect(() => {
+    const ownedLinkedRecords = allRecords.filter((record) => record.status === "owned" && record.discogsReleaseId);
+    if (!ownedLinkedRecords.length) {
+      setCollectionValue(null);
+      return;
+    }
+
+    let active = true;
+    setIsLoadingValue(true);
+
+    Promise.all(
+      ownedLinkedRecords.map(async (record) => ({
+        record,
+        value: await fetchDiscogsValue(record.discogsReleaseId!, record.condition),
+      })),
+    ).then((results) => {
+      if (!active) return;
+
+      let total = 0;
+      let currency = "USD";
+      let pricedCount = 0;
+      let mostValuable: { record: VinylRecord; value: number } | undefined;
+
+      for (const { record, value } of results) {
+        const priced = value?.estimate ?? value?.lowestListing;
+        if (!priced) continue;
+        total += priced.value;
+        currency = priced.currency;
+        pricedCount += 1;
+        if (!mostValuable || priced.value > mostValuable.value) {
+          mostValuable = { record, value: priced.value };
+        }
+      }
+
+      setCollectionValue({ total, currency, pricedCount, linkedCount: ownedLinkedRecords.length, mostValuable });
+      setIsLoadingValue(false);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [allRecords]);
+
   const recentlyAdded = useMemo(
     () =>
       [...allRecords]
@@ -194,6 +249,42 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           </div>
         ))}
       </div>
+
+      {/* Collection value */}
+      {isLoadingValue || collectionValue ? (
+        <div className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Collection value</h2>
+          {!collectionValue ? (
+            <div className="mt-4 h-9 w-32 animate-pulse rounded bg-gray-100" />
+          ) : (
+            <div className="mt-4 flex flex-wrap items-end gap-8">
+              <div>
+                <p className="text-xs text-gray-500">Estimated total</p>
+                <p className="mt-1 text-3xl font-semibold text-gray-950">
+                  {formatDiscogsMoney({ currency: collectionValue.currency, value: collectionValue.total })}
+                </p>
+                <p className="mt-1 text-xs text-gray-400">
+                  {collectionValue.pricedCount} of {collectionValue.linkedCount} Discogs-linked records priced
+                </p>
+              </div>
+              {collectionValue.mostValuable ? (
+                <Link
+                  href={`/vinyl/${collectionValue.mostValuable.record.id}`}
+                  className="rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-400"
+                >
+                  <p className="text-xs text-gray-500">Most valuable</p>
+                  <p className="mt-1 text-sm font-medium text-gray-950">
+                    {collectionValue.mostValuable.record.title}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {formatDiscogsMoney({ currency: collectionValue.currency, value: collectionValue.mostValuable.value })}
+                  </p>
+                </Link>
+              ) : null}
+            </div>
+          )}
+        </div>
+      ) : null}
 
       {/* Recently Added */}
       {recentlyAdded.length > 0 && (

@@ -2,11 +2,12 @@
 
 import { VinylRecord } from "@/data/vinyls";
 import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
+import { DiscogsValueResponse, fetchDiscogsValue, formatDiscogsMoney } from "@/lib/discogsClient";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { getStatusTone } from "@/lib/vinylAnalytics";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
-import { Disc3, ExternalLink, Pencil, Settings2, Star } from "lucide-react";
+import { Disc3, ExternalLink, Pencil, Search, Settings2, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
@@ -47,6 +48,7 @@ type AlbumEditForm = {
   favorite: boolean;
   coverImage: string;
   backCoverImage: string;
+  discogsReleaseId: string;
 };
 
 function recordToEditForm(record: VinylRecord): AlbumEditForm {
@@ -80,6 +82,7 @@ function recordToEditForm(record: VinylRecord): AlbumEditForm {
     favorite: Boolean(record.favorite),
     coverImage: record.coverImage ?? "",
     backCoverImage: record.backCoverImage ?? "",
+    discogsReleaseId: record.discogsReleaseId?.toString() ?? "",
   };
 }
 
@@ -88,6 +91,90 @@ function splitTrackList(value: string) {
     .split(/\n+/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+type DiscogsSearchResult = {
+  id: number;
+  title: string;
+  year?: string;
+  thumb?: string;
+  format?: string[];
+  label?: string[];
+};
+
+type DiscogsRelease = {
+  id: number;
+  title: string;
+  artists?: { name: string }[];
+  year?: number;
+  genres?: string[];
+  styles?: string[];
+  labels?: { name: string; catno?: string }[];
+  formats?: { name: string; qty?: string; descriptions?: string[] }[];
+  tracklist?: { title: string; type_?: string }[];
+  images?: { type?: string; uri?: string }[];
+};
+
+function splitDiscogsTitle(value: string) {
+  const separatorIndex = value.indexOf(" - ");
+  if (separatorIndex === -1) return { artist: "", title: value };
+  return { artist: value.slice(0, separatorIndex), title: value.slice(separatorIndex + 3) };
+}
+
+function DiscogsValueCard({ releaseId, condition }: { releaseId: number; condition?: string }) {
+  const [value, setValue] = useState<DiscogsValueResponse | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+
+  useEffect(() => {
+    let active = true;
+    setStatus("loading");
+
+    fetchDiscogsValue(releaseId, condition).then((data) => {
+      if (!active) return;
+      if (!data) {
+        setStatus("unavailable");
+        return;
+      }
+      setValue(data);
+      setStatus("ready");
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [releaseId, condition]);
+
+  if (status === "unavailable") return null;
+
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-6">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Estimated value</h3>
+      {status === "loading" ? (
+        <div className="mt-3 h-7 w-24 animate-pulse rounded bg-gray-200" />
+      ) : value?.estimate ? (
+        <div className="mt-2">
+          <p className="text-2xl font-semibold text-gray-950">{formatDiscogsMoney(value.estimate)}</p>
+          <p className="mt-1 text-xs text-gray-500">
+            {value.isGuess ? "Assuming" : "Based on"} {value.grade} condition, via Discogs
+          </p>
+          {value.lowestListing ? (
+            <p className="mt-3 text-xs text-gray-500">
+              {value.numForSale} for sale now from {formatDiscogsMoney(value.lowestListing)}
+            </p>
+          ) : null}
+        </div>
+      ) : value?.lowestListing ? (
+        <div className="mt-2">
+          <p className="text-2xl font-semibold text-gray-950">{formatDiscogsMoney(value.lowestListing)}</p>
+          <p className="mt-1 text-xs text-gray-500">
+            Lowest of {value.numForSale} copies currently listed on Discogs
+          </p>
+        </div>
+      ) : (
+        <p className="mt-2 text-sm text-gray-500">No Discogs price data for this pressing yet.</p>
+      )}
+    </div>
+  );
 }
 
 function CoverImage({
@@ -175,6 +262,10 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
   const [statusMessage, setStatusMessage] = useState("");
   const [ownedStorageLocation, setOwnedStorageLocation] = useState("");
   const [appleMusicUrl, setAppleMusicUrl] = useState("");
+  const [discogsQuery, setDiscogsQuery] = useState("");
+  const [discogsResults, setDiscogsResults] = useState<DiscogsSearchResult[]>([]);
+  const [isSearchingDiscogs, setIsSearchingDiscogs] = useState(false);
+  const [applyingDiscogsId, setApplyingDiscogsId] = useState<number | null>(null);
   const inputClassName =
     "w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 outline-none transition-colors focus:border-gray-950";
 
@@ -270,6 +361,59 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
     setEditForm((current) => (current ? { ...current, [key]: value } : current));
   };
 
+  const searchDiscogs = async () => {
+    const term = discogsQuery.trim();
+    if (!term) return;
+
+    setIsSearchingDiscogs(true);
+
+    try {
+      const response = await fetch(`/api/discogs/search?q=${encodeURIComponent(term)}`);
+      const data = (await response.json()) as { results?: DiscogsSearchResult[] };
+      setDiscogsResults(data.results ?? []);
+    } catch {
+      setDiscogsResults([]);
+    } finally {
+      setIsSearchingDiscogs(false);
+    }
+  };
+
+  const applyDiscogsRelease = async (result: DiscogsSearchResult) => {
+    setApplyingDiscogsId(result.id);
+
+    try {
+      const response = await fetch(`/api/discogs/release/${result.id}`);
+      const data = (await response.json()) as { release?: DiscogsRelease };
+      if (!response.ok || !data.release) return;
+
+      const release = data.release;
+      const primaryLabel = release.labels?.[0];
+      const primaryFormat = release.formats?.[0];
+      const format = primaryFormat?.descriptions?.[0] ?? primaryFormat?.name;
+      const discCount = primaryFormat?.qty ? Number(primaryFormat.qty) : undefined;
+      const genres = [...new Set([...(release.genres ?? []), ...(release.styles ?? [])])];
+      const trackList = (release.tracklist ?? [])
+        .filter((track) => !track.type_ || track.type_ === "track")
+        .map((track) => track.title)
+        .filter(Boolean);
+      const coverImage =
+        release.images?.find((image) => image.type === "primary")?.uri ?? release.images?.[0]?.uri;
+
+      updateEditForm("label", primaryLabel?.name ?? "");
+      updateEditForm("catalogNumber", primaryLabel?.catno ?? "");
+      if (format) updateEditForm("format", format);
+      if (discCount) updateEditForm("discCount", String(discCount));
+      if (genres.length) updateEditForm("genres", genres.join(", "));
+      if (trackList.length) updateEditForm("trackList", trackList.join("\n"));
+      if (coverImage) updateEditForm("coverImage", coverImage);
+      updateEditForm("discogsReleaseId", String(result.id));
+      setDiscogsResults([]);
+      setDiscogsQuery("");
+    } finally {
+      setApplyingDiscogsId(null);
+    }
+  };
+
   const cancelRecordEdit = () => {
     if (!record) return;
     setEditForm(recordToEditForm(record));
@@ -328,6 +472,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       favorite: editForm.favorite,
       coverImage: editForm.coverImage || undefined,
       backCoverImage: editForm.backCoverImage || undefined,
+      discogsReleaseId: editForm.discogsReleaseId ? Number(editForm.discogsReleaseId) : undefined,
       dateAdded: record.dateAdded,
     };
 
@@ -709,6 +854,10 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               </div>
             ) : null}
 
+            {record.discogsReleaseId ? (
+              <DiscogsValueCard releaseId={record.discogsReleaseId} condition={record.condition} />
+            ) : null}
+
             <dl className="grid grid-cols-2 gap-2 text-[11px] leading-tight sm:grid-cols-2 sm:gap-3 sm:text-sm xl:grid-cols-3">
               {[
                 ["Released", record.releaseYear?.toString()],
@@ -839,6 +988,85 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-950">Full record details</h2>
               </div>
             </div>
+
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">
+                  Discogs
+                </h3>
+                {editForm?.discogsReleaseId ? (
+                  <button
+                    type="button"
+                    onClick={() => updateEditForm("discogsReleaseId", "")}
+                    className="text-xs font-medium text-gray-500 underline-offset-4 hover:underline"
+                  >
+                    Linked to release {editForm.discogsReleaseId} · unlink
+                  </button>
+                ) : null}
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Search Discogs to link this pressing and pull in label, catalog number, format, and value.
+              </p>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <label className="relative block flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <input
+                    value={discogsQuery}
+                    onChange={(event) => setDiscogsQuery(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        searchDiscogs();
+                      }
+                    }}
+                    className={`${inputClassName} pl-10`}
+                    placeholder="Search album or artist"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={searchDiscogs}
+                  disabled={isSearchingDiscogs}
+                  className="rounded-md bg-gray-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSearchingDiscogs ? "Searching..." : "Search"}
+                </button>
+              </div>
+
+              {discogsResults.length ? (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {discogsResults.map((result) => {
+                    const { artist, title } = splitDiscogsTitle(result.title);
+                    return (
+                      <button
+                        key={result.id}
+                        type="button"
+                        onClick={() => applyDiscogsRelease(result)}
+                        disabled={applyingDiscogsId === result.id}
+                        className="grid grid-cols-[56px_minmax(0,1fr)] gap-3 rounded-md border border-gray-200 bg-white p-2 text-left transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <div className="relative aspect-square overflow-hidden rounded bg-gray-100">
+                          {result.thumb ? (
+                            <Image src={result.thumb} alt="" fill className="object-cover" unoptimized />
+                          ) : null}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-gray-950">{title}</p>
+                          <p className="truncate text-sm text-gray-600">{artist || "Unknown artist"}</p>
+                          <p className="mt-1 truncate text-xs text-gray-400">
+                            {applyingDiscogsId === result.id
+                              ? "Loading..."
+                              : [result.year, result.format?.[0], result.label?.[0]].filter(Boolean).join(" · ") ||
+                                "Release"}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block sm:col-span-2">
                 <span className="mb-2 block text-sm font-medium text-gray-700">Front cover image</span>
