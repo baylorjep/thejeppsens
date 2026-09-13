@@ -28,6 +28,7 @@ export type DiscogsRelease = {
   notes?: string;
   country?: string;
   released?: string;
+  community?: { have?: number; want?: number };
 };
 
 function discogsHeaders() {

@@ -9,6 +9,8 @@ export type DiscogsValueResponse = {
   estimate: DiscogsMoney | null;
   lowestListing: DiscogsMoney | null;
   numForSale: number;
+  have: number | null;
+  want: number | null;
 };
 
 export function formatDiscogsMoney({ currency, value }: DiscogsMoney, options: { cents?: boolean } = {}) {
@@ -43,6 +45,9 @@ export type CollectionValueSummary = {
   linkedCount: number;
   unverifiedCount: number;
   mostValuable?: { record: VinylRecord; value: number };
+  cheapest?: { record: VinylRecord; value: number };
+  rarest?: { record: VinylRecord; have: number };
+  mostWanted?: { record: VinylRecord; want: number };
 };
 
 /**
@@ -78,20 +83,48 @@ export function useCollectionValue(records: VinylRecord[]) {
       let pricedCount = 0;
       let unverifiedCount = 0;
       let mostValuable: { record: VinylRecord; value: number } | undefined;
+      let cheapest: { record: VinylRecord; value: number } | undefined;
+      let rarest: { record: VinylRecord; have: number } | undefined;
+      let mostWanted: { record: VinylRecord; want: number } | undefined;
 
       for (const { record, value: recordValue } of results) {
         const priced = recordValue?.estimate ?? recordValue?.lowestListing;
-        if (!priced) continue;
-        total += priced.value;
-        currency = priced.currency;
-        pricedCount += 1;
-        if (!record.discogsVerified) unverifiedCount += 1;
-        if (!mostValuable || priced.value > mostValuable.value) {
-          mostValuable = { record, value: priced.value };
+        if (priced) {
+          total += priced.value;
+          currency = priced.currency;
+          pricedCount += 1;
+          if (!record.discogsVerified) unverifiedCount += 1;
+          if (!mostValuable || priced.value > mostValuable.value) {
+            mostValuable = { record, value: priced.value };
+          }
+          if (!cheapest || priced.value < cheapest.value) {
+            cheapest = { record, value: priced.value };
+          }
+        }
+
+        if (typeof recordValue?.have === "number") {
+          if (!rarest || recordValue.have < rarest.have) {
+            rarest = { record, have: recordValue.have };
+          }
+        }
+        if (typeof recordValue?.want === "number") {
+          if (!mostWanted || recordValue.want > mostWanted.want) {
+            mostWanted = { record, want: recordValue.want };
+          }
         }
       }
 
-      setValue({ total, currency, pricedCount, linkedCount: ownedLinkedRecords.length, unverifiedCount, mostValuable });
+      setValue({
+        total,
+        currency,
+        pricedCount,
+        linkedCount: ownedLinkedRecords.length,
+        unverifiedCount,
+        mostValuable,
+        cheapest,
+        rarest,
+        mostWanted,
+      });
       setIsLoading(false);
     });
 

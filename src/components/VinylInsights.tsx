@@ -141,6 +141,28 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       ? `${genrePct}% of the collection is ${snapshot.topGenre.value}, led by ${topRealArtist?.label ?? snapshot.topArtist.value}, mostly from the ${snapshot.topReleaseEra.value}.`
       : "";
 
+  const span = useMemo(() => {
+    const withYear = allRecords.filter(
+      (record): record is VinylRecord & { releaseYear: number } => typeof record.releaseYear === "number",
+    );
+    if (withYear.length < 2) return "";
+
+    const oldest = withYear.reduce((a, b) => (b.releaseYear < a.releaseYear ? b : a));
+    const newest = withYear.reduce((a, b) => (b.releaseYear > a.releaseYear ? b : a));
+    if (oldest.id === newest.id) return "";
+
+    return `Her oldest record is ${oldest.title} (${oldest.releaseYear}), and her newest is ${newest.title} (${newest.releaseYear}) — a ${newest.releaseYear - oldest.releaseYear}-year span.`;
+  }, [allRecords]);
+
+  const discogsLinkedCount = useMemo(
+    () => allRecords.filter((record) => record.discogsReleaseId).length,
+    [allRecords],
+  );
+  const discogsVerifiedCount = useMemo(
+    () => allRecords.filter((record) => record.discogsVerified).length,
+    [allRecords],
+  );
+
   const statCards = [
     { label: "Records", value: allRecords.length },
     { label: "Artists", value: snapshot.artists },
@@ -183,6 +205,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             Collection DNA
           </p>
           <p className="text-sm leading-relaxed text-gray-700 sm:text-base">{dna}</p>
+          {span ? <p className="mt-2 text-sm leading-relaxed text-gray-700 sm:text-base">{span}</p> : null}
         </div>
       )}
 
@@ -220,6 +243,10 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                     with an unconfirmed pressing match
                   </p>
                 ) : null}
+                <p className="mt-3 text-xs text-gray-400">
+                  {discogsLinkedCount} of {allRecords.length} records linked to Discogs
+                  {discogsVerifiedCount ? ` (${discogsVerifiedCount} confirmed)` : ""}
+                </p>
               </div>
               {collectionValue.mostValuable ? (
                 <Link
@@ -235,8 +262,57 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   </p>
                 </Link>
               ) : null}
+              {collectionValue.cheapest && collectionValue.cheapest.record.id !== collectionValue.mostValuable?.record.id ? (
+                <Link
+                  href={`/vinyl/${collectionValue.cheapest.record.id}`}
+                  className="rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-400"
+                >
+                  <p className="text-xs text-gray-500">Least valuable</p>
+                  <p className="mt-1 text-sm font-medium text-gray-950">{collectionValue.cheapest.record.title}</p>
+                  <p className="text-xs text-gray-500">
+                    {formatDiscogsMoney({ currency: collectionValue.currency, value: collectionValue.cheapest.value })}
+                  </p>
+                </Link>
+              ) : null}
             </div>
           )}
+        </div>
+      ) : null}
+
+      {/* Discogs rarity */}
+      {collectionValue?.rarest || collectionValue?.mostWanted ? (
+        <div className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Rarity, via Discogs</h2>
+          <p className="mt-1 text-xs text-gray-400">
+            Based on how many Discogs users report owning or wanting each exact pressing.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {collectionValue.rarest ? (
+              <Link
+                href={`/vinyl/${collectionValue.rarest.record.id}`}
+                className="rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-400"
+              >
+                <p className="text-xs text-gray-500">Rarest (fewest owners)</p>
+                <p className="mt-1 text-sm font-medium text-gray-950">{collectionValue.rarest.record.title}</p>
+                <p className="text-xs text-gray-500">
+                  {collectionValue.rarest.have} {collectionValue.rarest.have === 1 ? "person has" : "people have"} this
+                  pressing
+                </p>
+              </Link>
+            ) : null}
+            {collectionValue.mostWanted ? (
+              <Link
+                href={`/vinyl/${collectionValue.mostWanted.record.id}`}
+                className="rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-gray-400"
+              >
+                <p className="text-xs text-gray-500">Most wanted</p>
+                <p className="mt-1 text-sm font-medium text-gray-950">{collectionValue.mostWanted.record.title}</p>
+                <p className="text-xs text-gray-500">
+                  {collectionValue.mostWanted.want} people want this pressing
+                </p>
+              </Link>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
