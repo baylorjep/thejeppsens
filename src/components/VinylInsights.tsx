@@ -32,7 +32,10 @@ function BreakdownSection({
   formatCount?: (count: number) => string;
 }) {
   const [showAll, setShowAll] = useState(false);
-  const topCount = items[0]?.count ?? 1;
+  // Bars are sized relative to the largest value, not necessarily items[0] -
+  // some breakdowns (value by decade) are sorted chronologically rather
+  // than by count, so items[0] isn't reliably the max.
+  const topCount = Math.max(...items.map((item) => item.count), 1);
   const visible = showAll ? items : items.slice(0, 8);
 
   return (
