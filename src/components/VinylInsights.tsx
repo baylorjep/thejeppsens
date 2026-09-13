@@ -18,6 +18,7 @@ type CollectionValueSummary = {
   currency: string;
   pricedCount: number;
   linkedCount: number;
+  unverifiedCount: number;
   mostValuable?: { record: VinylRecord; value: number };
 };
 
@@ -148,6 +149,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       let total = 0;
       let currency = "USD";
       let pricedCount = 0;
+      let unverifiedCount = 0;
       let mostValuable: { record: VinylRecord; value: number } | undefined;
 
       for (const { record, value } of results) {
@@ -156,12 +158,20 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         total += priced.value;
         currency = priced.currency;
         pricedCount += 1;
+        if (!record.catalogNumber) unverifiedCount += 1;
         if (!mostValuable || priced.value > mostValuable.value) {
           mostValuable = { record, value: priced.value };
         }
       }
 
-      setCollectionValue({ total, currency, pricedCount, linkedCount: ownedLinkedRecords.length, mostValuable });
+      setCollectionValue({
+        total,
+        currency,
+        pricedCount,
+        linkedCount: ownedLinkedRecords.length,
+        unverifiedCount,
+        mostValuable,
+      });
       setIsLoadingValue(false);
     });
 
@@ -266,6 +276,12 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                 <p className="mt-1 text-xs text-gray-400">
                   {collectionValue.pricedCount} of {collectionValue.linkedCount} Discogs-linked records priced
                 </p>
+                {collectionValue.unverifiedCount > 0 ? (
+                  <p className="mt-1 text-xs text-amber-600">
+                    Includes {collectionValue.unverifiedCount} record{collectionValue.unverifiedCount === 1 ? "" : "s"}{" "}
+                    with no catalog number saved, so the exact pressing isn&apos;t confirmed
+                  </p>
+                ) : null}
               </div>
               {collectionValue.mostValuable ? (
                 <Link

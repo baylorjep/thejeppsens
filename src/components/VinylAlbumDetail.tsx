@@ -121,7 +121,15 @@ function splitDiscogsTitle(value: string) {
   return { artist: value.slice(0, separatorIndex), title: value.slice(separatorIndex + 3) };
 }
 
-function DiscogsValueCard({ releaseId, condition }: { releaseId: number; condition?: string }) {
+function DiscogsValueCard({
+  releaseId,
+  condition,
+  verifiedPressing,
+}: {
+  releaseId: number;
+  condition?: string;
+  verifiedPressing: boolean;
+}) {
   const [value, setValue] = useState<DiscogsValueResponse | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
 
@@ -173,6 +181,12 @@ function DiscogsValueCard({ releaseId, condition }: { releaseId: number; conditi
       ) : (
         <p className="mt-2 text-sm text-gray-500">No Discogs price data for this pressing yet.</p>
       )}
+      {status === "ready" && (value?.estimate || value?.lowestListing) && !verifiedPressing ? (
+        <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          Approximate — this record has no catalog number saved, so we can&apos;t confirm this is the exact
+          pressing priced here. Add the catalog number from the label to sharpen this estimate.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -855,7 +869,11 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             ) : null}
 
             {record.discogsReleaseId ? (
-              <DiscogsValueCard releaseId={record.discogsReleaseId} condition={record.condition} />
+              <DiscogsValueCard
+                releaseId={record.discogsReleaseId}
+                condition={record.condition}
+                verifiedPressing={Boolean(record.catalogNumber)}
+              />
             ) : null}
 
             <dl className="grid grid-cols-2 gap-2 text-[11px] leading-tight sm:grid-cols-2 sm:gap-3 sm:text-sm xl:grid-cols-3">
