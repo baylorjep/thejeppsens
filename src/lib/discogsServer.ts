@@ -38,15 +38,32 @@ function discogsHeaders() {
   };
 }
 
+// Discogs allows ~60 authenticated requests/minute. This is the one place
+// every actual outbound Discogs HTTP call passes through (search, release,
+// price suggestions, marketplace stats), so it's the right place to pace
+// them - not the callers, and not the client. ~1.1s between real dispatches
+// keeps sustained throughput under the limit regardless of how many
+// concurrent requests land on the app (cache hits elsewhere never reach
+// this queue at all, since they never needed to call Discogs).
+const DISCOGS_DISPATCH_DELAY_MS = 1100;
+let discogsDispatchQueue: Promise<unknown> = Promise.resolve();
+
+function queueDiscogsDispatch<T>(task: () => Promise<T>): Promise<T> {
+  const run = discogsDispatchQueue.then(task, task);
+  discogsDispatchQueue = run.then(
+    () => new Promise((resolve) => setTimeout(resolve, DISCOGS_DISPATCH_DELAY_MS)),
+    () => new Promise((resolve) => setTimeout(resolve, DISCOGS_DISPATCH_DELAY_MS)),
+  );
+  return run;
+}
+
 /**
- * Discogs allows ~60 authenticated requests/minute, and with several hooks
- * on the site fetching a release's price/rarity/rating/artists back to
- * back, a 429 is a "slow down," not a real failure - retry with backoff
+ * A 429 here is a "slow down," not a real failure - retry with backoff
  * (honoring Retry-After when Discogs sends one) instead of surfacing it as
- * missing data.
+ * missing data. The retry itself also goes through the paced queue.
  */
 async function discogsFetch(url: string | URL, attempt = 0): Promise<Response> {
-  const response = await fetch(url, { headers: discogsHeaders() });
+  const response = await queueDiscogsDispatch(() => fetch(url, { headers: discogsHeaders() }));
   if (response.status !== 429 || attempt >= 3) return response;
 
   const retryAfterHeader = response.headers.get("retry-after");

@@ -1,6 +1,6 @@
 "use client";
 
-import { DiscogsValueResponse, fetchDiscogsValueDirect, formatDiscogsMoney } from "@/lib/discogsClient";
+import { DiscogsValueResponse, fetchDiscogsValue, formatDiscogsMoney } from "@/lib/discogsClient";
 import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -24,7 +24,7 @@ export default function DiscogsValueCard({
     let active = true;
     setStatus("loading");
 
-    fetchDiscogsValueDirect(releaseId, condition, { forceRefresh }).then((data) => {
+    fetchDiscogsValue(releaseId, condition, { forceRefresh }).then((data) => {
       if (!active) return;
       if (!data) {
         setStatus("unavailable");

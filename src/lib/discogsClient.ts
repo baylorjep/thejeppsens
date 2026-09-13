@@ -48,18 +48,14 @@ export function formatDiscogsMoney({ currency, value }: DiscogsMoney, options: {
   }
 }
 
-// Discogs allows roughly 60 authenticated requests/minute, and each call to
-// our value endpoint fans out to 3 Discogs requests (price suggestions,
-// marketplace stats, release) - so pacing needs to budget for 3x, not 1x,
-// per dispatch. Every hook that wants per-release data (value, rarity,
-// ratings, artist credits, ...) goes through this single module-level queue
-// so we never fire a burst of requests across hooks/components - each
-// dispatch waits its turn, and identical (releaseId, condition) lookups
-// share one in-flight promise instead of each hook fetching the same
-// release again. The server side also retries on 429 with backoff, so this
-// delay just needs to keep retries rare, not eliminate them entirely.
-const DISCOGS_FETCH_DELAY_MS = 2000;
-let discogsQueueTail: Promise<unknown> = Promise.resolve();
+// Every hook below shares this cache so two hooks needing the same
+// (releaseId, condition) - useCollectionValue and useDiscogsArtistBreakdown
+// both want owned+linked records, for instance - only fetch it once per
+// page session. There's deliberately no client-side pacing/queueing here
+// anymore: Discogs' rate limit is protected once, at the source, by the
+// server (discogsServer.ts's dispatch queue) - a cache hit costs Discogs
+// nothing, so gating it behind an artificial client-side delay just made
+// a warm cache feel as slow as a cold one for no reason.
 const discogsValueCache = new Map<string, Promise<DiscogsValueResponse | null>>();
 
 async function rawFetchDiscogsValue(
@@ -77,48 +73,23 @@ async function rawFetchDiscogsValue(
   return (await response.json()) as DiscogsValueResponse;
 }
 
-export function fetchDiscogsValue(releaseId: number, condition?: string): Promise<DiscogsValueResponse | null> {
-  const key = `${releaseId}::${condition ?? ""}`;
-  const cached = discogsValueCache.get(key);
-  if (cached) return cached;
-
-  const run = discogsQueueTail.then(
-    () => rawFetchDiscogsValue(releaseId, condition),
-    () => rawFetchDiscogsValue(releaseId, condition),
-  );
-  // A response the server already had cached costs Discogs nothing, so only
-  // the actual live-fetch path needs to wait out the pacing delay - letting
-  // cache hits skip it means a warm cache loads at full speed instead of
-  // being throttled to one every couple seconds for no reason.
-  discogsQueueTail = run.then(
-    (result) => (result?.cached ? undefined : new Promise((resolve) => setTimeout(resolve, DISCOGS_FETCH_DELAY_MS))),
-    () => new Promise((resolve) => setTimeout(resolve, DISCOGS_FETCH_DELAY_MS)),
-  );
-
-  discogsValueCache.set(key, run);
-  return run;
-}
-
-/**
- * For a single on-demand lookup (an album page or the catalog's quick-view
- * modal) - reuses the shared cache so it doesn't refetch a release the bulk
- * hooks below already have, but doesn't wait its turn in their queue either,
- * since one ad-hoc request is never what trips Discogs' rate limit.
- */
-export function fetchDiscogsValueDirect(
+export function fetchDiscogsValue(
   releaseId: number,
   condition?: string,
   options: { forceRefresh?: boolean } = {},
 ): Promise<DiscogsValueResponse | null> {
   const key = `${releaseId}::${condition ?? ""}`;
-  if (options.forceRefresh) discogsValueCache.delete(key);
 
-  if (!options.forceRefresh) {
-    const cached = discogsValueCache.get(key);
-    if (cached) return cached;
+  if (options.forceRefresh) {
+    const run = rawFetchDiscogsValue(releaseId, condition, true);
+    discogsValueCache.set(key, run);
+    return run;
   }
 
-  const run = rawFetchDiscogsValue(releaseId, condition, options.forceRefresh);
+  const cached = discogsValueCache.get(key);
+  if (cached) return cached;
+
+  const run = rawFetchDiscogsValue(releaseId, condition);
   discogsValueCache.set(key, run);
   return run;
 }
@@ -261,10 +232,11 @@ function aggregateCollectionValue(
 }
 
 /**
- * Estimated total value of owned, Discogs-linked records. Requests are
- * paced through the shared queue above, and the summary updates as each
- * one resolves rather than waiting for every record to finish - with 150+
- * linked records and Discogs' rate limit, that can take a couple minutes.
+ * Estimated total value of owned, Discogs-linked records. Every record's
+ * fetch fires immediately (no client-side pacing - see the comment above
+ * discogsValueCache), and the summary updates as each one resolves. With a
+ * warm cache this settles in seconds; a cold one is bounded by the server's
+ * own paced queue instead.
  */
 export function useCollectionValue(records: VinylRecord[]) {
   const [value, setValue] = useState<CollectionValueSummary | null>(null);
@@ -281,17 +253,17 @@ export function useCollectionValue(records: VinylRecord[]) {
     let cancelled = false;
     setIsLoading(true);
     const collected: { record: VinylRecord; value: DiscogsValueResponse | null }[] = [];
+    let remaining = ownedLinkedRecords.length;
 
-    (async () => {
-      for (const record of ownedLinkedRecords) {
-        if (cancelled) return;
-        const recordValue = await fetchDiscogsValue(record.discogsReleaseId!, record.condition);
+    ownedLinkedRecords.forEach((record) => {
+      fetchDiscogsValue(record.discogsReleaseId!, record.condition).then((recordValue) => {
         if (cancelled) return;
         collected.push({ record, value: recordValue });
         setValue(aggregateCollectionValue(collected, ownedLinkedRecords.length));
-      }
-      if (!cancelled) setIsLoading(false);
-    })();
+        remaining -= 1;
+        if (remaining <= 0) setIsLoading(false);
+      });
+    });
 
     return () => {
       cancelled = true;
@@ -312,8 +284,8 @@ export function useCollectionValue(records: VinylRecord[]) {
  * proper list of separate names, so for linked records we use that instead.
  * Unlinked records fall back to the raw `artist` string as one entry.
  *
- * Shares the same fetch queue/cache as useCollectionValue, so for records
- * both hooks need (owned + linked), this doesn't cost any extra requests.
+ * Shares the same fetch cache as useCollectionValue, so for records both
+ * hooks need (owned + linked), this doesn't cost any extra requests.
  */
 export function useDiscogsArtistBreakdown(records: VinylRecord[]) {
   const [breakdown, setBreakdown] = useState<{ label: string; count: number }[] | null>(null);
@@ -327,17 +299,15 @@ export function useDiscogsArtistBreakdown(records: VinylRecord[]) {
     let cancelled = false;
     const creditsByRecordId = new Map<string, string[]>();
 
-    (async () => {
-      for (const record of linkedRecords) {
-        if (cancelled) return;
-        const recordValue = await fetchDiscogsValue(record.discogsReleaseId!, record.condition);
+    linkedRecords.forEach((record) => {
+      fetchDiscogsValue(record.discogsReleaseId!, record.condition).then((recordValue) => {
         if (cancelled) return;
         if (recordValue?.artists.length) creditsByRecordId.set(record.id, recordValue.artists);
 
         const allCredits = records.flatMap((r) => creditsByRecordId.get(r.id) ?? [r.artist]);
         setBreakdown(getBreakdown(allCredits));
-      }
-    })();
+      });
+    });
 
     return () => {
       cancelled = true;
