@@ -631,6 +631,51 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           </div>
         </section>
       ) : null}
+
+      {collectionValue && collectionValue.originalCount + collectionValue.reissueCount > 1 ? (
+        <section className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Original vs. reissue</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
+            {Math.round(
+              (collectionValue.originalCount / (collectionValue.originalCount + collectionValue.reissueCount)) * 100,
+            )}
+            % of your linked records are original pressings, the rest are reissues or represses.
+          </p>
+          <div className="mt-5">
+            <DonutChart
+              items={[
+                { label: "Original pressing", count: collectionValue.originalCount },
+                { label: "Reissue / repress", count: collectionValue.reissueCount },
+              ].filter((item) => item.count > 0)}
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {collectionValue?.byCountry && collectionValue.byCountry.length > 1 ? (
+        <section className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Country of origin</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
+            Your pressings come from {collectionValue.byCountry.length} different countries, mostly{" "}
+            {collectionValue.byCountry[0].country}.
+          </p>
+          <div className="mt-5">
+            <DonutChart
+              items={
+                collectionValue.byCountry.length > 6
+                  ? [
+                      ...collectionValue.byCountry.slice(0, 6).map((entry) => ({ label: entry.country, count: entry.count })),
+                      {
+                        label: "Other",
+                        count: collectionValue.byCountry.slice(6).reduce((sum, entry) => sum + entry.count, 0),
+                      },
+                    ]
+                  : collectionValue.byCountry.map((entry) => ({ label: entry.country, count: entry.count }))
+              }
+            />
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

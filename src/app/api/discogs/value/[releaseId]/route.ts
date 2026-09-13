@@ -34,6 +34,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ rele
       want: release?.community?.want ?? null,
       ratingAverage: release?.community?.rating?.average ?? null,
       ratingCount: release?.community?.rating?.count ?? null,
+      formatDescriptions: release?.formats?.[0]?.descriptions ?? [],
+      country: release?.country ?? null,
     });
   } catch (error) {
     console.error("Discogs value lookup failed", error);

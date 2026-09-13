@@ -18,7 +18,17 @@ export type DiscogsValueResponse = {
   want: number | null;
   ratingAverage: number | null;
   ratingCount: number | null;
+  formatDescriptions: string[];
+  country: string | null;
 };
+
+const REISSUE_KEYWORDS = ["reissue", "repress", "remaster"];
+
+function isReissue(formatDescriptions: string[]) {
+  return formatDescriptions.some((description) =>
+    REISSUE_KEYWORDS.some((keyword) => description.toLowerCase().includes(keyword)),
+  );
+}
 
 export function formatDiscogsMoney({ currency, value }: DiscogsMoney, options: { cents?: boolean } = {}) {
   const { cents = true } = options;
@@ -60,6 +70,9 @@ export type CollectionValueSummary = {
   byDecade: { decade: string; total: number; count: number }[];
   byGenre: { genre: string; total: number; count: number }[];
   currentlyListedCount: number;
+  originalCount: number;
+  reissueCount: number;
+  byCountry: { country: string; count: number }[];
 };
 
 /**
@@ -100,9 +113,12 @@ export function useCollectionValue(records: VinylRecord[]) {
       let mostWanted: { record: VinylRecord; want: number } | undefined;
       let highestRated: { record: VinylRecord; average: number; count: number } | undefined;
       let currentlyListedCount = 0;
+      let originalCount = 0;
+      let reissueCount = 0;
       const byFormatMap = new Map<string, { total: number; count: number }>();
       const byDecadeMap = new Map<string, { total: number; count: number }>();
       const byGenreMap = new Map<string, { total: number; count: number }>();
+      const byCountryMap = new Map<string, number>();
 
       for (const { record, value: recordValue } of results) {
         const priced = recordValue?.estimate ?? recordValue?.lowestListing;
@@ -136,6 +152,15 @@ export function useCollectionValue(records: VinylRecord[]) {
 
         if ((recordValue?.numForSale ?? 0) > 0) currentlyListedCount += 1;
 
+        if (recordValue) {
+          if (isReissue(recordValue.formatDescriptions)) reissueCount += 1;
+          else originalCount += 1;
+        }
+
+        if (recordValue?.country) {
+          byCountryMap.set(recordValue.country, (byCountryMap.get(recordValue.country) ?? 0) + 1);
+        }
+
         if (typeof recordValue?.have === "number") {
           if (!rarest || recordValue.have < rarest.have) {
             rarest = { record, have: recordValue.have };
@@ -166,6 +191,10 @@ export function useCollectionValue(records: VinylRecord[]) {
         .sort((a, b) => b.total - a.total)
         .slice(0, 8);
 
+      const byCountry = [...byCountryMap.entries()]
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count);
+
       setValue({
         total,
         currency,
@@ -181,6 +210,9 @@ export function useCollectionValue(records: VinylRecord[]) {
         byDecade,
         byGenre,
         currentlyListedCount,
+        originalCount,
+        reissueCount,
+        byCountry,
       });
       setIsLoading(false);
     });
