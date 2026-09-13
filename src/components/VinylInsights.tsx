@@ -21,6 +21,7 @@ function BreakdownSection({
   totalCount,
   barColor = "bg-gray-950",
   linkBase,
+  formatCount = (count) => String(count),
 }: {
   title: string;
   narrative?: string;
@@ -28,6 +29,7 @@ function BreakdownSection({
   totalCount: number;
   barColor?: string;
   linkBase?: string;
+  formatCount?: (count: number) => string;
 }) {
   const [showAll, setShowAll] = useState(false);
   const topCount = items[0]?.count ?? 1;
@@ -45,7 +47,7 @@ function BreakdownSection({
               <div className="mb-1.5 flex items-center justify-between gap-2 text-xs sm:text-sm">
                 <span className="truncate font-medium text-gray-900">{item.label}</span>
                 <span className="shrink-0 tabular-nums text-gray-500">
-                  {item.count} · {pct}%
+                  {formatCount(item.count)} · {pct}%
                 </span>
               </div>
               <div className="h-2 rounded-full bg-gray-100">
@@ -398,6 +400,11 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   {discogsLinkedCount} of {allRecords.length} records linked to Discogs
                   {discogsVerifiedCount ? ` (${discogsVerifiedCount} confirmed)` : ""}
                 </p>
+                {collectionValue.currentlyListedCount > 0 ? (
+                  <p className="mt-1 text-xs text-gray-400">
+                    {collectionValue.currentlyListedCount} of your records have copies for sale on Discogs right now
+                  </p>
+                ) : null}
               </div>
               {collectionValue.mostValuable ? (
                 <Link
@@ -595,6 +602,30 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           <div className="mt-5">
             <DonutChart
               items={collectionValue.byFormat.map((entry) => ({ label: entry.format, count: Math.round(entry.total) }))}
+              formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {collectionValue?.byDecade && collectionValue.byDecade.length > 1 ? (
+        <BreakdownSection
+          title="Value by decade"
+          narrative="Where the money in your collection actually sits, by the decade each record was released."
+          items={collectionValue.byDecade.map((entry) => ({ label: entry.decade, count: Math.round(entry.total) }))}
+          totalCount={collectionValue.byDecade.reduce((sum, entry) => sum + Math.round(entry.total), 0)}
+          barColor="bg-emerald-500"
+          formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
+        />
+      ) : null}
+
+      {collectionValue?.byGenre && collectionValue.byGenre.length > 1 ? (
+        <section className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Value by genre</h2>
+          <p className="mt-1 text-xs text-gray-400">Which genres carry the most estimated value.</p>
+          <div className="mt-5">
+            <DonutChart
+              items={collectionValue.byGenre.map((entry) => ({ label: entry.genre, count: Math.round(entry.total) }))}
               formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
             />
           </div>

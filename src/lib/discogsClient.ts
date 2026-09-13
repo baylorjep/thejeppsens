@@ -1,4 +1,5 @@
 import { VinylRecord } from "@/data/vinyls";
+import { getReleaseDecade } from "@/lib/vinylRecordUtils";
 import { useEffect, useState } from "react";
 
 export type DiscogsMoney = { currency: string; value: number };
@@ -56,6 +57,9 @@ export type CollectionValueSummary = {
   mostWanted?: { record: VinylRecord; want: number };
   highestRated?: { record: VinylRecord; average: number; count: number };
   byFormat: { format: string; total: number; count: number }[];
+  byDecade: { decade: string; total: number; count: number }[];
+  byGenre: { genre: string; total: number; count: number }[];
+  currentlyListedCount: number;
 };
 
 /**
@@ -95,7 +99,10 @@ export function useCollectionValue(records: VinylRecord[]) {
       let rarest: { record: VinylRecord; have: number } | undefined;
       let mostWanted: { record: VinylRecord; want: number } | undefined;
       let highestRated: { record: VinylRecord; average: number; count: number } | undefined;
+      let currentlyListedCount = 0;
       const byFormatMap = new Map<string, { total: number; count: number }>();
+      const byDecadeMap = new Map<string, { total: number; count: number }>();
+      const byGenreMap = new Map<string, { total: number; count: number }>();
 
       for (const { record, value: recordValue } of results) {
         const priced = recordValue?.estimate ?? recordValue?.lowestListing;
@@ -112,9 +119,22 @@ export function useCollectionValue(records: VinylRecord[]) {
           }
 
           const formatKey = record.format || "Unknown";
-          const existing = byFormatMap.get(formatKey) ?? { total: 0, count: 0 };
-          byFormatMap.set(formatKey, { total: existing.total + priced.value, count: existing.count + 1 });
+          const existingFormat = byFormatMap.get(formatKey) ?? { total: 0, count: 0 };
+          byFormatMap.set(formatKey, { total: existingFormat.total + priced.value, count: existingFormat.count + 1 });
+
+          const decadeKey = getReleaseDecade(record);
+          if (decadeKey !== "Unknown") {
+            const existingDecade = byDecadeMap.get(decadeKey) ?? { total: 0, count: 0 };
+            byDecadeMap.set(decadeKey, { total: existingDecade.total + priced.value, count: existingDecade.count + 1 });
+          }
+
+          for (const genre of record.genres) {
+            const existingGenre = byGenreMap.get(genre) ?? { total: 0, count: 0 };
+            byGenreMap.set(genre, { total: existingGenre.total + priced.value, count: existingGenre.count + 1 });
+          }
         }
+
+        if ((recordValue?.numForSale ?? 0) > 0) currentlyListedCount += 1;
 
         if (typeof recordValue?.have === "number") {
           if (!rarest || recordValue.have < rarest.have) {
@@ -137,6 +157,15 @@ export function useCollectionValue(records: VinylRecord[]) {
         .map(([format, { total: formatTotal, count }]) => ({ format, total: formatTotal, count }))
         .sort((a, b) => b.total - a.total);
 
+      const byDecade = [...byDecadeMap.entries()]
+        .map(([decade, { total: decadeTotal, count }]) => ({ decade, total: decadeTotal, count }))
+        .sort((a, b) => a.decade.localeCompare(b.decade));
+
+      const byGenre = [...byGenreMap.entries()]
+        .map(([genre, { total: genreTotalValue, count }]) => ({ genre, total: genreTotalValue, count }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 8);
+
       setValue({
         total,
         currency,
@@ -149,6 +178,9 @@ export function useCollectionValue(records: VinylRecord[]) {
         mostWanted,
         highestRated,
         byFormat,
+        byDecade,
+        byGenre,
+        currentlyListedCount,
       });
       setIsLoading(false);
     });
