@@ -2,7 +2,6 @@
 
 import { VinylRecord } from "@/data/vinyls";
 import DiscogsValueCard from "@/components/DiscogsValueCard";
-import { formatDiscogsMoney, useCollectionValue } from "@/lib/discogsClient";
 import {
   getCollectionSnapshot,
   getStatusTone,
@@ -501,7 +500,6 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const shouldUseModal = !isTouchDevice;
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
-  const { value: collectionValue, isLoading: isLoadingCollectionValue } = useCollectionValue(allRecords);
   const ownedShelfRecords = useMemo(
     () => allRecords.filter((record) => record.status !== "wishlist"),
     [allRecords],
@@ -902,23 +900,11 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   return (
     <div>
       <div className="mb-10 overflow-x-auto pb-1">
-        <div className="grid w-max grid-cols-6 gap-3 md:w-auto">
+        <div className="grid w-max grid-cols-5 gap-3 md:w-auto">
           <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
             <p className="text-sm text-gray-500">Records</p>
             <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
               <AnimatedNumber value={ownedShelfRecords.length} />
-            </p>
-          </div>
-          <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
-            <p className="text-sm text-gray-500">Collection value</p>
-            <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
-              {isLoadingCollectionValue ? (
-                <span className="inline-block h-6 w-16 animate-pulse rounded bg-gray-200 align-middle" />
-              ) : collectionValue ? (
-                formatDiscogsMoney({ currency: collectionValue.currency, value: collectionValue.total }, { cents: false })
-              ) : (
-                "—"
-              )}
             </p>
           </div>
           <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
