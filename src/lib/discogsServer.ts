@@ -38,6 +38,24 @@ function discogsHeaders() {
   };
 }
 
+/**
+ * Discogs allows ~60 authenticated requests/minute, and with several hooks
+ * on the site fetching a release's price/rarity/rating/artists back to
+ * back, a 429 is a "slow down," not a real failure - retry with backoff
+ * (honoring Retry-After when Discogs sends one) instead of surfacing it as
+ * missing data.
+ */
+async function discogsFetch(url: string | URL, attempt = 0): Promise<Response> {
+  const response = await fetch(url, { headers: discogsHeaders() });
+  if (response.status !== 429 || attempt >= 3) return response;
+
+  const retryAfterHeader = response.headers.get("retry-after");
+  const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : (attempt + 1) * 2000;
+
+  await new Promise((resolve) => setTimeout(resolve, Number.isFinite(retryAfterMs) ? retryAfterMs : 2000));
+  return discogsFetch(url, attempt + 1);
+}
+
 export async function searchDiscogsReleases(query: string) {
   if (!process.env.DISCOGS_TOKEN) return null;
 
@@ -47,7 +65,7 @@ export async function searchDiscogsReleases(query: string) {
   url.searchParams.set("format", "Vinyl");
   url.searchParams.set("per_page", "12");
 
-  const response = await fetch(url, { headers: discogsHeaders() });
+  const response = await discogsFetch(url);
   if (!response.ok) throw new Error(`Discogs search failed (${response.status})`);
 
   const data = (await response.json()) as { results?: DiscogsSearchResult[] };
@@ -62,9 +80,7 @@ export async function searchDiscogsReleases(query: string) {
 export async function fetchDiscogsRelease(releaseId: string) {
   if (!process.env.DISCOGS_TOKEN) return null;
 
-  const response = await fetch(`${DISCOGS_API_BASE}/releases/${releaseId}`, {
-    headers: discogsHeaders(),
-  });
+  const response = await discogsFetch(`${DISCOGS_API_BASE}/releases/${releaseId}`);
   if (!response.ok) throw new Error(`Discogs release lookup failed (${response.status})`);
 
   return (await response.json()) as DiscogsRelease;
@@ -125,9 +141,7 @@ export function normalizeConditionToDiscogsGrade(condition?: string): { grade: s
 export async function fetchDiscogsPriceSuggestions(releaseId: string) {
   if (!process.env.DISCOGS_TOKEN) return null;
 
-  const response = await fetch(`${DISCOGS_API_BASE}/marketplace/price_suggestions/${releaseId}`, {
-    headers: discogsHeaders(),
-  });
+  const response = await discogsFetch(`${DISCOGS_API_BASE}/marketplace/price_suggestions/${releaseId}`);
   if (response.status === 404) return {} as DiscogsPriceSuggestions;
   if (!response.ok) throw new Error(`Discogs price suggestions failed (${response.status})`);
 
@@ -140,7 +154,7 @@ export async function fetchDiscogsMarketplaceStats(releaseId: string) {
   const url = new URL(`${DISCOGS_API_BASE}/marketplace/stats/${releaseId}`);
   url.searchParams.set("curr_abbr", "USD");
 
-  const response = await fetch(url, { headers: discogsHeaders() });
+  const response = await discogsFetch(url);
   if (!response.ok) throw new Error(`Discogs marketplace stats failed (${response.status})`);
 
   return (await response.json()) as DiscogsMarketplaceStats;

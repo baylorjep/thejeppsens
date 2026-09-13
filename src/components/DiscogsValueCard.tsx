@@ -1,6 +1,6 @@
 "use client";
 
-import { DiscogsValueResponse, fetchDiscogsValue, formatDiscogsMoney } from "@/lib/discogsClient";
+import { DiscogsValueResponse, fetchDiscogsValueDirect, formatDiscogsMoney } from "@/lib/discogsClient";
 import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -20,11 +20,11 @@ export default function DiscogsValueCard({
   const [value, setValue] = useState<DiscogsValueResponse | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
 
-  const load = () => {
+  const load = (forceRefresh = false) => {
     let active = true;
     setStatus("loading");
 
-    fetchDiscogsValue(releaseId, condition).then((data) => {
+    fetchDiscogsValueDirect(releaseId, condition, { forceRefresh }).then((data) => {
       if (!active) return;
       if (!data) {
         setStatus("unavailable");
@@ -39,7 +39,7 @@ export default function DiscogsValueCard({
     };
   };
 
-  useEffect(load, [releaseId, condition]);
+  useEffect(() => load(false), [releaseId, condition]);
 
   if (status === "unavailable") return null;
 
@@ -49,7 +49,7 @@ export default function DiscogsValueCard({
         <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Estimated value</h3>
         <button
           type="button"
-          onClick={load}
+          onClick={() => load(true)}
           disabled={status === "loading"}
           className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 disabled:opacity-50"
           aria-label="Refresh estimate"

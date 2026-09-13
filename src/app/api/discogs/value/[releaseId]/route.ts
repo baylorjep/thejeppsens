@@ -36,6 +36,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ rele
       ratingCount: release?.community?.rating?.count ?? null,
       formatDescriptions: release?.formats?.[0]?.descriptions ?? [],
       country: release?.country ?? null,
+      artists: (release?.artists ?? []).map((artist) => artist.name.replace(/\s\(\d+\)$/, "")),
     });
   } catch (error) {
     console.error("Discogs value lookup failed", error);

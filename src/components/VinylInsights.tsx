@@ -2,7 +2,7 @@
 
 import { VinylRecord } from "@/data/vinyls";
 import DonutChart from "@/components/DonutChart";
-import { formatDiscogsMoney, useCollectionValue } from "@/lib/discogsClient";
+import { formatDiscogsMoney, useCollectionValue, useDiscogsArtistBreakdown } from "@/lib/discogsClient";
 import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
 import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
@@ -123,6 +123,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
 
   const { value: collectionValue, isLoading: isLoadingValue } = useCollectionValue(allRecords);
+  const discogsArtistBreakdown = useDiscogsArtistBreakdown(allRecords);
+  const artistBreakdown = discogsArtistBreakdown ?? snapshot.artistBreakdown;
 
   const recentlyAdded = useMemo(
     () =>
@@ -136,7 +138,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   const genreTotal = snapshot.genreBreakdown.reduce((s, i) => s + i.count, 0);
   const moodTotal = snapshot.moodBreakdown.reduce((s, i) => s + i.count, 0);
 
-  const topRealArtist = snapshot.artistBreakdown.find(
+  const topRealArtist = artistBreakdown.find(
     (a) => a.label.toLowerCase() !== "various artists",
   );
 
@@ -148,9 +150,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     const genrePct = Math.round((snapshot.topGenre.count / total) * 100);
 
     const leadingArtist = topRealArtist?.label ?? snapshot.topArtist.value;
-    const escapedArtist = leadingArtist.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const leadingArtistPattern = new RegExp(escapedArtist, "i");
-    const leadingArtistCount = allRecords.filter((record) => leadingArtistPattern.test(record.artist)).length;
+    const leadingArtistCount = (topRealArtist ?? artistBreakdown[0])?.count ?? 0;
 
     lines.push(
       `${genrePct}% of your collection is ${snapshot.topGenre.value}, led by ${leadingArtist} with ${leadingArtistCount} records, mostly from the ${snapshot.topReleaseEra.value}.`,
@@ -202,7 +202,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     }
 
     return lines;
-  }, [allRecords, snapshot, topRealArtist]);
+  }, [allRecords, snapshot, topRealArtist, artistBreakdown]);
 
   const discogsLinkedCount = useMemo(
     () => allRecords.filter((record) => record.discogsReleaseId).length,
@@ -224,7 +224,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         : `${topGenre.label} is your only genre so far, across ${topGenre.count} records.`;
     }
 
-    const [topArtist] = snapshot.artistBreakdown;
+    const [topArtist] = artistBreakdown;
     if (topArtist) {
       lines.artist = `${topArtist.label} tops your artist list with ${topArtist.count} record${topArtist.count === 1 ? "" : "s"}, out of ${snapshot.artists} artists in all.`;
     }
@@ -264,7 +264,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     }
 
     return lines;
-  }, [allRecords.length, snapshot, genreTotal]);
+  }, [allRecords.length, snapshot, genreTotal, artistBreakdown]);
 
   const needsAttention = useMemo(
     () => ({
@@ -548,8 +548,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         <BreakdownSection
           title="Top artists"
           narrative={categoryNarratives.artist}
-          items={snapshot.artistBreakdown}
-          totalCount={allRecords.length}
+          items={artistBreakdown}
+          totalCount={artistBreakdown.reduce((sum, item) => sum + item.count, 0)}
           barColor="bg-blue-500"
         />
         <BreakdownSection
