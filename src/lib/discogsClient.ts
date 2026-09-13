@@ -113,7 +113,7 @@ export type CollectionValueSummary = {
   reissueCount: number;
   rarestRecords: { record: VinylRecord; have: number }[];
   mostWantedRecords: { record: VinylRecord; want: number }[];
-  rarityTiers: { tier: string; count: number }[];
+  rarityTiers: { tier: string; count: number; records: { record: VinylRecord; have: number }[] }[];
 };
 
 export const RARITY_TIERS = [
@@ -213,14 +213,18 @@ function aggregateCollectionValue(
   const rarestRecords = [...haveEntries].sort((a, b) => a.have - b.have).slice(0, 10);
   const mostWantedRecords = [...wantEntries].sort((a, b) => b.want - a.want).slice(0, 10);
 
-  const tierCounts = new Map(RARITY_TIERS.map((tier) => [tier.label, 0]));
+  const tierRecords = new Map<string, { record: VinylRecord; have: number }[]>(
+    RARITY_TIERS.map((tier) => [tier.label, []]),
+  );
   for (const entry of haveEntries) {
     const tier = rarityTierLabel(entry.have);
-    tierCounts.set(tier, (tierCounts.get(tier) ?? 0) + 1);
+    tierRecords.get(tier)?.push(entry);
   }
-  const rarityTiers = RARITY_TIERS.map((tier) => ({ tier: tier.label, count: tierCounts.get(tier.label) ?? 0 })).filter(
-    (entry) => entry.count > 0,
-  );
+  const rarityTiers = RARITY_TIERS.map((tier) => ({
+    tier: tier.label,
+    count: tierRecords.get(tier.label)?.length ?? 0,
+    records: (tierRecords.get(tier.label) ?? []).sort((a, b) => a.have - b.have),
+  })).filter((entry) => entry.count > 0);
 
   return {
     total,

@@ -113,6 +113,7 @@ function AnimatedNumber({ value }: { value: number }) {
 
 export default function VinylInsights({ records }: VinylInsightsProps) {
   const [allRecords, setAllRecords] = useState(records);
+  const [selectedRarityTier, setSelectedRarityTier] = useState<string | null>(null);
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -564,11 +565,49 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Rarity breakdown</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
             Ultra rare means fewer than 100 Discogs users report owning that exact pressing; common means 2,000 or
-            more.
+            more. Click a tier to see what's in it.
           </p>
           <div className="mt-5">
-            <DonutChart items={collectionValue.rarityTiers.map((entry) => ({ label: entry.tier, count: entry.count }))} />
+            <DonutChart
+              items={collectionValue.rarityTiers.map((entry) => ({ label: entry.tier, count: entry.count }))}
+              selectedLabel={selectedRarityTier}
+              onSelectLabel={(label) => setSelectedRarityTier((current) => (current === label ? null : label))}
+            />
           </div>
+          {selectedRarityTier ? (
+            <div className="mt-5 border-t border-gray-100 pt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-950">{selectedRarityTier}</h3>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRarityTier(null)}
+                  className="text-xs text-gray-400 underline-offset-4 hover:text-gray-700 hover:underline"
+                >
+                  Close
+                </button>
+              </div>
+              <ol className="mt-3 space-y-1">
+                {collectionValue.rarityTiers
+                  .find((entry) => entry.tier === selectedRarityTier)
+                  ?.records.map((entry, index) => (
+                    <li key={entry.record.id}>
+                      <Link
+                        href={`/vinyl/${entry.record.id}`}
+                        className="-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-50"
+                      >
+                        <span className="min-w-0 flex-1 truncate text-sm text-gray-900">
+                          <span className="mr-2 tabular-nums text-gray-400">{index + 1}.</span>
+                          {entry.record.title}
+                        </span>
+                        <span className="shrink-0 text-xs tabular-nums text-gray-500">
+                          {entry.have.toLocaleString()}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+              </ol>
+            </div>
+          ) : null}
         </section>
       ) : null}
 
