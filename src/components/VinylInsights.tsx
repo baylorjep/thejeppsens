@@ -1,7 +1,7 @@
 "use client";
 
 import { VinylRecord } from "@/data/vinyls";
-import { fetchDiscogsValue, formatDiscogsMoney } from "@/lib/discogsClient";
+import { formatDiscogsMoney, useCollectionValue } from "@/lib/discogsClient";
 import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
 import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
@@ -11,15 +11,6 @@ import { useEffect, useMemo, useState } from "react";
 
 type VinylInsightsProps = {
   records: VinylRecord[];
-};
-
-type CollectionValueSummary = {
-  total: number;
-  currency: string;
-  pricedCount: number;
-  linkedCount: number;
-  unverifiedCount: number;
-  mostValuable?: { record: VinylRecord; value: number };
 };
 
 function BreakdownSection({
@@ -125,60 +116,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
 
-  const [collectionValue, setCollectionValue] = useState<CollectionValueSummary | null>(null);
-  const [isLoadingValue, setIsLoadingValue] = useState(false);
-
-  useEffect(() => {
-    const ownedLinkedRecords = allRecords.filter((record) => record.status === "owned" && record.discogsReleaseId);
-    if (!ownedLinkedRecords.length) {
-      setCollectionValue(null);
-      return;
-    }
-
-    let active = true;
-    setIsLoadingValue(true);
-
-    Promise.all(
-      ownedLinkedRecords.map(async (record) => ({
-        record,
-        value: await fetchDiscogsValue(record.discogsReleaseId!, record.condition),
-      })),
-    ).then((results) => {
-      if (!active) return;
-
-      let total = 0;
-      let currency = "USD";
-      let pricedCount = 0;
-      let unverifiedCount = 0;
-      let mostValuable: { record: VinylRecord; value: number } | undefined;
-
-      for (const { record, value } of results) {
-        const priced = value?.estimate ?? value?.lowestListing;
-        if (!priced) continue;
-        total += priced.value;
-        currency = priced.currency;
-        pricedCount += 1;
-        if (!record.discogsVerified) unverifiedCount += 1;
-        if (!mostValuable || priced.value > mostValuable.value) {
-          mostValuable = { record, value: priced.value };
-        }
-      }
-
-      setCollectionValue({
-        total,
-        currency,
-        pricedCount,
-        linkedCount: ownedLinkedRecords.length,
-        unverifiedCount,
-        mostValuable,
-      });
-      setIsLoadingValue(false);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [allRecords]);
+  const { value: collectionValue, isLoading: isLoadingValue } = useCollectionValue(allRecords);
 
   const recentlyAdded = useMemo(
     () =>
