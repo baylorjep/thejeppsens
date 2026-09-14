@@ -14,6 +14,8 @@ type VinylInsightsProps = {
   records: VinylRecord[];
 };
 
+const RARITY_PAGE_SIZE = 10;
+
 function BreakdownSection({
   title,
   narrative,
@@ -114,6 +116,7 @@ function AnimatedNumber({ value }: { value: number }) {
 export default function VinylInsights({ records }: VinylInsightsProps) {
   const [allRecords, setAllRecords] = useState(records);
   const [selectedRarityTier, setSelectedRarityTier] = useState<string | null>(null);
+  const [rarityPage, setRarityPage] = useState(0);
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -571,43 +574,78 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             <DonutChart
               items={collectionValue.rarityTiers.map((entry) => ({ label: entry.tier, count: entry.count }))}
               selectedLabel={selectedRarityTier}
-              onSelectLabel={(label) => setSelectedRarityTier((current) => (current === label ? null : label))}
+              onSelectLabel={(label) => {
+                setSelectedRarityTier((current) => (current === label ? null : label));
+                setRarityPage(0);
+              }}
             />
           </div>
-          {selectedRarityTier ? (
-            <div className="mt-5 border-t border-gray-100 pt-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-950">{selectedRarityTier}</h3>
-                <button
-                  type="button"
-                  onClick={() => setSelectedRarityTier(null)}
-                  className="text-xs text-gray-400 underline-offset-4 hover:text-gray-700 hover:underline"
-                >
-                  Close
-                </button>
-              </div>
-              <ol className="mt-3 space-y-1">
-                {collectionValue.rarityTiers
-                  .find((entry) => entry.tier === selectedRarityTier)
-                  ?.records.map((entry, index) => (
-                    <li key={entry.record.id}>
-                      <Link
-                        href={`/vinyl/${entry.record.id}`}
-                        className="-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-50"
+          {selectedRarityTier
+            ? (() => {
+                const tierRecords =
+                  collectionValue.rarityTiers.find((entry) => entry.tier === selectedRarityTier)?.records ?? [];
+                const totalPages = Math.max(1, Math.ceil(tierRecords.length / RARITY_PAGE_SIZE));
+                const page = Math.min(rarityPage, totalPages - 1);
+                const pageRecords = tierRecords.slice(page * RARITY_PAGE_SIZE, (page + 1) * RARITY_PAGE_SIZE);
+                return (
+                  <div className="mt-5 border-t border-gray-100 pt-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-gray-950">
+                        {selectedRarityTier} <span className="font-normal text-gray-400">({tierRecords.length})</span>
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRarityTier(null)}
+                        className="text-xs text-gray-400 underline-offset-4 hover:text-gray-700 hover:underline"
                       >
-                        <span className="min-w-0 flex-1 truncate text-sm text-gray-900">
-                          <span className="mr-2 tabular-nums text-gray-400">{index + 1}.</span>
-                          {entry.record.title}
+                        Close
+                      </button>
+                    </div>
+                    <ol className="mt-3 space-y-1">
+                      {pageRecords.map((entry, index) => (
+                        <li key={entry.record.id}>
+                          <Link
+                            href={`/vinyl/${entry.record.id}`}
+                            className="-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-50"
+                          >
+                            <span className="min-w-0 flex-1 truncate text-sm text-gray-900">
+                              <span className="mr-2 tabular-nums text-gray-400">{page * RARITY_PAGE_SIZE + index + 1}.</span>
+                              {entry.record.title}
+                            </span>
+                            <span className="shrink-0 text-xs tabular-nums text-gray-500">
+                              {entry.have.toLocaleString()}
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ol>
+                    {totalPages > 1 ? (
+                      <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                        <button
+                          type="button"
+                          onClick={() => setRarityPage((p) => Math.max(0, p - 1))}
+                          disabled={page === 0}
+                          className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
+                        >
+                          Previous
+                        </button>
+                        <span className="tabular-nums">
+                          Page {page + 1} of {totalPages}
                         </span>
-                        <span className="shrink-0 text-xs tabular-nums text-gray-500">
-                          {entry.have.toLocaleString()}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-              </ol>
-            </div>
-          ) : null}
+                        <button
+                          type="button"
+                          onClick={() => setRarityPage((p) => Math.min(totalPages - 1, p + 1))}
+                          disabled={page >= totalPages - 1}
+                          className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })()
+            : null}
         </section>
       ) : null}
 
