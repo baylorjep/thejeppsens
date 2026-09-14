@@ -91,6 +91,100 @@ function BreakdownSection({
   );
 }
 
+function TierBreakdownSection({
+  title,
+  description,
+  tiers,
+  selectedTier,
+  onSelectTier,
+  page,
+  onPageChange,
+}: {
+  title: string;
+  description: string;
+  tiers: { tier: string; count: number; records: { record: VinylRecord; value: number }[] }[];
+  selectedTier: string | null;
+  onSelectTier: (label: string) => void;
+  page: number;
+  onPageChange: (page: number) => void;
+}) {
+  const activeTier = tiers.find((entry) => entry.tier === selectedTier);
+  const totalPages = activeTier ? Math.max(1, Math.ceil(activeTier.records.length / RARITY_PAGE_SIZE)) : 1;
+  const clampedPage = Math.min(page, totalPages - 1);
+  const pageRecords = activeTier
+    ? activeTier.records.slice(clampedPage * RARITY_PAGE_SIZE, (clampedPage + 1) * RARITY_PAGE_SIZE)
+    : [];
+
+  return (
+    <section className="rounded-lg border border-gray-200 bg-white p-5">
+      <h2 className="text-base font-semibold text-gray-950 sm:text-xl">{title}</h2>
+      <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{description}</p>
+      <div className="mt-5">
+        <DonutChart
+          items={tiers.map((entry) => ({ label: entry.tier, count: entry.count }))}
+          selectedLabel={selectedTier}
+          onSelectLabel={onSelectTier}
+        />
+      </div>
+      {activeTier ? (
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-950">
+              {activeTier.tier} <span className="font-normal text-gray-400">({activeTier.records.length})</span>
+            </h3>
+            <button
+              type="button"
+              onClick={() => onSelectTier(activeTier.tier)}
+              className="text-xs text-gray-400 underline-offset-4 hover:text-gray-700 hover:underline"
+            >
+              Close
+            </button>
+          </div>
+          <ol className="mt-3 space-y-1">
+            {pageRecords.map((entry, index) => (
+              <li key={entry.record.id}>
+                <Link
+                  href={`/vinyl/${entry.record.id}`}
+                  className="-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-50"
+                >
+                  <span className="min-w-0 flex-1 truncate text-sm text-gray-900">
+                    <span className="mr-2 tabular-nums text-gray-400">{clampedPage * RARITY_PAGE_SIZE + index + 1}.</span>
+                    {entry.record.title}
+                  </span>
+                  <span className="shrink-0 text-xs tabular-nums text-gray-500">{entry.value.toLocaleString()}</span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+          {totalPages > 1 ? (
+            <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+              <button
+                type="button"
+                onClick={() => onPageChange(Math.max(0, clampedPage - 1))}
+                disabled={clampedPage === 0}
+                className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
+              >
+                Previous
+              </button>
+              <span className="tabular-nums">
+                Page {clampedPage + 1} of {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => onPageChange(Math.min(totalPages - 1, clampedPage + 1))}
+                disabled={clampedPage >= totalPages - 1}
+                className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
+              >
+                Next
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function AnimatedNumber({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = useState(0);
 
@@ -117,6 +211,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   const [allRecords, setAllRecords] = useState(records);
   const [selectedRarityTier, setSelectedRarityTier] = useState<string | null>(null);
   const [rarityPage, setRarityPage] = useState(0);
+  const [selectedWantTier, setSelectedWantTier] = useState<string | null>(null);
+  const [wantPage, setWantPage] = useState(0);
 
   useEffect(() => {
     const queuedRecords = readQueuedVinyls();
@@ -512,141 +608,46 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         </div>
       ) : null}
 
-      {/* Rarity leaderboard */}
-      {collectionValue && (collectionValue.rarestRecords.length > 1 || collectionValue.mostWantedRecords.length > 1) ? (
+      {/* Rarity + demand breakdowns */}
+      {(collectionValue?.rarityTiers?.length ?? 0) > 1 || (collectionValue?.wantTiers?.length ?? 0) > 1 ? (
         <div className="grid gap-6 lg:grid-cols-2">
-          {collectionValue.rarestRecords.length > 1 ? (
-            <section className="rounded-lg border border-gray-200 bg-white p-5">
-              <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Rarest pressings</h2>
-              <p className="mt-1 text-xs text-gray-400">Fewest Discogs users reporting they own this exact pressing.</p>
-              <ol className="mt-4 space-y-1">
-                {collectionValue.rarestRecords.map((entry, index) => (
-                  <li key={entry.record.id}>
-                    <Link
-                      href={`/vinyl/${entry.record.id}`}
-                      className="-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-50"
-                    >
-                      <span className="min-w-0 flex-1 truncate text-sm text-gray-900">
-                        <span className="mr-2 tabular-nums text-gray-400">{index + 1}.</span>
-                        {entry.record.title}
-                      </span>
-                      <span className="shrink-0 text-xs tabular-nums text-gray-500">{entry.have.toLocaleString()}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          ) : null}
-          {collectionValue.mostWantedRecords.length > 1 ? (
-            <section className="rounded-lg border border-gray-200 bg-white p-5">
-              <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Most wanted</h2>
-              <p className="mt-1 text-xs text-gray-400">Most Discogs users with this pressing on their wantlist.</p>
-              <ol className="mt-4 space-y-1">
-                {collectionValue.mostWantedRecords.map((entry, index) => (
-                  <li key={entry.record.id}>
-                    <Link
-                      href={`/vinyl/${entry.record.id}`}
-                      className="-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-50"
-                    >
-                      <span className="min-w-0 flex-1 truncate text-sm text-gray-900">
-                        <span className="mr-2 tabular-nums text-gray-400">{index + 1}.</span>
-                        {entry.record.title}
-                      </span>
-                      <span className="shrink-0 text-xs tabular-nums text-gray-500">{entry.want.toLocaleString()}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* Rarity distribution */}
-      {collectionValue?.rarityTiers && collectionValue.rarityTiers.length > 1 ? (
-        <section className="rounded-lg border border-gray-200 bg-white p-5">
-          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Rarity breakdown</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
-            Ultra rare means fewer than 100 Discogs users report owning that exact pressing; common means 2,000 or
-            more. Click a tier to see what's in it.
-          </p>
-          <div className="mt-5">
-            <DonutChart
-              items={collectionValue.rarityTiers.map((entry) => ({ label: entry.tier, count: entry.count }))}
-              selectedLabel={selectedRarityTier}
-              onSelectLabel={(label) => {
+          {collectionValue?.rarityTiers && collectionValue.rarityTiers.length > 1 ? (
+            <TierBreakdownSection
+              title="Rarity breakdown"
+              description="Ultra rare means fewer than 100 Discogs users report owning that exact pressing; common means 2,000 or more. Click a tier to see what's in it."
+              tiers={collectionValue.rarityTiers.map((entry) => ({
+                tier: entry.tier,
+                count: entry.count,
+                records: entry.records.map((r) => ({ record: r.record, value: r.have })),
+              }))}
+              selectedTier={selectedRarityTier}
+              onSelectTier={(label) => {
                 setSelectedRarityTier((current) => (current === label ? null : label));
                 setRarityPage(0);
               }}
+              page={rarityPage}
+              onPageChange={setRarityPage}
             />
-          </div>
-          {selectedRarityTier
-            ? (() => {
-                const tierRecords =
-                  collectionValue.rarityTiers.find((entry) => entry.tier === selectedRarityTier)?.records ?? [];
-                const totalPages = Math.max(1, Math.ceil(tierRecords.length / RARITY_PAGE_SIZE));
-                const page = Math.min(rarityPage, totalPages - 1);
-                const pageRecords = tierRecords.slice(page * RARITY_PAGE_SIZE, (page + 1) * RARITY_PAGE_SIZE);
-                return (
-                  <div className="mt-5 border-t border-gray-100 pt-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-gray-950">
-                        {selectedRarityTier} <span className="font-normal text-gray-400">({tierRecords.length})</span>
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedRarityTier(null)}
-                        className="text-xs text-gray-400 underline-offset-4 hover:text-gray-700 hover:underline"
-                      >
-                        Close
-                      </button>
-                    </div>
-                    <ol className="mt-3 space-y-1">
-                      {pageRecords.map((entry, index) => (
-                        <li key={entry.record.id}>
-                          <Link
-                            href={`/vinyl/${entry.record.id}`}
-                            className="-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-gray-50"
-                          >
-                            <span className="min-w-0 flex-1 truncate text-sm text-gray-900">
-                              <span className="mr-2 tabular-nums text-gray-400">{page * RARITY_PAGE_SIZE + index + 1}.</span>
-                              {entry.record.title}
-                            </span>
-                            <span className="shrink-0 text-xs tabular-nums text-gray-500">
-                              {entry.have.toLocaleString()}
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ol>
-                    {totalPages > 1 ? (
-                      <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-                        <button
-                          type="button"
-                          onClick={() => setRarityPage((p) => Math.max(0, p - 1))}
-                          disabled={page === 0}
-                          className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
-                        >
-                          Previous
-                        </button>
-                        <span className="tabular-nums">
-                          Page {page + 1} of {totalPages}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setRarityPage((p) => Math.min(totalPages - 1, p + 1))}
-                          disabled={page >= totalPages - 1}
-                          className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })()
-            : null}
-        </section>
+          ) : null}
+          {collectionValue?.wantTiers && collectionValue.wantTiers.length > 1 ? (
+            <TierBreakdownSection
+              title="Demand breakdown"
+              description="How many Discogs users have this exact pressing on their wantlist. Click a tier to see what's in it."
+              tiers={collectionValue.wantTiers.map((entry) => ({
+                tier: entry.tier,
+                count: entry.count,
+                records: entry.records.map((r) => ({ record: r.record, value: r.want })),
+              }))}
+              selectedTier={selectedWantTier}
+              onSelectTier={(label) => {
+                setSelectedWantTier((current) => (current === label ? null : label));
+                setWantPage(0);
+              }}
+              page={wantPage}
+              onPageChange={setWantPage}
+            />
+          ) : null}
+        </div>
       ) : null}
 
       {/* Recently Added */}
