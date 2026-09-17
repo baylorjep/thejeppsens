@@ -37,8 +37,8 @@ export function missingEvidence(e: PressingEvidence): string[] {
   if (e.sealed) return [!photo("front") && "Front-cover photo", !photo("back") && "Back-cover photo", !(e.catalogNumber.trim() || e.barcode.trim()) && "Catalog number or barcode from the packaging"].filter(Boolean) as string[];
   const sides = sidesFor(e.discCount);
   return [
-    ...(!e.catalogNumber.trim() ? sides.filter(s => !photo("label", s)).map(s => `Side ${s}: label photo (or enter the catalog number)`) : []),
-    ...sides.filter(s => !e.runouts[s]?.trim() && !photo("runout", s)).map(s => `Side ${s}: runout text or a readable runout photo`),
+    ...(!e.catalogNumber.trim() ? sides.filter(s => !photo("label", s)).map(s => `Side ${s}: photo of the paper center label (or enter the catalog number)`) : []),
+    ...sides.filter(s => !e.runouts[s]?.trim() && !photo("runout", s)).map(s => `Side ${s}: close-ups of the tiny markings near the center label, or type those markings`),
   ];
 }
 // The same validation is used by the server, UI, and terminal export.
