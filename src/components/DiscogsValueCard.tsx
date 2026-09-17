@@ -46,7 +46,7 @@ export default function DiscogsValueCard({
   return (
     <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-6">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Estimated value</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Discogs price reference</h3>
         <button
           type="button"
           onClick={() => load(true)}
@@ -91,11 +91,12 @@ export default function DiscogsValueCard({
       ) : (
         <p className="mt-2 text-sm text-gray-500">No Discogs price data for this pressing yet.</p>
       )}
+      {status === "ready" && value?.isGuess ? <p className="mt-3 text-xs text-gray-600">No media grade recorded. Asking prices are shown only as market context, not your copy’s value.</p> : null}
+      {status === "ready" && value?.estimate ? <p className="mt-3 text-xs text-gray-500">Discogs suggestion for this media grade. Jacket condition, missing extras, and comparable sales still need review.</p> : null}
       {status === "ready" && (value?.estimate || value?.lowestListing) && !verifiedPressing ? (
         <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
           Approximate. This pressing hasn&apos;t been manually confirmed, so it may not be the exact one
-          priced here. Edit this record and confirm the match under &quot;Discogs&quot; to sharpen this
-          estimate.
+          priced here. Use “Identify this pressing” to submit physical evidence for review.
         </p>
       ) : null}
     </div>

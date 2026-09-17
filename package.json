@@ -9,8 +9,10 @@
     "import:vinyl": "node scripts/import-vinyls.mjs",
     "reprocess:vinyl-covers": "node scripts/reprocess-vinyl-covers.mjs",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "node scripts/setup-yt-dlp.mjs"
+    "lint": "eslint .",
+    "postinstall": "node scripts/setup-yt-dlp.mjs",
+    "vinyl:discogs": "node scripts/process-vinyl-pressings.mjs",
+    "test:pressings": "node --test scripts/pressing-evidence.test.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",

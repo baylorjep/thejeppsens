@@ -26,6 +26,9 @@ export default function VinylPage() {
             </h1>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+            <Link href="/vinyl/identify" className="inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:border-gray-500">
+              Identify pressings
+            </Link>
             <Link
               href="/vinyl/achievements"
               className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500 sm:w-fit"

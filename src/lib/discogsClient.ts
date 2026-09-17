@@ -160,7 +160,7 @@ function aggregateCollectionValue(
   const wantEntries: { record: VinylRecord; want: number }[] = [];
 
   for (const { record, value: recordValue } of results) {
-    const priced = recordValue?.estimate ?? recordValue?.lowestListing;
+    const priced = recordValue?.estimate;
     if (priced) {
       total += priced.value;
       currency = priced.currency;

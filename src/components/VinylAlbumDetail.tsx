@@ -355,7 +355,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       if (trackList.length) updateEditForm("trackList", trackList.join("\n"));
       if (coverImage && !editForm?.coverImage) updateEditForm("coverImage", coverImage);
       updateEditForm("discogsReleaseId", String(result.id));
-      updateEditForm("discogsVerified", true);
+      updateEditForm("discogsVerified", false);
       setDiscogsResults([]);
       setDiscogsQuery("");
     } finally {
@@ -803,6 +803,11 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 {statusMessage}
               </div>
             ) : null}
+
+            <Link href={`/vinyl/${encodeURIComponent(record.id)}/identify`} className="block rounded-2xl border border-gray-200 bg-stone-50 p-5 transition-colors hover:border-gray-400">
+              <span className="font-semibold">Identify this pressing →</span>
+              <span className="mt-1 block text-sm leading-6 text-gray-500">Add label photos and runouts for Baylor to review, or check your submission’s progress.</span>
+            </Link>
 
             {record.discogsReleaseId ? (
               <DiscogsValueCard

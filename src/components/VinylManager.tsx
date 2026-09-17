@@ -363,7 +363,7 @@ export default function VinylManager() {
         source: current.source || "Discogs",
         coverImage: current.coverImage || coverImage || current.coverImage,
         discogsReleaseId: String(result.id),
-        discogsVerified: true,
+        discogsVerified: false,
       }));
       setImageFile(undefined);
       setMessage(
@@ -554,6 +554,8 @@ export default function VinylManager() {
                 </p>
               </div>
             </div>
+
+            <Link href={`/vinyl/${encodeURIComponent(savedRecord.id)}/identify`} className="mt-5 block rounded-lg border border-gray-200 bg-stone-50 p-3 text-sm font-medium">Add pressing photos & runouts →</Link>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button

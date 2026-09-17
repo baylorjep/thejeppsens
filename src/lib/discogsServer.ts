@@ -130,7 +130,7 @@ export function normalizeConditionToDiscogsGrade(condition?: string): { grade: s
   if (value.includes("near mint") || value === "nm" || value.includes("m-")) {
     return { grade: "Near Mint (NM or M-)", isGuess: false };
   }
-  if (value.includes("sealed") || value.includes("new") || value === "m" || value.includes("mint (m)")) {
+  if (value === "m" || value === "mint" || value === "mint (m)") {
     return { grade: "Mint (M)", isGuess: false };
   }
   if (value.includes("vg+") || value.includes("very good plus")) {
@@ -152,7 +152,7 @@ export function normalizeConditionToDiscogsGrade(condition?: string): { grade: s
     return { grade: "Poor (P)", isGuess: false };
   }
 
-  return { grade: "Very Good Plus (VG+)", isGuess: true };
+  return { grade: "Unknown", isGuess: true };
 }
 
 export async function fetchDiscogsPriceSuggestions(releaseId: string) {

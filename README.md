@@ -158,3 +158,11 @@ This project is for personal use. Feel free to use and modify for your own relat
 ---
 
 Built with ❤️ for date nights and decision-making adventures
+
+### Discogs pressing identification
+
+Isabel can capture pressing evidence and track reviews at `/vinyl/identify`.
+Baylor can run `npm run vinyl:discogs -- export` to pull ready pending submissions
+for review in a Codex session, without a paid live AI API. See
+[the pressing review guide](docs/vinyl-pressing-review.md) for the capture checklist,
+review commands, and how to safely apply confirmed matches or follow-up questions.
