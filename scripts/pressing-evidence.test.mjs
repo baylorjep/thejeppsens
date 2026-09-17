@@ -17,7 +17,7 @@ test('photo-only submission requires labels and runouts for both sides', () => {
   assert.equal(missingEvidence(e).length, 1);
   e.photos.push(photo('runout', 'B')); assert.deepEqual(missingEvidence(e), []);
 });
-test('sealed path needs exterior evidence and an identifier, not hidden runouts', () => {
+test('sealed path needs exterior evidence, not hidden runouts', () => {
   const e = { ...emptyEvidence(), sealed: true, barcode: '001234' };
   assert.equal(missingEvidence(e).length, 2);
   e.photos = [photo('front'), photo('back')]; assert.deepEqual(missingEvidence(e), []);
@@ -44,4 +44,36 @@ test('Discogs metadata clears unknown pressing date and preserves album/personal
   assert.equal(m.pressingYear, null); assert.equal(m.discCount, 2);
   assert.equal(m.catalogNumber, '123'); assert.equal(m.releaseYear, undefined); assert.equal(m.notes, undefined);
   assert.throws(() => releaseMetadata({ formats: [{ name: 'CD' }] }));
+});
+
+
+test('sealed submissions reuse saved covers and require only missing views', () => {
+  const e = { ...emptyEvidence(), sealed: true, barcode: '001234' };
+  assert.deepEqual(missingEvidence(e, { coverImage: 'front.jpg', backCoverImage: 'back.jpg' }), []);
+  assert.deepEqual(missingEvidence(e, { coverImage: 'front.jpg' }), ['Back-cover photo']);
+  e.photos = [photo('back')];
+  assert.deepEqual(missingEvidence(e, { coverImage: 'front.jpg' }), []);
+  assert.deepEqual(missingEvidence(e, { coverImage: '   ' }), ['Front-cover photo']);
+  e.barcode = '';
+  assert.deepEqual(missingEvidence(e, { coverImage: 'front.jpg' }), []);
+});
+
+test('saved covers replace label requirements but never replace runouts', () => {
+  const e = emptyEvidence();
+  assert.equal(missingEvidence(e, { coverImage: 'front.jpg', backCoverImage: 'back.jpg' }).length, 2);
+  e.runouts = { A: 'A-1', B: 'B-1' };
+  assert.deepEqual(missingEvidence(e, { coverImage: 'front.jpg', backCoverImage: 'back.jpg' }), []);
+  assert.equal(missingEvidence(e, { coverImage: 'front.jpg' }).length, 2);
+});
+
+
+test('new-record intake is ready with covers and every side, including mixed photos and text', () => {
+  const e = { ...emptyEvidence(), discCount: 2, runouts: { A: 'A1', B: 'B1', C: 'C1' } };
+  const covers = { coverImage: 'front.jpg', backCoverImage: 'back.jpg' };
+  assert.equal(missingEvidence(e, covers).length, 1);
+  e.photos = [photo('runout', 'D')];
+  validateEvidence(e);
+  assert.deepEqual(missingEvidence(e, covers), []);
+  e.discCount = 3;
+  assert.equal(missingEvidence(e, covers).length, 2);
 });

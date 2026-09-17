@@ -32,12 +32,13 @@ export function sidesFor(discs: number) {
 export function emptyEvidence(): PressingEvidence {
   return { catalogNumber: "", barcode: "", discCount: 1, sealed: false, color: "", runouts: {}, photos: [], mediaGrade: "", sleeveGrade: "", gradingMethod: "", conditionNotes: "", extras: "", notes: "" };
 }
-export function missingEvidence(e: PressingEvidence): string[] {
+export function missingEvidence(e: PressingEvidence, covers?: { coverImage?: string; backCoverImage?: string }): string[] {
   const photo = (kind: string, side?: string) => e.photos.some(p => p.kind === kind && (!side || p.side === side));
-  if (e.sealed) return [!photo("front") && "Front-cover photo", !photo("back") && "Back-cover photo", !(e.catalogNumber.trim() || e.barcode.trim()) && "Catalog number or barcode from the packaging"].filter(Boolean) as string[];
+  if (e.sealed) return [!photo("front") && !covers?.coverImage?.trim() && "Front-cover photo", !photo("back") && !covers?.backCoverImage?.trim() && "Back-cover photo"].filter(Boolean) as string[];
   const sides = sidesFor(e.discCount);
+  const hasCovers = (photo("front") || Boolean(covers?.coverImage?.trim())) && (photo("back") || Boolean(covers?.backCoverImage?.trim()));
   return [
-    ...(!e.catalogNumber.trim() ? sides.filter(s => !photo("label", s)).map(s => `Side ${s}: photo of the paper center label (or enter the catalog number)`) : []),
+    ...(!hasCovers && !e.catalogNumber.trim() ? sides.filter(s => !photo("label", s)).map(s => `Side ${s}: photo of the paper center label (or enter the catalog number)`) : []),
     ...sides.filter(s => !e.runouts[s]?.trim() && !photo("runout", s)).map(s => `Side ${s}: close-ups of the tiny markings near the center label, or type those markings`),
   ];
 }

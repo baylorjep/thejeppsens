@@ -1,5 +1,7 @@
 "use client";
 
+import VinylPressingIntake, { emptyPressingIntake } from "@/components/VinylPressingIntake";
+import { emptyEvidence, sidesFor, type PressingSubmission } from "@/lib/pressingEvidence";
 import { VinylRecord, vinyls } from "@/data/vinyls";
 import { optimizeImageFile } from "@/lib/vinylImage";
 import { deleteVinylRecord, fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylApi";
@@ -184,6 +186,9 @@ function splitDiscogsTitle(value: string) {
 }
 
 export default function VinylManager() {
+  const [pressingIntake, setPressingIntake] = useState(emptyPressingIntake);
+  const [retryingNewRecord, setRetryingNewRecord] = useState(false);
+  const [savedPressingStatus, setSavedPressingStatus] = useState<PressingSubmission["status"]>();
   const [form, setForm] = useState<FormState>(emptyForm);
   const [records, setRecords] = useState<VinylRecord[]>([]);
   const [apiSource, setApiSource] = useState<VinylApiStatus>("local");
@@ -194,7 +199,7 @@ export default function VinylManager() {
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [savedRecord, setSavedRecord] = useState<VinylRecord | null>(null);
-  const [recordsPage, setRecordsPage] = useState(1);
+  const [requestedPage, setRecordsPage] = useState(1);
   const [albumSearchQuery, setAlbumSearchQuery] = useState("");
   const [albumSearchResults, setAlbumSearchResults] = useState<AppleAlbumSearchResult[]>([]);
   const [isSearchingAlbums, setIsSearchingAlbums] = useState(false);
@@ -221,12 +226,21 @@ export default function VinylManager() {
     loadRecords();
   }, []);
 
+  useEffect(() => {
+    const hasUnsavedEvidence = retryingNewRecord || pressingIntake.sealed || Object.values(pressingIntake.runouts).some(text => text.trim()) || Object.values(pressingIntake.files).some(files => files.length);
+    if (!hasUnsavedEvidence) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [pressingIntake, retryingNewRecord]);
+
   const queuedOnlyRecords = useMemo(() => {
     const staticIds = new Set(vinyls.map((record) => record.id));
     return records.filter((record) => !staticIds.has(record.id));
   }, [records]);
 
   const totalRecordsPages = Math.max(1, Math.ceil(records.length / recordsPerPage));
+  const recordsPage = Math.min(requestedPage, totalRecordsPages);
   const paginatedRecords = useMemo(() => {
     const startIndex = (recordsPage - 1) * recordsPerPage;
     return records.slice(startIndex, startIndex + recordsPerPage);
@@ -406,6 +420,8 @@ export default function VinylManager() {
 
   const resetForm = () => {
     setForm(emptyForm);
+    setPressingIntake(emptyPressingIntake());
+    setRetryingNewRecord(false);
     setEditingId(null);
     setShowAdvancedOptions(false);
     setImageFile(undefined);
@@ -462,32 +478,66 @@ export default function VinylManager() {
       discogsReleaseId: form.discogsReleaseId ? Number(form.discogsReleaseId) : undefined,
       discogsVerified: form.discogsReleaseId ? form.discogsVerified : undefined,
     };
-    const isNewRecord = !editingId;
+    const isNewRecord = !editingId || retryingNewRecord;
+    if (!editingId && records.some(item => item.id === record.id)) {
+      setMessage("This album is already in your catalog. Use its identification card to add codes or photos.");
+      setIsSaving(false);
+      return;
+    }
 
     try {
-      const response = await saveVinylRecord(record, imageFile, backImageFile);
+      let pressing;
+      if (isNewRecord) {
+        const discCount = Math.min(10, Math.max(1, Math.trunc(Number(form.discCount)) || 1));
+        const files: { side: string; file: File }[] = [];
+        const activeSides = pressingIntake.sealed ? [] : sidesFor(discCount);
+        const originals = activeSides.flatMap(side => (pressingIntake.files[side] ?? []).map(file => ({ side, file })));
+        if (originals.length > 60) { setMessage("Use up to 60 marking photos."); return; }
+        try {
+          for (const { side, file } of originals) {
+            const optimized = await optimizeImageFile(file, 2800, 0.92);
+            if (optimized.size > 4_000_000) throw new Error("A marking photo is too large. Crop it and try again.");
+            files.push({ side, file: optimized });
+          }
+        } catch (error) { setMessage(error instanceof Error ? error.message : "Could not open a marking photo. Try JPG or PNG."); return; }
+        pressing = { evidence: { ...emptyEvidence(), sealed: pressingIntake.sealed, discCount, runouts: pressingIntake.runouts, color: form.vinylColor.trim() }, files };
+      }
+      const response = await saveVinylRecord(record, imageFile, backImageFile, pressing);
       const savedRecord = response.record;
       const nextRecords = [...records.filter((item) => item.id !== savedRecord.id), savedRecord];
 
       setApiSource(response.source);
       setRecords(nextRecords);
       syncLocalQueue(nextRecords);
-      if (isNewRecord) setSavedRecord(savedRecord);
+      if (response.pressingError) {
+        setEditingId(savedRecord.id);
+        setRetryingNewRecord(true);
+        setMessage(response.pressingError);
+        return;
+      }
+      if (isNewRecord) { setSavedRecord(savedRecord); setSavedPressingStatus(response.pressingStatus); }
       resetForm();
       setMessage(response.source === "supabase" ? `${title} saved permanently.` : `${title} queued locally.`);
     } catch {
       const nextRecords = [...records.filter((item) => item.id !== record.id), record];
       setRecords(nextRecords);
       writeQueuedVinyls(nextRecords.filter((item) => !vinyls.some((staticRecord) => staticRecord.id === item.id)));
-      if (isNewRecord) setSavedRecord(record);
-      resetForm();
-      setMessage(`${title} saved locally because Supabase is not available.`);
+      if (isNewRecord) {
+        setEditingId(record.id);
+        setRetryingNewRecord(true);
+        setMessage(`${title} saved locally. Identification is not saved yet. Keep this form open and retry.`);
+      } else {
+        resetForm();
+        setMessage(`${title} saved locally because Supabase is not available.`);
+      }
     } finally {
       setIsSaving(false);
     }
   };
 
   const editRecord = (record: VinylRecord) => {
+    setRetryingNewRecord(false);
+    setPressingIntake(emptyPressingIntake());
     setEditingId(record.id);
     setForm(recordToForm(record));
     setShowAdvancedOptions(false);
@@ -496,9 +546,6 @@ export default function VinylManager() {
     setMessage(`Editing ${record.title}.`);
   };
 
-  useEffect(() => {
-    setRecordsPage((current) => Math.min(current, totalRecordsPages));
-  }, [totalRecordsPages]);
 
   const removeRecord = async (id: string) => {
     const nextRecords = records.filter((record) => record.id !== id);
@@ -550,12 +597,12 @@ export default function VinylManager() {
                   {savedRecord.title} is in the catalog
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The record was saved successfully. You can keep adding records or jump to the album page now.
+                  {savedPressingStatus === "pending" ? "Saved and queued for identification. Tell Baylor it’s ready for review." : savedPressingStatus === "draft" ? "Saved with an identification draft. Finish the missing details whenever you’re ready." : "The record was saved successfully."}
                 </p>
               </div>
             </div>
 
-            <Link href={`/vinyl/${encodeURIComponent(savedRecord.id)}/identify`} className="mt-5 block rounded-lg border border-gray-200 bg-stone-50 p-3 text-sm font-medium">Add pressing photos & runouts →</Link>
+            <Link href={`/vinyl/${encodeURIComponent(savedRecord.id)}/identify`} className="mt-5 block rounded-lg border border-gray-200 bg-stone-50 p-3 text-sm font-medium">{savedPressingStatus === "pending" ? "View identification status →" : "Finish identification →"}</Link>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
@@ -578,6 +625,7 @@ export default function VinylManager() {
       ) : null}
 
       <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white p-5">
+        <fieldset disabled={isSaving} className="min-w-0">
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-950">
@@ -738,7 +786,7 @@ export default function VinylManager() {
             Cover Photos
           </h3>
           <p className="mt-2 text-sm text-gray-600">
-            Add front and back cover photos when you have them. Uploaded images are resized before storage.
+            Photograph your copy’s front and back. These photos also help identify the edition—include the barcode and small print. Album-search artwork is only a placeholder.
           </p>
         </div>
 
@@ -784,6 +832,8 @@ export default function VinylManager() {
             <span className="mb-2 block text-sm font-medium text-gray-700">Artist</span>
             <input value={form.artist} onChange={(event) => updateForm("artist", event.target.value)} className={inputClassName()} required />
           </label>
+
+        {(!editingId || retryingNewRecord) ? <div className="sm:col-span-2"><VinylPressingIntake value={pressingIntake} onChange={setPressingIntake} discs={Math.min(10, Math.max(1, Math.trunc(Number(form.discCount)) || 1))} onDiscsChange={count => updateForm("discCount", String(count))} /></div> : <Link href={`/vinyl/${encodeURIComponent(editingId)}/identify`} className="my-5 block rounded-lg bg-stone-50 p-4 text-sm font-medium underline sm:col-span-2">Update identification photos & codes →</Link>}
 
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-gray-700">Release year</span>
@@ -964,12 +1014,15 @@ export default function VinylManager() {
           </div>
         </div>
 
+
+
         <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <button type="submit" disabled={isSaving} className="rounded-md bg-gray-950 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60">
             {isSaving ? "Saving..." : editingId ? "Save changes" : "Add record"}
           </button>
-          {message ? <p className="text-sm text-gray-600">{message}</p> : null}
+          {message ? <p role="status" className="text-sm text-gray-600">{message}</p> : null}
         </div>
+        </fieldset>
       </form>
 
       <aside className="rounded-lg border border-gray-200 bg-gray-50 p-5">
@@ -1025,7 +1078,7 @@ export default function VinylManager() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setRecordsPage((current) => Math.max(1, current - 1))}
+              onClick={() => setRecordsPage(Math.max(1, recordsPage - 1))}
               disabled={recordsPage === 1}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -1033,7 +1086,7 @@ export default function VinylManager() {
             </button>
             <button
               type="button"
-              onClick={() => setRecordsPage((current) => Math.min(totalRecordsPages, current + 1))}
+              onClick={() => setRecordsPage(Math.min(totalRecordsPages, recordsPage + 1))}
               disabled={recordsPage === totalRecordsPages}
               className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
             >

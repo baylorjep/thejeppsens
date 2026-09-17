@@ -9,13 +9,12 @@ The existing Discogs token is used only for Discogs database lookups/prices.
 
 ## Isabel’s workflow
 
-1. Add the album to the collection, or open an existing album’s **Identify this pressing** link.
-2. For an opened album, enter the catalog number OR photograph every center label.
+1. New albums collect matrix text or photos directly in **Add a record**, using the same cover uploads. Saving creates a pending review when complete, otherwise a draft. Existing albums keep their **Identify this pressing** link.
+2. For an opened album, saved front/back covers replace the need to type a catalog number or photograph every center label. If covers are missing, a catalog number or every center label remains an alternative.
    Add complete runout text OR readable close-ups for every side. Both photos and
    text are welcome. Choose the number of discs first. Label photos, back/spine,
    barcode, color, stickers and extras help distinguish close candidates.
-3. For a sealed album, keep it sealed: supply front/back photos and a catalog number
-   or barcode from the packaging. An exact match may remain unresolved.
+3. For a sealed album, keep it sealed: reuse saved album front/back photos (upload only missing views) for exterior review. Barcode/catalog typing is optional. An exact match may remain unresolved.
 4. Optionally record separate media/jacket grades, inspection method, condition notes
    and extras. Unknown is a valid choice. These describe her copy, not the release.
 5. **Save draft** preserves incomplete work. **Submit for Baylor to review** requires
@@ -58,6 +57,8 @@ To fetch a candidate’s full metadata, identifiers, notes and image URLs:
 ```bash
 npm run vinyl:discogs -- release 12345
 ```
+
+The manifest also includes existing album photos in `record.coverImage` and `record.backCoverImage`. Reuse these for packaging review; do not ask for duplicate uploads. Inspect them as supporting evidence, not proof of an edition on their own.
 
 Candidate search results are a convenience, not exhaustive. Broaden searches on
 Discogs if the initial catalog/artist/title/barcode query misses. Inspect release

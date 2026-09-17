@@ -29,7 +29,10 @@ export async function PUT(request: Request, { params }: Context) {
     for (const photo of evidence.photos) {
       if (!photo.path.startsWith(`pressing/${encodeURIComponent(id)}/`) || photo.path.includes("..") || db.storage.from(BUCKET).getPublicUrl(photo.path).data.publicUrl !== photo.url) throw new Error("Invalid photo attachment.");
     }
-    const missing = missingEvidence(evidence);
+    const album = await db.from("vinyl_records").select("record").eq("id", id).maybeSingle();
+    if (album.error) return NextResponse.json({ error: "Could not load saved cover photos. Please retry." }, { status: 503 });
+    if (!album.data) return NextResponse.json({ error: "Save the album first." }, { status: 404 });
+    const missing = missingEvidence(evidence, album.data.record);
     if (submit && missing.length) return NextResponse.json({ error: `Still needed: ${missing.join("; ")}` }, { status: 400 });
     const row = { record_id: id, evidence, status: submit ? "pending" : "draft", revision: crypto.randomUUID(), updated_at: new Date().toISOString(), processed_at: null, release_id: null, review_notes: null };
     const result = revision
