@@ -26,7 +26,7 @@ export async function saveVinylRecord(record: VinylRecord, imageFile?: File, bac
   });
 
   if (!response.ok) throw new Error("Could not save vinyl record");
-  const result = await response.json() as { record: VinylRecord; source: VinylApiStatus; pressingStatus?: PressingSubmission["status"]; pressingError?: string };
+  const result = await response.json() as { record: VinylRecord; source: VinylApiStatus; pressingStatus?: PressingSubmission["status"]; pressingError?: string; pressingNotes?: string };
   if (!pressing) return result;
   if (result.source !== "supabase") return { ...result, pressingError: "Album saved locally. Identification is not saved yet. Keep this form open and retry when connected." };
   // Save the album first so each photo can upload separately within request size limits.
@@ -36,7 +36,7 @@ export async function saveVinylRecord(record: VinylRecord, imageFile?: File, bac
     const current = await currentResponse.json();
     if (!currentResponse.ok) throw new Error(current.error || "Could not check identification status.");
     // A retry after a lost response must not overwrite an already saved submission.
-    if (current.submission) return { ...result, pressingStatus: current.submission.status };
+    if (current.submission) return { ...result, pressingStatus: current.submission.status, pressingNotes: current.submission.review_notes };
     const evidence = { ...pressing.evidence, photos: [...pressing.evidence.photos] };
     for (const { side, file } of pressing.files) {
       const body = new FormData(); body.set("photo", file);
@@ -49,7 +49,7 @@ export async function saveVinylRecord(record: VinylRecord, imageFile?: File, bac
     const saved = await fetch(endpoint, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evidence, revision: null, submit }) });
     const data = await saved.json();
     if (!saved.ok) throw new Error(data.error || "Could not save identification.");
-    return { ...result, pressingStatus: data.submission.status as PressingSubmission["status"] };
+    return { ...result, pressingStatus: data.submission.status as PressingSubmission["status"], pressingNotes: data.submission.review_notes };
   } catch (error) {
     return { ...result, pressingError: `Album saved, but identification was not saved: ${error instanceof Error ? error.message : "Connection failed."} Your entries are still here. Retry saving.` };
   }

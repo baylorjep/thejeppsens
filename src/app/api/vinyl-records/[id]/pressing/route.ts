@@ -1,9 +1,11 @@
 import { getVinylSupabaseClient } from "@/lib/supabaseVinylServer";
 import { missingEvidence, validateEvidence } from "@/lib/pressingEvidence";
+import { autoMatchPressing } from "@/lib/autoMatchPressing";
 import { NextResponse } from "next/server";
 
 type Context = { params: Promise<{ id: string }> };
 const BUCKET = "vinyl-covers";
+export const maxDuration = 60;
 
 export async function GET(_request: Request, { params }: Context) {
   const { id } = await params;
@@ -40,7 +42,12 @@ export async function PUT(request: Request, { params }: Context) {
       : await db.from("vinyl_pressing_submissions").insert(row).select().single();
     if (result.error?.code === "23505" || (!result.error && !result.data)) return NextResponse.json({ error: "This submission changed in another session. Reload before saving so you don’t overwrite it." }, { status: 409 });
     if (result.error) { console.error("Pressing save failed", result.error); return NextResponse.json({ error: "Could not save to the cloud. Your changes are still on this page; please retry." }, { status: 503 }); }
-    return NextResponse.json({ submission: result.data });
+    let saved = result.data;
+    if (submit) {
+      try { saved = await autoMatchPressing(db, album.data.record, result.data); }
+      catch { /* The durable pending submission remains available for manual review. */ }
+    }
+    return NextResponse.json({ submission: saved });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid submission." }, { status: 400 });
   }

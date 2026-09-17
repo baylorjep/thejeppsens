@@ -82,13 +82,13 @@ export default function VinylPressingForm({ id }: { id: string }) {
   }
 
   async function save(submit: boolean) {
-    setBusy(submit ? "Submitting…" : "Saving draft…"); setError(""); setMessage("");
+    setBusy(submit ? "Saving & checking Discogs…" : "Saving draft…"); setError(""); setMessage("");
     try {
       const response = await fetch(endpoint, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ evidence, revision: submission?.revision ?? null, submit }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setSubmission(data.submission); setDirty(false);
-      setMessage(submit ? "Saved for Baylor’s review! Tell Baylor you’ve submitted this album; this page does not send him a notification." : "Draft saved. You can leave and come back to finish it.");
+      setMessage(submit ? (data.submission.status === "confirmed" ? "Matched automatically! Your album now links to the confirmed Discogs release." : data.submission.review_notes || "Saved for Baylor’s review. No notification is sent automatically.") : "Draft saved. You can leave and come back to finish it.");
     } catch (e) { setError(e instanceof Error ? e.message : "Could not save. Please retry."); }
     finally { setBusy(""); }
   }
@@ -156,11 +156,11 @@ export default function VinylPressingForm({ id }: { id: string }) {
     <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Identify this pressing</p>
     <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-5xl">{record.title}</h1>
     <p className="mt-2 text-lg text-gray-500">{record.artist}</p>
-    <p className="mt-5 leading-7 text-gray-600">Grab your record, phone, and a lamp. We’ll check one side at a time; Baylor finds the edition.</p>
+    <p className="mt-5 leading-7 text-gray-600">Grab your record, phone, and a lamp. We’ll check one side at a time. Typed codes are checked automatically. Baylor reviews uncertain matches.</p>
     <div className="my-6 rounded-xl bg-stone-100 p-4 text-sm leading-6">
       <span className="font-semibold">{submission ? STATUS_LABELS[submission.status] : "Not submitted"}{dirty ? " · Unsaved changes" : ""}</span>
       {submission?.status === "pending" ? <p>Your details are saved and waiting for review. Tell Baylor you’ve submitted this album; no notification is sent automatically.</p> : null}
-      {submission?.review_notes ? <p className="mt-2 whitespace-pre-wrap">Baylor’s review: {submission.review_notes}</p> : null}
+      {submission?.review_notes ? <p className="mt-2 whitespace-pre-wrap">Identification result: {submission.review_notes}</p> : null}
       {submission?.release_id ? <a className="mt-2 block underline" href={`https://www.discogs.com/release/${submission.release_id}`} target="_blank" rel="noreferrer">View confirmed Discogs release ↗</a> : null}
       {submission?.status === "confirmed" ? <p className="mt-2">Saving new evidence reopens the review. A confirmed pressing still needs condition and sales comparisons for an accurate value.</p> : null}
     </div>
@@ -246,12 +246,12 @@ export default function VinylPressingForm({ id }: { id: string }) {
         </section> : null}
       </fieldset>
       <div className={`${section} border-stone-300 bg-stone-50`}>
-        <h2 className="font-semibold">{step !== reviewStep ? "Work at your own pace" : missing.length ? "Still needed before submitting" : "Ready for Baylor’s review"}</h2>
-        {step !== reviewStep ? <p className="mt-2 text-sm text-gray-600">Save a draft before leaving. Continue moves to the next step without saving.</p> : missing.length ? <><ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-gray-600">{missing.map(item => <li key={item}><button type="button" disabled={locked} className="text-left underline underline-offset-4" onClick={() => { const side = /^Side ([A-T]):/.exec(item)?.[1]; goToStep(side ? sides.indexOf(side) + 1 : 0); }}>{item} →</button></li>)}</ul><p className="mt-3 text-sm text-gray-500">You can save an incomplete draft at any time.</p></> : <p className="mt-2 text-sm leading-6 text-gray-600">Ready to submit. Baylor will check the photos and codes. Tell him it’s ready; no notification is sent.</p>}
+        <h2 className="font-semibold">{step !== reviewStep ? "Work at your own pace" : missing.length ? "Still needed before submitting" : "Ready to identify"}</h2>
+        {step !== reviewStep ? <p className="mt-2 text-sm text-gray-600">Save a draft before leaving. Continue moves to the next step without saving.</p> : missing.length ? <><ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-gray-600">{missing.map(item => <li key={item}><button type="button" disabled={locked} className="text-left underline underline-offset-4" onClick={() => { const side = /^Side ([A-T]):/.exec(item)?.[1]; goToStep(side ? sides.indexOf(side) + 1 : 0); }}>{item} →</button></li>)}</ul><p className="mt-3 text-sm text-gray-500">You can save an incomplete draft at any time.</p></> : <p className="mt-2 text-sm leading-6 text-gray-600">Typed codes are checked against Discogs now. Photos and uncertain matches stay saved for Baylor; no notification is sent.</p>}
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
           <button type="button" onClick={() => void save(false)} disabled={locked || (!dirty && Boolean(submission))} className="rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-medium disabled:opacity-40">Save draft</button>
           {step > 0 ? <button type="button" disabled={locked} onClick={() => goToStep(step - 1)} className="rounded-lg border border-gray-300 px-5 py-3 text-sm font-medium">Back</button> : null}
-          {step < reviewStep ? <button type="button" disabled={locked} onClick={() => goToStep(step + 1)} className="rounded-lg bg-gray-950 px-5 py-3 text-sm font-medium text-white">{step + 1 === reviewStep ? "Continue to review" : step + 1 === conditionStep ? "Continue to condition (optional)" : `Continue to side ${sides[step]}`}</button> : <button type="submit" disabled={locked || missing.length > 0 || (!dirty && Boolean(submission) && ["pending", "confirmed"].includes(submission!.status))} className="rounded-lg bg-gray-950 px-5 py-3 text-sm font-medium text-white disabled:opacity-40">Submit for Baylor to review</button>}
+          {step < reviewStep ? <button type="button" disabled={locked} onClick={() => goToStep(step + 1)} className="rounded-lg bg-gray-950 px-5 py-3 text-sm font-medium text-white">{step + 1 === reviewStep ? "Continue to review" : step + 1 === conditionStep ? "Continue to condition (optional)" : `Continue to side ${sides[step]}`}</button> : <button type="submit" disabled={locked || missing.length > 0 || (!dirty && Boolean(submission) && ["pending", "confirmed"].includes(submission!.status))} className="rounded-lg bg-gray-950 px-5 py-3 text-sm font-medium text-white disabled:opacity-40">Save & identify</button>}
         </div>
         {busy ? <p role="status" className="mt-4 text-sm">{busy}</p> : null}
         {message ? <p role="status" className="mt-4 rounded-lg bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">{message}</p> : null}

@@ -62,15 +62,16 @@ function queueDiscogsDispatch<T>(task: () => Promise<T>): Promise<T> {
  * (honoring Retry-After when Discogs sends one) instead of surfacing it as
  * missing data. The retry itself also goes through the paced queue.
  */
-async function discogsFetch(url: string | URL, attempt = 0): Promise<Response> {
-  const response = await queueDiscogsDispatch(() => fetch(url, { headers: discogsHeaders() }));
-  if (response.status !== 429 || attempt >= 3) return response;
+async function discogsFetch(url: string | URL, attempt = 0, signal?: AbortSignal): Promise<Response> {
+  const response = await queueDiscogsDispatch(() => { signal?.throwIfAborted(); return fetch(url, { headers: discogsHeaders(), signal }); });
+  // Interactive matching falls back to review on throttling instead of waiting through retries.
+  if (response.status !== 429 || attempt >= 3 || signal) return response;
 
   const retryAfterHeader = response.headers.get("retry-after");
   const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : (attempt + 1) * 2000;
 
   await new Promise((resolve) => setTimeout(resolve, Number.isFinite(retryAfterMs) ? retryAfterMs : 2000));
-  return discogsFetch(url, attempt + 1);
+  return discogsFetch(url, attempt + 1, signal);
 }
 
 export async function searchDiscogsReleases(query: string) {
@@ -175,4 +176,29 @@ export async function fetchDiscogsMarketplaceStats(releaseId: string) {
   if (!response.ok) throw new Error(`Discogs marketplace stats failed (${response.status})`);
 
   return (await response.json()) as DiscogsMarketplaceStats;
+}
+
+
+/** Bounded candidate lookup: incomplete pages or any failed release block confirmation. */
+export async function fetchPressingCandidates(artist: string, title: string) {
+  if (!process.env.DISCOGS_TOKEN) throw new Error("Discogs is not configured");
+  const signal = AbortSignal.timeout(22_000);
+  const url = new URL(`${DISCOGS_API_BASE}/database/search`);
+  url.search = new URLSearchParams({ artist, release_title: title, type: "release", format: "Vinyl", per_page: "100" }).toString();
+  const response = await discogsFetch(url, 0, signal);
+  if (!response.ok) throw new Error("Discogs search unavailable");
+  const search = await response.json() as { results?: { id: number }[]; pagination?: { pages: number; items: number } };
+  const ids = [...new Set((search.results ?? []).map(r => r.id))];
+  const complete = search.pagination?.pages === 1 && search.pagination.items === ids.length && ids.length <= 12;
+  if (!complete) return { releases: [], complete: false };
+  const releases: import("./pressingMatcher").MatchRelease[] = [];
+  for (const id of ids) {
+    if (!Number.isSafeInteger(id) || id < 1) throw new Error("Invalid Discogs result");
+    const result = await discogsFetch(`${DISCOGS_API_BASE}/releases/${id}`, 0, signal);
+    if (!result.ok) throw new Error("Discogs release unavailable");
+    const release = await result.json();
+    if (release.id !== id) throw new Error("Discogs result mismatch");
+    releases.push(release);
+  }
+  return { releases, complete };
 }

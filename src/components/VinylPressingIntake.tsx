@@ -10,7 +10,7 @@ export default function VinylPressingIntake({ value, onChange, discs, onDiscsCha
 }) {
   return <section className="my-6 rounded-xl border border-gray-200 bg-stone-50 p-4 sm:p-5">
     <h3 className="text-lg font-semibold">Identify your exact edition</h3>
-    <p className="mt-2 text-sm leading-6 text-gray-600">We’ll use the cover photos above. Add the tiny codes from each side below, then save once. Baylor will review the match.</p>
+    <p className="mt-2 text-sm leading-6 text-gray-600">We’ll use the cover photos above. Add the tiny codes from each side below, then save once. Typed codes are checked automatically; uncertain matches go to Baylor.</p>
     <label className="mt-4 flex items-center gap-3 text-sm font-medium"><input type="checkbox" checked={value.sealed} onChange={e => onChange({ ...value, sealed: e.target.checked })} className="h-5 w-5" />Still factory sealed</label>
     {value.sealed ? <p className="mt-3 text-sm text-gray-600">Keep it sealed. We’ll start with the front and back photos; some copies need more detail to identify.</p> : <>
       <label className="mt-4 block text-sm font-medium">How many discs?<select value={discs} onChange={e => onDiscsChange(Number(e.target.value))} className="mt-2 block w-full rounded-lg border border-gray-300 bg-white p-3">{Array.from({ length: 10 }, (_, i) => <option key={i} value={i + 1}>{i + 1} {i === 0 ? "disc" : "discs"}</option>)}</select></label>

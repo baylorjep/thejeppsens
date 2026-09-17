@@ -4,7 +4,7 @@ The site collects evidence at `/vinyl/identify` or `/vinyl/<album-id>/identify`.
 Photos are uploaded individually to the existing `vinyl-covers` bucket under
 `pressing/<album-id>/`. Drafts and submission state live separately in
 `vinyl_pressing_submissions`, so ordinary album edits cannot erase the evidence.
-There are no live AI calls and no paid AI API credentials to configure.
+Typed matrices are now checked automatically on submit using Discogs lookups; photos and uncertain matches remain pending for Baylor. There are no AI calls or paid AI credentials.
 The existing Discogs token is used only for Discogs database lookups/prices.
 
 ## Isabel’s workflow
@@ -17,10 +17,11 @@ The existing Discogs token is used only for Discogs database lookups/prices.
 3. For a sealed album, keep it sealed: reuse saved album front/back photos (upload only missing views) for exterior review. Barcode/catalog typing is optional. An exact match may remain unresolved.
 4. Optionally record separate media/jacket grades, inspection method, condition notes
    and extras. Unknown is a valid choice. These describe her copy, not the release.
-5. **Save draft** preserves incomplete work. **Submit for Baylor to review** requires
-   the minimum evidence. It saves as pending and asks her to tell Baylor; no email,
+5. **Save & identify** first saves the evidence, then runs a bounded automatic lookup (up to 12 releases, about 25 seconds). Only a complete, unique, all-side text match with no unresolved competing release can confirm. Case and whitespace are normalized; symbols, words and digits are preserved. Missing identifiers, ambiguous variant groupings, conflicting details, timeouts and API failures leave a pending manual review with a result note. Matrix variants are never mixed across sides. The existing revision-checked RPC saves confirmations atomically. A database match is not an appraisal or a guarantee that Discogs contains every edition.
+6. **Save draft** preserves incomplete work. **Save & identify** requires
+   the minimum evidence. Unresolved submissions stay pending for Baylor; no email,
    text, notification, or automatic AI processing is sent.
-6. Review notes and requests for more details appear on the same page. Saving new
+7. Review notes and requests for more details appear on the same page. Saving new
    evidence reopens the review and invalidates the album’s prior confirmation.
 
 Uploaded photos must still be attached by saving the draft/submission. The form warns

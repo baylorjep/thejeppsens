@@ -188,6 +188,7 @@ function splitDiscogsTitle(value: string) {
 export default function VinylManager() {
   const [pressingIntake, setPressingIntake] = useState(emptyPressingIntake);
   const [retryingNewRecord, setRetryingNewRecord] = useState(false);
+  const [savedPressingNotes, setSavedPressingNotes] = useState("");
   const [savedPressingStatus, setSavedPressingStatus] = useState<PressingSubmission["status"]>();
   const [form, setForm] = useState<FormState>(emptyForm);
   const [records, setRecords] = useState<VinylRecord[]>([]);
@@ -515,7 +516,7 @@ export default function VinylManager() {
         setMessage(response.pressingError);
         return;
       }
-      if (isNewRecord) { setSavedRecord(savedRecord); setSavedPressingStatus(response.pressingStatus); }
+      if (isNewRecord) { setSavedRecord(savedRecord); setSavedPressingStatus(response.pressingStatus); setSavedPressingNotes(response.pressingNotes ?? ""); }
       resetForm();
       setMessage(response.source === "supabase" ? `${title} saved permanently.` : `${title} queued locally.`);
     } catch {
@@ -597,12 +598,13 @@ export default function VinylManager() {
                   {savedRecord.title} is in the catalog
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  {savedPressingStatus === "pending" ? "Saved and queued for identification. Tell Baylor it’s ready for review." : savedPressingStatus === "draft" ? "Saved with an identification draft. Finish the missing details whenever you’re ready." : "The record was saved successfully."}
+                  {savedPressingStatus === "confirmed" ? "Your pressing was matched automatically. Open the album to see the confirmed Discogs listing." : savedPressingStatus === "pending" ? "Saved for review. The automatic check could not confirm one edition." : savedPressingStatus === "draft" ? "Saved with an identification draft. Finish the missing details whenever you’re ready." : "The record was saved successfully."}
                 </p>
               </div>
             </div>
 
-            <Link href={`/vinyl/${encodeURIComponent(savedRecord.id)}/identify`} className="mt-5 block rounded-lg border border-gray-200 bg-stone-50 p-3 text-sm font-medium">{savedPressingStatus === "pending" ? "View identification status →" : "Finish identification →"}</Link>
+            {savedPressingNotes ? <p className="mt-4 max-h-48 overflow-y-auto text-sm leading-6 text-gray-600">{savedPressingNotes}</p> : null}
+            <Link href={`/vinyl/${encodeURIComponent(savedRecord.id)}/identify`} className="mt-5 block rounded-lg border border-gray-200 bg-stone-50 p-3 text-sm font-medium">{["pending", "confirmed"].includes(savedPressingStatus ?? "") ? "View identification result →" : "Finish identification →"}</Link>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
@@ -1018,7 +1020,7 @@ export default function VinylManager() {
 
         <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <button type="submit" disabled={isSaving} className="rounded-md bg-gray-950 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60">
-            {isSaving ? "Saving..." : editingId ? "Save changes" : "Add record"}
+            {isSaving ? "Saving & checking Discogs…" : editingId ? "Save changes" : "Add record"}
           </button>
           {message ? <p role="status" className="text-sm text-gray-600">{message}</p> : null}
         </div>
