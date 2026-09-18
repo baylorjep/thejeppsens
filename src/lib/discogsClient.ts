@@ -1,5 +1,4 @@
 import { VinylRecord } from "@/data/vinyls";
-import { getBreakdown } from "@/lib/vinylAnalytics";
 import { getReleaseDecade } from "@/lib/vinylRecordUtils";
 import { useEffect, useState } from "react";
 
@@ -316,60 +315,4 @@ export function useCollectionValue(records: VinylRecord[]) {
   }, [records]);
 
   return { value, isLoading };
-}
-
-// Discogs credits this one specifically to "The Sinatra Family" as its own
-// act, which is the technically-correct read (same as Simon & Garfunkel not
-// splitting into Paul Simon), but Isabel wants this particular record to
-// count toward Frank Sinatra anyway - a deliberate one-off exception, not a
-// general rule, so it's called out by record id rather than folded into the
-// Discogs-credit logic above.
-const ARTIST_CREDIT_OVERRIDES: Record<string, string[]> = {
-  "la-familia-sinatra-les-desea-una-feliz-navidad": ["Frank Sinatra"],
-};
-
-/**
- * A record's `artist` field is one free-text string, so a collaboration
- * credit ("Frank Sinatra & Antônio Carlos Jobim") counts as its own bucket
- * instead of adding to either artist's total - undercounting anyone who
- * appears on duets/collabs. Splitting that text ourselves isn't safe (real
- * act names like "Hall & Oates" or "Simon and Garfunkel" would get shredded
- * too), but Discogs already stores each release's artist credits as a
- * proper list of separate names, so for linked records we use that instead.
- * Unlinked records fall back to the raw `artist` string as one entry.
- *
- * Shares the same fetch cache as useCollectionValue, so for records both
- * hooks need (owned + linked), this doesn't cost any extra requests.
- */
-export function useDiscogsArtistBreakdown(records: VinylRecord[]) {
-  const [breakdown, setBreakdown] = useState<{ label: string; count: number }[] | null>(null);
-
-  useEffect(() => {
-    const linkedRecords = records.filter((record) => record.discogsReleaseId);
-    setBreakdown(getBreakdown(records.map((record) => ARTIST_CREDIT_OVERRIDES[record.id]?.[0] ?? record.artist)));
-
-    if (!linkedRecords.length) return;
-
-    let cancelled = false;
-    const creditsByRecordId = new Map<string, string[]>(Object.entries(ARTIST_CREDIT_OVERRIDES));
-
-    linkedRecords.forEach((record) => {
-      if (ARTIST_CREDIT_OVERRIDES[record.id]) return;
-
-      fetchDiscogsValue(record.discogsReleaseId!, record.condition).then((recordValue) => {
-        if (cancelled) return;
-        if (recordValue?.artists.length) creditsByRecordId.set(record.id, recordValue.artists);
-
-        const allCredits = records.flatMap((r) => creditsByRecordId.get(r.id) ?? [r.artist]);
-        setBreakdown(getBreakdown(allCredits));
-      });
-    });
-
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [records]);
-
-  return breakdown;
 }

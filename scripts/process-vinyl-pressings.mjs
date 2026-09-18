@@ -135,6 +135,9 @@ async function applyDecisions() {
       if (decision.status === 'confirmed' && (record.record.discogsReleaseId !== decision.releaseId || !record.record.discogsVerified)) throw new Error('Album read-back did not match.');
     }
     console.log(`${flags.includes('--write') ? 'Saved' : 'Would save'} ${decision.recordId}: ${decision.status}${decision.releaseId ? ` → release ${decision.releaseId}` : ''}\n  ${decision.notes}`);
+    if (flags.includes('--write') && decision.status === 'confirmed') {
+      console.log(`  NEXT: curate curatedFacts for ${decision.recordId} -- 1-2 real facts about the album/artist, plus one about this specific pressing if you have it (a matrix/plant detail from the evidence above counts). See docs/vinyl-pressing-review.md.`);
+    }
   }
   if (!flags.includes('--write')) console.log('\nDry run only. Add --write to save these reviewed decisions.');
 }

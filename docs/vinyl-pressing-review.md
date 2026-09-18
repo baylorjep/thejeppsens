@@ -95,6 +95,35 @@ media grade; they do not automatically account for jacket condition, missing ext
 or comparable recent sales. Blank/new/sealed condition is not silently treated as
 VG+ or Mint. Current asking prices remain separate and are not fallback collection values.
 
+## After a confirm: curate the facts
+
+The album page shows an "Interesting facts about this pressing" card. By default it's
+built automatically from the confirmed release's raw Discogs notes, run through a
+denylist of boring-line patterns in `src/lib/vinylRecordUtils.ts` (copyright/phonogram
+lines, publishing-rights boilerplate, pure matrix-engraving mechanics, purely cosmetic
+printing trivia). That denylist is a floor, not a finish line -- Discogs' notes are
+free-form prose from thousands of different contributors, so no fixed pattern list will
+catch everything or add real color on its own.
+
+Whenever a decision applies with `status: "confirmed"`, the apply command prints a
+reminder to also set that record's `curatedFacts` (an array of strings on the record,
+which the facts card prefers over the auto-filtered notes whenever it's present). Do
+this as part of the same review, not a separate pass:
+
+1. Read through the confirmed release's actual notes and pick only what's genuinely
+   interesting -- skip anything that's just describing packaging/printing mechanics
+   with no story to it.
+2. Add 1-2 real facts about the album or artist (chart history, production trivia,
+   a notable quote, cultural context) -- only things you're confident are factually
+   accurate. Skip a record entirely rather than pad it with a guess.
+3. Add one fact about this *specific pressing* when you have one available -- the
+   matrix/runout detail, plant symbol, or label variation that's literally why this
+   release (and not a lookalike) was the confirmed match is usually the most
+   collector-interesting fact of all, and it's sitting right there in your own
+   decision notes even when Discogs' own release notes don't mention it.
+4. Update the record with a direct Supabase write (`record.curatedFacts = [...]`,
+   merge onto the existing record, update by id) -- there's no UI for this field yet.
+
 ## Setup and checks
 
 Migration: `20260917025017_vinyl_pressing_submissions.sql`.

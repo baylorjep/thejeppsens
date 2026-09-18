@@ -1,5 +1,5 @@
 import { VinylRecord } from "@/data/vinyls";
-import { getDecade, getRecordingDecade, getReleaseDecade } from "@/lib/vinylRecordUtils";
+import { getArtistBreakdown, getDecade, getRecordingDecade, getReleaseDecade } from "@/lib/vinylRecordUtils";
 
 export type VinylSortKey =
   | "date-added"
@@ -95,8 +95,9 @@ export function sortVinylRecords(records: VinylRecord[], sortKey: VinylSortKey) 
 }
 
 export function getCollectionSnapshot(records: VinylRecord[]) {
+  const artistBreakdown = getArtistBreakdown(records);
   return {
-    artists: uniqueSorted(records.map((record) => record.artist)).length,
+    artists: artistBreakdown.length,
     genres: uniqueSorted(records.flatMap((record) => record.genres)).length,
     favorites: records.filter((record) => record.favorite).length,
     formats: uniqueSorted(records.map((record) => record.format ?? "Unknown")).length,
@@ -105,7 +106,7 @@ export function getCollectionSnapshot(records: VinylRecord[]) {
     wishlist: records.filter((record) => record.status === "wishlist").length,
     upgrade: records.filter((record) => record.status === "upgrade").length,
     topGenre: getTopValue(records.flatMap((record) => record.genres)),
-    topArtist: getTopValue(records.map((record) => record.artist)),
+    topArtist: artistBreakdown[0] ? { value: artistBreakdown[0].label, count: artistBreakdown[0].count } : { value: "None", count: 0 },
     topMood: getTopValue(records.flatMap((record) => record.moods)),
     topEra: getTopValue(records.map(getDecade).filter((decade) => decade !== "Unknown")),
     topReleaseEra: getTopValue(records.map(getReleaseDecade).filter((decade) => decade !== "Unknown")),
@@ -113,7 +114,7 @@ export function getCollectionSnapshot(records: VinylRecord[]) {
     topFormat: getTopValue(records.map((record) => record.format ?? "Unknown")),
     topLabel: getTopValue(records.map((record) => record.label ?? "Unknown")),
     genreBreakdown: getBreakdown(records.flatMap((record) => record.genres)),
-    artistBreakdown: getBreakdown(records.map((record) => record.artist)),
+    artistBreakdown,
     decadeBreakdown: getBreakdown(records.map(getDecade).filter((decade) => decade !== "Unknown")),
     releaseDecadeBreakdown: getBreakdown(records.map(getReleaseDecade).filter((decade) => decade !== "Unknown")),
     recordingDecadeBreakdown: getBreakdown(records.map(getRecordingDecade).filter((decade) => decade !== "Unknown")),

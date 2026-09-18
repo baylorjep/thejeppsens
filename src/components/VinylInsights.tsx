@@ -2,9 +2,9 @@
 
 import { VinylRecord } from "@/data/vinyls";
 import DonutChart from "@/components/DonutChart";
-import { formatDiscogsMoney, useCollectionValue, useDiscogsArtistBreakdown } from "@/lib/discogsClient";
+import { formatDiscogsMoney, useCollectionValue } from "@/lib/discogsClient";
 import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
-import { getDecade, getRecordingDecade, getReleaseDecade, isOriginalPressing } from "@/lib/vinylRecordUtils";
+import { getDecade, getRecordingDecade, getReleaseDecade, groupRecordsByArtist, isOriginalPressing } from "@/lib/vinylRecordUtils";
 import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { Disc3 } from "lucide-react";
@@ -371,8 +371,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
 
   const { value: collectionValue, isLoading: isLoadingValue } = useCollectionValue(allRecords);
-  const discogsArtistBreakdown = useDiscogsArtistBreakdown(allRecords);
-  const artistBreakdown = discogsArtistBreakdown ?? snapshot.artistBreakdown;
+  const artistBreakdown = snapshot.artistBreakdown;
 
   const recentlyAdded = useMemo(
     () =>
@@ -550,11 +549,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     return { known: known.length, original, reissue: known.length - original };
   }, [allRecords]);
 
-  const recordsByArtist = useMemo(() => {
-    const map: Record<string, VinylRecord[]> = {};
-    for (const record of allRecords) (map[record.artist] ??= []).push(record);
-    return map;
-  }, [allRecords]);
+  const recordsByArtist = useMemo(() => Object.fromEntries(groupRecordsByArtist(allRecords)) as Record<string, VinylRecord[]>, [allRecords]);
 
   const chartRecords = useMemo(() => ({
     genre: groupRecordsByLabel(allRecords, (record) => record.genres),
@@ -579,10 +574,11 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     if (!artist) return null;
     const artistRecords = recordsByArtist[artist] ?? [];
     const communityRecords = collectionValue?.rarityTiers.flatMap((tier) => tier.records) ?? [];
+    const artistIds = new Set(artistRecords.map((record) => record.id));
     const have = communityRecords
-      .filter((entry) => entry.record.artist === artist)
+      .filter((entry) => artistIds.has(entry.record.id))
       .reduce((sum, entry) => sum + entry.have, 0);
-    return { artist, yours: artistRecords.length, have, known: communityRecords.some((entry) => entry.record.artist === artist) };
+    return { artist, yours: artistRecords.length, have, known: communityRecords.some((entry) => artistIds.has(entry.record.id)) };
   }, [collectionValue, recordsByArtist, topRealArtist]);
 
   const foundStories = useMemo(() => {

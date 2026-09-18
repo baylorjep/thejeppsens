@@ -6,8 +6,11 @@ export default function PressingFactsCard({ record, allRecords }: { record: Viny
   // Hand-curated facts (real trivia + the best of Discogs' notes, reviewed by a
   // person) take priority over the auto-filtered raw notes when they exist --
   // no denylist of regex patterns will ever catch everything Discogs' free-form
-  // community prose throws at it as well as an actual read-through does.
-  const facts = record.curatedFacts?.length ? record.curatedFacts : getPressingFacts(record);
+  // community prose throws at it as well as an actual read-through does. Gated
+  // on discogsVerified same as the raw-notes fallback: this card's header claims
+  // "about this pressing," which isn't an honest claim to make about a release
+  // that was only ever loosely linked (title/search match), never matrix-checked.
+  const facts = record.discogsVerified ? (record.curatedFacts?.length ? record.curatedFacts : getPressingFacts(record)) : [];
   const limitedEditionSize = getLimitedEditionSize(record);
   const artistStat = getArtistCollectionStat(record, allRecords);
   if (!facts.length && !limitedEditionSize && !artistStat) return null;

@@ -1,4 +1,5 @@
 import { VinylRecord } from "@/data/vinyls";
+import { groupRecordsByArtist } from "@/lib/vinylRecordUtils";
 
 export type AchievementMetric =
   | "owned"
@@ -80,7 +81,7 @@ export function computeInstantStats(records: VinylRecord[]): AchievementStats {
   return {
     owned: records.filter((record) => record.status === "owned").length,
     favorites: records.filter((record) => record.favorite).length,
-    artists: new Set(records.map((record) => record.artist)).size,
+    artists: groupRecordsByArtist(records).size,
     genres: new Set(records.flatMap((record) => record.genres)).size,
     discogsLinked: records.filter((record) => record.discogsReleaseId).length,
     discogsVerified: records.filter((record) => record.discogsVerified).length,

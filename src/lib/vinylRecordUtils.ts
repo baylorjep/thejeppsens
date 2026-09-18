@@ -1,4 +1,4 @@
-import { VinylRecord } from "@/data/vinyls";
+import type { VinylRecord } from "@/data/vinyls";
 
 export function splitList(value: string) {
   return value
@@ -150,24 +150,109 @@ export function getPressingFacts(record: VinylRecord): string[] {
     .filter((line) => !isBoringLine(line));
 }
 
+const CREDIT_DELIMITERS = /\s*(?:,|\/|;|&|\band\b|\bfeaturing\b|\bfeat\.?|\bft\.?|\bwith\b)\s*/i;
+
+function normalizeCredit(value: string) {
+  return value.replace(/[()[\]]/g, "").replace(/\s+/g, " ").trim();
+}
+
 /**
- * How many other owned records share this record's primary (first-listed)
- * artist, by simple substring match on the raw `artist` field -- deliberately
- * not splitting collaboration credits ourselves (real act names like "Hall &
- * Oates" would get shredded), just checking whether the primary artist's name
- * appears in each record's credit. Returns null when there's nothing to
- * celebrate (fewer than 2 in the collection).
+ * Who is credited on each record, keyed by record id -- the single source of
+ * truth for every "how many records by X" number in the app (album-page stat,
+ * Insights breakdown, top artist), so they can't disagree.
+ *
+ * A record's raw `artist` string is one free-text field, so real collaboration
+ * credits ("Frank Sinatra & Antônio Carlos Jobim") and featured artists that
+ * only appear in the title ("Tommy Dorsey and His Orchestra Featuring Frank
+ * Sinatra") would otherwise be invisible to per-artist counts. Splitting the
+ * text blindly isn't safe (real acts like "Hall & Oates" would get shredded),
+ * so a piece of a credit only counts as its own artist when that exact name
+ * also appears as a whole artist credit on some other record in the collection.
+ * Unrecognized pieces are ignored, and a record with no recognized pieces keeps
+ * its whole credit string as one entry.
+ */
+export function buildArtistCredits(records: VinylRecord[]): Map<string, string[]> {
+  const knownArtists = new Map<string, string>();
+  for (const record of records) {
+    const name = normalizeCredit(record.artist);
+    if (name && !knownArtists.has(name.toLowerCase())) knownArtists.set(name.toLowerCase(), name);
+  }
+
+  const credits = new Map<string, string[]>();
+  for (const record of records) {
+    const whole = normalizeCredit(record.artist);
+    const parts = record.artist.split(CREDIT_DELIMITERS).map(normalizeCredit).filter(Boolean);
+    const matchedFromArtist = parts.length > 1 ? parts.filter((part) => knownArtists.has(part.toLowerCase())) : [];
+
+    const featuredText = record.title.match(/\b(?:featuring|feat\.?|ft\.?)\s+(.+)$/i)?.[1] ?? "";
+    const matchedFromTitle = featuredText
+      .split(CREDIT_DELIMITERS)
+      .map(normalizeCredit)
+      .filter((part) => part && knownArtists.has(part.toLowerCase()));
+
+    // A composite credit line is replaced by the artists we recognize in it;
+    // a single act's credit line is kept alongside anyone featured in the title.
+    const base = matchedFromArtist.length ? matchedFromArtist : [whole];
+    const unique = new Map<string, string>();
+    for (const name of [...base, ...matchedFromTitle]) {
+      const display = knownArtists.get(name.toLowerCase()) ?? name;
+      unique.set(display.toLowerCase(), display);
+    }
+    credits.set(record.id, [...unique.values()]);
+  }
+  return credits;
+}
+
+/** Catch-all labels on compilations -- not an artist anyone has a favorite of. */
+export function isCatchAllArtist(name: string) {
+  return /^various(\s+artists)?$/i.test(name.trim());
+}
+
+/**
+ * THE way to group or count records by artist anywhere in the app. Every
+ * per-artist number (album-page "#N of X" stat, Insights artist chart and its
+ * click-through lists, top artist, artist counts) must come from this so they
+ * can never disagree -- never group by the raw `record.artist` string, which
+ * misses collaborations and featured credits (Sinatra: 14 solo vs. 19 real).
+ */
+export function groupRecordsByArtist(records: VinylRecord[]): Map<string, VinylRecord[]> {
+  const credits = buildArtistCredits(records);
+  const groups = new Map<string, VinylRecord[]>();
+  for (const record of records) {
+    for (const artist of credits.get(record.id) ?? [record.artist]) {
+      if (isCatchAllArtist(artist)) continue;
+      const group = groups.get(artist);
+      if (group) group.push(record);
+      else groups.set(artist, [record]);
+    }
+  }
+  return groups;
+}
+
+/** Artists ranked by record count (ties alphabetical), derived from groupRecordsByArtist. */
+export function getArtistBreakdown(records: VinylRecord[]) {
+  return [...groupRecordsByArtist(records)]
+    .map(([label, group]) => ({ label, count: group.length }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+}
+
+/**
+ * The artist stat for an album page: "#N of X <artist> albums you own", using
+ * whichever credited artist on this record has the most owned records (needs
+ * at least 2, or there's nothing to celebrate).
  */
 export function getArtistCollectionStat(record: VinylRecord, allRecords: VinylRecord[]) {
-  const primaryArtist = record.artist.split(/[,/]| and | & /i)[0].trim();
-  if (!primaryArtist) return null;
+  const groups = groupRecordsByArtist(allRecords);
+  const credited = [...groups].filter(([, group]) => group.some((r) => r.id === record.id));
 
-  const matches = allRecords.filter(
-    (r) => r.status === "owned" && r.artist.toLowerCase().includes(primaryArtist.toLowerCase()),
-  );
-  if (matches.length < 2) return null;
+  let best: { artist: string; total: number; position: number } | null = null;
+  for (const [artist, group] of credited) {
+    const owned = group.filter((r) => r.status === "owned");
+    if (owned.length < 2 || (best && owned.length <= best.total)) continue;
 
-  const sorted = [...matches].sort((a, b) => (a.dateAdded ?? "").localeCompare(b.dateAdded ?? ""));
-  const position = sorted.findIndex((r) => r.id === record.id) + 1;
-  return { artist: primaryArtist, total: matches.length, position: position || matches.length };
+    const sorted = [...owned].sort((a, b) => (a.dateAdded ?? "").localeCompare(b.dateAdded ?? "") || a.id.localeCompare(b.id));
+    const position = sorted.findIndex((r) => r.id === record.id) + 1;
+    best = { artist, total: owned.length, position: position || owned.length };
+  }
+  return best;
 }
