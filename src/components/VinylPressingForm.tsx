@@ -46,8 +46,10 @@ export default function VinylPressingForm({ id }: { id: string }) {
       // Existing imported metadata is not physical evidence: don't prefill identifiers.
       const loaded = data.submission?.evidence ?? { ...emptyEvidence(), discCount: Math.min(10, Math.max(1, data.record.discCount ?? 1)) };
       setEvidence(loaded);
-      // Any markings already saved were typed on purpose, not copied — don't let later cascades overwrite them.
-      setTouchedSides(Object.fromEntries(Object.entries(loaded.runouts as Record<string, string>).filter(([, v]) => v?.trim()).map(([k]) => [k, true])));
+      // "Touched" tracks edits made in this session only — a side saved with content on a
+      // previous visit isn't assumed to be a deliberate override, so re-editing an earlier
+      // side still cascades forward into it (the "Copied from" hint flags it either way).
+      setTouchedSides({});
       setCopiedFrom({});
     }).catch(e => { if (active) setError(e.message); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
