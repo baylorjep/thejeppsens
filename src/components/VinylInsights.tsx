@@ -1118,7 +1118,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   {Math.max(0, Math.round(collectionValue.total / 50)).toLocaleString("en-US")}
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  bowling balls we could have bought with the estimated value of her collection, at about $50 each.
+                  bowling balls we could have bought with the estimated value of my collection, at about $50 each.
                 </p>
               </div>
             ) : null}
