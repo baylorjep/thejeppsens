@@ -612,7 +612,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   }, [allRecords]);
 
   const statCards = [
-    { label: "Owned", value: snapshot.owned },
+    { label: "Records", value: snapshot.owned },
     { label: "Artists", value: snapshot.artists },
     { label: "Genres", value: snapshot.genres },
     { label: "Favorites", value: snapshot.favorites },
