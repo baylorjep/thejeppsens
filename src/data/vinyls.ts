@@ -9,6 +9,10 @@ export type VinylRecord = {
   pressingNotes?: string;
   label?: string;
   catalogNumber?: string;
+  pressingPlant?: string;
+  barcode?: string;
+  releasedDate?: string;
+  weightGrams?: number;
   format?: string;
   discCount?: number;
   storageLocation?: string;

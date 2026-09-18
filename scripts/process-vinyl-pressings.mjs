@@ -111,6 +111,17 @@ async function applyDecisions() {
       const release = await discogs(`/releases/${decision.releaseId}`);
       if (release.id !== decision.releaseId) throw new Error('Discogs release ID mismatch.');
       metadata = releaseMetadata(release);
+      // The album's true first-release year (from the Discogs master, which groups
+      // every pressing of an album) is distinct from pressingYear (this specific
+      // pressing/repress). Only fill releaseYear/originalReleaseYear if not already
+      // set -- never overwrite curated data, same as releaseMetadata's other fields.
+      if ((!album.record.releaseYear || !album.record.originalReleaseYear) && release.master_id) {
+        const master = await discogs(`/masters/${release.master_id}`);
+        if (master.year > 0) {
+          if (!album.record.releaseYear) metadata.releaseYear = master.year;
+          if (!album.record.originalReleaseYear) metadata.originalReleaseYear = master.year;
+        }
+      }
     }
     plans.push({ decision, metadata });
   }

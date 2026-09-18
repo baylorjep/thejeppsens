@@ -21,6 +21,11 @@ export type DiscogsReleaseDetails = {
   styles?: string[];
   labels?: { name: string; catno?: string }[];
   formats?: { name: string; qty?: string; descriptions?: string[] }[];
+  companies?: { name: string; entity_type_name?: string }[];
+  country?: string;
+  released?: string;
+  estimated_weight?: number;
+  identifiers?: { type: string; value: string; description?: string }[];
   tracklist?: { title: string; type_?: string }[];
   images?: { type?: string; uri?: string }[];
 };
@@ -73,6 +78,12 @@ export function applyDiscogsMatchToRecord(record: VinylRecord, release: DiscogsR
     .map((track) => track.title)
     .filter(Boolean);
   const coverImage = release.images?.find((image) => image.type === "primary")?.uri ?? release.images?.[0]?.uri;
+  const pressingPlant =
+    release.companies?.find((company) => company.entity_type_name === "Pressed By")?.name ??
+    release.companies?.find((company) => company.entity_type_name === "Manufactured By")?.name;
+  const barcodes = release.identifiers?.filter((identifier) => identifier.type === "Barcode") ?? [];
+  const barcode = (barcodes.find((b) => b.description === "Text") ?? barcodes[0])?.value;
+  const releasedDate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(release.released ?? "") ? release.released : undefined;
 
   return {
     ...record,
@@ -80,6 +91,11 @@ export function applyDiscogsMatchToRecord(record: VinylRecord, release: DiscogsR
     discogsVerified: true,
     label: primaryLabel?.name ?? record.label,
     catalogNumber: primaryLabel?.catno ?? record.catalogNumber,
+    pressingPlant: pressingPlant ?? record.pressingPlant,
+    country: release.country ?? record.country,
+    barcode: barcode ?? record.barcode,
+    releasedDate: releasedDate ?? record.releasedDate,
+    weightGrams: release.estimated_weight ?? record.weightGrams,
     format: record.format || format || record.format,
     discCount: record.discCount || discCount || record.discCount,
     genres: record.genres.length ? record.genres : genres.length ? genres : record.genres,
