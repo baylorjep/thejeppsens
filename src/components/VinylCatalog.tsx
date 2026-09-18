@@ -4,6 +4,8 @@ import { VinylRecord } from "@/data/vinyls";
 import AchievementCelebration from "@/components/AchievementCelebration";
 import DiscogsRarityCard from "@/components/DiscogsRarityCard";
 import DiscogsValueCard from "@/components/DiscogsValueCard";
+import OriginalPressingBadge from "@/components/OriginalPressingBadge";
+import PressingFactsCard from "@/components/PressingFactsCard";
 import { computeInstantStats } from "@/lib/achievements";
 import { useAchievementUnlocks } from "@/lib/achievementUnlocks";
 import {
@@ -1749,6 +1751,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     {selectedRecord.title}
                   </h2>
                   <p className="mt-2 text-lg text-gray-600">{selectedRecord.artist}</p>
+                  <div className="mt-3">
+                    <OriginalPressingBadge record={selectedRecord} />
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -1829,6 +1834,8 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                   {selectedRecord.discogsReleaseId ? (
                     <DiscogsRarityCard releaseId={selectedRecord.discogsReleaseId} condition={selectedRecord.condition} />
                   ) : null}
+
+                  <PressingFactsCard record={selectedRecord} />
 
                   <div className="grid gap-3 text-sm sm:grid-cols-2">
                     {[

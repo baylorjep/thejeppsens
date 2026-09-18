@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import VinylCatalog from "@/components/VinylCatalog";
 import { vinyls } from "@/data/vinyls";
+import { listSupabaseVinylRecords } from "@/lib/supabaseVinylServer";
 import { Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -10,7 +11,18 @@ export const metadata: Metadata = {
   description: "Isabel's vinyl collection.",
 };
 
-export default function VinylPage() {
+export const dynamic = "force-dynamic";
+
+export default async function VinylPage() {
+  let records = vinyls;
+  try {
+    const liveRecords = await listSupabaseVinylRecords();
+    if (liveRecords) records = liveRecords;
+  } catch {
+    // Fall back to the seed data; VinylCatalog will retry the live fetch client-side.
+  }
+  const needsIdentification = records.some((record) => record.status === "owned" && !record.discogsVerified);
+
   return (
     <main className="min-h-screen bg-white">
       <Header />
@@ -26,9 +38,11 @@ export default function VinylPage() {
             </h1>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
-            <Link href="/vinyl/identify" className="inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:border-gray-500">
-              Identify pressings
-            </Link>
+            {needsIdentification ? (
+              <Link href="/vinyl/identify" className="inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:border-gray-500">
+                Identify pressings
+              </Link>
+            ) : null}
             <Link
               href="/vinyl/achievements"
               className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500 sm:w-fit"

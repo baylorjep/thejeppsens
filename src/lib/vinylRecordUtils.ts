@@ -57,3 +57,40 @@ export function getRecordingDecade(record: VinylRecord) {
   const year = recordingYears ? Number(recordingYears[1]) : recordingDecade ? Number(recordingDecade[1]) : undefined;
   return decadeFromYear(year);
 }
+
+/**
+ * True only when a confirmed pressing's year matches the album's true first-release
+ * year AND Discogs doesn't describe this specific release as a reissue/repress --
+ * i.e. this copy is (as far as the confirmed Discogs data shows) the first pressing
+ * of this release, not a later run.
+ */
+export function isOriginalPressing(record: VinylRecord) {
+  if (!record.discogsVerified || !record.pressingYear || !record.originalReleaseYear) return false;
+  if (record.pressingYear !== record.originalReleaseYear) return false;
+  return !/reissue|repress|remaster/i.test(record.format ?? "");
+}
+
+/**
+ * Pulls a stated total print-run size out of the confirmed release's own Discogs
+ * notes (e.g. "limited to 3,000 copies"), when Discogs actually states one. Never
+ * inferred or estimated -- most pressings have no such number and this returns null.
+ */
+export function getLimitedEditionSize(record: VinylRecord): number | null {
+  if (!record.discogsVerified) return null;
+  const notes = record.pressingNotes ?? "";
+  const match =
+    notes.match(/(?:limited(?: edition)?(?: of)?(?: to)?|numbered edition of)\s+([\d,]{3,7})(?:\s*(?:copies|units))?/i) ??
+    notes.match(/([\d,]{3,7})\s*(?:numbered\s+)?copies/i);
+  if (!match) return null;
+  const size = Number(match[1].replace(/,/g, ""));
+  return Number.isFinite(size) && size > 0 ? size : null;
+}
+
+/** Splits a release's Discogs notes into distinct fact bullets for display. */
+export function getPressingFacts(record: VinylRecord): string[] {
+  if (!record.discogsVerified) return [];
+  return (record.pressingNotes ?? "")
+    .split(/\n{2,}/)
+    .map((fact) => fact.trim())
+    .filter(Boolean);
+}

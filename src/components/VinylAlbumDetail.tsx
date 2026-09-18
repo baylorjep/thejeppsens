@@ -4,6 +4,8 @@ import { VinylRecord } from "@/data/vinyls";
 import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
 import DiscogsRarityCard from "@/components/DiscogsRarityCard";
 import DiscogsValueCard from "@/components/DiscogsValueCard";
+import OriginalPressingBadge from "@/components/OriginalPressingBadge";
+import PressingFactsCard from "@/components/PressingFactsCard";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { getStatusTone } from "@/lib/vinylAnalytics";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
@@ -693,6 +695,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                   <span className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusTone(record.status).badge}`}>
                     {statusLabel(record.status)}
                   </span>
+                  <OriginalPressingBadge record={record} />
                 </div>
               </div>
 
@@ -804,10 +807,12 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               </div>
             ) : null}
 
-            <Link href={`/vinyl/${encodeURIComponent(record.id)}/identify`} className="block rounded-2xl border border-gray-200 bg-stone-50 p-5 transition-colors hover:border-gray-400">
-              <span className="font-semibold">Identify this pressing →</span>
-              <span className="mt-1 block text-sm leading-6 text-gray-500">Add label photos and runouts for Baylor to review, or check your submission’s progress.</span>
-            </Link>
+            {!record.discogsVerified ? (
+              <Link href={`/vinyl/${encodeURIComponent(record.id)}/identify`} className="block rounded-2xl border border-gray-200 bg-stone-50 p-5 transition-colors hover:border-gray-400">
+                <span className="font-semibold">Identify this pressing →</span>
+                <span className="mt-1 block text-sm leading-6 text-gray-500">Add label photos and runouts for Baylor to review, or check your submission’s progress.</span>
+              </Link>
+            ) : null}
 
             {record.discogsReleaseId ? (
               <DiscogsValueCard
@@ -820,6 +825,8 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             {record.discogsReleaseId ? (
               <DiscogsRarityCard releaseId={record.discogsReleaseId} condition={record.condition} />
             ) : null}
+
+            <PressingFactsCard record={record} />
 
             <dl className="grid grid-cols-2 gap-2 text-[11px] leading-tight sm:grid-cols-2 sm:gap-3 sm:text-sm xl:grid-cols-3">
               {[
@@ -839,7 +846,6 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ["Catalog number", record.catalogNumber],
                 ["Barcode", record.barcode],
                 ["Pressing", record.pressing],
-                ["Pressing notes", record.pressingNotes],
                 ["Vinyl color", record.vinylColor],
                 ["Condition", record.condition],
                 ["Source", record.source],
