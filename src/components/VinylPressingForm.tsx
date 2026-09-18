@@ -7,6 +7,16 @@ import { emptyEvidence, GRADES, missingEvidence, sidesFor, STATUS_LABELS, type P
 import { optimizeImageFile } from "@/lib/vinylImage";
 
 const input = "mt-2 block w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-base text-gray-950 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900";
+const gradeHelp: Record<string, { record: string; cover: string }> = {
+  "Mint (M)": { record: "Perfect and unplayed; rarely used.", cover: "Perfect; no defects." },
+  "Near Mint (NM or M-)": { record: "Almost perfect; no obvious wear; flawless playback.", cover: "Almost perfect; no creases or split edges." },
+  "Very Good Plus (VG+)": { record: "Light wear that does not affect listening.", cover: "Minor wear or small corner damage." },
+  "Very Good (VG)": { record: "Audible crackle, but music remains clear.", cover: "Noticeable wear, marks, or writing." },
+  "Good Plus (G+)": { record: "Noisy throughout, but plays without skipping.", cover: "Heavy wear; seam splits or creases." },
+  "Good (G)": { record: "Very noisy and scratched; may skip.", cover: "Torn, written on, or taped." },
+  "Fair (F)": { record: "Major damage; skips or repeats.", cover: "Severe damage; barely holds the record." },
+  "Poor (P)": { record: "Major damage; skips or repeats.", cover: "Severe damage; barely holds the record." },
+};
 
 const section = "rounded-2xl border border-gray-200 bg-white p-5 sm:p-7";
 
@@ -183,8 +193,8 @@ export default function VinylPressingForm({ id }: { id: string }) {
           </details>
         </section> : null}
         {step === conditionStep ? <section className={section}>
-          <label className="block text-sm font-medium">Vinyl disc grade<select className={input} value={evidence.mediaGrade} onChange={e => update("mediaGrade", e.target.value)}><option value="">Not sure</option>{GRADES.map(g => <option key={g} value={g}>{g}</option>)}</select></label>
-          <label className="mt-5 block text-sm font-medium">Cardboard cover grade<select className={input} value={evidence.sleeveGrade} onChange={e => update("sleeveGrade", e.target.value)}><option value="">Not sure</option>{GRADES.map(g => <option key={g} value={g}>{g}</option>)}<option value="Generic">Generic</option><option value="No cover">No cover</option></select></label>
+          <label className="block text-sm font-medium">Vinyl disc grade<select className={input} value={evidence.mediaGrade} onChange={e => update("mediaGrade", e.target.value)}><option value="">Not sure</option>{GRADES.map(g => <option key={g} value={g}>{g} — {gradeHelp[g].record}</option>)}</select></label>
+          <label className="mt-5 block text-sm font-medium">Cardboard cover grade<select className={input} value={evidence.sleeveGrade} onChange={e => update("sleeveGrade", e.target.value)}><option value="">Not sure</option>{GRADES.map(g => <option key={g} value={g}>{g} — {gradeHelp[g].cover}</option>)}<option value="Generic">Generic</option><option value="No cover">No cover</option></select></label>
           <label className="mt-6 block text-sm font-medium">Notes<textarea className={input} rows={3} value={evidence.conditionNotes} onChange={e => update("conditionNotes", e.target.value)} placeholder="Disc, sound, cover…" maxLength={5000} /></label>
         </section> : null}
       </fieldset>
