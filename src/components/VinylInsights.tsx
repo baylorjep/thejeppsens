@@ -1112,16 +1112,6 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         <section className="rounded-lg border border-gray-200 bg-gray-50 p-5">
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Just for fun</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {collectionValue ? (
-              <div className="rounded-lg border border-gray-200 bg-white p-4">
-                <p className="text-2xl font-semibold tabular-nums text-gray-950">
-                  {Math.max(0, Math.round(collectionValue.total / 50)).toLocaleString("en-US")}
-                </p>
-                <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  bowling balls we could have bought with the estimated value of my collection, at about $50 each.
-                </p>
-              </div>
-            ) : null}
             {funStats.weighedCount > 0 ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4">
                 <p className="text-2xl font-semibold tabular-nums text-gray-950">
@@ -1131,6 +1121,16 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   Total weight of your {funStats.weighedCount} weighed record{funStats.weighedCount === 1 ? "" : "s"}.
                   About {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12))} bowling ball
                   {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12)) === 1 ? "" : "s"} worth of vinyl (using a 12 lb ball).
+                </p>
+              </div>
+            ) : null}
+            {collectionValue ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="text-2xl font-semibold tabular-nums text-gray-950">
+                  {Math.max(0, Math.round(collectionValue.total / 50)).toLocaleString("en-US")}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                  bowling balls we could have bought with the estimated value of my collection, at about $50 each.
                 </p>
               </div>
             ) : null}
