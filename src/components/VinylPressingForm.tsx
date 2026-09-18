@@ -30,6 +30,8 @@ export default function VinylPressingForm({ id }: { id: string }) {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [step, setStep] = useState(0);
+  const [touchedSides, setTouchedSides] = useState<Record<string, boolean>>({});
+  const [copiedFrom, setCopiedFrom] = useState<Record<string, string>>({});
   const stepHeading = useRef<HTMLHeadingElement>(null);
   const endpoint = `/api/vinyl-records/${encodeURIComponent(id)}/pressing`;
 
@@ -42,7 +44,11 @@ export default function VinylPressingForm({ id }: { id: string }) {
       setRecord(data.record);
       setSubmission(data.submission);
       // Existing imported metadata is not physical evidence: don't prefill identifiers.
-      setEvidence(data.submission?.evidence ?? { ...emptyEvidence(), discCount: Math.min(10, Math.max(1, data.record.discCount ?? 1)) });
+      const loaded = data.submission?.evidence ?? { ...emptyEvidence(), discCount: Math.min(10, Math.max(1, data.record.discCount ?? 1)) };
+      setEvidence(loaded);
+      // Any markings already saved were typed on purpose, not copied — don't let later cascades overwrite them.
+      setTouchedSides(Object.fromEntries(Object.entries(loaded.runouts as Record<string, string>).filter(([, v]) => v?.trim()).map(([k]) => [k, true])));
+      setCopiedFrom({});
     }).catch(e => { if (active) setError(e.message); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [endpoint]);
@@ -132,6 +138,28 @@ export default function VinylPressingForm({ id }: { id: string }) {
   const conditionStep = sides.length + 1;
   const reviewStep = conditionStep + 1;
   const activeSide = sides[step - 1];
+  function updateRunout(side: string, value: string) {
+    setTouchedSides(current => ({ ...current, [side]: true }));
+    setCopiedFrom(current => {
+      const next = { ...current };
+      delete next[side];
+      for (let i = sides.indexOf(side) + 1; i < sides.length; i++) {
+        if (touchedSides[sides[i]]) break;
+        next[sides[i]] = side;
+      }
+      return next;
+    });
+    setEvidence(current => {
+      const runouts = { ...current.runouts, [side]: value };
+      for (let i = sides.indexOf(side) + 1; i < sides.length; i++) {
+        if (touchedSides[sides[i]]) break;
+        runouts[sides[i]] = value;
+      }
+      return { ...current, runouts };
+    });
+    setDirty(true);
+    setMessage("");
+  }
   function goToStep(next: number) {
     setStep(next);
     requestAnimationFrame(() => {
@@ -184,7 +212,8 @@ export default function VinylPressingForm({ id }: { id: string }) {
             </svg>
           </figure>
           {photoField("runout", `Side ${activeSide} marking photos`, activeSide)}
-          <label className="mt-4 block text-sm font-medium">Or type the markings<textarea rows={3} className={input} value={evidence.runouts[activeSide] ?? ""} onChange={e => update("runouts", { ...evidence.runouts, [activeSide]: e.target.value })} placeholder="Copy exactly what you see" maxLength={3000} /></label>
+          <label className="mt-4 block text-sm font-medium">Or type the markings<textarea rows={3} className={input} value={evidence.runouts[activeSide] ?? ""} onChange={e => updateRunout(activeSide, e.target.value)} placeholder="Copy exactly what you see" maxLength={3000} /></label>
+          {copiedFrom[activeSide] ? <p className="mt-2 text-sm text-amber-700">Copied from side {copiedFrom[activeSide]} — check it, or edit above.</p> : null}
         </section> : null}
         {step === reviewStep ? <section className={section}>
           <label className="block text-sm font-medium">Vinyl color<input className={input} value={evidence.color} onChange={e => update("color", e.target.value)} placeholder="Black, clear, blue splatter…" maxLength={5000} /></label>
