@@ -43,6 +43,19 @@ function pickBarcode(identifiers) {
   return (barcodes.find((b) => b.description === "Text") ?? barcodes[0])?.value || null;
 }
 
+function parseDurationSeconds(duration) {
+  const parts = String(duration ?? "").trim().split(":").map(Number);
+  if (!parts.length || parts.some(Number.isNaN)) return 0;
+  return parts.reduce((total, part) => total * 60 + part, 0);
+}
+
+function pickRuntimeSeconds(tracklist) {
+  const seconds = (tracklist ?? [])
+    .filter((t) => !t.type_ || t.type_ === "track")
+    .reduce((total, t) => total + parseDurationSeconds(t.duration), 0);
+  return seconds > 0 ? seconds : null;
+}
+
 // Only the exact facts confirmed via physical evidence review, mirroring
 // scripts/lib/pressing-review.mjs's releaseMetadata(). Never touches personal
 // fields (vinylColor, notes, storage, etc).
@@ -53,6 +66,7 @@ function pickFacts(release) {
     barcode: pickBarcode(release.identifiers),
     releasedDate: /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(release.released ?? "") ? release.released : null,
     weightGrams: Number.isFinite(release.estimated_weight) ? release.estimated_weight : null,
+    runtimeSeconds: pickRuntimeSeconds(release.tracklist),
   };
 }
 
@@ -93,6 +107,7 @@ async function main() {
         !row.record.barcode ||
         !row.record.releasedDate ||
         !row.record.weightGrams ||
+        !row.record.runtimeSeconds ||
         !row.record.releaseYear ||
         !row.record.originalReleaseYear),
   );

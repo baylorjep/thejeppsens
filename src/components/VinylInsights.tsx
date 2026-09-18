@@ -4,6 +4,7 @@ import { VinylRecord } from "@/data/vinyls";
 import DonutChart from "@/components/DonutChart";
 import { formatDiscogsMoney, useCollectionValue, useDiscogsArtistBreakdown } from "@/lib/discogsClient";
 import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
+import { isOriginalPressing } from "@/lib/vinylRecordUtils";
 import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { Disc3 } from "lucide-react";
@@ -359,6 +360,14 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       lines.mood = `${topMoodCount.label} is the mood you reach for most, tagged on ${topMoodCount.count} records.`;
     }
 
+    const [topPlant, secondPlant] = snapshot.pressingPlantBreakdown;
+    if (topPlant) {
+      const known = snapshot.pressingPlantBreakdown.reduce((sum, item) => sum + item.count, 0);
+      lines.pressingPlant = secondPlant
+        ? `${topPlant.label} pressed more of your records than anywhere else, out of ${known} records with a known plant.`
+        : `${topPlant.label} is the only pressing plant identified so far, across ${topPlant.count} records.`;
+    }
+
     if (allRecords.length > 0) {
       const parts = [`${snapshot.owned} owned`];
       if (snapshot.wishlist > 0) parts.push(`${snapshot.wishlist} on the wishlist`);
@@ -380,6 +389,15 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     [allRecords],
   );
 
+  // Confirmed pressings only, and only ones with both years on file - this
+  // compares against Discogs' own master-release year (the album's true first
+  // release), not a keyword guess off the format description.
+  const originalPressingStats = useMemo(() => {
+    const known = allRecords.filter((record) => record.discogsVerified && record.pressingYear && record.originalReleaseYear);
+    const original = known.filter(isOriginalPressing).length;
+    return { known: known.length, original, reissue: known.length - original };
+  }, [allRecords]);
+
   const foundStories = useMemo(() => {
     const ownedRecords = allRecords.filter((record) => record.status === "owned");
     const withStory = ownedRecords.filter((record) => record.whereWeGotIt?.trim());
@@ -391,6 +409,19 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       told: withStory.length,
       missing: ownedRecords.length - withStory.length,
       samples,
+    };
+  }, [allRecords]);
+
+  // Just-for-fun stats, not analysis - kept at the very bottom of the page.
+  const funStats = useMemo(() => {
+    const owned = allRecords.filter((record) => record.status === "owned");
+    const weighed = owned.filter((record) => (record.weightGrams ?? 0) > 0);
+    const timed = owned.filter((record) => (record.runtimeSeconds ?? 0) > 0);
+    return {
+      weighedCount: weighed.length,
+      totalGrams: weighed.reduce((sum, record) => sum + (record.weightGrams ?? 0), 0),
+      timedCount: timed.length,
+      totalSeconds: timed.reduce((sum, record) => sum + (record.runtimeSeconds ?? 0), 0),
     };
   }, [allRecords]);
 
@@ -740,6 +771,15 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           totalCount={allRecords.length}
           barColor="bg-rose-500"
         />
+        {snapshot.pressingPlantBreakdown.length > 0 ? (
+          <BreakdownSection
+            title="By pressing plant"
+            narrative={categoryNarratives.pressingPlant}
+            items={snapshot.pressingPlantBreakdown}
+            totalCount={snapshot.pressingPlantBreakdown.reduce((sum, item) => sum + item.count, 0)}
+            barColor="bg-cyan-600"
+          />
+        ) : null}
         <BreakdownSection
           title="Top moods"
           narrative={categoryNarratives.mood}
@@ -796,20 +836,20 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         </section>
       ) : null}
 
-      {collectionValue && collectionValue.originalCount + collectionValue.reissueCount > 1 ? (
+      {originalPressingStats.known > 1 ? (
         <section className="rounded-lg border border-gray-200 bg-white p-5">
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Original vs. reissue</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
-            {Math.round(
-              (collectionValue.originalCount / (collectionValue.originalCount + collectionValue.reissueCount)) * 100,
-            )}
-            % of your linked records are original pressings, the rest are reissues or represses.
+            {Math.round((originalPressingStats.original / originalPressingStats.known) * 100)}% of your{" "}
+            {originalPressingStats.known} confirmed pressings with a known first-release year are true original
+            pressings, the rest are reissues or represses. Compared against each release&apos;s Discogs master year,
+            not guessed from the format description.
           </p>
           <div className="mt-5">
             <DonutChart
               items={[
-                { label: "Original pressing", count: collectionValue.originalCount },
-                { label: "Reissue / repress", count: collectionValue.reissueCount },
+                { label: "Original pressing", count: originalPressingStats.original },
+                { label: "Reissue / repress", count: originalPressingStats.reissue },
               ].filter((item) => item.count > 0)}
             />
           </div>
@@ -849,6 +889,41 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           ) : null}
         </section>
       )}
+
+      {funStats.weighedCount > 0 || funStats.timedCount > 0 ? (
+        <section className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Just for fun</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {funStats.weighedCount > 0 ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="text-2xl font-semibold tabular-nums text-gray-950">
+                  {(funStats.totalGrams / 453.592).toLocaleString("en-US", { maximumFractionDigits: 1 })} lb
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                  Total weight of your {funStats.weighedCount} weighed record{funStats.weighedCount === 1 ? "" : "s"}.
+                  About {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12))} bowling ball
+                  {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12)) === 1 ? "" : "s"} worth of vinyl.
+                </p>
+              </div>
+            ) : null}
+            {funStats.timedCount > 0 ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="text-2xl font-semibold tabular-nums text-gray-950">
+                  {(() => {
+                    const hours = Math.floor(funStats.totalSeconds / 3600);
+                    const days = Math.floor(hours / 24);
+                    return days > 0 ? `${days}d ${hours % 24}h` : `${hours}h ${Math.round((funStats.totalSeconds % 3600) / 60)}m`;
+                  })()}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                  Total runtime of your {funStats.timedCount} timed record{funStats.timedCount === 1 ? "" : "s"}. How
+                  long it would take to play the whole stack back to back, no breaks.
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

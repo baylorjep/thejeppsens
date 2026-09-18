@@ -13,6 +13,7 @@ export type VinylRecord = {
   barcode?: string;
   releasedDate?: string;
   weightGrams?: number;
+  runtimeSeconds?: number;
   format?: string;
   discCount?: number;
   storageLocation?: string;

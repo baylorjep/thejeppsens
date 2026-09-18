@@ -5,6 +5,9 @@ export type MatchRelease = {
   identifiers?: { type: string; value: string; description?: string }[];
   formats?: { name: string; qty?: string; descriptions?: string[]; text?: string }[];
   labels?: { name: string; catno?: string }[]; notes?: string;
+  estimated_weight?: number; master_id?: number;
+  companies?: { name: string; entity_type_name?: string }[];
+  tracklist?: { type_?: string; duration?: string }[];
 };
 export type MatchDecision = { kind: "confirmed" | "review" | "ambiguous"; notes: string; release?: MatchRelease };
 // Only presentation differences are ignored. Never drop words, symbols, or digits.
@@ -82,7 +85,37 @@ export function matchPressing(e: PressingEvidence, album: { title: string; artis
   return { kind: "review", notes: `${exact.length ? "Strong matrix match, but other edition details need checking." : "No unique complete text match."}${candidates ? ` Closest text candidates (not confirmed): ${candidates}.` : ""} Your codes are saved for Baylor; no need to retype them. Extra words, symbols, missing Discogs entries, or incomplete identifiers need review.` };
 }
 
+function pickPressingPlant(companies?: { name: string; entity_type_name?: string }[]) {
+  const pressed = companies?.find(c => c.entity_type_name === "Pressed By");
+  const manufactured = companies?.find(c => c.entity_type_name === "Manufactured By");
+  return (pressed ?? manufactured)?.name || undefined;
+}
+
+// Discogs durations are "M:SS" or occasionally "H:MM:SS"; some tracks (indexes,
+// silences) have none at all, which just contributes 0.
+function parseDurationSeconds(duration?: string): number {
+  const parts = (duration ?? "").trim().split(":").map(Number);
+  if (!parts.length || parts.some(Number.isNaN)) return 0;
+  return parts.reduce((total, part) => total * 60 + part, 0);
+}
+
+function sumRuntimeSeconds(tracklist?: { type_?: string; duration?: string }[]): number {
+  return (tracklist ?? [])
+    .filter(track => !track.type_ || track.type_ === "track")
+    .reduce((total, track) => total + parseDurationSeconds(track.duration), 0);
+}
+
 export function matchedMetadata(release: MatchRelease) {
   const vinyl = release.formats!.filter(f => f.name === "Vinyl");
-  return { pressingYear: release.year && release.year > 0 ? release.year : null, label: release.labels?.map(l => l.name).join(" / ") || null, catalogNumber: release.labels?.map(l => l.catno).filter(Boolean).join(" / ") || null, country: release.country || null, format: vinyl.map(f => [f.qty, f.name, ...(f.descriptions ?? [])].join(", ")).join(" / "), discCount: vinyl.reduce((n, f) => n + Number(f.qty), 0), pressingNotes: release.notes || null };
+  const weightGrams = Number.isFinite(release.estimated_weight) ? release.estimated_weight : undefined;
+  const pressingPlant = pickPressingPlant(release.companies);
+  const runtimeSeconds = sumRuntimeSeconds(release.tracklist);
+  return {
+    pressingYear: release.year && release.year > 0 ? release.year : null, label: release.labels?.map(l => l.name).join(" / ") || null, catalogNumber: release.labels?.map(l => l.catno).filter(Boolean).join(" / ") || null, country: release.country || null, format: vinyl.map(f => [f.qty, f.name, ...(f.descriptions ?? [])].join(", ")).join(" / "), discCount: vinyl.reduce((n, f) => n + Number(f.qty), 0), pressingNotes: release.notes || null,
+    // Never included as null/0 - an absent key leaves whatever the record already
+    // had (e.g. from an earlier manual link) alone; jsonb merge overwrites otherwise.
+    ...(weightGrams !== undefined ? { weightGrams } : {}),
+    ...(pressingPlant ? { pressingPlant } : {}),
+    ...(runtimeSeconds > 0 ? { runtimeSeconds } : {}),
+  };
 }

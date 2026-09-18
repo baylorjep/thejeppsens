@@ -23,12 +23,15 @@ export type DiscogsRelease = {
   styles?: string[];
   labels?: { name: string; catno?: string }[];
   formats?: { name: string; qty?: string; descriptions?: string[] }[];
-  tracklist?: { position?: string; title: string; type_?: string }[];
+  tracklist?: { position?: string; title: string; type_?: string; duration?: string }[];
   images?: { type?: string; uri?: string; uri150?: string }[];
   notes?: string;
   country?: string;
   released?: string;
   community?: { have?: number; want?: number; rating?: { average?: number; count?: number } };
+  estimated_weight?: number;
+  master_id?: number;
+  companies?: { name: string; entity_type_name?: string }[];
 };
 
 function discogsHeaders() {
@@ -102,6 +105,19 @@ export async function fetchDiscogsRelease(releaseId: string) {
   if (!response.ok) throw new Error(`Discogs release lookup failed (${response.status})`);
 
   return (await response.json()) as DiscogsRelease;
+}
+
+// The release's own `year` is when *this pressing* came out; the master's `year`
+// is when the album was *first* released, full stop. Comparing the two is the
+// only reliable way to tell an original pressing from a later reissue.
+export async function fetchDiscogsMasterYear(masterId: number): Promise<number | null> {
+  if (!process.env.DISCOGS_TOKEN) return null;
+
+  const response = await discogsFetch(`${DISCOGS_API_BASE}/masters/${masterId}`);
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as { year?: number };
+  return data.year && data.year > 0 ? data.year : null;
 }
 
 export type DiscogsPrice = { currency: string; value: number };

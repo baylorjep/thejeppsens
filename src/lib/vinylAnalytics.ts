@@ -121,5 +121,9 @@ export function getCollectionSnapshot(records: VinylRecord[]) {
     formatBreakdown: getBreakdown(records.map((record) => record.format ?? "Unknown")),
     labelBreakdown: getBreakdown(records.map((record) => record.label ?? "Unknown")),
     statusBreakdown: getBreakdown(records.map((record) => record.status)),
+    // Unlike format/label, most records don't have this yet - an "Unknown" bar
+    // covering most of the collection wouldn't tell you anything, so it's excluded
+    // rather than defaulted.
+    pressingPlantBreakdown: getBreakdown(records.map((record) => record.pressingPlant ?? "")),
   };
 }

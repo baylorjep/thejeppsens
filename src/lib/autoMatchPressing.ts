@@ -1,4 +1,4 @@
-import { fetchPressingCandidates } from "./discogsServer";
+import { fetchDiscogsMasterYear, fetchPressingCandidates } from "./discogsServer";
 import { canMatchText, matchPressing, matchedMetadata } from "./pressingMatcher";
 import type { PressingSubmission } from "./pressingEvidence";
 import type { getVinylSupabaseClient } from "./supabaseVinylServer";
@@ -17,9 +17,16 @@ export async function autoMatchPressing(db: NonNullable<ReturnType<typeof getVin
   }
   clearTimeout(timer);
   if (decision.kind === "confirmed" && decision.release) {
+    const metadata: Record<string, unknown> = matchedMetadata(decision.release);
+    // Best-effort: the master year makes "original pressing" data trustworthy
+    // instead of guessed, but a lookup failure shouldn't block the confirmation.
+    if (decision.release.master_id) {
+      const masterYear = await fetchDiscogsMasterYear(decision.release.master_id).catch(() => null);
+      if (masterYear) { metadata.releaseYear = masterYear; metadata.originalReleaseYear = masterYear; }
+    }
     const { data, error } = await db.rpc("review_vinyl_pressing", {
       p_record_id: submission.record_id, p_revision: submission.revision, p_status: "confirmed",
-      p_notes: decision.notes, p_release_id: decision.release.id, p_metadata: matchedMetadata(decision.release),
+      p_notes: decision.notes, p_release_id: decision.release.id, p_metadata: metadata,
     });
     if (!error && data) return data;
     // Never fall back to overwriting a submission that changed while Discogs ran.

@@ -26,9 +26,16 @@ export type DiscogsReleaseDetails = {
   released?: string;
   estimated_weight?: number;
   identifiers?: { type: string; value: string; description?: string }[];
-  tracklist?: { title: string; type_?: string }[];
+  tracklist?: { title: string; type_?: string; duration?: string }[];
   images?: { type?: string; uri?: string }[];
+  masterYear?: number | null;
 };
+
+function parseDurationSeconds(duration?: string): number {
+  const parts = (duration ?? "").trim().split(":").map(Number);
+  if (!parts.length || parts.some(Number.isNaN)) return 0;
+  return parts.reduce((total, part) => total * 60 + part, 0);
+}
 
 function stripParentheticals(value: string) {
   return value.replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/\s+/g, " ").trim();
@@ -84,6 +91,9 @@ export function applyDiscogsMatchToRecord(record: VinylRecord, release: DiscogsR
   const barcodes = release.identifiers?.filter((identifier) => identifier.type === "Barcode") ?? [];
   const barcode = (barcodes.find((b) => b.description === "Text") ?? barcodes[0])?.value;
   const releasedDate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(release.released ?? "") ? release.released : undefined;
+  const runtimeSeconds = (release.tracklist ?? [])
+    .filter((track) => !track.type_ || track.type_ === "track")
+    .reduce((total, track) => total + parseDurationSeconds(track.duration), 0);
 
   return {
     ...record,
@@ -96,6 +106,10 @@ export function applyDiscogsMatchToRecord(record: VinylRecord, release: DiscogsR
     barcode: barcode ?? record.barcode,
     releasedDate: releasedDate ?? record.releasedDate,
     weightGrams: release.estimated_weight ?? record.weightGrams,
+    runtimeSeconds: runtimeSeconds > 0 ? runtimeSeconds : record.runtimeSeconds,
+    // The master's year is the album's true first release; this pressing's own
+    // `release.year` (already used for pressingYear elsewhere) is not the same thing.
+    originalReleaseYear: release.masterYear ?? record.originalReleaseYear,
     format: record.format || format || record.format,
     discCount: record.discCount || discCount || record.discCount,
     genres: record.genres.length ? record.genres : genres.length ? genres : record.genres,
