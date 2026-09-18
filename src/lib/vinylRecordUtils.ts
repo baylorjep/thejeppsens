@@ -86,11 +86,36 @@ export function getLimitedEditionSize(record: VinylRecord): number | null {
   return Number.isFinite(size) && size > 0 ? size : null;
 }
 
+// Discogs notes use its own wiki markup ([l123], [a123], [r123] link to a label/
+// artist/release by internal id; [url=...]text[/url] wraps a link). We don't
+// resolve those ids to names, so strip them rather than show raw brackets. A
+// [l...] reference is almost always to the release's own label, which we
+// already have, so substitute that in instead of just deleting it.
+function cleanDiscogsMarkup(text: string, labelName?: string): string {
+  const label = labelName?.replace(/\s*\(\d+\)\s*$/, "").trim();
+  return text
+    .replace(/\[url(?:=[^\]]*)?\](.*?)\[\/url\]/gi, "$1")
+    .replace(/\[l\d+\]/gi, label || "this")
+    .replace(/\[[amr]\d+\]/gi, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]+([.,])/g, "$1")
+    .trim();
+}
+
+// A copyright/phonogram notice ("(C) 1980 Lucasfilm Ltd.") isn't a fact about
+// this specific pressing - it's boilerplate Discogs includes on every release.
+const COPYRIGHT_LINE = /^\(?[©℗cp]\)?\s+\d{4}\b/i;
+function isCopyrightNotice(fact: string): boolean {
+  const lines = fact.split("\n").map((line) => line.trim()).filter(Boolean);
+  return lines.length > 0 && lines.every((line) => COPYRIGHT_LINE.test(line));
+}
+
 /** Splits a release's Discogs notes into distinct fact bullets for display. */
 export function getPressingFacts(record: VinylRecord): string[] {
   if (!record.discogsVerified) return [];
   return (record.pressingNotes ?? "")
     .split(/\n{2,}/)
-    .map((fact) => fact.trim())
-    .filter(Boolean);
+    .map((fact) => cleanDiscogsMarkup(fact.trim(), record.label))
+    .filter(Boolean)
+    .filter((fact) => !isCopyrightNotice(fact));
 }

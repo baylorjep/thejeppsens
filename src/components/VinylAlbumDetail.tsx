@@ -826,8 +826,6 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               <DiscogsRarityCard releaseId={record.discogsReleaseId} condition={record.condition} />
             ) : null}
 
-            <PressingFactsCard record={record} />
-
             <dl className="grid grid-cols-2 gap-2 text-[11px] leading-tight sm:grid-cols-2 sm:gap-3 sm:text-sm xl:grid-cols-3">
               {[
                 ["Released", record.releaseYear?.toString()],
@@ -949,6 +947,8 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 </div>
               </div>
             ) : null}
+
+            <PressingFactsCard record={record} />
           </div>
         </div>
       </section>
