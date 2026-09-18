@@ -4,7 +4,7 @@ import { VinylRecord } from "@/data/vinyls";
 import DonutChart from "@/components/DonutChart";
 import { formatDiscogsMoney, useCollectionValue, useDiscogsArtistBreakdown } from "@/lib/discogsClient";
 import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
-import { isOriginalPressing } from "@/lib/vinylRecordUtils";
+import { getDecade, getRecordingDecade, getReleaseDecade, isOriginalPressing } from "@/lib/vinylRecordUtils";
 import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { Disc3 } from "lucide-react";
@@ -17,6 +17,90 @@ type VinylInsightsProps = {
 
 const RARITY_PAGE_SIZE = 10;
 
+function groupRecordsByLabel(records: VinylRecord[], getLabels: (record: VinylRecord) => string[]) {
+  const grouped: Record<string, VinylRecord[]> = {};
+  for (const record of records) {
+    for (const label of getLabels(record)) {
+      if (!label) continue;
+      (grouped[label] ??= []).push(record);
+    }
+  }
+  return grouped;
+}
+
+function formatRuntimeComparison(totalSeconds: number) {
+  const totalMinutes = totalSeconds / 60;
+  if (totalMinutes < 120) {
+    const movies = Math.max(1, Math.round(totalMinutes / 105));
+    return `roughly ${movies} feature-length movie${movies === 1 ? "" : "s"}`;
+  }
+
+  const totalHours = totalMinutes / 60;
+  if (totalHours < 24) {
+    const workdays = Math.max(1, Math.round(totalHours / 8));
+    return `about ${workdays} eight-hour workday${workdays === 1 ? "" : "s"}`;
+  }
+
+  const totalDays = totalHours / 24;
+  if (totalDays < 7) {
+    const days = Math.max(1, Math.round(totalDays));
+    return `${days} full day${days === 1 ? "" : "s"} of nonstop listening`;
+  }
+
+  if (totalDays < 30) {
+    const weeks = Math.max(1, Math.round(totalDays / 7));
+    return `${weeks} week${weeks === 1 ? "" : "s"} of nonstop listening`;
+  }
+
+  const months = Math.max(1, Math.round(totalDays / 30));
+  return `${months} month${months === 1 ? "" : "s"} of nonstop listening`;
+}
+
+function InteractiveDonut({
+  items,
+  recordsByLabel,
+  formatCount,
+}: {
+  items: { label: string; count: number }[];
+  recordsByLabel: Record<string, VinylRecord[]>;
+  formatCount?: (count: number) => string;
+}) {
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const selectedRecords = selectedLabel ? recordsByLabel[selectedLabel] : undefined;
+
+  return (
+    <>
+      <DonutChart
+        items={items}
+        formatCount={formatCount}
+        selectedLabel={selectedLabel}
+        onSelectLabel={(label) => setSelectedLabel((current) => (current === label ? null : label))}
+      />
+      {selectedRecords ? (
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-gray-950">
+              {selectedLabel} <span className="font-normal text-gray-400">({selectedRecords.length} albums)</span>
+            </h3>
+            <button type="button" onClick={() => setSelectedLabel(null)} className="text-xs text-gray-400 underline-offset-4 hover:text-gray-700 hover:underline">
+              Close
+            </button>
+          </div>
+          <ol className="mt-3 grid gap-1 sm:grid-cols-2">
+            {selectedRecords.map((record) => (
+              <li key={record.id}>
+                <Link href={`/vinyl/${record.id}`} className="block truncate rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950">
+                  {record.title}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 function BreakdownSection({
   title,
   narrative,
@@ -25,6 +109,7 @@ function BreakdownSection({
   barColor = "bg-gray-950",
   linkBase,
   formatCount = (count) => String(count),
+  detailRecordsByLabel,
 }: {
   title: string;
   narrative?: string;
@@ -33,13 +118,16 @@ function BreakdownSection({
   barColor?: string;
   linkBase?: string;
   formatCount?: (count: number) => string;
+  detailRecordsByLabel?: Record<string, VinylRecord[]>;
 }) {
   const [showAll, setShowAll] = useState(false);
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   // Bars are sized relative to the largest value, not necessarily items[0] -
   // some breakdowns (value by decade) are sorted chronologically rather
   // than by count, so items[0] isn't reliably the max.
   const topCount = Math.max(...items.map((item) => item.count), 1);
   const visible = showAll ? items : items.slice(0, 8);
+  const selectedRecords = selectedLabel ? detailRecordsByLabel?.[selectedLabel] : undefined;
 
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-5">
@@ -65,6 +153,19 @@ function BreakdownSection({
             </>
           );
 
+          if (detailRecordsByLabel) {
+            return (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => setSelectedLabel((current) => (current === item.label ? null : item.label))}
+                className={`block w-full -mx-2 rounded-md px-2 py-1 text-left transition-colors hover:bg-gray-50 ${selectedLabel === item.label ? "bg-gray-50" : ""}`}
+              >
+                {inner}
+              </button>
+            );
+          }
+
           if (linkBase) {
             return (
               <Link
@@ -88,6 +189,31 @@ function BreakdownSection({
           {showAll ? "Show less" : `Show all ${items.length}`}
         </button>
       )}
+      {selectedRecords ? (
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-gray-950">
+              {selectedLabel} <span className="font-normal text-gray-400">({selectedRecords.length} albums)</span>
+            </h3>
+            <button
+              type="button"
+              onClick={() => setSelectedLabel(null)}
+              className="text-xs text-gray-400 underline-offset-4 hover:text-gray-700 hover:underline"
+            >
+              Close
+            </button>
+          </div>
+          <ol className="mt-3 grid gap-1 sm:grid-cols-2">
+            {selectedRecords.map((record) => (
+              <li key={record.id}>
+                <Link href={`/vinyl/${record.id}`} className="block truncate rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950">
+                  {record.title}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -241,6 +367,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
   const genreTotal = snapshot.genreBreakdown.reduce((s, i) => s + i.count, 0);
   const moodTotal = snapshot.moodBreakdown.reduce((s, i) => s + i.count, 0);
+  const countryTotal = snapshot.countryBreakdown.reduce((s, i) => s + i.count, 0);
 
   const topRealArtist = artistBreakdown.find(
     (a) => a.label.toLowerCase() !== "various artists",
@@ -360,6 +487,13 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       lines.mood = `${topMoodCount.label} is the mood you reach for most, tagged on ${topMoodCount.count} records.`;
     }
 
+    const [topCountry, secondCountry] = snapshot.countryBreakdown;
+    if (topCountry) {
+      lines.country = secondCountry
+        ? `${topCountry.label} is where the most records in your collection were pressed, with ${topCountry.count} titles, followed by ${secondCountry.label}.`
+        : `${topCountry.label} is the only pressing country recorded so far, across ${topCountry.count} titles.`;
+    }
+
     const [topPlant, secondPlant] = snapshot.pressingPlantBreakdown;
     if (topPlant) {
       const known = snapshot.pressingPlantBreakdown.reduce((sum, item) => sum + item.count, 0);
@@ -398,11 +532,45 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     return { known: known.length, original, reissue: known.length - original };
   }, [allRecords]);
 
+  const recordsByArtist = useMemo(() => {
+    const map: Record<string, VinylRecord[]> = {};
+    for (const record of allRecords) (map[record.artist] ??= []).push(record);
+    return map;
+  }, [allRecords]);
+
+  const chartRecords = useMemo(() => ({
+    genre: groupRecordsByLabel(allRecords, (record) => record.genres),
+    artist: recordsByArtist,
+    releaseDecade: groupRecordsByLabel(allRecords, (record) => [getReleaseDecade(record)]),
+    recordingDecade: groupRecordsByLabel(allRecords, (record) => [getRecordingDecade(record)]),
+    decade: groupRecordsByLabel(allRecords, (record) => [getDecade(record)]),
+    format: groupRecordsByLabel(allRecords, (record) => [record.format ?? "Unknown"]),
+    label: groupRecordsByLabel(allRecords, (record) => [record.label ?? "Unknown"]),
+    country: groupRecordsByLabel(allRecords, (record) => [record.country ?? "Unknown"]),
+    pressingPlant: groupRecordsByLabel(allRecords, (record) => [record.pressingPlant ?? "Unknown"]),
+    mood: groupRecordsByLabel(allRecords, (record) => record.moods),
+    status: groupRecordsByLabel(allRecords, (record) => [record.status]),
+    originalStatus: groupRecordsByLabel(
+      allRecords.filter((record) => record.discogsVerified && record.pressingYear && record.originalReleaseYear),
+      (record) => [isOriginalPressing(record) ? "Original pressing" : "Reissue / repress"],
+    ),
+  }), [allRecords, recordsByArtist]);
+
+  const artistCommunityFact = useMemo(() => {
+    const artist = topRealArtist?.label;
+    if (!artist) return null;
+    const artistRecords = recordsByArtist[artist] ?? [];
+    const communityRecords = collectionValue?.rarityTiers.flatMap((tier) => tier.records) ?? [];
+    const have = communityRecords
+      .filter((entry) => entry.record.artist === artist)
+      .reduce((sum, entry) => sum + entry.have, 0);
+    return { artist, yours: artistRecords.length, have, known: communityRecords.some((entry) => entry.record.artist === artist) };
+  }, [collectionValue, recordsByArtist, topRealArtist]);
+
   const foundStories = useMemo(() => {
     const ownedRecords = allRecords.filter((record) => record.status === "owned");
     const withStory = ownedRecords.filter((record) => record.whereWeGotIt?.trim());
-    // Shuffle so the same few stories aren't pinned to the top forever.
-    const samples = [...withStory].sort(() => Math.random() - 0.5).slice(0, 3);
+    const samples = [...withStory].sort((a, b) => a.id.localeCompare(b.id)).slice(0, 3);
 
     return {
       total: ownedRecords.length,
@@ -426,13 +594,12 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   }, [allRecords]);
 
   const statCards = [
-    { label: "Records", value: allRecords.length },
+    { label: "Owned", value: snapshot.owned },
     { label: "Artists", value: snapshot.artists },
     { label: "Genres", value: snapshot.genres },
     { label: "Favorites", value: snapshot.favorites },
-    { label: "Owned", value: snapshot.owned },
     { label: "Wishlist", value: snapshot.wishlist },
-    { label: "Upgrades", value: snapshot.upgrade },
+    { label: "Originals", value: originalPressingStats.original },
     { label: "Formats", value: snapshot.formats },
   ];
 
@@ -515,8 +682,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         </div>
       ) : null}
 
-      {/* Stats — unified 8-card grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {statCards.map(({ label, value }) => (
           <div key={label} className="rounded-lg border border-gray-200 bg-white p-4">
             <p className="text-xs text-gray-500">{label}</p>
@@ -588,6 +755,19 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             </div>
           )}
         </div>
+      ) : null}
+
+      {artistCommunityFact ? (
+        <section className="rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Interesting facts</h2>
+          <div className="mt-4 rounded-lg bg-gray-50 p-4">
+            <p className="text-sm leading-relaxed text-gray-700">
+              {artistCommunityFact.known
+                ? `Discogs collectors report ${artistCommunityFact.have.toLocaleString()} copies across ${artistCommunityFact.artist}'s pressings represented here; you have ${artistCommunityFact.yours}.`
+                : `You have ${artistCommunityFact.yours} ${artistCommunityFact.artist} album${artistCommunityFact.yours === 1 ? "" : "s"}. Link a pressing to Discogs to compare it with other collectors.`}
+            </p>
+          </div>
+        </section>
       ) : null}
 
       {/* Discogs community stats */}
@@ -734,6 +914,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           totalCount={genreTotal}
           barColor="bg-teal-500"
           linkBase="/vinyl?genre="
+          detailRecordsByLabel={chartRecords.genre}
         />
         <BreakdownSection
           title="Top artists"
@@ -741,6 +922,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           items={artistBreakdown}
           totalCount={artistBreakdown.reduce((sum, item) => sum + item.count, 0)}
           barColor="bg-blue-500"
+          detailRecordsByLabel={chartRecords.artist}
         />
         <BreakdownSection
           title="By release decade"
@@ -749,6 +931,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           totalCount={allRecords.length}
           barColor="bg-amber-500"
           linkBase="/vinyl?decade="
+          detailRecordsByLabel={chartRecords.releaseDecade}
         />
         <BreakdownSection
           title="By recording decade"
@@ -756,6 +939,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           items={snapshot.recordingDecadeBreakdown}
           totalCount={allRecords.length}
           barColor="bg-orange-400"
+          detailRecordsByLabel={chartRecords.recordingDecade}
         />
         <BreakdownSection
           title="By format"
@@ -763,6 +947,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           items={snapshot.formatBreakdown}
           totalCount={allRecords.length}
           barColor="bg-purple-500"
+          detailRecordsByLabel={chartRecords.format}
         />
         <BreakdownSection
           title="By label"
@@ -770,6 +955,15 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           items={snapshot.labelBreakdown}
           totalCount={allRecords.length}
           barColor="bg-rose-500"
+          detailRecordsByLabel={chartRecords.label}
+        />
+        <BreakdownSection
+          title="By country"
+          narrative={categoryNarratives.country}
+          items={snapshot.countryBreakdown}
+          totalCount={countryTotal}
+          barColor="bg-sky-500"
+          detailRecordsByLabel={chartRecords.country}
         />
         {snapshot.pressingPlantBreakdown.length > 0 ? (
           <BreakdownSection
@@ -778,6 +972,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             items={snapshot.pressingPlantBreakdown}
             totalCount={snapshot.pressingPlantBreakdown.reduce((sum, item) => sum + item.count, 0)}
             barColor="bg-cyan-600"
+            detailRecordsByLabel={chartRecords.pressingPlant}
           />
         ) : null}
         <BreakdownSection
@@ -787,6 +982,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           totalCount={moodTotal}
           barColor="bg-violet-500"
           linkBase="/vinyl?mood="
+          detailRecordsByLabel={chartRecords.mood}
         />
         <section className="rounded-lg border border-gray-200 bg-white p-5">
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">By status</h2>
@@ -794,7 +990,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{categoryNarratives.status}</p>
           ) : null}
           <div className="mt-5">
-            <DonutChart items={snapshot.statusBreakdown} />
+            <InteractiveDonut items={snapshot.statusBreakdown} recordsByLabel={chartRecords.status} />
           </div>
         </section>
       </div>
@@ -804,9 +1000,10 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Value by format</h2>
           <p className="mt-1 text-xs text-gray-400">Estimated value split across the formats in your collection.</p>
           <div className="mt-5">
-            <DonutChart
+            <InteractiveDonut
               items={collectionValue.byFormat.map((entry) => ({ label: entry.format, count: Math.round(entry.total) }))}
               formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
+              recordsByLabel={chartRecords.format}
             />
           </div>
         </section>
@@ -820,6 +1017,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           totalCount={collectionValue.byDecade.reduce((sum, entry) => sum + Math.round(entry.total), 0)}
           barColor="bg-emerald-500"
           formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
+          detailRecordsByLabel={chartRecords.releaseDecade}
         />
       ) : null}
 
@@ -828,9 +1026,10 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Value by genre</h2>
           <p className="mt-1 text-xs text-gray-400">Which genres carry the most estimated value.</p>
           <div className="mt-5">
-            <DonutChart
+            <InteractiveDonut
               items={collectionValue.byGenre.map((entry) => ({ label: entry.genre, count: Math.round(entry.total) }))}
               formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
+              recordsByLabel={chartRecords.genre}
             />
           </div>
         </section>
@@ -846,11 +1045,12 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             not guessed from the format description.
           </p>
           <div className="mt-5">
-            <DonutChart
+            <InteractiveDonut
               items={[
                 { label: "Original pressing", count: originalPressingStats.original },
                 { label: "Reissue / repress", count: originalPressingStats.reissue },
               ].filter((item) => item.count > 0)}
+              recordsByLabel={chartRecords.originalStatus}
             />
           </div>
         </section>
@@ -890,10 +1090,20 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         </section>
       )}
 
-      {funStats.weighedCount > 0 || funStats.timedCount > 0 ? (
+      {funStats.weighedCount > 0 || funStats.timedCount > 0 || collectionValue ? (
         <section className="rounded-lg border border-gray-200 bg-gray-50 p-5">
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Just for fun</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {collectionValue ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="text-2xl font-semibold tabular-nums text-gray-950">
+                  {Math.max(0, Math.round(collectionValue.total / 50)).toLocaleString("en-US")}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                  bowling balls we could have bought with the estimated value of her collection, at about $50 each.
+                </p>
+              </div>
+            ) : null}
             {funStats.weighedCount > 0 ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4">
                 <p className="text-2xl font-semibold tabular-nums text-gray-950">
@@ -902,7 +1112,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
                   Total weight of your {funStats.weighedCount} weighed record{funStats.weighedCount === 1 ? "" : "s"}.
                   About {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12))} bowling ball
-                  {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12)) === 1 ? "" : "s"} worth of vinyl.
+                  {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12)) === 1 ? "" : "s"} worth of vinyl (using a 12 lb ball).
                 </p>
               </div>
             ) : null}
@@ -917,7 +1127,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
                   Total runtime of your {funStats.timedCount} timed record{funStats.timedCount === 1 ? "" : "s"}. How
-                  long it would take to play the whole stack back to back, no breaks.
+                  long it would take to play the whole stack back to back, no breaks. That is {formatRuntimeComparison(funStats.totalSeconds)}.
                 </p>
               </div>
             ) : null}

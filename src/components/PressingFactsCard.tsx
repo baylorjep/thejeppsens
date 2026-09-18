@@ -1,11 +1,16 @@
 import { VinylRecord } from "@/data/vinyls";
-import { getLimitedEditionSize, getPressingFacts } from "@/lib/vinylRecordUtils";
+import { getArtistCollectionStat, getLimitedEditionSize, getPressingFacts } from "@/lib/vinylRecordUtils";
 import { Lightbulb } from "lucide-react";
 
-export default function PressingFactsCard({ record }: { record: VinylRecord }) {
-  const facts = getPressingFacts(record);
+export default function PressingFactsCard({ record, allRecords }: { record: VinylRecord; allRecords: VinylRecord[] }) {
+  // Hand-curated facts (real trivia + the best of Discogs' notes, reviewed by a
+  // person) take priority over the auto-filtered raw notes when they exist --
+  // no denylist of regex patterns will ever catch everything Discogs' free-form
+  // community prose throws at it as well as an actual read-through does.
+  const facts = record.curatedFacts?.length ? record.curatedFacts : getPressingFacts(record);
   const limitedEditionSize = getLimitedEditionSize(record);
-  if (!facts.length && !limitedEditionSize) return null;
+  const artistStat = getArtistCollectionStat(record, allRecords);
+  if (!facts.length && !limitedEditionSize && !artistStat) return null;
 
   return (
     <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5">
@@ -13,19 +18,30 @@ export default function PressingFactsCard({ record }: { record: VinylRecord }) {
         <Lightbulb className="h-4 w-4" />
         Interesting facts about this pressing
       </div>
-      {limitedEditionSize ? (
-        <p className="mt-3 inline-flex rounded-full bg-indigo-900 px-3 py-1 text-xs font-semibold text-white">
-          Limited to {limitedEditionSize.toLocaleString()} copies
-        </p>
+      {limitedEditionSize || artistStat ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {limitedEditionSize ? (
+            <p className="inline-flex rounded-full bg-indigo-900 px-3 py-1 text-xs font-semibold text-white">
+              Limited to {limitedEditionSize.toLocaleString()} copies
+            </p>
+          ) : null}
+          {artistStat ? (
+            <p className="inline-flex rounded-full bg-indigo-900 px-3 py-1 text-xs font-semibold text-white">
+              #{artistStat.position} of {artistStat.total} {artistStat.artist} albums you own
+            </p>
+          ) : null}
+        </div>
       ) : null}
-      <ul className="mt-3 space-y-2 text-sm leading-6 text-indigo-950">
-        {facts.map((fact, index) => (
-          <li key={index} className="flex gap-2">
-            <span className="text-indigo-400">•</span>
-            <span className="whitespace-pre-line">{fact}</span>
-          </li>
-        ))}
-      </ul>
+      {facts.length ? (
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-indigo-950">
+          {facts.map((fact, index) => (
+            <li key={index} className="flex gap-2">
+              <span className="text-indigo-400">•</span>
+              <span className="whitespace-pre-line">{fact}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   );
 }

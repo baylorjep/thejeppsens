@@ -9,7 +9,7 @@ import PressingFactsCard from "@/components/PressingFactsCard";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { getStatusTone } from "@/lib/vinylAnalytics";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
-import { getDecade, statusLabel } from "@/lib/vinylRecordUtils";
+import { getDecade, isReissuePressing, statusLabel } from "@/lib/vinylRecordUtils";
 import { Disc3, ExternalLink, Pencil, Search, Settings2, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,6 +41,7 @@ type AlbumEditForm = {
   pressing: string;
   vinylColor: string;
   condition: string;
+  sleeveCondition: string;
   source: string;
   giftFrom: string;
   whereWeGotIt: string;
@@ -76,6 +77,7 @@ function recordToEditForm(record: VinylRecord): AlbumEditForm {
     pressing: record.pressing ?? "",
     vinylColor: record.vinylColor ?? "",
     condition: record.condition ?? "",
+    sleeveCondition: record.sleeveCondition ?? "",
     source: record.source ?? "",
     giftFrom: record.giftFrom ?? "",
     whereWeGotIt: record.whereWeGotIt ?? "",
@@ -413,6 +415,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       pressing: editForm.pressing.trim() || undefined,
       vinylColor: editForm.vinylColor.trim() || undefined,
       condition: editForm.condition.trim() || undefined,
+      sleeveCondition: editForm.sleeveCondition.trim() || undefined,
       source: editForm.source.trim() || undefined,
       giftFrom: editForm.giftFrom.trim() || undefined,
       whereWeGotIt: editForm.whereWeGotIt.trim() || undefined,
@@ -831,7 +834,10 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ["Released", record.releaseYear?.toString()],
                 ["Original release", record.originalReleaseYear?.toString()],
                 ["Recording years", record.recordingYears],
-                ["Pressing year", record.pressingYear?.toString()],
+                [
+                  "Pressing year",
+                  record.pressingYear?.toString() ?? (isReissuePressing(record) ? "Unknown (Discogs doesn't date this reissue)" : undefined),
+                ],
                 ["Released date", record.releasedDate],
                 ["Decade", getDecade(record)],
                 ["Format", record.format],
@@ -845,7 +851,8 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ["Barcode", record.barcode],
                 ["Pressing", record.pressing],
                 ["Vinyl color", record.vinylColor],
-                ["Condition", record.condition],
+                ["Disc condition", record.condition],
+                ["Sleeve condition", record.sleeveCondition],
                 ["Source", record.source],
                 ["Date added", record.dateAdded],
               ].map(([label, value]) =>
@@ -948,7 +955,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               </div>
             ) : null}
 
-            <PressingFactsCard record={record} />
+            <PressingFactsCard record={record} allRecords={records} />
           </div>
         </div>
       </section>
@@ -1080,7 +1087,8 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ["Favorite tracks", "favoriteTracks", "Track one, Track two"],
                 ["Pressing", "pressing", "Deluxe, standard, limited..."],
                 ["Vinyl color", "vinylColor", "Black, clear, pink..."],
-                ["Condition", "condition", "New, good, used..."],
+                ["Disc condition", "condition", "New, good, used..."],
+                ["Sleeve condition", "sleeveCondition", "New, good, used..."],
                 ["Source", "source", "Gift, record store, thrifted, wishlist..."],
                 ["Pressing notes", "pressingNotes", "Italian reissue, expanded 2-LP edition, archival pressing..."],
                 ["Gift from", "giftFrom", "If it was a gift, who from?"],

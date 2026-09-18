@@ -120,6 +120,7 @@ export function getCollectionSnapshot(records: VinylRecord[]) {
     moodBreakdown: getBreakdown(records.flatMap((record) => record.moods)),
     formatBreakdown: getBreakdown(records.map((record) => record.format ?? "Unknown")),
     labelBreakdown: getBreakdown(records.map((record) => record.label ?? "Unknown")),
+    countryBreakdown: getBreakdown(records.map((record) => record.country ?? "")),
     statusBreakdown: getBreakdown(records.map((record) => record.status)),
     // Unlike format/label, most records don't have this yet - an "Unknown" bar
     // covering most of the collection wouldn't tell you anything, so it's excluded

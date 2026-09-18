@@ -7,6 +7,7 @@ export type VinylRecord = {
   recordingYears?: string;
   pressingYear?: number;
   pressingNotes?: string;
+  curatedFacts?: string[];
   label?: string;
   catalogNumber?: string;
   pressingPlant?: string;

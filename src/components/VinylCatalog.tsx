@@ -19,7 +19,7 @@ import { fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylA
 import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
 import { optimizeImageFile } from "@/lib/vinylImage";
 import { readQueuedVinyls, writeQueuedVinyls } from "@/lib/vinylQueue";
-import { getDecade, slugifyVinylId, statusLabel } from "@/lib/vinylRecordUtils";
+import { getDecade, isReissuePressing, slugifyVinylId, statusLabel } from "@/lib/vinylRecordUtils";
 import {
   X,
   AlertCircle,
@@ -1835,16 +1835,22 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     <DiscogsRarityCard releaseId={selectedRecord.discogsReleaseId} condition={selectedRecord.condition} />
                   ) : null}
 
-                  <PressingFactsCard record={selectedRecord} />
+                  <PressingFactsCard record={selectedRecord} allRecords={allRecords} />
 
                   <div className="grid gap-3 text-sm sm:grid-cols-2">
                     {[
                       ["Released", selectedRecord.releaseYear?.toString()],
+                      [
+                        "Pressing year",
+                        selectedRecord.pressingYear?.toString() ??
+                          (isReissuePressing(selectedRecord) ? "Unknown (Discogs doesn't date this reissue)" : undefined),
+                      ],
                       ["Status", statusLabel(selectedRecord.status)],
                       ["Pressing", selectedRecord.pressing],
                       ["Storage location", selectedRecord.storageLocation],
                       ["Vinyl color", selectedRecord.vinylColor],
-                      ["Condition", selectedRecord.condition],
+                      ["Disc condition", selectedRecord.condition],
+                      ["Sleeve condition", selectedRecord.sleeveCondition],
                       ["Source", selectedRecord.source],
                     ].map(([label, value]) =>
                       value ? (
