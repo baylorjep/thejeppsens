@@ -28,32 +28,50 @@ function groupRecordsByLabel(records: VinylRecord[], getLabels: (record: VinylRe
   return grouped;
 }
 
+const MOVIE_MARATHONS = [
+  { label: "the Harry Potter series", minutes: 1178 },
+  { label: "the extended Lord of the Rings trilogy", minutes: 686 },
+  { label: "the original Star Wars trilogy", minutes: 402 },
+  { label: "the Toy Story movies", minutes: 385 },
+  { label: "the Back to the Future trilogy", minutes: 342 },
+  { label: "the Jurassic Park movies", minutes: 575 },
+];
+
 function formatRuntimeComparison(totalSeconds: number) {
   const totalMinutes = totalSeconds / 60;
-  if (totalMinutes < 120) {
-    const movies = Math.max(1, Math.round(totalMinutes / 105));
-    return `roughly ${movies} feature-length movie${movies === 1 ? "" : "s"}`;
+  if (totalMinutes < 100) return "one very long movie, with popcorn breaks included";
+
+  let remaining = totalMinutes;
+  const picks: { label: string; count: number }[] = [];
+
+  // Give each franchise a turn before repeating any of them, so longer
+  // collections read like a fun movie-night itinerary.
+  for (const marathon of MOVIE_MARATHONS) {
+    if (remaining < marathon.minutes) continue;
+    picks.push({ label: marathon.label, count: 1 });
+    remaining -= marathon.minutes;
   }
 
-  const totalHours = totalMinutes / 60;
-  if (totalHours < 24) {
-    const workdays = Math.max(1, Math.round(totalHours / 8));
-    return `about ${workdays} eight-hour workday${workdays === 1 ? "" : "s"}`;
+  // Once every marathon that fits has been used, repeat the largest ones to
+  // keep the comparison useful for very large collections.
+  for (const marathon of MOVIE_MARATHONS) {
+    const extra = Math.floor(remaining / marathon.minutes);
+    if (!extra) continue;
+    const existing = picks.find((pick) => pick.label === marathon.label);
+    if (existing) existing.count += extra;
+    else picks.push({ label: marathon.label, count: extra });
+    remaining -= extra * marathon.minutes;
   }
 
-  const totalDays = totalHours / 24;
-  if (totalDays < 7) {
-    const days = Math.max(1, Math.round(totalDays));
-    return `${days} full day${days === 1 ? "" : "s"} of nonstop listening`;
+  if (!picks.length) {
+    const closest = MOVIE_MARATHONS[ MOVIE_MARATHONS.length - 1];
+    return `partway through ${closest.label}`;
   }
 
-  if (totalDays < 30) {
-    const weeks = Math.max(1, Math.round(totalDays / 7));
-    return `${weeks} week${weeks === 1 ? "" : "s"} of nonstop listening`;
-  }
-
-  const months = Math.max(1, Math.round(totalDays / 30));
-  return `${months} month${months === 1 ? "" : "s"} of nonstop listening`;
+  const descriptions = picks.map(({ label, count }) => (count === 1 ? label : `${label} ${count} times`));
+  return descriptions.length === 1
+    ? `all of ${descriptions[0]}`
+    : `all of ${descriptions.slice(0, -1).join(", ")}, and ${descriptions.at(-1)}`;
 }
 
 function InteractiveDonut({
