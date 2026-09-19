@@ -71,6 +71,17 @@ export function isOriginalPressing(record: VinylRecord) {
 }
 
 /**
+ * True for Record Store Day releases: Discogs' own format tag or notes on a confirmed
+ * release, or wording in your own fields (where you got it, notes, source).
+ */
+export function isRecordStoreDay(record: VinylRecord) {
+  const pattern = /record store day|\bRSD\b/i;
+  const discogsText = record.discogsVerified ? [record.format, record.pressingNotes] : [];
+  const yourText = [record.whereWeGotIt, record.notes, record.source, record.pressing];
+  return [...discogsText, ...yourText].some((text) => Boolean(text) && pattern.test(text!));
+}
+
+/**
  * True when Discogs' own format descriptions flag this confirmed release as a
  * later reissue/repress -- shown as the counterpart to isOriginalPressing so a
  * confirmed reissue gets a clear "not the original" signal instead of just

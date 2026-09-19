@@ -5,6 +5,7 @@ import AchievementCelebration from "@/components/AchievementCelebration";
 import DiscogsRarityCard from "@/components/DiscogsRarityCard";
 import DiscogsValueCard from "@/components/DiscogsValueCard";
 import OriginalPressingBadge from "@/components/OriginalPressingBadge";
+import RecordStoreDayBadge from "@/components/RecordStoreDayBadge";
 import PressingFactsCard from "@/components/PressingFactsCard";
 import { computeInstantStats } from "@/lib/achievements";
 import { useAchievementUnlocks } from "@/lib/achievementUnlocks";
@@ -1757,8 +1758,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     {selectedRecord.title}
                   </h2>
                   <p className="mt-2 text-lg text-gray-600">{selectedRecord.artist}</p>
-                  <div className="mt-3">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <OriginalPressingBadge record={selectedRecord} />
+                    <RecordStoreDayBadge record={selectedRecord} />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

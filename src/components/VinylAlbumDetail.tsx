@@ -7,6 +7,7 @@ import DiscogsValueCard from "@/components/DiscogsValueCard";
 import MoreByArtist from "@/components/MoreByArtist";
 import OriginalPressingBadge from "@/components/OriginalPressingBadge";
 import PressingFactsCard from "@/components/PressingFactsCard";
+import RecordStoreDayBadge from "@/components/RecordStoreDayBadge";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
 import { getStatusTone } from "@/lib/vinylAnalytics";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
@@ -700,6 +701,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                     {statusLabel(record.status)}
                   </span>
                   <OriginalPressingBadge record={record} />
+                  <RecordStoreDayBadge record={record} />
                 </div>
               </div>
 
