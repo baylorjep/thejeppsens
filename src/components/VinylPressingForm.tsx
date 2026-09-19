@@ -198,6 +198,7 @@ export default function VinylPressingForm({ id }: { id: string }) {
         {step === 0 ? <section className={section}>
           <label className="block text-sm font-medium">How many vinyl discs are inside?<select className={input} value={evidence.discCount} onChange={e => update("discCount", Number(e.target.value))}>{Array.from({ length: 10 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1} {i === 0 ? "disc · 2 sides" : `discs · ${(i + 1) * 2} sides`}</option>)}</select></label>
           <div className="mt-5">{identifiers}</div>
+          <label className="mt-5 block text-sm font-medium">Vinyl color<input className={input} value={evidence.color} onChange={e => update("color", e.target.value)} placeholder="Black, clear, blue splatter…" maxLength={5000} /></label>
         </section> : null}
         {activeSide ? <section key={activeSide} className={section}>
           <figure className="rounded-xl bg-stone-50 p-4">
@@ -218,7 +219,6 @@ export default function VinylPressingForm({ id }: { id: string }) {
           {copiedFrom[activeSide] ? <p className="mt-2 text-sm text-amber-700">Copied from side {copiedFrom[activeSide]} — check it, or edit above.</p> : null}
         </section> : null}
         {step === reviewStep ? <section className={section}>
-          <label className="block text-sm font-medium">Vinyl color<input className={input} value={evidence.color} onChange={e => update("color", e.target.value)} placeholder="Black, clear, blue splatter…" maxLength={5000} /></label>
           <details className="mt-5"><summary className="cursor-pointer text-sm font-medium underline">Extra photos</summary>
             <div className="mt-3">{coverField("front")}{coverField("back")}{photoField("extra", "Stickers, inserts, or other details")}</div>
           </details>
