@@ -154,6 +154,57 @@ export async function searchDiscogsArtistAlbums(artist: string): Promise<Discogs
   return albums.sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
 }
 
+export type DiscogsGenreAlbum = DiscogsArtistAlbum & { have: number; want: number };
+
+const DISCOGS_GENRES = new Set(["blues", "brass & military", "children's", "classical", "electronic", "folk, world, & country", "funk / soul", "hip hop", "jazz", "latin", "non-music", "pop", "reggae", "rock", "stage & screen"]);
+
+/** Most-collected albums Discogs lists for a genre or style, one row per master. */
+export async function searchDiscogsGenreAlbums(name: string): Promise<DiscogsGenreAlbum[] | null> {
+  if (!process.env.DISCOGS_TOKEN) return null;
+
+  const url = new URL(`${DISCOGS_API_BASE}/database/search`);
+  url.searchParams.set("type", "master");
+  url.searchParams.set(DISCOGS_GENRES.has(name.toLowerCase()) ? "genre" : "style", name);
+  url.searchParams.set("format", "Album");
+  url.searchParams.set("sort", "have");
+  url.searchParams.set("sort_order", "desc");
+  url.searchParams.set("per_page", "50");
+
+  const response = await discogsFetch(url);
+  if (!response.ok) throw new Error(`Discogs genre search failed (${response.status})`);
+
+  const data = (await response.json()) as { results?: (DiscogsSearchResult & { community?: { have?: number; want?: number } })[] };
+  const albums: DiscogsGenreAlbum[] = [];
+  const seen = new Set<string>();
+
+  for (const result of data.results ?? []) {
+    const [credited, ...rest] = result.title.split(" - ");
+    const title = rest.join(" - ").trim();
+    if (!title) continue;
+
+    const formats = (result.format ?? []).map((format) => format.toLowerCase());
+    if (!formats.some((format) => format === "vinyl" || format === "lp")) continue;
+    if (formats.some((format) => NON_ALBUM_FORMATS.has(format))) continue;
+
+    const key = `${credited}|${title}`.toLowerCase().replace(/[^a-z0-9|]+/g, "");
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const year = Number(result.year);
+    albums.push({
+      id: result.id,
+      artist: credited.replace(/\s*\(\d+\)$/, "").trim(),
+      title,
+      year: Number.isFinite(year) && year > 0 ? year : null,
+      cover: result.cover_image ?? result.thumb ?? null,
+      have: result.community?.have ?? 0,
+      want: result.community?.want ?? 0,
+    });
+  }
+
+  return albums;
+}
+
 export async function fetchDiscogsRelease(releaseId: string) {
   if (!process.env.DISCOGS_TOKEN) return null;
 

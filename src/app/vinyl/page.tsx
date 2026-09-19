@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import VinylCatalog from "@/components/VinylCatalog";
 import { vinyls } from "@/data/vinyls";
 import { listSupabaseVinylRecords } from "@/lib/supabaseVinylServer";
-import { Sparkles, Trophy } from "lucide-react";
+import { Compass, Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -56,6 +56,13 @@ export default async function VinylPage() {
             >
               <Sparkles className="h-4 w-4" />
               Analytics
+            </Link>
+            <Link
+              href="/vinyl/research"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500 sm:w-fit"
+            >
+              <Compass className="h-4 w-4" />
+              Research
             </Link>
             <Link
               href="/vinyl/manage"
