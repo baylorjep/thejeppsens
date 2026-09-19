@@ -158,20 +158,17 @@ export type DiscogsGenreAlbum = DiscogsArtistAlbum & { have: number; want: numbe
 
 const DISCOGS_GENRES = new Set(["blues", "brass & military", "children's", "classical", "electronic", "folk, world, & country", "funk / soul", "hip hop", "jazz", "latin", "non-music", "pop", "reggae", "rock", "stage & screen"]);
 
-/** Most-collected albums Discogs lists for a genre or style, one row per master. */
-export async function searchDiscogsGenreAlbums(name: string): Promise<DiscogsGenreAlbum[] | null> {
-  if (!process.env.DISCOGS_TOKEN) return null;
-
+async function searchMasterAlbums(filters: Record<string, string>, sort: "have" | "want", label: string): Promise<DiscogsGenreAlbum[]> {
   const url = new URL(`${DISCOGS_API_BASE}/database/search`);
   url.searchParams.set("type", "master");
-  url.searchParams.set(DISCOGS_GENRES.has(name.toLowerCase()) ? "genre" : "style", name);
   url.searchParams.set("format", "Album");
-  url.searchParams.set("sort", "have");
+  for (const [key, value] of Object.entries(filters)) url.searchParams.set(key, value);
+  url.searchParams.set("sort", sort);
   url.searchParams.set("sort_order", "desc");
   url.searchParams.set("per_page", "50");
 
   const response = await discogsFetch(url);
-  if (!response.ok) throw new Error(`Discogs genre search failed (${response.status})`);
+  if (!response.ok) throw new Error(`Discogs ${label} search failed (${response.status})`);
 
   const data = (await response.json()) as { results?: (DiscogsSearchResult & { community?: { have?: number; want?: number } })[] };
   const albums: DiscogsGenreAlbum[] = [];
@@ -203,6 +200,24 @@ export async function searchDiscogsGenreAlbums(name: string): Promise<DiscogsGen
   }
 
   return albums;
+}
+
+/** Most-collected albums Discogs lists for a genre or style, one row per master. */
+export async function searchDiscogsGenreAlbums(name: string): Promise<DiscogsGenreAlbum[] | null> {
+  if (!process.env.DISCOGS_TOKEN) return null;
+  const filters = { [DISCOGS_GENRES.has(name.toLowerCase()) ? "genre" : "style"]: name };
+  return searchMasterAlbums(filters, "have", "genre");
+}
+
+/**
+ * The albums from the last two years that Discogs collectors want most. Discogs has no "viral"
+ * signal, so wantlist counts on new releases stand in for what is buzzing right now.
+ */
+export async function searchDiscogsTrendingAlbums(): Promise<DiscogsGenreAlbum[] | null> {
+  if (!process.env.DISCOGS_TOKEN) return null;
+  const thisYear = new Date().getFullYear();
+  const recent = await Promise.all([thisYear, thisYear - 1].map((year) => searchMasterAlbums({ year: String(year) }, "want", "trending")));
+  return recent.flat().sort((a, b) => b.want - a.want);
 }
 
 export async function fetchDiscogsRelease(releaseId: string) {

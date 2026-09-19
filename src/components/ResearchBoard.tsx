@@ -11,11 +11,13 @@ import { useEffect, useMemo, useState } from "react";
 type ResearchRow =
   | { key: string; kind: "artist"; artist: string; count: number }
   | { key: string; kind: "favorite"; artist: string; title: string }
-  | { key: string; kind: "genre"; genre: string; count: number };
+  | { key: string; kind: "genre"; genre: string; count: number }
+  | { key: string; kind: "trending" };
 
 const MAX_ROWS_PER_KIND = 3;
 
 function rowRequest(row: ResearchRow) {
+  if (row.kind === "trending") return "/api/discogs/trending-albums";
   return row.kind === "genre"
     ? `/api/discogs/genre-albums?genre=${encodeURIComponent(row.genre)}`
     : `/api/discogs/artist-albums?artist=${encodeURIComponent(row.artist)}`;
@@ -37,6 +39,16 @@ function RowHeading({ row }: { row: ResearchRow }) {
       <>
         <h3 className="text-base font-semibold text-gray-950 sm:text-lg">More by {row.artist}</h3>
         <p className="mt-1 text-sm text-gray-600">You favorited {row.title}. Here are more from {row.artist}.</p>
+      </>
+    );
+  }
+  if (row.kind === "trending") {
+    return (
+      <>
+        <h3 className="text-base font-semibold text-gray-950 sm:text-lg">Popular right now</h3>
+        <p className="mt-1 text-sm text-gray-600">
+          The albums from the last two years that Discogs collectors want most, so the new and buzzy ones like the latest film scores and big releases.
+        </p>
       </>
     );
   }
@@ -92,7 +104,7 @@ export default function ResearchBoard({ records }: { records: VinylRecord[] }) {
       .slice(0, MAX_ROWS_PER_KIND)
       .map(([genre, count]) => ({ key: `genre:${genre}`, kind: "genre", genre, count }));
 
-    return [...artistRows, ...favoriteRows, ...genreRows];
+    return [{ key: "trending:now", kind: "trending" }, ...artistRows, ...favoriteRows, ...genreRows];
   }, [owned]);
 
   // Discogs is paced to about one request a second, so load one row at a time. Results are
@@ -119,6 +131,7 @@ export default function ResearchBoard({ records }: { records: VinylRecord[] }) {
   }, [rows]);
 
   const sections: { title: string; kind: ResearchRow["kind"] }[] = [
+    { title: "Trending now", kind: "trending" },
     { title: "Because of the artists you own", kind: "artist" },
     { title: "Because of your favorites", kind: "favorite" },
     { title: "Because of your genres", kind: "genre" },
