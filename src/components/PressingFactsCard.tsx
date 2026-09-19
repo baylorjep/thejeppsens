@@ -10,7 +10,13 @@ export default function PressingFactsCard({ record, allRecords }: { record: Viny
   // on discogsVerified same as the raw-notes fallback: this card's header claims
   // "about this pressing," which isn't an honest claim to make about a release
   // that was only ever loosely linked (title/search match), never matrix-checked.
-  const facts = record.discogsVerified ? (record.curatedFacts?.length ? record.curatedFacts : getPressingFacts(record)) : [];
+  // A "checked, not on Discogs" record has no release to be wrong about, so its
+  // hand-written facts (e.g. "this pressing isn't documented") are safe to show.
+  const facts = record.discogsVerified
+    ? (record.curatedFacts?.length ? record.curatedFacts : getPressingFacts(record))
+    : record.discogsNoMatch
+      ? (record.curatedFacts ?? [])
+      : [];
   const limitedEditionSize = getLimitedEditionSize(record);
   const artistStat = getArtistCollectionStat(record, allRecords);
   if (!facts.length && !limitedEditionSize && !artistStat) return null;
