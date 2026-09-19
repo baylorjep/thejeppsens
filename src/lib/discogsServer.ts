@@ -98,6 +98,62 @@ export async function searchDiscogsReleases(query: string) {
   return results.filter((result) => (result.format ?? []).some((format) => format.toLowerCase() === "vinyl"));
 }
 
+export type DiscogsArtistAlbum = { id: number; artist: string; title: string; year: number | null; cover: string | null };
+
+// Formats that mean "not a plain album" on a Discogs master (its format list is the
+// union of every release under it, so compilations and singles show up tagged).
+const NON_ALBUM_FORMATS = new Set(["compilation", "box set", "club edition", "promo", "ep", "single", "unofficial release", "bootleg", "mini-album"]);
+
+/**
+ * Albums Discogs lists for an artist, one row per master (so reissues collapse into
+ * the album). Discogs search is fuzzy on artist, so callers should treat this as a
+ * discovery list, not a complete or authoritative discography.
+ */
+export async function searchDiscogsArtistAlbums(artist: string): Promise<DiscogsArtistAlbum[] | null> {
+  if (!process.env.DISCOGS_TOKEN) return null;
+
+  const url = new URL(`${DISCOGS_API_BASE}/database/search`);
+  url.searchParams.set("type", "master");
+  url.searchParams.set("artist", artist);
+  url.searchParams.set("format", "Album");
+  url.searchParams.set("per_page", "100");
+
+  const response = await discogsFetch(url);
+  if (!response.ok) throw new Error(`Discogs artist search failed (${response.status})`);
+
+  const data = (await response.json()) as { results?: (DiscogsSearchResult & { cover_image?: string })[] };
+  const wanted = artist.toLowerCase();
+  const seen = new Set<string>();
+  const albums: DiscogsArtistAlbum[] = [];
+
+  for (const result of data.results ?? []) {
+    const [credited, ...rest] = result.title.split(" - ");
+    const title = rest.join(" - ").trim();
+    const creditedLower = credited.toLowerCase();
+    // Lead credit only, and not a different artist who shares the name ("Frank Sinatra Jr.").
+    if (!title || !creditedLower.startsWith(wanted) || /^\s+(jr|sr)\b/.test(creditedLower.slice(wanted.length))) continue;
+
+    const formats = (result.format ?? []).map((format) => format.toLowerCase());
+    if (!formats.some((format) => format === "vinyl" || format === "lp")) continue;
+    if (formats.some((format) => NON_ALBUM_FORMATS.has(format))) continue;
+
+    const key = title.toLowerCase().replace(/[^a-z0-9]+/g, "");
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const year = Number(result.year);
+    albums.push({
+      id: result.id,
+      artist: credited.replace(/\s*\(\d+\)$/, "").trim(),
+      title,
+      year: Number.isFinite(year) && year > 0 ? year : null,
+      cover: result.cover_image ?? result.thumb ?? null,
+    });
+  }
+
+  return albums.sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
+}
+
 export async function fetchDiscogsRelease(releaseId: string) {
   if (!process.env.DISCOGS_TOKEN) return null;
 

@@ -4,6 +4,7 @@ import { VinylRecord } from "@/data/vinyls";
 import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
 import DiscogsRarityCard from "@/components/DiscogsRarityCard";
 import DiscogsValueCard from "@/components/DiscogsValueCard";
+import MoreByArtist from "@/components/MoreByArtist";
 import OriginalPressingBadge from "@/components/OriginalPressingBadge";
 import PressingFactsCard from "@/components/PressingFactsCard";
 import { fetchVinylRecords, saveVinylRecord } from "@/lib/vinylApi";
@@ -956,6 +957,8 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             ) : null}
 
             <PressingFactsCard record={record} allRecords={records} />
+
+            <MoreByArtist artist={record.artist} records={records} />
           </div>
         </div>
       </section>
