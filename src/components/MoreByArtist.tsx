@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 
 type ArtistAlbum = { id: number; artist: string; title: string; year: number | null; cover: string | null };
 
-const INITIAL_COUNT = 8;
+const PAGE_SIZE = 8;
 
 function normalize(value: string) {
   return value
@@ -22,7 +22,7 @@ function normalize(value: string) {
 
 export default function MoreByArtist({ artist, records }: { artist: string; records: VinylRecord[] }) {
   const [albums, setAlbums] = useState<ArtistAlbum[] | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  const [page, setPage] = useState(0);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [addedIds, setAddedIds] = useState<Record<number, string>>({});
   const [error, setError] = useState("");
@@ -80,7 +80,9 @@ export default function MoreByArtist({ artist, records }: { artist: string; reco
 
   if (isCompilationArtist || !albums || !missing.length) return null;
 
-  const visible = showAll ? missing : missing.slice(0, INITIAL_COUNT);
+  const pageCount = Math.ceil(missing.length / PAGE_SIZE);
+  const currentPage = Math.min(page, pageCount - 1);
+  const visible = missing.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
@@ -128,10 +130,28 @@ export default function MoreByArtist({ artist, records }: { artist: string; reco
         })}
       </ul>
       {error ? <p role="alert" className="mt-3 text-sm text-red-700">{error}</p> : null}
-      {missing.length > INITIAL_COUNT ? (
-        <button type="button" onClick={() => setShowAll((current) => !current)} className="mt-4 text-sm font-medium text-gray-700 underline-offset-4 hover:underline">
-          {showAll ? "Show fewer" : `Show all ${missing.length}`}
-        </button>
+      {pageCount > 1 ? (
+        <div className="mt-4 flex items-center justify-between gap-3 text-sm">
+          <button
+            type="button"
+            onClick={() => setPage(Math.max(0, currentPage - 1))}
+            disabled={currentPage === 0}
+            className="rounded-md border border-gray-300 px-3 py-1.5 font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span className="text-gray-500">
+            Page {currentPage + 1} of {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage(Math.min(pageCount - 1, currentPage + 1))}
+            disabled={currentPage >= pageCount - 1}
+            className="rounded-md border border-gray-300 px-3 py-1.5 font-medium text-gray-900 transition-colors hover:border-gray-500 disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
       ) : null}
     </div>
   );
