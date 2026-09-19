@@ -228,7 +228,7 @@ export default function VinylManager() {
   }, []);
 
   useEffect(() => {
-    const hasUnsavedEvidence = retryingNewRecord || pressingIntake.sealed || pressingIntake.catalogNumber.trim() || Object.values(pressingIntake.runouts).some(text => text.trim()) || Object.values(pressingIntake.files).some(files => files.length);
+    const hasUnsavedEvidence = retryingNewRecord || pressingIntake.sealed || pressingIntake.catalogNumber.trim() || pressingIntake.barcode.trim() || Object.values(pressingIntake.runouts).some(text => text.trim()) || Object.values(pressingIntake.files).some(files => files.length);
     if (!hasUnsavedEvidence) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     window.addEventListener("beforeunload", warn);
@@ -501,7 +501,7 @@ export default function VinylManager() {
             files.push({ side, file: optimized });
           }
         } catch (error) { setMessage(error instanceof Error ? error.message : "Could not open a marking photo. Try JPG or PNG."); return; }
-        pressing = { evidence: { ...emptyEvidence(), sealed: pressingIntake.sealed, catalogNumber: pressingIntake.catalogNumber.trim(), discCount, runouts: pressingIntake.runouts, color: form.vinylColor.trim() }, files };
+        pressing = { evidence: { ...emptyEvidence(), sealed: pressingIntake.sealed, catalogNumber: pressingIntake.catalogNumber.trim(), barcode: pressingIntake.barcode.trim(), discCount, runouts: pressingIntake.runouts, color: form.vinylColor.trim() }, files };
       }
       const response = await saveVinylRecord(record, imageFile, backImageFile, pressing);
       const savedRecord = response.record;
