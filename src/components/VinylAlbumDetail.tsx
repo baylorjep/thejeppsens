@@ -826,7 +826,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
             ) : null}
 
             {record.discogsReleaseId ? (
-              <DiscogsRarityCard releaseId={record.discogsReleaseId} condition={record.condition} />
+              <DiscogsRarityCard releaseId={record.discogsReleaseId} condition={record.condition} record={record} />
             ) : null}
 
             <dl className="grid grid-cols-2 gap-2 text-[11px] leading-tight sm:grid-cols-2 sm:gap-3 sm:text-sm xl:grid-cols-3">

@@ -89,11 +89,24 @@ export function getLimitedEditionSize(record: VinylRecord): number | null {
   if (!record.discogsVerified) return null;
   const notes = record.pressingNotes ?? "";
   const match =
-    notes.match(/(?:limited(?: edition)?(?: of)?(?: to)?|numbered edition of)\s+([\d,]{3,7})(?:\s*(?:copies|units))?/i) ??
+    notes.match(/(?:limited(?: edition| run| pressing)?(?: of)?(?: to)?|numbered edition of)\s+([\d,]{3,7})(?:\s*(?:copies|units))?/i) ??
     notes.match(/([\d,]{3,7})\s*(?:numbered\s+)?copies/i);
   if (!match) return null;
   const size = Number(match[1].replace(/,/g, ""));
   return Number.isFinite(size) && size > 0 ? size : null;
+}
+
+/**
+ * How many copies were in this pressing's run, only when a real source states it:
+ * a size entered on the record (with its source) or a run stated in the confirmed
+ * release's Discogs notes. Never estimated. Most pressings have no public number.
+ */
+export function getPressRun(record: VinylRecord): { size: number; source: string } | null {
+  if (record.pressRunSize && record.pressRunSize > 0) {
+    return { size: record.pressRunSize, source: record.pressRunSource?.trim() || "stated on the record" };
+  }
+  const size = getLimitedEditionSize(record);
+  return size ? { size, source: "Discogs release notes" } : null;
 }
 
 // Discogs notes use its own wiki markup: [l123] / [l=Name] / [a123] / [r123]

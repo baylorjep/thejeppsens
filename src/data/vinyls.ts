@@ -8,6 +8,9 @@ export type VinylRecord = {
   pressingYear?: number;
   pressingNotes?: string;
   curatedFacts?: string[];
+  // Original pressing run size, only when a real source states it (liner notes, label history, a book).
+  pressRunSize?: number;
+  pressRunSource?: string;
   label?: string;
   catalogNumber?: string;
   pressingPlant?: string;
