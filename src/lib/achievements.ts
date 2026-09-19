@@ -77,7 +77,8 @@ export const ACHIEVEMENTS: Achievement[] = [
 
 export type AchievementStats = Partial<Record<AchievementMetric, number>>;
 
-export function computeInstantStats(records: VinylRecord[]): AchievementStats {
+export function computeInstantStats(allRecords: VinylRecord[]): AchievementStats {
+  const records = allRecords.filter((record) => record.status !== "wishlist");
   return {
     owned: records.filter((record) => record.status === "owned").length,
     favorites: records.filter((record) => record.favorite).length,

@@ -61,6 +61,7 @@ export default function DiscogsMatcher() {
       records
         .filter(
           (record) =>
+            record.status !== "wishlist" &&
             !record.discogsReleaseId &&
             !record.discogsNoMatch &&
             !linkedIds.has(record.id) &&
@@ -76,7 +77,7 @@ export default function DiscogsMatcher() {
   const skippedRecords = useMemo(() => records.filter((record) => record.discogsNoMatch), [records]);
 
   const totalUnmatched = useMemo(
-    () => records.filter((record) => !record.discogsReleaseId && !record.discogsNoMatch).length,
+    () => records.filter((record) => record.status !== "wishlist" && !record.discogsReleaseId && !record.discogsNoMatch).length,
     [records],
   );
   const visibleRecords = unmatchedRecords.slice(0, visibleCount);

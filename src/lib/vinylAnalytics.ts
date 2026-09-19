@@ -94,7 +94,9 @@ export function sortVinylRecords(records: VinylRecord[], sortKey: VinylSortKey) 
   return next.sort((a, b) => (b.dateAdded ?? "").localeCompare(a.dateAdded ?? "") || a.title.localeCompare(b.title));
 }
 
-export function getCollectionSnapshot(records: VinylRecord[]) {
+export function getCollectionSnapshot(allRecords: VinylRecord[]) {
+  // Wishlist records are not part of the collection: only the wishlist count looks at them.
+  const records = allRecords.filter((record) => record.status !== "wishlist");
   const artistBreakdown = getArtistBreakdown(records);
   return {
     artists: artistBreakdown.length,
@@ -103,7 +105,7 @@ export function getCollectionSnapshot(records: VinylRecord[]) {
     formats: uniqueSorted(records.map((record) => record.format ?? "Unknown")).length,
     labels: uniqueSorted(records.map((record) => record.label ?? "Unknown")).length,
     owned: records.filter((record) => record.status === "owned").length,
-    wishlist: records.filter((record) => record.status === "wishlist").length,
+    wishlist: allRecords.length - records.length,
     upgrade: records.filter((record) => record.status === "upgrade").length,
     topGenre: getTopValue(records.flatMap((record) => record.genres)),
     topArtist: artistBreakdown[0] ? { value: artistBreakdown[0].label, count: artistBreakdown[0].count } : { value: "None", count: 0 },

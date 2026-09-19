@@ -15,6 +15,37 @@ export function slugifyVinylId(title: string, artist: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+function normalizeForMatch(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/\(.*?\)|\[.*?\]/g, "")
+    .replace(/&/g, "and")
+    .replace(/^the\s+/, "")
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+/**
+ * True when an album is already in the collection or on the wishlist. Deliberately generous so a
+ * suggestion never shows something you already have: same id, or a related artist plus the same
+ * title or one that contains the other ("Sgt. Pepper" vs "Sgt. Pepper (2017 Mix)").
+ */
+export function isAlbumInCollection(album: { title: string; artist: string }, records: VinylRecord[]) {
+  const id = slugifyVinylId(album.title, album.artist);
+  const title = normalizeForMatch(album.title);
+  const artist = normalizeForMatch(album.artist);
+  if (!title || !artist) return false;
+
+  return records.some((record) => {
+    if (record.id === id) return true;
+    const recordArtist = normalizeForMatch(record.artist);
+    if (!recordArtist || !(recordArtist.includes(artist) || artist.includes(recordArtist))) return false;
+    const recordTitle = normalizeForMatch(record.title);
+    if (recordTitle === title) return true;
+    const [short, long] = recordTitle.length <= title.length ? [recordTitle, title] : [title, recordTitle];
+    return short.length >= 6 && long.includes(short);
+  });
+}
+
 export function isVinylRecord(value: unknown): value is VinylRecord {
   const record = value as Partial<VinylRecord>;
   return Boolean(
@@ -266,7 +297,8 @@ export function getArtistBreakdown(records: VinylRecord[]) {
  * at least 2, or there's nothing to celebrate).
  */
 export function getArtistCollectionStat(record: VinylRecord, allRecords: VinylRecord[]) {
-  const groups = groupRecordsByArtist(allRecords);
+  if (record.status === "wishlist") return null;
+  const groups = groupRecordsByArtist(allRecords.filter((item) => item.status !== "wishlist"));
   const credited = [...groups].filter(([, group]) => group.some((r) => r.id === record.id));
 
   let best: { artist: string; total: number; position: number } | null = null;

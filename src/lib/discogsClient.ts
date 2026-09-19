@@ -286,7 +286,7 @@ export function useCollectionValue(records: VinylRecord[]) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const ownedLinkedRecords = records.filter((record) => record.status === "owned" && record.discogsReleaseId);
+    const ownedLinkedRecords = records.filter((record) => record.status === "owned" && record.discogsReleaseId);  // owned only: wishlist never counts toward value
     if (!ownedLinkedRecords.length) {
       setValue(null);
       setIsLoading(false);

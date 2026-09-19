@@ -14,7 +14,10 @@ export default async function PressingQueuePage() {
     if (!db) throw new Error("Unavailable");
     const [collection, queue] = await Promise.all([listSupabaseVinylRecords(), db.from("vinyl_pressing_submissions").select("record_id,status")]);
     if (queue.error) throw queue.error;
-    records = collection; submissions = queue.data;
+    // Wishlist records are not physically here yet, so there is nothing to identify.
+    records = collection?.filter((record) => record.status !== "wishlist") ?? null;
+    const identifiable = new Set(records?.map((record) => record.id));
+    submissions = queue.data.filter((submission) => identifiable.has(submission.record_id));
   } catch { failed = true; }
   return <main className="min-h-screen bg-white"><Header /><section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
     <Link href="/vinyl" className="text-sm text-gray-500 hover:underline">← Vinyl catalog</Link>

@@ -358,7 +358,10 @@ function AnimatedNumber({ value }: { value: number }) {
 }
 
 export default function VinylInsights({ records }: VinylInsightsProps) {
-  const [allRecords, setAllRecords] = useState(records);
+  const [everyRecord, setEveryRecord] = useState(records);
+  // Every chart and count on this page is about what you own, so wishlist records stay out of it.
+  const allRecords = useMemo(() => everyRecord.filter((record) => record.status !== "wishlist"), [everyRecord]);
+  const wishlistCount = everyRecord.length - allRecords.length;
   // The Just for fun cards rotate through a pool on each page load. They start on the default
   // so the server and first client render match, then re-roll once mounted.
   const [funPick, setFunPick] = useState({ weight: 0, value: 0, runtime: -1 });
@@ -378,9 +381,9 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     const queuedRecords = readQueuedVinyls();
     fetchVinylRecords()
       .then((response) => {
-        setAllRecords(response.source === "supabase" ? response.records : [...response.records, ...queuedRecords]);
+        setEveryRecord(response.source === "supabase" ? response.records : [...response.records, ...queuedRecords]);
       })
-      .catch(() => setAllRecords([...records, ...queuedRecords]));
+      .catch(() => setEveryRecord([...records, ...queuedRecords]));
   }, [records]);
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
@@ -536,7 +539,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
     if (allRecords.length > 0) {
       const parts = [`${snapshot.owned} owned`];
-      if (snapshot.wishlist > 0) parts.push(`${snapshot.wishlist} on the wishlist`);
+      if (wishlistCount > 0) parts.push(`${wishlistCount} on the wishlist`);
       if (snapshot.upgrade > 0) parts.push(`${snapshot.upgrade} marked for an upgrade`);
       lines.status = `${parts.join(", ")}.`;
     }
@@ -617,7 +620,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     { label: "Artists", value: snapshot.artists, href: "#top-artists" },
     { label: "Genres", value: snapshot.genres, href: "#by-genre" },
     { label: "Favorites", value: snapshot.favorites, href: "/vinyl?filter=favorites" },
-    { label: "Wishlist", value: snapshot.wishlist, href: "/vinyl?filter=wishlist" },
+    { label: "Wishlist", value: wishlistCount, href: "/vinyl?filter=wishlist" },
     { label: "Originals", value: originalPressingStats.original, href: "/vinyl?filter=originals" },
     { label: "Formats", value: snapshot.formats, href: "#by-format" },
   ];

@@ -453,7 +453,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
       const matchesGenre = activeGenre === "All" || record.genres.includes(activeGenre);
       const matchesMood = activeMood === "All" || record.moods.includes(activeMood);
-      const matchesStatus = activeStatus === "All" || statusLabel(record.status) === activeStatus;
+      // Wishlist records only appear when you ask for them (Wishlist filter or status), never in the everyday list.
+      const wishlistRequested = quickFilter === "wishlist" || activeStatus === "Wishlist";
+      const matchesStatus = activeStatus === "All" ? wishlistRequested || record.status !== "wishlist" : statusLabel(record.status) === activeStatus;
       const matchesDecade = activeDecade === "All" || getDecade(record) === activeDecade;
       const matchesQuickFilter =
         quickFilter === "all" ||
@@ -511,14 +513,15 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
   const pickedRecord = allRecords.find((record) => record.id === pickedRecordId);
   const shouldUseModal = !isTouchDevice;
 
-  const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
-  const instantAchievementStats = useMemo(() => computeInstantStats(allRecords), [allRecords]);
-  const { newlyUnlocked: newlyUnlockedAchievements, dismiss: dismissAchievement } =
-    useAchievementUnlocks(instantAchievementStats);
   const ownedShelfRecords = useMemo(
     () => allRecords.filter((record) => record.status !== "wishlist"),
     [allRecords],
   );
+  const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
+  const originalPressingCount = useMemo(() => ownedShelfRecords.filter(isOriginalPressing).length, [ownedShelfRecords]);
+  const instantAchievementStats = useMemo(() => computeInstantStats(allRecords), [allRecords]);
+  const { newlyUnlocked: newlyUnlockedAchievements, dismiss: dismissAchievement } =
+    useAchievementUnlocks(instantAchievementStats);
   const pickableRecords = useMemo(
     () => ownedShelfRecords.filter((record) => Boolean(record.coverImage) && Boolean(record.backCoverImage)),
     [ownedShelfRecords],
@@ -918,7 +921,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
       <AchievementCelebration achievements={newlyUnlockedAchievements} onDismiss={dismissAchievement} />
 
       <div className="mb-10 overflow-x-auto pb-1">
-        <div className="grid w-max grid-cols-5 gap-3 md:w-auto">
+        <div className="grid w-max grid-cols-6 gap-3 md:w-auto">
           <div className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center sm:w-40 sm:p-5 sm:text-left md:w-auto">
             <p className="text-sm text-gray-500">Records</p>
             <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
@@ -949,6 +952,16 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
               <AnimatedNumber value={snapshot.wishlist} />
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setQuickFilter("originals")}
+            className="w-36 rounded-lg border border-gray-200 bg-gray-50 p-3 text-center transition-colors hover:border-gray-400 sm:w-40 sm:p-5 sm:text-left md:w-auto"
+          >
+            <p className="text-sm text-gray-500">Original pressings</p>
+            <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-3xl">
+              <AnimatedNumber value={originalPressingCount} />
+            </p>
+          </button>
         </div>
       </div>
 
