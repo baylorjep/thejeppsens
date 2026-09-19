@@ -70,3 +70,24 @@ export function describeRuntime(totalMinutes: number, unit: RuntimeUnit) {
 export function randomIndex(length: number) {
   return Math.floor(Math.random() * length);
 }
+
+/** A random index that differs from the one used on the previous page load, so a refresh always changes it. */
+export function randomIndexAvoiding(length: number, storageKey: string, offset = 0) {
+  let last: number | null = null;
+  try {
+    const stored = window.localStorage.getItem(storageKey);
+    last = stored === null ? null : Number(stored);
+  } catch {
+    // Private windows and blocked storage just fall back to plain random.
+  }
+
+  let pick = randomIndex(length) - offset;
+  if (length > 1 && pick === last) pick = ((pick + offset + 1 + randomIndex(length - 1)) % length) - offset;
+
+  try {
+    window.localStorage.setItem(storageKey, String(pick));
+  } catch {
+    // Ignore: remembering the last pick is a nicety.
+  }
+  return pick;
+}

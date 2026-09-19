@@ -11,7 +11,7 @@ import { Disc3 } from "lucide-react";
 import Link from "next/link";
 import ArtistBingo from "@/components/ArtistBingo";
 import CrateMap from "@/components/CrateMap";
-import { RUNTIME_UNITS, VALUE_UNITS, WEIGHT_UNITS, describeCount, describeRuntime, formatCount, nounFor, randomIndex } from "@/lib/funComparisons";
+import { RUNTIME_UNITS, VALUE_UNITS, WEIGHT_UNITS, describeCount, describeRuntime, formatCount, nounFor, randomIndexAvoiding } from "@/lib/funComparisons";
 import { useEffect, useMemo, useState } from "react";
 
 type VinylInsightsProps = {
@@ -367,7 +367,13 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   const [funPick, setFunPick] = useState({ weight: 0, value: 0, runtime: -1 });
   useEffect(() => {
     const timer = window.setTimeout(
-      () => setFunPick({ weight: randomIndex(WEIGHT_UNITS.length), value: randomIndex(VALUE_UNITS.length), runtime: randomIndex(RUNTIME_UNITS.length + 1) - 1 }),
+      () =>
+        setFunPick({
+          weight: randomIndexAvoiding(WEIGHT_UNITS.length, "insights-fun-weight"),
+          value: randomIndexAvoiding(VALUE_UNITS.length, "insights-fun-value"),
+          // -1 is the movie marathon itinerary; 0 and up are the RUNTIME_UNITS.
+          runtime: randomIndexAvoiding(RUNTIME_UNITS.length + 1, "insights-fun-runtime", 1),
+        }),
       0,
     );
     return () => window.clearTimeout(timer);
