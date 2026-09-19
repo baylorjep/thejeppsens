@@ -61,7 +61,7 @@ export const RUNTIME_UNITS: RuntimeUnit[] = [
 // Stack height: inches. A single LP in its jacket is roughly a fifth of an inch thick.
 export const HEIGHT_UNITS: (CountedUnit & { inches: number })[] = [
   { singular: "Baylor", plural: "Baylors", inches: 76, note: "Baylor is 6'4\"" },
-  { singular: "golden retriever", plural: "golden retrievers", inches: 24, note: "about 2 ft at the shoulder" },
+  { singular: "Dodger", plural: "Dodgers", inches: 24, note: "about 2 ft at the shoulder" },
   { singular: "Shaq", plural: "Shaqs", inches: 85, note: "Shaquille O'Neal is 7'1\"" },
   { singular: "basketball hoop", plural: "basketball hoops", inches: 120, note: "10 ft" },
   { singular: "school bus", plural: "school buses", inches: 126, note: "about 10.5 ft tall" },
