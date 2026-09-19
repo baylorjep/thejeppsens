@@ -37,6 +37,7 @@ export const VALUE_UNITS: (CountedUnit & { dollars: number })[] = [
   { singular: "trip for two to Japan", plural: "trips for two to Japan", dollars: 7500, note: "about $7,500" },
   { singular: "trip for two to Italy", plural: "trips for two to Italy", dollars: 8000, note: "about $8,000" },
   { singular: "trip for two to Greece", plural: "trips for two to Greece", dollars: 7500, note: "about $7,500" },
+  { singular: "trip for two to Spain", plural: "trips for two to Spain", dollars: 7000, note: "about $7,000" },
   { singular: "trip for two to Peru", plural: "trips for two to Peru", dollars: 6500, note: "about $6,500" },
   { singular: "trip for two to Morocco", plural: "trips for two to Morocco", dollars: 5500, note: "about $5,500" },
   { singular: "trip for two to New Zealand", plural: "trips for two to New Zealand", dollars: 10000, note: "about $10,000" },
