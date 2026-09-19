@@ -445,9 +445,18 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       const newest = withYear.reduce((a, b) => (b.releaseYear > a.releaseYear ? b : a));
       if (oldest.id !== newest.id) {
         lines.push(
-          `Your oldest record is ${oldest.title} (${oldest.releaseYear}), and your newest is ${newest.title} (${newest.releaseYear}), a ${newest.releaseYear - oldest.releaseYear}-year span.`,
+          `Your oldest release date is ${oldest.title} (${oldest.releaseYear}), and your newest is ${newest.title} (${newest.releaseYear}), a ${newest.releaseYear - oldest.releaseYear}-year span.`,
         );
       }
+    }
+
+    // Only confirmed pressings have a real pressing year, so this is the oldest one we can prove.
+    const pressed = allRecords.filter(
+      (record): record is VinylRecord & { pressingYear: number } => Boolean(record.discogsVerified) && typeof record.pressingYear === "number",
+    );
+    if (pressed.length) {
+      const oldestPressing = pressed.reduce((a, b) => (b.pressingYear < a.pressingYear ? b : a));
+      lines.push(`Your oldest confirmed pressing is ${oldestPressing.title}, pressed in ${oldestPressing.pressingYear}.`);
     }
 
     if (snapshot.topMood.value !== "None") {
