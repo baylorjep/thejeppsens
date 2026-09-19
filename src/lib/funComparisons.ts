@@ -2,6 +2,7 @@
 // page load. Sizes are everyday-approximate ("about"), chosen to be fun rather than exact.
 
 export type CountedUnit = { singular: string; plural: string; note: string };
+export type RuntimeUnit = CountedUnit & { minutes: number; since?: Date };
 
 export const WEIGHT_UNITS: (CountedUnit & { pounds: number })[] = [
   { singular: "bowling ball", plural: "bowling balls", pounds: 12, note: "12 lb each" },
@@ -29,7 +30,7 @@ export const VALUE_UNITS: (CountedUnit & { dollars: number })[] = [
 ];
 
 // Index 0 is the original movie-marathon itinerary, which is built separately in VinylInsights.
-export const RUNTIME_UNITS: (CountedUnit & { minutes: number })[] = [
+export const RUNTIME_UNITS: RuntimeUnit[] = [
   { singular: "full run of The Office", plural: "full runs of The Office", minutes: 4400, note: "all 9 seasons" },
   { singular: "full run of Friends", plural: "full runs of Friends", minutes: 5200, note: "all 10 seasons" },
   { singular: "nonstop flight from New York to Tokyo", plural: "nonstop flights from New York to Tokyo", minutes: 840, note: "about 14 hours each" },
@@ -37,6 +38,8 @@ export const RUNTIME_UNITS: (CountedUnit & { minutes: number })[] = [
   { singular: "Super Bowl", plural: "Super Bowls", minutes: 240, note: "kickoff to final whistle, about 4 hours" },
   { singular: "NBA game", plural: "NBA games", minutes: 144, note: "about 2.4 hours each" },
   { singular: "viewing of Titanic", plural: "viewings of Titanic", minutes: 194, note: "3 hours 14 minutes" },
+  // Measured against how long we have been together, so the size of the unit grows every day.
+  { singular: "relationship", plural: "relationships", minutes: 0, since: new Date(2022, 1, 21), note: "counting from our first date on February 21, 2022" },
 ];
 
 export function formatCount(n: number) {
@@ -53,6 +56,15 @@ export function nounFor(n: number, unit: CountedUnit) {
 
 export function describeCount(n: number, unit: CountedUnit) {
   return `${formatCount(n)} ${nounFor(n, unit)}`;
+}
+
+export function describeRuntime(totalMinutes: number, unit: RuntimeUnit) {
+  if (unit.since) {
+    const ratio = totalMinutes / ((Date.now() - unit.since.getTime()) / 60000);
+    const amount = ratio < 1 ? `${formatCount(ratio * 100)}% of` : `${formatCount(ratio)} times`;
+    return `about ${amount} our whole relationship so far (${unit.note})`;
+  }
+  return `about ${describeCount(totalMinutes / unit.minutes, unit)} (${unit.note})`;
 }
 
 export function randomIndex(length: number) {

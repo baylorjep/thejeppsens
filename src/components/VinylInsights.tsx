@@ -9,7 +9,7 @@ import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { Disc3 } from "lucide-react";
 import Link from "next/link";
-import { RUNTIME_UNITS, VALUE_UNITS, WEIGHT_UNITS, describeCount, formatCount, nounFor, randomIndex } from "@/lib/funComparisons";
+import { RUNTIME_UNITS, VALUE_UNITS, WEIGHT_UNITS, describeCount, describeRuntime, formatCount, nounFor, randomIndex } from "@/lib/funComparisons";
 import { useEffect, useMemo, useState } from "react";
 
 type VinylInsightsProps = {
@@ -1140,7 +1140,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   long it would take to play the whole stack back to back, no breaks. That is{" "}
                   {funPick.runtime < 0
                     ? formatRuntimeComparison(funStats.totalSeconds)
-                    : `about ${describeCount(funStats.totalSeconds / 60 / RUNTIME_UNITS[funPick.runtime].minutes, RUNTIME_UNITS[funPick.runtime])} (${RUNTIME_UNITS[funPick.runtime].note})`}.
+                    : describeRuntime(funStats.totalSeconds / 60, RUNTIME_UNITS[funPick.runtime])}.
                 </p>
               </div>
             ) : null}
