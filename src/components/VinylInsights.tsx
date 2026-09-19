@@ -12,7 +12,21 @@ import Link from "next/link";
 import ArtistBingo from "@/components/ArtistBingo";
 import CollectionTimeline from "@/components/CollectionTimeline";
 import CrateMap from "@/components/CrateMap";
-import { RUNTIME_UNITS, VALUE_UNITS, WEIGHT_UNITS, describeCount, describeRuntime, formatCount, nounFor, randomIndexAvoiding } from "@/lib/funComparisons";
+import {
+  AGE_UNITS,
+  DISTANCE_UNITS,
+  HEIGHT_UNITS,
+  RUNTIME_UNITS,
+  VALUE_UNITS,
+  WEIGHT_UNITS,
+  describeCount,
+  describeRuntime,
+  formatCount,
+  formatHeight,
+  nounFor,
+  randomIndexAvoiding,
+  unitYears,
+} from "@/lib/funComparisons";
 import { useEffect, useMemo, useState } from "react";
 
 type VinylInsightsProps = {
@@ -365,7 +379,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   const wishlistCount = everyRecord.length - allRecords.length;
   // The Just for fun cards rotate through a pool on each page load. They start on the default
   // so the server and first client render match, then re-roll once mounted.
-  const [funPick, setFunPick] = useState({ weight: 0, value: 0, runtime: -1 });
+  const [funPick, setFunPick] = useState({ weight: 0, value: 0, runtime: -1, height: 0, distance: 0, age: 0 });
   useEffect(() => {
     const timer = window.setTimeout(
       () =>
@@ -374,6 +388,9 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           value: randomIndexAvoiding(VALUE_UNITS.length, "insights-fun-value"),
           // -1 is the movie marathon itinerary; 0 and up are the RUNTIME_UNITS.
           runtime: randomIndexAvoiding(RUNTIME_UNITS.length + 1, "insights-fun-runtime", 1),
+          height: randomIndexAvoiding(HEIGHT_UNITS.length, "insights-fun-height"),
+          distance: randomIndexAvoiding(DISTANCE_UNITS.length, "insights-fun-distance"),
+          age: randomIndexAvoiding(AGE_UNITS.length, "insights-fun-age"),
         }),
       0,
     );
@@ -621,11 +638,19 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     const owned = allRecords.filter((record) => record.status === "owned");
     const weighed = owned.filter((record) => (record.weightGrams ?? 0) > 0);
     const timed = owned.filter((record) => (record.runtimeSeconds ?? 0) > 0);
+    const discCount = allRecords.reduce((sum, record) => sum + Math.max(1, record.discCount ?? 1), 0);
+    const thisYear = new Date().getFullYear();
+    const aged = allRecords.filter((record) => typeof record.releaseYear === "number" && record.releaseYear <= thisYear);
     return {
       weighedCount: weighed.length,
       totalGrams: weighed.reduce((sum, record) => sum + (record.weightGrams ?? 0), 0),
       timedCount: timed.length,
       totalSeconds: timed.reduce((sum, record) => sum + (record.runtimeSeconds ?? 0), 0),
+      recordCount: allRecords.length,
+      discCount,
+      stackInches: allRecords.reduce((sum, record) => sum + 0.2 + 0.15 * (Math.max(1, record.discCount ?? 1) - 1), 0),
+      agedCount: aged.length,
+      totalAgeYears: aged.reduce((sum, record) => sum + (thisYear - record.releaseYear!), 0),
     };
   }, [allRecords]);
 
@@ -1154,6 +1179,37 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   {funPick.runtime < 0
                     ? formatRuntimeComparison(funStats.totalSeconds)
                     : describeRuntime(funStats.totalSeconds / 60, RUNTIME_UNITS[funPick.runtime])}.
+                </p>
+              </div>
+            ) : null}
+            {funStats.recordCount > 0 ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="text-2xl font-semibold tabular-nums text-gray-950">{formatHeight(funStats.stackInches)}</p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                  Stack all {funStats.recordCount} of your records on top of each other and that is how tall it gets. About{" "}
+                  {describeCount(funStats.stackInches / HEIGHT_UNITS[funPick.height].inches, HEIGHT_UNITS[funPick.height])} ({HEIGHT_UNITS[funPick.height].note}).
+                </p>
+              </div>
+            ) : null}
+            {funStats.discCount > 0 ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="text-2xl font-semibold tabular-nums text-gray-950">
+                  {formatCount(funStats.discCount * 0.559)} miles
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                  Unspool the groove from all {funStats.discCount} of your discs, about 900 meters each, and it stretches this far. About{" "}
+                  {describeCount((funStats.discCount * 0.559) / DISTANCE_UNITS[funPick.distance].miles, DISTANCE_UNITS[funPick.distance])} ({DISTANCE_UNITS[funPick.distance].note}).
+                </p>
+              </div>
+            ) : null}
+            {funStats.agedCount > 0 ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="text-2xl font-semibold tabular-nums text-gray-950">
+                  {Math.round(funStats.totalAgeYears).toLocaleString("en-US")} years
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                  The combined age of your {funStats.agedCount} records, counted from each release year. About{" "}
+                  {describeCount(funStats.totalAgeYears / unitYears(AGE_UNITS[funPick.age]), AGE_UNITS[funPick.age])} ({AGE_UNITS[funPick.age].note}).
                 </p>
               </div>
             ) : null}
