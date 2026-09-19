@@ -7,12 +7,12 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Identify pressings · Isabel’s vinyl" };
 export default async function PressingQueuePage() {
   let records: Awaited<ReturnType<typeof listSupabaseVinylRecords>> = null;
-  let submissions: Pick<PressingSubmission, "record_id" | "status">[] = [];
+  let submissions: Pick<PressingSubmission, "record_id" | "status" | "updated_at">[] = [];
   let failed = false;
   try {
     const db = getVinylSupabaseClient();
     if (!db) throw new Error("Unavailable");
-    const [collection, queue] = await Promise.all([listSupabaseVinylRecords(), db.from("vinyl_pressing_submissions").select("record_id,status")]);
+    const [collection, queue] = await Promise.all([listSupabaseVinylRecords(), db.from("vinyl_pressing_submissions").select("record_id,status,updated_at")]);
     if (queue.error) throw queue.error;
     // Wishlist records are not physically here yet, so there is nothing to identify.
     records = collection?.filter((record) => record.status !== "wishlist") ?? null;
