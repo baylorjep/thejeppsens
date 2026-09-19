@@ -1006,20 +1006,6 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         </section>
       </div>
 
-      {collectionValue?.byFormat && collectionValue.byFormat.length > 1 ? (
-        <section className="rounded-lg border border-gray-200 bg-white p-5">
-          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Value by format</h2>
-          <p className="mt-1 text-xs text-gray-400">Estimated value split across the formats in your collection.</p>
-          <div className="mt-5">
-            <InteractiveDonut
-              items={collectionValue.byFormat.map((entry) => ({ label: entry.format, count: Math.round(entry.total) }))}
-              formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
-              recordsByLabel={chartRecords.format}
-            />
-          </div>
-        </section>
-      ) : null}
-
       {collectionValue?.byDecade && collectionValue.byDecade.length > 1 ? (
         <BreakdownSection
           title="Value by decade"
