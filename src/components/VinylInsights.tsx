@@ -10,6 +10,7 @@ import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { Disc3 } from "lucide-react";
 import Link from "next/link";
 import ArtistBingo from "@/components/ArtistBingo";
+import CollectionTimeline from "@/components/CollectionTimeline";
 import CrateMap from "@/components/CrateMap";
 import { RUNTIME_UNITS, VALUE_UNITS, WEIGHT_UNITS, describeCount, describeRuntime, formatCount, nounFor, randomIndexAvoiding } from "@/lib/funComparisons";
 import { useEffect, useMemo, useState } from "react";
@@ -1106,6 +1107,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           ) : null}
         </section>
       )}
+
+      <CollectionTimeline records={allRecords} />
 
       <ArtistBingo records={allRecords} />
 
