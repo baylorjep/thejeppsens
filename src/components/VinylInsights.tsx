@@ -554,7 +554,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     }
 
     return lines;
-  }, [allRecords.length, snapshot, genreTotal, artistBreakdown]);
+  }, [allRecords.length, snapshot, genreTotal, artistBreakdown, wishlistCount]);
 
   const needsAttention = useMemo(
     () => ({
