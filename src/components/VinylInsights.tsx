@@ -120,6 +120,7 @@ function InteractiveDonut({
 }
 
 function BreakdownSection({
+  id,
   title,
   narrative,
   items,
@@ -129,6 +130,7 @@ function BreakdownSection({
   formatCount = (count) => String(count),
   detailRecordsByLabel,
 }: {
+  id?: string;
   title: string;
   narrative?: string;
   items: { label: string; count: number }[];
@@ -148,7 +150,7 @@ function BreakdownSection({
   const selectedRecords = selectedLabel ? detailRecordsByLabel?.[selectedLabel] : undefined;
 
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5">
+    <section id={id} className="scroll-mt-24 rounded-lg border border-gray-200 bg-white p-5">
       <h2 className="text-base font-semibold text-gray-950 sm:text-xl">{title}</h2>
       {narrative ? <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{narrative}</p> : null}
       <div className="mt-5 space-y-3">
@@ -569,18 +571,6 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     ),
   }), [allRecords, recordsByArtist]);
 
-  const artistCommunityFact = useMemo(() => {
-    const artist = topRealArtist?.label;
-    if (!artist) return null;
-    const artistRecords = recordsByArtist[artist] ?? [];
-    const communityRecords = collectionValue?.rarityTiers.flatMap((tier) => tier.records) ?? [];
-    const artistIds = new Set(artistRecords.map((record) => record.id));
-    const have = communityRecords
-      .filter((entry) => artistIds.has(entry.record.id))
-      .reduce((sum, entry) => sum + entry.have, 0);
-    return { artist, yours: artistRecords.length, have, known: communityRecords.some((entry) => artistIds.has(entry.record.id)) };
-  }, [collectionValue, recordsByArtist, topRealArtist]);
-
   const foundStories = useMemo(() => {
     const ownedRecords = allRecords.filter((record) => record.status === "owned");
     const withStory = ownedRecords.filter((record) => record.whereWeGotIt?.trim());
@@ -607,14 +597,16 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     };
   }, [allRecords]);
 
+  // Record-count cards open the catalog filtered to exactly those records;
+  // Artists/Genres/Formats are category counts, so they jump to their breakdown below.
   const statCards = [
-    { label: "Records", value: snapshot.owned },
-    { label: "Artists", value: snapshot.artists },
-    { label: "Genres", value: snapshot.genres },
-    { label: "Favorites", value: snapshot.favorites },
-    { label: "Wishlist", value: snapshot.wishlist },
-    { label: "Originals", value: originalPressingStats.original },
-    { label: "Formats", value: snapshot.formats },
+    { label: "Records", value: snapshot.owned, href: "/vinyl?status=Owned" },
+    { label: "Artists", value: snapshot.artists, href: "#top-artists" },
+    { label: "Genres", value: snapshot.genres, href: "#by-genre" },
+    { label: "Favorites", value: snapshot.favorites, href: "/vinyl?filter=favorites" },
+    { label: "Wishlist", value: snapshot.wishlist, href: "/vinyl?filter=wishlist" },
+    { label: "Originals", value: originalPressingStats.original, href: "/vinyl?filter=originals" },
+    { label: "Formats", value: snapshot.formats, href: "#by-format" },
   ];
 
   return (
@@ -698,13 +690,17 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-        {statCards.map(({ label, value }) => (
-          <div key={label} className="rounded-lg border border-gray-200 bg-white p-4">
+        {statCards.map(({ label, value, href }) => (
+          <Link
+            key={label}
+            href={href}
+            className="rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:border-gray-400"
+          >
             <p className="text-xs text-gray-500">{label}</p>
             <p className="mt-2 text-xl font-semibold text-gray-950 sm:text-2xl">
               <AnimatedNumber value={value} />
             </p>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -769,19 +765,6 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             </div>
           )}
         </div>
-      ) : null}
-
-      {artistCommunityFact ? (
-        <section className="rounded-lg border border-gray-200 bg-white p-5">
-          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Interesting facts</h2>
-          <div className="mt-4 rounded-lg bg-gray-50 p-4">
-            <p className="text-sm leading-relaxed text-gray-700">
-              {artistCommunityFact.known
-                ? `Discogs collectors report ${artistCommunityFact.have.toLocaleString()} copies across ${artistCommunityFact.artist}'s pressings represented here; you have ${artistCommunityFact.yours}.`
-                : `You have ${artistCommunityFact.yours} ${artistCommunityFact.artist} album${artistCommunityFact.yours === 1 ? "" : "s"}. Link a pressing to Discogs to compare it with other collectors.`}
-            </p>
-          </div>
-        </section>
       ) : null}
 
       {/* Discogs community stats */}
@@ -922,6 +905,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       {/* Breakdowns */}
       <div className="grid gap-6 lg:grid-cols-2">
         <BreakdownSection
+          id="by-genre"
           title="By genre"
           narrative={categoryNarratives.genre}
           items={snapshot.genreBreakdown}
@@ -931,6 +915,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           detailRecordsByLabel={chartRecords.genre}
         />
         <BreakdownSection
+          id="top-artists"
           title="Top artists"
           narrative={categoryNarratives.artist}
           items={artistBreakdown}
@@ -956,6 +941,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           detailRecordsByLabel={chartRecords.recordingDecade}
         />
         <BreakdownSection
+          id="by-format"
           title="By format"
           narrative={categoryNarratives.format}
           items={snapshot.formatBreakdown}

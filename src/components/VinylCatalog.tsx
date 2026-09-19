@@ -19,7 +19,7 @@ import { fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylA
 import { getAppleMusicAlbumUrl, getAppleMusicSearchUrl } from "@/lib/appleMusic";
 import { optimizeImageFile } from "@/lib/vinylImage";
 import { readQueuedVinyls, writeQueuedVinyls } from "@/lib/vinylQueue";
-import { getDecade, isReissuePressing, slugifyVinylId, statusLabel } from "@/lib/vinylRecordUtils";
+import { getDecade, isOriginalPressing, isReissuePressing, slugifyVinylId, statusLabel } from "@/lib/vinylRecordUtils";
 import {
   X,
   AlertCircle,
@@ -44,7 +44,7 @@ type VinylCatalogProps = {
 
 type ViewMode = "grid" | "list";
 type FilterKey = "genres" | "moods" | "status" | "decades";
-type QuickFilter = "all" | "favorites" | "wishlist" | "upgrade";
+type QuickFilter = "all" | "favorites" | "wishlist" | "upgrade" | "originals";
 
 type AppleAlbumSearchResult = {
   collectionId: number;
@@ -373,10 +373,14 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     const mood = params.get("mood");
     const decade = params.get("decade");
     const status = params.get("status");
+    const filter = params.get("filter");
     if (genre) setActiveGenre(genre);
     if (mood) setActiveMood(mood);
     if (decade) setActiveDecade(decade);
     if (status) setActiveStatus(status);
+    if (filter === "favorites" || filter === "wishlist" || filter === "upgrade" || filter === "originals") {
+      setQuickFilter(filter);
+    }
   }, []);
 
   useEffect(() => {
@@ -454,7 +458,8 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
         quickFilter === "all" ||
         (quickFilter === "favorites" && record.favorite) ||
         (quickFilter === "wishlist" && record.status === "wishlist") ||
-        (quickFilter === "upgrade" && record.status === "upgrade");
+        (quickFilter === "upgrade" && record.status === "upgrade") ||
+        (quickFilter === "originals" && isOriginalPressing(record));
       return matchesQuery && matchesGenre && matchesMood && matchesStatus && matchesDecade && matchesQuickFilter;
     });
 
@@ -903,6 +908,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
     ["favorites", "Favorites"],
     allRecords.some((record) => record.status === "wishlist") ? ["wishlist", "Wishlist"] : null,
     allRecords.some((record) => record.status === "upgrade") ? ["upgrade", "Upgrades"] : null,
+    allRecords.some(isOriginalPressing) ? ["originals", "Originals"] : null,
   ].filter(Boolean) as Array<[string, string]>;
   const activeAdvancedFilters = [activeGenre, activeMood, activeStatus, activeDecade].filter((value) => value !== "All").length;
 
@@ -1249,7 +1255,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
             )}
             {quickFilter !== "all" && (
               <button type="button" onClick={() => setQuickFilter("all")} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200">
-                {quickFilter === "favorites" ? "Favorites" : quickFilter === "wishlist" ? "Wishlist" : "Upgrades"} <X className="h-3 w-3" />
+                {quickFilter === "favorites" ? "Favorites" : quickFilter === "wishlist" ? "Wishlist" : quickFilter === "originals" ? "Originals" : "Upgrades"} <X className="h-3 w-3" />
               </button>
             )}
             {query && (
