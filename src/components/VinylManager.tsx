@@ -228,7 +228,7 @@ export default function VinylManager() {
   }, []);
 
   useEffect(() => {
-    const hasUnsavedEvidence = retryingNewRecord || pressingIntake.sealed || Object.values(pressingIntake.runouts).some(text => text.trim()) || Object.values(pressingIntake.files).some(files => files.length);
+    const hasUnsavedEvidence = retryingNewRecord || pressingIntake.sealed || pressingIntake.catalogNumber.trim() || Object.values(pressingIntake.runouts).some(text => text.trim()) || Object.values(pressingIntake.files).some(files => files.length);
     if (!hasUnsavedEvidence) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     window.addEventListener("beforeunload", warn);
@@ -501,7 +501,7 @@ export default function VinylManager() {
             files.push({ side, file: optimized });
           }
         } catch (error) { setMessage(error instanceof Error ? error.message : "Could not open a marking photo. Try JPG or PNG."); return; }
-        pressing = { evidence: { ...emptyEvidence(), sealed: pressingIntake.sealed, discCount, runouts: pressingIntake.runouts, color: form.vinylColor.trim() }, files };
+        pressing = { evidence: { ...emptyEvidence(), sealed: pressingIntake.sealed, catalogNumber: pressingIntake.catalogNumber.trim(), discCount, runouts: pressingIntake.runouts, color: form.vinylColor.trim() }, files };
       }
       const response = await saveVinylRecord(record, imageFile, backImageFile, pressing);
       const savedRecord = response.record;
@@ -721,7 +721,7 @@ export default function VinylManager() {
             ) : null}
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            Pulls pressing details like label, catalog number, and format straight from Discogs.
+            Pulls label, catalog number, and format from Discogs. You will still add the catalog number and matrix markings from your own copy below.
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <label className="relative block flex-1">
@@ -835,7 +835,7 @@ export default function VinylManager() {
             <input value={form.artist} onChange={(event) => updateForm("artist", event.target.value)} className={inputClassName()} required />
           </label>
 
-        {(!editingId || retryingNewRecord) ? <div className="sm:col-span-2"><VinylPressingIntake value={pressingIntake} onChange={setPressingIntake} discs={Math.min(10, Math.max(1, Math.trunc(Number(form.discCount)) || 1))} onDiscsChange={count => updateForm("discCount", String(count))} /></div> : <Link href={`/vinyl/${encodeURIComponent(editingId)}/identify`} className="my-5 block rounded-lg bg-stone-50 p-4 text-sm font-medium underline sm:col-span-2">Update identification photos & codes →</Link>}
+        {(!editingId || retryingNewRecord) ? <div className="sm:col-span-2"><VinylPressingIntake value={pressingIntake} onChange={setPressingIntake} discs={Math.min(10, Math.max(1, Math.trunc(Number(form.discCount)) || 1))} onDiscsChange={count => updateForm("discCount", String(count))} discogsLinked={Boolean(form.discogsReleaseId)} discogsCatalogNumber={form.discogsReleaseId ? form.catalogNumber.trim() : undefined} /></div> : <Link href={`/vinyl/${encodeURIComponent(editingId)}/identify`} className="my-5 block rounded-lg bg-stone-50 p-4 text-sm font-medium underline sm:col-span-2">Update identification photos & codes →</Link>}
 
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-gray-700">Release year</span>
