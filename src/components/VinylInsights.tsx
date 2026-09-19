@@ -9,6 +9,7 @@ import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
 import { Disc3 } from "lucide-react";
 import Link from "next/link";
+import { RUNTIME_UNITS, VALUE_UNITS, WEIGHT_UNITS, describeCount, formatCount, nounFor, randomIndex } from "@/lib/funComparisons";
 import { useEffect, useMemo, useState } from "react";
 
 type VinylInsightsProps = {
@@ -356,6 +357,16 @@ function AnimatedNumber({ value }: { value: number }) {
 
 export default function VinylInsights({ records }: VinylInsightsProps) {
   const [allRecords, setAllRecords] = useState(records);
+  // The Just for fun cards rotate through a pool on each page load. They start on the default
+  // so the server and first client render match, then re-roll once mounted.
+  const [funPick, setFunPick] = useState({ weight: 0, value: 0, runtime: -1 });
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setFunPick({ weight: randomIndex(WEIGHT_UNITS.length), value: randomIndex(VALUE_UNITS.length), runtime: randomIndex(RUNTIME_UNITS.length + 1) - 1 }),
+      0,
+    );
+    return () => window.clearTimeout(timer);
+  }, []);
   const [selectedRarityTier, setSelectedRarityTier] = useState<string | null>(null);
   const [rarityPage, setRarityPage] = useState(0);
   const [selectedWantTier, setSelectedWantTier] = useState<string | null>(null);
@@ -1101,18 +1112,17 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
                   Total weight of your {funStats.weighedCount} weighed record{funStats.weighedCount === 1 ? "" : "s"}.
-                  About {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12))} bowling ball
-                  {Math.max(1, Math.round(funStats.totalGrams / 453.592 / 12)) === 1 ? "" : "s"} worth of vinyl (using a 12 lb ball).
+                  About {describeCount(funStats.totalGrams / 453.592 / WEIGHT_UNITS[funPick.weight].pounds, WEIGHT_UNITS[funPick.weight])} worth of vinyl ({WEIGHT_UNITS[funPick.weight].note}).
                 </p>
               </div>
             ) : null}
             {collectionValue ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4">
                 <p className="text-2xl font-semibold tabular-nums text-gray-950">
-                  {Math.max(0, Math.round(collectionValue.total / 50)).toLocaleString("en-US")}
+                  {formatCount(Math.max(0, collectionValue.total / VALUE_UNITS[funPick.value].dollars))}
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  bowling balls we could have bought with the estimated value of my collection, at about $50 each.
+                  {nounFor(collectionValue.total / VALUE_UNITS[funPick.value].dollars, VALUE_UNITS[funPick.value])} we could have bought with the estimated value of my collection ({VALUE_UNITS[funPick.value].note}).
                 </p>
               </div>
             ) : null}
@@ -1127,7 +1137,10 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
                   Total runtime of your {funStats.timedCount} timed record{funStats.timedCount === 1 ? "" : "s"}. How
-                  long it would take to play the whole stack back to back, no breaks. That is {formatRuntimeComparison(funStats.totalSeconds)}.
+                  long it would take to play the whole stack back to back, no breaks. That is{" "}
+                  {funPick.runtime < 0
+                    ? formatRuntimeComparison(funStats.totalSeconds)
+                    : `about ${describeCount(funStats.totalSeconds / 60 / RUNTIME_UNITS[funPick.runtime].minutes, RUNTIME_UNITS[funPick.runtime])} (${RUNTIME_UNITS[funPick.runtime].note})`}.
                 </p>
               </div>
             ) : null}
