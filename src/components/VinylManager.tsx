@@ -1,7 +1,7 @@
 "use client";
 
 import VinylPressingIntake, { emptyPressingIntake } from "@/components/VinylPressingIntake";
-import { emptyEvidence, sidesFor, type PressingSubmission } from "@/lib/pressingEvidence";
+import { emptyEvidence, GRADES, sidesFor, type PressingSubmission } from "@/lib/pressingEvidence";
 import { VinylRecord, vinyls } from "@/data/vinyls";
 import { optimizeImageFile } from "@/lib/vinylImage";
 import { deleteVinylRecord, fetchVinylRecords, saveVinylRecord, VinylApiStatus } from "@/lib/vinylApi";
@@ -32,6 +32,7 @@ type FormState = {
   pressing: string;
   vinylColor: string;
   condition: string;
+  sleeveCondition: string;
   source: string;
   giftFrom: string;
   whereWeGotIt: string;
@@ -105,6 +106,7 @@ const emptyForm: FormState = {
   pressing: "",
   vinylColor: "",
   condition: "",
+  sleeveCondition: "",
   source: "",
   giftFrom: "",
   whereWeGotIt: "",
@@ -118,6 +120,19 @@ const emptyForm: FormState = {
   discogsReleaseId: "",
   discogsVerified: false,
 };
+
+const COVER_EXTRA_GRADES = ["Generic", "No cover"];
+
+// Old records hold free-text conditions ("New", "Good"); keep whatever is saved as a
+// selectable option so opening and re-saving a record never silently drops it.
+function gradeOptions(current: string, extras: string[] = []) {
+  const known: string[] = [...GRADES, ...extras];
+  return current && !known.includes(current) ? [current, ...known] : known;
+}
+
+function validGrade(value: string, extras: string[] = []) {
+  return ([...GRADES, ...extras] as string[]).includes(value) ? value : "";
+}
 
 function recordToForm(record: VinylRecord): FormState {
   return {
@@ -140,6 +155,7 @@ function recordToForm(record: VinylRecord): FormState {
     pressing: record.pressing ?? "",
     vinylColor: record.vinylColor ?? "",
     condition: record.condition ?? "",
+    sleeveCondition: record.sleeveCondition ?? "",
     source: record.source ?? "",
     giftFrom: record.giftFrom ?? "",
     whereWeGotIt: record.whereWeGotIt ?? "",
@@ -465,6 +481,7 @@ export default function VinylManager() {
       pressing: form.pressing.trim() || undefined,
       vinylColor: form.vinylColor.trim() || undefined,
       condition: form.condition.trim() || undefined,
+      sleeveCondition: form.sleeveCondition.trim() || undefined,
       source: form.source.trim() || undefined,
       giftFrom: form.giftFrom.trim() || undefined,
       whereWeGotIt: form.whereWeGotIt.trim() || undefined,
@@ -501,7 +518,7 @@ export default function VinylManager() {
             files.push({ side, file: optimized });
           }
         } catch (error) { setMessage(error instanceof Error ? error.message : "Could not open a marking photo. Try JPG or PNG."); return; }
-        pressing = { evidence: { ...emptyEvidence(), sealed: pressingIntake.sealed, catalogNumber: pressingIntake.catalogNumber.trim(), barcode: pressingIntake.barcode.trim(), discCount, runouts: pressingIntake.runouts, color: form.vinylColor.trim() }, files };
+        pressing = { evidence: { ...emptyEvidence(), sealed: pressingIntake.sealed, catalogNumber: pressingIntake.catalogNumber.trim(), barcode: pressingIntake.barcode.trim(), discCount, runouts: pressingIntake.runouts, color: form.vinylColor.trim(), mediaGrade: validGrade(form.condition), sleeveGrade: validGrade(form.sleeveCondition, COVER_EXTRA_GRADES) }, files };
       }
       const response = await saveVinylRecord(record, imageFile, backImageFile, pressing);
       const savedRecord = response.record;
@@ -871,6 +888,34 @@ export default function VinylManager() {
             </select>
           </label>
 
+          {form.status !== "wishlist" ? (
+            <div className="grid gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:col-span-2 sm:grid-cols-3">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-gray-700">Vinyl color</span>
+                <input value={form.vinylColor} onChange={(event) => updateForm("vinylColor", event.target.value)} className={inputClassName()} list="vinyl-color-options" placeholder="Black, clear, pink..." />
+                <datalist id="vinyl-color-options">
+                  {["Black", "Clear", "White", "Red", "Blue", "Green", "Yellow", "Pink", "Purple", "Orange", "Gold", "Silver", "Splatter", "Marbled", "Picture disc"].map((color) => <option key={color} value={color} />)}
+                </datalist>
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-gray-700">Disc condition</span>
+                <select value={form.condition} onChange={(event) => updateForm("condition", event.target.value)} className={inputClassName()}>
+                  <option value="">Not sure</option>
+                  {gradeOptions(form.condition).map((grade) => <option key={grade} value={grade}>{grade}</option>)}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-gray-700">Cover condition</span>
+                <select value={form.sleeveCondition} onChange={(event) => updateForm("sleeveCondition", event.target.value)} className={inputClassName()}>
+                  <option value="">Not sure</option>
+                  {gradeOptions(form.sleeveCondition, COVER_EXTRA_GRADES).map((grade) => <option key={grade} value={grade}>{grade}</option>)}
+                </select>
+              </label>
+            </div>
+          ) : null}
+
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-gray-700">Genres</span>
             <input value={form.genres} onChange={(event) => updateForm("genres", event.target.value)} className={inputClassName()} placeholder="Rock, Pop" />
@@ -955,16 +1000,6 @@ export default function VinylManager() {
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-gray-700">Pressing</span>
                   <input value={form.pressing} onChange={(event) => updateForm("pressing", event.target.value)} className={inputClassName()} placeholder="Deluxe, standard, limited..." />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-gray-700">Vinyl color</span>
-                  <input value={form.vinylColor} onChange={(event) => updateForm("vinylColor", event.target.value)} className={inputClassName()} placeholder="Black, clear, pink..." />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-gray-700">Condition</span>
-                  <input value={form.condition} onChange={(event) => updateForm("condition", event.target.value)} className={inputClassName()} placeholder="New, good, used..." />
                 </label>
 
                 <label className="block">
