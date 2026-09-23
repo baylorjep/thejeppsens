@@ -13,26 +13,41 @@ export default function DiscogsValueCard({
   condition,
   verifiedPressing,
   noMatch = false,
+  priceReferenceReleaseId,
 }: {
   releaseId: number;
   condition?: string;
   verifiedPressing: boolean;
   noMatch?: boolean;
+  priceReferenceReleaseId?: number;
 }) {
   const [value, setValue] = useState<DiscogsValueResponse | null>(null);
+  // Set when the exact pressing has no sales yet and the price comes from its twin release.
+  const [pricedFrom, setPricedFrom] = useState<number | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
 
   const load = (forceRefresh = false) => {
     let active = true;
     setStatus("loading");
 
-    fetchDiscogsValue(releaseId, condition, { forceRefresh }).then((data) => {
+    fetchDiscogsValue(releaseId, condition, { forceRefresh }).then(async (data) => {
       if (!active) return;
       if (!data) {
         setStatus("unavailable");
         return;
       }
-      setValue(data);
+      let shown = data;
+      let from: number | null = null;
+      if (priceReferenceReleaseId && !data.estimate && !data.lowestListing) {
+        const twin = await fetchDiscogsValue(priceReferenceReleaseId, condition, { forceRefresh });
+        if (!active) return;
+        if (twin && (twin.estimate || twin.lowestListing)) {
+          shown = { ...data, estimate: twin.estimate, lowestListing: twin.lowestListing, numForSale: twin.numForSale };
+          from = priceReferenceReleaseId;
+        }
+      }
+      setValue(shown);
+      setPricedFrom(from);
       setStatus("ready");
     });
 
@@ -41,7 +56,7 @@ export default function DiscogsValueCard({
     };
   };
 
-  useEffect(() => load(false), [releaseId, condition]);
+  useEffect(() => load(false), [releaseId, condition, priceReferenceReleaseId]);
 
   if (status === "unavailable") return null;
 
@@ -69,7 +84,7 @@ export default function DiscogsValueCard({
           </p>
           {value.lowestListing ? (
             <a
-              href={marketplaceUrl(releaseId)}
+              href={marketplaceUrl(pricedFrom ?? releaseId)}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-block text-xs text-gray-500 underline-offset-4 hover:text-gray-950 hover:underline"
@@ -82,7 +97,7 @@ export default function DiscogsValueCard({
         <div className="mt-2">
           <p className="text-2xl font-semibold text-gray-950">{formatDiscogsMoney(value.lowestListing)}</p>
           <a
-            href={marketplaceUrl(releaseId)}
+            href={marketplaceUrl(pricedFrom ?? releaseId)}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-1 inline-block text-xs text-gray-500 underline-offset-4 hover:text-gray-950 hover:underline"
@@ -95,6 +110,9 @@ export default function DiscogsValueCard({
       )}
       {status === "ready" && value?.isGuess ? <p className="mt-3 text-xs text-gray-600">No media grade recorded. Asking prices are shown only as market context, not your copy’s value.</p> : null}
       {status === "ready" && value?.estimate ? <p className="mt-3 text-xs text-gray-500">Discogs suggestion for this media grade. Jacket condition, missing extras, and comparable sales still need review.</p> : null}
+      {status === "ready" && pricedFrom ? (
+        <p className="mt-3 text-xs text-gray-500">No sales yet for your exact pressing, so this is priced from its closest twin on Discogs.</p>
+      ) : null}
       {status === "ready" && (value?.estimate || value?.lowestListing) && noMatch ? (
         <p className="mt-3 text-xs text-gray-500">Priced from the closest listed pressing, since yours isn&apos;t on Discogs.</p>
       ) : status === "ready" && (value?.estimate || value?.lowestListing) && !verifiedPressing ? (

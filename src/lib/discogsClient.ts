@@ -283,6 +283,18 @@ function aggregateCollectionValue(
  * warm cache this settles in seconds; a cold one is bounded by the server's
  * own paced queue instead.
  */
+/**
+ * When the exact pressing has never sold on Discogs, borrow the price from the
+ * record's chosen twin release. Owners/wants stay the pressing's own.
+ */
+export async function fetchDiscogsValueWithReference(record: VinylRecord): Promise<DiscogsValueResponse | null> {
+  const own = await fetchDiscogsValue(record.discogsReleaseId!, record.condition);
+  if (!record.priceReferenceReleaseId || own?.estimate || own?.lowestListing) return own;
+  const twin = await fetchDiscogsValue(record.priceReferenceReleaseId, record.condition);
+  if (!twin || (!twin.estimate && !twin.lowestListing)) return own;
+  return own ? { ...own, estimate: twin.estimate, lowestListing: twin.lowestListing, numForSale: twin.numForSale } : twin;
+}
+
 export function useCollectionValue(records: VinylRecord[]) {
   const [value, setValue] = useState<CollectionValueSummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -301,7 +313,7 @@ export function useCollectionValue(records: VinylRecord[]) {
     let remaining = ownedLinkedRecords.length;
 
     ownedLinkedRecords.forEach((record) => {
-      fetchDiscogsValue(record.discogsReleaseId!, record.condition).then((recordValue) => {
+      fetchDiscogsValueWithReference(record).then((recordValue) => {
         if (cancelled) return;
         collected.push({ record, value: recordValue });
         setValue(aggregateCollectionValue(collected, ownedLinkedRecords.length));

@@ -48,6 +48,8 @@ export type VinylRecord = {
   discogsReleaseId?: number;
   discogsVerified?: boolean;
   discogsNoMatch?: boolean;
+  // A near-identical release to price from when the exact pressing has no Discogs sales yet.
+  priceReferenceReleaseId?: number;
 };
 
 export const vinyls: VinylRecord[] = [

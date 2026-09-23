@@ -835,6 +835,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 condition={record.condition}
                 verifiedPressing={Boolean(record.discogsVerified)}
                 noMatch={Boolean(record.discogsNoMatch)}
+                priceReferenceReleaseId={record.priceReferenceReleaseId}
               />
             ) : null}
 

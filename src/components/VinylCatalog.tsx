@@ -1859,6 +1859,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       condition={selectedRecord.condition}
                       verifiedPressing={Boolean(selectedRecord.discogsVerified)}
                       noMatch={Boolean(selectedRecord.discogsNoMatch)}
+                      priceReferenceReleaseId={selectedRecord.priceReferenceReleaseId}
                     />
                   ) : null}
 
