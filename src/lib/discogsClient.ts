@@ -164,7 +164,7 @@ function aggregateCollectionValue(
       total += priced.value;
       currency = priced.currency;
       pricedCount += 1;
-      if (!record.discogsVerified) unverifiedCount += 1;
+      if (!record.discogsVerified && !record.discogsNoMatch) unverifiedCount += 1;
       if (!mostValuable || priced.value > mostValuable.value) {
         mostValuable = { record, value: priced.value };
       }
@@ -195,7 +195,8 @@ function aggregateCollectionValue(
       else originalCount += 1;
     }
 
-    if (typeof recordValue?.have === "number") {
+    // A not-on-Discogs record's have count belongs to its closest comparable, not to it.
+    if (typeof recordValue?.have === "number" && !record.discogsNoMatch) {
       haveEntries.push({ record, have: recordValue.have });
     }
     if (typeof recordValue?.want === "number") {

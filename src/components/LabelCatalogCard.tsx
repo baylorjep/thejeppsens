@@ -39,7 +39,10 @@ export default function LabelCatalogCard({ record, records }: { record: VinylRec
     return catalog.albums.filter((album) => ownedTitles.has(normalize(album.title))).length;
   }, [catalog, records]);
 
-  if (!catalog || catalog.albums.length < 2) return null;
+  // Only makes sense on a page for one of the counted albums; a compilation or a
+  // later reissue on this label isn't in the list, so the count would read wrong.
+  const isCountedAlbum = catalog?.albums.some((album) => normalize(album.title) === normalize(record.title));
+  if (!catalog || catalog.albums.length < 2 || !isCountedAlbum) return null;
 
   const total = catalog.albums.length;
   const shownLabel = catalog.label;

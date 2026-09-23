@@ -12,10 +12,12 @@ export default function DiscogsValueCard({
   releaseId,
   condition,
   verifiedPressing,
+  noMatch = false,
 }: {
   releaseId: number;
   condition?: string;
   verifiedPressing: boolean;
+  noMatch?: boolean;
 }) {
   const [value, setValue] = useState<DiscogsValueResponse | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
@@ -93,7 +95,9 @@ export default function DiscogsValueCard({
       )}
       {status === "ready" && value?.isGuess ? <p className="mt-3 text-xs text-gray-600">No media grade recorded. Asking prices are shown only as market context, not your copy’s value.</p> : null}
       {status === "ready" && value?.estimate ? <p className="mt-3 text-xs text-gray-500">Discogs suggestion for this media grade. Jacket condition, missing extras, and comparable sales still need review.</p> : null}
-      {status === "ready" && (value?.estimate || value?.lowestListing) && !verifiedPressing ? (
+      {status === "ready" && (value?.estimate || value?.lowestListing) && noMatch ? (
+        <p className="mt-3 text-xs text-gray-500">Priced from the closest listed pressing, since yours isn&apos;t on Discogs.</p>
+      ) : status === "ready" && (value?.estimate || value?.lowestListing) && !verifiedPressing ? (
         <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
           Approximate. This pressing hasn&apos;t been manually confirmed, so it may not be the exact one
           priced here. Use “Identify this pressing” to submit physical evidence for review.

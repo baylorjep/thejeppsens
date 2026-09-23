@@ -1844,7 +1844,9 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                     </div>
                   ) : null}
 
-                  {!selectedRecord.discogsVerified && selectedRecord.status !== "wishlist" ? (
+                  {selectedRecord.discogsNoMatch && !selectedRecord.discogsVerified ? (
+                    <p className="text-sm text-gray-500">Pressing checked · not listed on Discogs</p>
+                  ) : !selectedRecord.discogsVerified && selectedRecord.status !== "wishlist" ? (
                     <Link href={`/vinyl/${encodeURIComponent(selectedRecord.id)}/identify`} className="block rounded-2xl border border-gray-200 bg-stone-50 p-5 transition-colors hover:border-gray-400">
                       <span className="font-semibold">Identify this pressing →</span>
                       <span className="mt-1 block text-sm leading-6 text-gray-500">Add label photos and runouts for Baylor to review, or check your submission’s progress.</span>
@@ -1856,11 +1858,12 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                       releaseId={selectedRecord.discogsReleaseId}
                       condition={selectedRecord.condition}
                       verifiedPressing={Boolean(selectedRecord.discogsVerified)}
+                      noMatch={Boolean(selectedRecord.discogsNoMatch)}
                     />
                   ) : null}
 
                   {selectedRecord.discogsReleaseId ? (
-                    <DiscogsRarityCard releaseId={selectedRecord.discogsReleaseId} condition={selectedRecord.condition} />
+                    <DiscogsRarityCard releaseId={selectedRecord.discogsReleaseId} condition={selectedRecord.condition} noMatch={Boolean(selectedRecord.discogsNoMatch)} />
                   ) : null}
 
                   <PressingFactsCard record={selectedRecord} allRecords={allRecords} />

@@ -13,10 +13,12 @@ export default function DiscogsRarityCard({
   releaseId,
   condition,
   record,
+  noMatch = false,
 }: {
   releaseId: number;
   condition?: string;
   record?: VinylRecord;
+  noMatch?: boolean;
 }) {
   const [have, setHave] = useState<number | null>(null);
   const [want, setWant] = useState<number | null>(null);
@@ -59,9 +61,13 @@ export default function DiscogsRarityCard({
           {have !== null ? (
             <p className="text-sm text-gray-700">
               <span className="font-semibold text-gray-950">{have.toLocaleString()}</span>{" "}
-              {have === 1 ? "person" : "people"} on Discogs {have === 1 ? "has" : "have"} this exact pressing
-              {" · "}
-              <span className="font-medium">{rarityTierLabel(have)}</span>
+              {have === 1 ? "person" : "people"} on Discogs {have === 1 ? "has" : "have"} {noMatch ? "the closest listed pressing" : "this exact pressing"}
+              {noMatch ? null : (
+                <>
+                  {" · "}
+                  <span className="font-medium">{rarityTierLabel(have)}</span>
+                </>
+              )}
             </p>
           ) : null}
           {want !== null ? (

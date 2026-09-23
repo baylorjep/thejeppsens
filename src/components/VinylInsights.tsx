@@ -586,7 +586,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         (record) => record.status === "owned" && (!record.coverImage || !record.backCoverImage),
       ).length,
       notLinked: allRecords.filter((record) => !record.discogsReleaseId && !record.discogsNoMatch).length,
-      unverifiedLinked: allRecords.filter((record) => record.discogsReleaseId && !record.discogsVerified).length,
+      unverifiedLinked: allRecords.filter((record) => record.discogsReleaseId && !record.discogsVerified && !record.discogsNoMatch).length,
     }),
     [allRecords],
   );
