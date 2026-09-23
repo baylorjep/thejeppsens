@@ -197,7 +197,8 @@ function aggregateCollectionValue(
 
     // A not-on-Discogs record's have count belongs to its closest comparable, not to it.
     if (typeof recordValue?.have === "number" && !record.discogsNoMatch) {
-      haveEntries.push({ record, have: recordValue.have });
+      // You own this copy, so at least one person has it even if nobody has logged it on Discogs.
+      haveEntries.push({ record, have: Math.max(1, recordValue.have) });
     }
     if (typeof recordValue?.want === "number") {
       wantEntries.push({ record, want: recordValue.want });

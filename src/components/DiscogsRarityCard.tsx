@@ -34,7 +34,8 @@ export default function DiscogsRarityCard({
         setStatus("unavailable");
         return;
       }
-      setHave(data.have);
+      // You own this copy, so it is never "0 people"; a not-on-Discogs count belongs to the comparable instead.
+      setHave(data.have === null ? null : noMatch ? data.have : Math.max(1, data.have));
       setWant(data.want);
       setStatus("ready");
     });
@@ -42,7 +43,7 @@ export default function DiscogsRarityCard({
     return () => {
       active = false;
     };
-  }, [releaseId, condition]);
+  }, [releaseId, condition, noMatch]);
 
   const pressRun = record ? getPressRun(record) : null;
   // Originals always get a run-size line so a missing number reads as "nobody

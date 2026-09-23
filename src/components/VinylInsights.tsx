@@ -158,13 +158,17 @@ function BreakdownSection({
   formatCount?: (count: number) => string;
   detailRecordsByLabel?: Record<string, VinylRecord[]>;
 }) {
-  const [showAll, setShowAll] = useState(false);
+  const [page, setPage] = useState(0);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   // Bars are sized relative to the largest value, not necessarily items[0] -
   // some breakdowns (value by decade) are sorted chronologically rather
   // than by count, so items[0] isn't reliably the max.
   const topCount = Math.max(...items.map((item) => item.count), 1);
-  const visible = showAll ? items : items.slice(0, 8);
+  // Paged instead of "show all" so a long list (labels, formats) doesn't run the page down on mobile.
+  const pageSize = 8;
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const currentPage = Math.min(page, totalPages - 1);
+  const visible = items.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
   const selectedRecords = selectedLabel ? detailRecordsByLabel?.[selectedLabel] : undefined;
 
   return (
@@ -219,14 +223,29 @@ function BreakdownSection({
           return <div key={item.label}>{inner}</div>;
         })}
       </div>
-      {items.length > 8 && (
-        <button
-          onClick={() => setShowAll((v) => !v)}
-          className="mt-4 text-xs font-medium text-gray-400 transition-colors hover:text-gray-700"
-        >
-          {showAll ? "Show less" : `Show all ${items.length}`}
-        </button>
-      )}
+      {totalPages > 1 ? (
+        <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
+          <button
+            type="button"
+            onClick={() => setPage(Math.max(0, currentPage - 1))}
+            disabled={currentPage === 0}
+            className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
+          >
+            Previous
+          </button>
+          <span className="tabular-nums">
+            Page {currentPage + 1} of {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))}
+            disabled={currentPage >= totalPages - 1}
+            className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
+          >
+            Next
+          </button>
+        </div>
+      ) : null}
       {selectedRecords ? (
         <div className="mt-5 border-t border-gray-100 pt-4">
           <div className="flex items-center justify-between gap-3">
