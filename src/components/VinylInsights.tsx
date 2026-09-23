@@ -632,6 +632,14 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         : `${topCountry.label} is the only pressing country recorded so far, across ${topCountry.count} titles.`;
     }
 
+    const abroad = snapshot.foundCountryBreakdown.filter((item) => item.label !== "United States");
+    if (abroad.length) {
+      const found = abroad.reduce((sum, item) => sum + item.count, 0);
+      const names = abroad.map((item) => item.label);
+      const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
+      lines.foundCountry = `${found} of your records were found outside the US, in ${list}.`;
+    }
+
     const [topPlant, secondPlant] = snapshot.pressingPlantBreakdown;
     if (topPlant) {
       const known = snapshot.pressingPlantBreakdown.reduce((sum, item) => sum + item.count, 0);
@@ -681,6 +689,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     format: groupRecordsByLabel(allRecords, (record) => [record.format ?? "Unknown"]),
     label: groupRecordsByLabel(allRecords, (record) => [record.label ?? "Unknown"]),
     country: groupRecordsByLabel(allRecords, (record) => [record.country ?? "Unknown"]),
+    foundCountry: groupRecordsByLabel(allRecords, (record) => [record.foundCountry?.trim() || "United States"]),
     pressingPlant: groupRecordsByLabel(allRecords, (record) => [record.pressingPlant ?? "Unknown"]),
     mood: groupRecordsByLabel(allRecords, (record) => record.moods),
     status: groupRecordsByLabel(allRecords, (record) => [record.status]),
@@ -1087,12 +1096,20 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           detailRecordsByLabel={chartRecords.label}
         />
         <BreakdownSection
-          title="By country"
+          title="By country pressed"
           narrative={categoryNarratives.country}
           items={snapshot.countryBreakdown}
           totalCount={countryTotal}
           barColor="bg-sky-500"
           detailRecordsByLabel={chartRecords.country}
+        />
+        <BreakdownSection
+          title="By country found"
+          narrative={categoryNarratives.foundCountry}
+          items={snapshot.foundCountryBreakdown}
+          totalCount={allRecords.length}
+          barColor="bg-emerald-500"
+          detailRecordsByLabel={chartRecords.foundCountry}
         />
         {snapshot.pressingPlantBreakdown.length > 0 ? (
           <BreakdownSection

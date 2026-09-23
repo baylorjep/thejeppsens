@@ -33,6 +33,8 @@ export type VinylRecord = {
   source?: string;
   giftFrom?: string;
   whereWeGotIt?: string;
+  // Country where you found or bought this copy (not where it was pressed). Blank means United States.
+  foundCountry?: string;
   bestFor?: string;
   dateAdded?: string;
   status: "owned" | "wishlist" | "upgrade";

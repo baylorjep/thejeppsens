@@ -48,6 +48,7 @@ type AlbumEditForm = {
   source: string;
   giftFrom: string;
   whereWeGotIt: string;
+  foundCountry: string;
   bestFor: string;
   status: VinylRecord["status"];
   notes: string;
@@ -84,6 +85,7 @@ function recordToEditForm(record: VinylRecord): AlbumEditForm {
     source: record.source ?? "",
     giftFrom: record.giftFrom ?? "",
     whereWeGotIt: record.whereWeGotIt ?? "",
+    foundCountry: record.foundCountry ?? "",
     bestFor: record.bestFor ?? "",
     status: record.status,
     notes: record.notes ?? "",
@@ -422,6 +424,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
       source: editForm.source.trim() || undefined,
       giftFrom: editForm.giftFrom.trim() || undefined,
       whereWeGotIt: editForm.whereWeGotIt.trim() || undefined,
+      foundCountry: editForm.foundCountry.trim() || undefined,
       bestFor: editForm.bestFor.trim() || undefined,
       status: editForm.status,
       notes: editForm.notes.trim() || undefined,
@@ -942,13 +945,14 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
               ) : null}
             </div>
 
-            {record.giftFrom || record.whereWeGotIt || record.bestFor ? (
+            {record.giftFrom || record.whereWeGotIt || record.foundCountry || record.bestFor ? (
               <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">Personal details</h2>
                 <div className="space-y-3">
                   {[
                     ["Gift from", record.giftFrom],
                     ["Where we got it", record.whereWeGotIt],
+                    ["Found in", record.foundCountry],
                     ["Best for", record.bestFor],
                   ].map(([label, value]) =>
                     value ? (
@@ -1104,6 +1108,7 @@ export default function VinylAlbumDetail({ id, staticRecords }: VinylAlbumDetail
                 ["Pressing notes", "pressingNotes", "Italian reissue, expanded 2-LP edition, archival pressing..."],
                 ["Gift from", "giftFrom", "If it was a gift, who from?"],
                 ["Where we got it", "whereWeGotIt", "Record store, thrift shop, inheritance..."],
+                ["Country we found it in", "foundCountry", "United States if left blank"],
                 ["Best for", "bestFor", "Dinner, road trip, rainy night, background music..."],
               ].map(([label, field, placeholder]) => {
                 const key = field as keyof AlbumEditForm;
