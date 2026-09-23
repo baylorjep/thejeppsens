@@ -37,6 +37,7 @@ type FormState = {
   giftFrom: string;
   whereWeGotIt: string;
   foundCountry: string;
+  foundState: string;
   bestFor: string;
   status: VinylRecord["status"];
   notes: string;
@@ -112,6 +113,7 @@ const emptyForm: FormState = {
   giftFrom: "",
   whereWeGotIt: "",
   foundCountry: "",
+  foundState: "",
   bestFor: "",
   status: "owned",
   notes: "",
@@ -162,6 +164,7 @@ function recordToForm(record: VinylRecord): FormState {
     giftFrom: record.giftFrom ?? "",
     whereWeGotIt: record.whereWeGotIt ?? "",
     foundCountry: record.foundCountry ?? "",
+    foundState: record.foundState ?? "",
     bestFor: record.bestFor ?? "",
     status: record.status,
     notes: record.notes ?? "",
@@ -489,6 +492,7 @@ export default function VinylManager() {
       giftFrom: form.giftFrom.trim() || undefined,
       whereWeGotIt: form.whereWeGotIt.trim() || undefined,
       foundCountry: form.foundCountry.trim() || undefined,
+      foundState: form.foundState.trim() || undefined,
       bestFor: form.bestFor.trim() || undefined,
       dateAdded: new Date().toISOString().slice(0, 10),
       status: form.status,
@@ -1044,6 +1048,11 @@ export default function VinylManager() {
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-gray-700">Country we found it in</span>
                   <input value={form.foundCountry} onChange={(event) => updateForm("foundCountry", event.target.value)} className={inputClassName()} placeholder="United States if left blank" />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-gray-700">State we found it in</span>
+                  <input value={form.foundState} onChange={(event) => updateForm("foundState", event.target.value)} className={inputClassName()} placeholder="Utah if left blank (US only)" />
                 </label>
 
                 <label className="block sm:col-span-2">

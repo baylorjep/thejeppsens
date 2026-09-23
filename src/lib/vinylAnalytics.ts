@@ -125,6 +125,9 @@ export function getCollectionSnapshot(allRecords: VinylRecord[]) {
     labelBreakdown: getBreakdown(records.map((record) => record.label ?? "Unknown")),
     countryBreakdown: getBreakdown(records.map((record) => record.country ?? "")),
     foundCountryBreakdown: getBreakdown(records.map((record) => record.foundCountry?.trim() || "United States")),
+    foundStateBreakdown: getBreakdown(
+      records.filter((record) => !record.foundCountry?.trim() || record.foundCountry.trim() === "United States").map((record) => record.foundState?.trim() || "Utah"),
+    ),
     statusBreakdown: getBreakdown(records.map((record) => record.status)),
     // Unlike format/label, most records don't have this yet - an "Unknown" bar
     // covering most of the collection wouldn't tell you anything, so it's excluded

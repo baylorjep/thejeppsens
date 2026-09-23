@@ -35,6 +35,16 @@ type VinylInsightsProps = {
 
 const RARITY_PAGE_SIZE = 10;
 
+// "Columbia", "Columbia Records" and "Columbia Masterworks" are one label family.
+function labelFamily(label: string) {
+  return label.split(" / ")[0].replace(/\s*\(.*?\)/g, "").replace(/\b(records?|recordings|masterworks|music)\b/gi, "").replace(/\s+/g, " ").trim();
+}
+
+// "US" reads as "in US" in a sentence; these need an article.
+function placeName(country: string) {
+  return /^(US|UK|USA|United States|United Kingdom)$/i.test(country) ? `the ${country}` : country;
+}
+
 function groupRecordsByLabel(records: VinylRecord[], getLabels: (record: VinylRecord) => string[]) {
   const grouped: Record<string, VinylRecord[]> = {};
   for (const record of records) {
@@ -147,6 +157,7 @@ function BreakdownSection({
   linkBase,
   formatCount = (count) => String(count),
   detailRecordsByLabel,
+  subBreakdown,
 }: {
   id?: string;
   title: string;
@@ -157,6 +168,8 @@ function BreakdownSection({
   linkBase?: string;
   formatCount?: (count: number) => string;
   detailRecordsByLabel?: Record<string, VinylRecord[]>;
+  // A smaller second list shown under the main bars, e.g. US states under countries.
+  subBreakdown?: { title: string; items: { label: string; count: number }[]; barColor: string };
 }) {
   const [page, setPage] = useState(0);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
@@ -244,6 +257,30 @@ function BreakdownSection({
           >
             Next
           </button>
+        </div>
+      ) : null}
+      {subBreakdown && subBreakdown.items.length > 1 ? (
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <h3 className="text-sm font-semibold text-gray-950">{subBreakdown.title}</h3>
+          <div className="mt-3 space-y-2.5">
+            {subBreakdown.items.map((item) => {
+              const subTotal = subBreakdown.items.reduce((sum, entry) => sum + entry.count, 0);
+              const subTop = Math.max(...subBreakdown.items.map((entry) => entry.count), 1);
+              return (
+                <div key={item.label}>
+                  <div className="mb-1 flex items-center justify-between gap-2 text-xs sm:text-sm">
+                    <span className="min-w-0 flex-1 truncate font-medium text-gray-900">{item.label}</span>
+                    <span className="shrink-0 tabular-nums text-gray-500">
+                      {item.count} · {Math.round((item.count / subTotal) * 100)}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gray-100">
+                    <div className={`h-1.5 rounded-full ${subBreakdown.barColor}`} style={{ width: `${(item.count / subTop) * 100}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : null}
       {selectedRecords ? (
@@ -465,7 +502,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     if (firstGenre && secondGenre) {
       facts.push({
         stat: `${Math.round(((firstGenre.count + secondGenre.count) / total) * 100)}%`,
-        text: `is ${firstGenre.label} and ${secondGenre.label} together.`,
+        text: `of what you own is ${firstGenre.label} or ${secondGenre.label}, your top two genres.`,
       });
     }
 
@@ -478,8 +515,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       facts.push({
         stat: firstDecade.label,
         text: secondDecade
-          ? `is where most of your records come from, with the ${secondDecade.label} close behind at ${secondDecade.count}.`
-          : "is where most of your records come from.",
+          ? `is the decade most of your records come from. The ${secondDecade.label} are close behind with ${secondDecade.count}.`
+          : "is the decade most of your records come from.",
       });
     }
 
@@ -500,10 +537,10 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       const byYear = new Map<number, number>();
       for (const record of dated) byYear.set(firstYear(record)!, (byYear.get(firstYear(record)!) ?? 0) + 1);
       const [bestYear, bestCount] = [...byYear.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
-      if (bestCount > 1) facts.push({ stat: String(bestYear), text: `is your best year: ${bestCount} of your albums first came out then.` });
+      if (bestCount > 1) facts.push({ stat: String(bestYear), text: `is the year the most of your albums came out, ${bestCount} of them.` });
 
       const averageYear = Math.round(dated.reduce((sum, record) => sum + firstYear(record)!, 0) / dated.length);
-      facts.push({ stat: `${new Date().getFullYear() - averageYear} years`, text: `is the age of your average album, first released around ${averageYear}.` });
+      facts.push({ stat: `${new Date().getFullYear() - averageYear} years`, text: `old is your average album, first released around ${averageYear}.` });
     }
 
     const namedArtists = artistBreakdown.filter((artist) => artist.label.toLowerCase() !== "various artists");
@@ -512,9 +549,6 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       facts.push({ stat: namedArtists.length.toLocaleString(), text: `different artists, and ${oneTimers} of them show up just once.` });
     }
 
-    // "Columbia", "Columbia Records" and "Columbia Masterworks" are one label family.
-    const labelFamily = (label: string) =>
-      label.split(" / ")[0].replace(/\s*\(.*?\)/g, "").replace(/\b(records?|recordings|masterworks|music)\b/gi, "").replace(/\s+/g, " ").trim();
     const families = new Map<string, number>();
     for (const record of allRecords) {
       const family = record.label ? labelFamily(record.label) : "";
@@ -534,13 +568,13 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     );
     if (pressed.length) {
       const oldestPressing = pressed.reduce((a, b) => (b.pressingYear < a.pressingYear ? b : a));
-      facts.push({ stat: String(oldestPressing.pressingYear), text: `is your oldest confirmed pressing: ${oldestPressing.title}.` });
+      facts.push({ stat: String(oldestPressing.pressingYear), text: `is when your oldest confirmed pressing was made: ${oldestPressing.title}.` });
     }
 
     const confirmed = allRecords.filter((record) => record.discogsVerified).length;
     if (confirmed) {
       const originals = allRecords.filter(isOriginalPressing).length;
-      facts.push({ stat: String(confirmed), text: `pressings confirmed down to the exact edition${originals ? `, ${originals} of them first pressings` : ""}.` });
+      facts.push({ stat: String(confirmed), text: `pressings identified down to the exact edition${originals ? `, including ${originals} first pressings` : ""}.` });
     }
 
     const runs = allRecords
@@ -550,7 +584,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       const smallest = runs.reduce((a, b) => (b.run.size < a.run.size ? b : a));
       facts.push({
         stat: `${smallest.run.size.toLocaleString()} copies`,
-        text: `is your smallest known press run, ${smallest.record.title}${runs.length > 1 ? `, one of ${runs.length} limited pressings you own` : ""}.`,
+        text: `in your smallest known press run, ${smallest.record.title}.${runs.length > 1 ? ` You own ${runs.length} limited pressings in all.` : ""}`,
       });
     }
 
@@ -566,12 +600,12 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     // Format strings are too inconsistent to group, so this uses disc count instead.
     const multiDisc = allRecords.filter((record) => (record.discCount ?? 1) > 1).length;
     if (multiDisc) {
-      facts.push({ stat: `${Math.round(((total - multiDisc) / total) * 100)}%`, text: `of your records are single discs, and ${multiDisc} are double albums or bigger.` });
+      facts.push({ stat: `${Math.round(((total - multiDisc) / total) * 100)}%`, text: `of your records are single discs, and ${multiDisc} are sets of two or more.` });
     }
 
     const songs = allRecords.reduce((sum, record) => sum + (record.trackList?.length ?? 0), 0);
     const discs = allRecords.reduce((sum, record) => sum + Math.max(1, record.discCount ?? 1), 0);
-    if (songs) facts.push({ stat: songs.toLocaleString(), text: `songs on your track lists, across ${discs.toLocaleString()} discs.` });
+    if (songs) facts.push({ stat: songs.toLocaleString(), text: `songs across the track lists of your records, spread over ${discs.toLocaleString()} discs.` });
 
     if (snapshot.favorites > 0) {
       facts.push({ stat: String(snapshot.favorites), text: `favorites, about 1 in every ${Math.round(total / snapshot.favorites)} records you own.` });
@@ -588,6 +622,15 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     () => allRecords.filter((record) => record.discogsVerified).length,
     [allRecords],
   );
+
+  const labelFamilyBreakdown = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const record of allRecords) {
+      const family = labelFamily(record.label ?? "") || "Unknown";
+      counts.set(family, (counts.get(family) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  }, [allRecords]);
 
   const categoryNarratives = useMemo(() => {
     const pctOf = (count: number, total: number) => (total > 0 ? Math.round((count / total) * 100) : 0);
@@ -607,7 +650,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
     const [topReleaseDecade] = snapshot.releaseDecadeBreakdown;
     if (topReleaseDecade) {
-      lines.releaseDecade = `The ${topReleaseDecade.label} is your best-represented decade, with ${topReleaseDecade.count} records (${pctOf(topReleaseDecade.count, allRecords.length)}%).`;
+      lines.releaseDecade = `The ${topReleaseDecade.label} are your best-represented decade, with ${topReleaseDecade.count} records (${pctOf(topReleaseDecade.count, allRecords.length)}%).`;
     }
 
     const [topRecordingDecade] = snapshot.recordingDecadeBreakdown;
@@ -615,16 +658,17 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       lines.recordingDecade = `Most of your music was originally recorded in the ${topRecordingDecade.label}.`;
     }
 
-    const [topFormatCount, secondFormatCount] = snapshot.formatBreakdown;
-    if (topFormatCount) {
-      lines.format = secondFormatCount
-        ? `${topFormatCount.label} makes up ${pctOf(topFormatCount.count, allRecords.length)}% of your collection, with ${snapshot.formats - 1} other formats mixed in.`
-        : `Every record you own is ${topFormatCount.label} so far.`;
+    // Raw format strings ("1, Vinyl, LP, Album") don't read well in a sentence, so describe disc counts instead.
+    const multiDiscCount = allRecords.filter((record) => (record.discCount ?? 1) > 1).length;
+    if (allRecords.length) {
+      lines.format = multiDiscCount
+        ? `Most of your records are single discs, and ${multiDiscCount} are sets of two or more.`
+        : "Every record you own is a single disc.";
     }
 
-    const [topLabelCount] = snapshot.labelBreakdown;
-    if (topLabelCount && topLabelCount.label !== "Unknown") {
-      lines.label = `${topLabelCount.label} presses more of your records than any other label, with ${topLabelCount.count} titles.`;
+    const [topLabelCount] = labelFamilyBreakdown;
+    if (topLabelCount) {
+      lines.label = `${topLabelCount.label} released more of your records than any other label, with ${topLabelCount.count} titles.`;
     }
 
     const [topMoodCount] = snapshot.moodBreakdown;
@@ -635,8 +679,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     const [topCountry, secondCountry] = snapshot.countryBreakdown;
     if (topCountry) {
       lines.country = secondCountry
-        ? `${topCountry.label} is where the most records in your collection were pressed, with ${topCountry.count} titles, followed by ${secondCountry.label}.`
-        : `${topCountry.label} is the only pressing country recorded so far, across ${topCountry.count} titles.`;
+        ? `More of your records were pressed in ${placeName(topCountry.label)} than anywhere else (${topCountry.count} titles), followed by ${placeName(secondCountry.label)}.`
+        : `Every record with a known pressing country was pressed in ${placeName(topCountry.label)}, ${topCountry.count} titles in all.`;
     }
 
     const abroad = snapshot.foundCountryBreakdown.filter((item) => item.label !== "United States");
@@ -663,7 +707,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     }
 
     return lines;
-  }, [allRecords.length, snapshot, genreTotal, artistBreakdown, wishlistCount]);
+  }, [allRecords, snapshot, genreTotal, artistBreakdown, wishlistCount, labelFamilyBreakdown]);
 
   const needsAttention = useMemo(
     () => ({
@@ -685,6 +729,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     return { known: known.length, original, reissue: known.length - original };
   }, [allRecords]);
 
+
   const recordsByArtist = useMemo(() => Object.fromEntries(groupRecordsByArtist(allRecords)) as Record<string, VinylRecord[]>, [allRecords]);
 
   const chartRecords = useMemo(() => ({
@@ -694,7 +739,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     recordingDecade: groupRecordsByLabel(allRecords, (record) => [getRecordingDecade(record)]),
     decade: groupRecordsByLabel(allRecords, (record) => [getDecade(record)]),
     format: groupRecordsByLabel(allRecords, (record) => [record.format ?? "Unknown"]),
-    label: groupRecordsByLabel(allRecords, (record) => [record.label ?? "Unknown"]),
+    label: groupRecordsByLabel(allRecords, (record) => [labelFamily(record.label ?? "") || "Unknown"]),
     country: groupRecordsByLabel(allRecords, (record) => [record.country ?? "Unknown"]),
     foundCountry: groupRecordsByLabel(allRecords, (record) => [record.foundCountry?.trim() || "United States"]),
     pressingPlant: groupRecordsByLabel(allRecords, (record) => [record.pressingPlant ?? "Unknown"]),
@@ -1097,7 +1142,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         <BreakdownSection
           title="By label"
           narrative={categoryNarratives.label}
-          items={snapshot.labelBreakdown}
+          items={labelFamilyBreakdown}
           totalCount={allRecords.length}
           barColor="bg-rose-500"
           detailRecordsByLabel={chartRecords.label}
@@ -1117,6 +1162,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           totalCount={allRecords.length}
           barColor="bg-emerald-500"
           detailRecordsByLabel={chartRecords.foundCountry}
+          subBreakdown={{ title: "Found in the US, by state", items: snapshot.foundStateBreakdown, barColor: "bg-emerald-300" }}
         />
         {snapshot.pressingPlantBreakdown.length > 0 ? (
           <BreakdownSection
@@ -1179,9 +1225,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Original vs. reissue</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
             {Math.round((originalPressingStats.original / originalPressingStats.known) * 100)}% of your{" "}
-            {originalPressingStats.known} confirmed pressings with a known first-release year are true original
-            pressings, the rest are reissues or represses. Compared against each release&apos;s Discogs master year,
-            not guessed from the format description.
+            {originalPressingStats.known} confirmed pressings are true originals, and the rest are reissues or represses.
+            Each one is checked against the album&apos;s original release year on Discogs, not guessed from the format.
           </p>
           <div className="mt-5">
             <InteractiveDonut
@@ -1245,8 +1290,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   {(funStats.totalGrams / 453.592).toLocaleString("en-US", { maximumFractionDigits: 1 })} lb
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  Total weight of your {funStats.weighedCount} weighed record{funStats.weighedCount === 1 ? "" : "s"}.
-                  About {describeCount(funStats.totalGrams / 453.592 / WEIGHT_UNITS[funPick.weight].pounds, WEIGHT_UNITS[funPick.weight])} worth of vinyl ({WEIGHT_UNITS[funPick.weight].note}).
+                  What your {funStats.weighedCount} weighed record{funStats.weighedCount === 1 ? "" : "s"} add up to. That&apos;s about the weight of{" "}
+                  {describeCount(funStats.totalGrams / 453.592 / WEIGHT_UNITS[funPick.weight].pounds, WEIGHT_UNITS[funPick.weight])} ({WEIGHT_UNITS[funPick.weight].note}).
                 </p>
               </div>
             ) : null}
@@ -1270,8 +1315,8 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   })()}
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  Total runtime of your {funStats.timedCount} timed record{funStats.timedCount === 1 ? "" : "s"}. How
-                  long it would take to play the whole stack back to back, no breaks. That is{" "}
+                  How long it would take to play your {funStats.timedCount} timed record{funStats.timedCount === 1 ? "" : "s"} back to
+                  back, no breaks. That&apos;s{" "}
                   {funPick.runtime < 0
                     ? formatRuntimeComparison(funStats.totalSeconds)
                     : describeRuntime(funStats.totalSeconds / 60, RUNTIME_UNITS[funPick.runtime])}.
@@ -1282,7 +1327,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
               <div className="rounded-lg border border-gray-200 bg-white p-4">
                 <p className="text-2xl font-semibold tabular-nums text-gray-950">{formatHeight(funStats.stackInches)}</p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  Stack all {funStats.recordCount} of your records on top of each other and that is how tall it gets. About{" "}
+                  How tall your {funStats.recordCount} records get stacked on top of each other. That&apos;s about{" "}
                   {describeCount(funStats.stackInches / HEIGHT_UNITS[funPick.height].inches, HEIGHT_UNITS[funPick.height])} ({HEIGHT_UNITS[funPick.height].note}).
                 </p>
               </div>
@@ -1293,7 +1338,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   {formatCount(funStats.discCount * 0.559)} miles
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  Unspool the groove from all {funStats.discCount} of your discs, about 900 meters each, and it stretches this far. About{" "}
+                  How far the grooves on your {funStats.discCount} discs would stretch if you unspooled them, at about 900 meters each. That&apos;s about{" "}
                   {describeCount((funStats.discCount * 0.559) / DISTANCE_UNITS[funPick.distance].miles, DISTANCE_UNITS[funPick.distance])} ({DISTANCE_UNITS[funPick.distance].note}).
                 </p>
               </div>
@@ -1304,7 +1349,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                   {Math.round(funStats.totalAgeYears).toLocaleString("en-US")} years
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  The combined age of your {funStats.agedCount} records, counted from each release year. About{" "}
+                  The combined age of your {funStats.agedCount} records, counted from each release year. That&apos;s about{" "}
                   {describeCount(funStats.totalAgeYears / unitYears(AGE_UNITS[funPick.age]), AGE_UNITS[funPick.age])} ({AGE_UNITS[funPick.age].note}).
                 </p>
               </div>

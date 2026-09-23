@@ -35,6 +35,8 @@ export type VinylRecord = {
   whereWeGotIt?: string;
   // Country where you found or bought this copy (not where it was pressed). Blank means United States.
   foundCountry?: string;
+  // US state it was found in, when found in the US. Blank means Utah.
+  foundState?: string;
   bestFor?: string;
   dateAdded?: string;
   status: "owned" | "wishlist" | "upgrade";
