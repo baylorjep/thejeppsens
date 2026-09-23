@@ -131,7 +131,7 @@ export function getLimitedEditionSize(record: VinylRecord): number | null {
   if (!record.discogsVerified) return null;
   const notes = record.pressingNotes ?? "";
   const match =
-    notes.match(/(?:limited(?: edition| run| pressing)?(?: of)?(?: to)?|numbered edition of)\s+([\d,]{3,7})(?:\s*(?:copies|units))?/i) ??
+    notes.match(/(?:limited(?: edition| run| pressing)?(?: of| on| to)*|numbered edition of|pressed to(?: a quantity of)?|quantity of)\s+([\d,]{3,7})(?:\s*(?:copies|units))?/i) ??
     notes.match(/([\d,]{3,7})\s*(?:numbered\s+)?copies/i);
   if (!match) return null;
   const size = Number(match[1].replace(/,/g, ""));

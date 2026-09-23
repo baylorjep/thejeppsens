@@ -1863,7 +1863,7 @@ export default function VinylCatalog({ records }: VinylCatalogProps) {
                   ) : null}
 
                   {selectedRecord.discogsReleaseId ? (
-                    <DiscogsRarityCard releaseId={selectedRecord.discogsReleaseId} condition={selectedRecord.condition} noMatch={Boolean(selectedRecord.discogsNoMatch)} />
+                    <DiscogsRarityCard releaseId={selectedRecord.discogsReleaseId} condition={selectedRecord.condition} record={selectedRecord} noMatch={Boolean(selectedRecord.discogsNoMatch)} />
                   ) : null}
 
                   <PressingFactsCard record={selectedRecord} allRecords={allRecords} />

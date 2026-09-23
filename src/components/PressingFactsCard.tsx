@@ -1,5 +1,5 @@
 import { VinylRecord } from "@/data/vinyls";
-import { getArtistCollectionStat, getLimitedEditionSize, getPressingFacts } from "@/lib/vinylRecordUtils";
+import { getArtistCollectionStat, getPressRun, getPressingFacts } from "@/lib/vinylRecordUtils";
 import { Lightbulb } from "lucide-react";
 
 export default function PressingFactsCard({ record, allRecords }: { record: VinylRecord; allRecords: VinylRecord[] }) {
@@ -17,7 +17,7 @@ export default function PressingFactsCard({ record, allRecords }: { record: Viny
     : record.discogsNoMatch
       ? (record.curatedFacts ?? [])
       : [];
-  const limitedEditionSize = getLimitedEditionSize(record);
+  const limitedEditionSize = getPressRun(record)?.size ?? null;
   const artistStat = getArtistCollectionStat(record, allRecords);
   if (!facts.length && !limitedEditionSize && !artistStat) return null;
 
