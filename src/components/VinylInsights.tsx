@@ -4,6 +4,7 @@ import { VinylRecord } from "@/data/vinyls";
 import DonutChart from "@/components/DonutChart";
 import { formatDiscogsMoney, useCollectionValue } from "@/lib/discogsClient";
 import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
+import { getVinylPersona } from "@/lib/vinylPersona";
 import { getDecade, getPressRun, getRecordingDecade, getReleaseDecade, groupRecordsByArtist, isOriginalPressing } from "@/lib/vinylRecordUtils";
 import { fetchVinylRecords } from "@/lib/vinylApi";
 import { readQueuedVinyls } from "@/lib/vinylQueue";
@@ -467,6 +468,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   }, [records]);
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
+  const persona = useMemo(() => getVinylPersona(allRecords), [allRecords]);
 
   const { value: collectionValue, isLoading: isLoadingValue } = useCollectionValue(allRecords);
   const artistBreakdown = snapshot.artistBreakdown;
@@ -828,6 +830,25 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           </Link>
         </div>
       </div>
+
+      {persona.length > 0 ? (
+        <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-5 sm:p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">The record-store read</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-gray-950 sm:text-2xl">If we only knew your records…</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+            Here&apos;s our playful read on you. These are guesses from the music on your shelves, not personal facts.
+          </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {persona.map((guess) => (
+              <div key={guess.label} className="rounded-lg border border-amber-100 bg-white p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-amber-700">{guess.label}</p>
+                <p className="mt-2 text-xl font-semibold tracking-tight text-gray-950">{guess.value}</p>
+                <p className="mt-2 text-sm leading-6 text-gray-600">{guess.reason}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {/* Collection DNA */}
       {narrative.length > 0 && (
