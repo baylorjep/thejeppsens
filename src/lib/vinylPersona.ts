@@ -24,15 +24,13 @@ function ageGuess(records: VinylRecord[], currentYear: number): PersonaGuess | n
   if (years.length < 2) return null;
 
   // The newer half says more about a listener's likely formative years than a
-  // handful of classic albums. This is deliberately a broad, playful range.
+  // handful of classic albums. Keep the result playful, but make one clear guess.
   const anchor = years[Math.floor(years.length * 0.7)];
   const guessedAge = Math.max(22, Math.min(70, currentYear - anchor + 18));
-  const lower = Math.max(20, Math.floor((guessedAge - 4) / 5) * 5);
-  const upper = lower + 9;
   const decade = `${Math.floor(anchor / 10) * 10}s`;
   return {
     label: "Our age guess",
-    value: `${lower}–${upper}`,
+    value: String(guessedAge),
     reason: `The newer side of your collection centers around ${decade} releases. We guessed you met that music around 18.`,
   };
 }
