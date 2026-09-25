@@ -47,6 +47,24 @@ export function getBreakdown(values: string[]) {
     .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
+export function getFoundCountry(record: VinylRecord) {
+  return record.foundCountry?.trim() || (record.foundState?.trim() ? "United States" : "Unknown");
+}
+
+export function getFormatGroup(record: VinylRecord) {
+  const format = record.format?.trim();
+  if (!format) return "Unknown";
+  if (/\bpicture disc\b/i.test(format)) return "Picture disc";
+  if (/\bbox set\b/i.test(format)) return "Box set";
+  if (/\b7(?:\"|″|-inch|\s*inch)/i.test(format)) return "7-inch";
+  if (/\b10(?:\"|″|-inch|\s*inch)/i.test(format)) return "10-inch";
+  if (/\b12(?:\"|″|-inch|\s*inch)/i.test(format)) return "12-inch";
+  if (/\bEP\b/i.test(format)) return "EP";
+  if (/\b(?:LP|Album)\b/i.test(format)) return "LP / album";
+  if (/\bSingle\b/i.test(format)) return "Single";
+  return format;
+}
+
 export function getStatusTone(status: VinylRecord["status"]) {
   if (status === "wishlist") {
     return {
@@ -102,7 +120,7 @@ export function getCollectionSnapshot(allRecords: VinylRecord[]) {
     artists: artistBreakdown.length,
     genres: uniqueSorted(records.flatMap((record) => record.genres)).length,
     favorites: records.filter((record) => record.favorite).length,
-    formats: uniqueSorted(records.map((record) => record.format ?? "Unknown")).length,
+    formats: uniqueSorted(records.map(getFormatGroup)).length,
     labels: uniqueSorted(records.map((record) => record.label ?? "Unknown")).length,
     owned: records.filter((record) => record.status === "owned").length,
     wishlist: allRecords.length - records.length,
@@ -113,7 +131,7 @@ export function getCollectionSnapshot(allRecords: VinylRecord[]) {
     topEra: getTopValue(records.map(getDecade).filter((decade) => decade !== "Unknown")),
     topReleaseEra: getTopValue(records.map(getReleaseDecade).filter((decade) => decade !== "Unknown")),
     topRecordingEra: getTopValue(records.map(getRecordingDecade).filter((decade) => decade !== "Unknown")),
-    topFormat: getTopValue(records.map((record) => record.format ?? "Unknown")),
+    topFormat: getTopValue(records.map(getFormatGroup)),
     topLabel: getTopValue(records.map((record) => record.label ?? "Unknown")),
     genreBreakdown: getBreakdown(records.flatMap((record) => record.genres)),
     artistBreakdown,
@@ -121,12 +139,12 @@ export function getCollectionSnapshot(allRecords: VinylRecord[]) {
     releaseDecadeBreakdown: getBreakdown(records.map(getReleaseDecade).filter((decade) => decade !== "Unknown")),
     recordingDecadeBreakdown: getBreakdown(records.map(getRecordingDecade).filter((decade) => decade !== "Unknown")),
     moodBreakdown: getBreakdown(records.flatMap((record) => record.moods)),
-    formatBreakdown: getBreakdown(records.map((record) => record.format ?? "Unknown")),
+    formatBreakdown: getBreakdown(records.map(getFormatGroup)),
     labelBreakdown: getBreakdown(records.map((record) => record.label ?? "Unknown")),
     countryBreakdown: getBreakdown(records.map((record) => record.country ?? "")),
-    foundCountryBreakdown: getBreakdown(records.map((record) => record.foundCountry?.trim() || "United States")),
+    foundCountryBreakdown: getBreakdown(records.map(getFoundCountry)),
     foundStateBreakdown: getBreakdown(
-      records.filter((record) => !record.foundCountry?.trim() || record.foundCountry.trim() === "United States").map((record) => record.foundState?.trim() || "Utah"),
+      records.filter((record) => getFoundCountry(record) === "United States").map((record) => record.foundState?.trim() || "Unknown"),
     ),
     statusBreakdown: getBreakdown(records.map((record) => record.status)),
     // Unlike format/label, most records don't have this yet - an "Unknown" bar

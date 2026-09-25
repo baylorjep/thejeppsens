@@ -3,18 +3,22 @@
 import { VinylRecord } from "@/data/vinyls";
 import { alphabetTiles, groupArtistsByLetter } from "@/lib/insightsExtras";
 import { groupRecordsByArtist } from "@/lib/vinylRecordUtils";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 const MAX_CHIPS = 36;
 
 export default function ArtistBingo({ records }: { records: VinylRecord[] }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
+  const [showAllArtists, setShowAllArtists] = useState(false);
+
+  const recordsByArtist = useMemo(() => new Map(groupRecordsByArtist(records.filter((record) => record.status === "owned"))), [records]);
 
   const byLetter = useMemo(() => {
-    const owned = records.filter((record) => record.status === "owned");
-    const artists = [...groupRecordsByArtist(owned)].map(([artist, group]) => ({ artist, count: group.length }));
+    const artists = [...recordsByArtist].map(([artist, group]) => ({ artist, count: group.length }));
     return groupArtistsByLetter(artists);
-  }, [records]);
+  }, [recordsByArtist]);
 
   if (!byLetter.size) return null;
 
@@ -41,7 +45,7 @@ export default function ArtistBingo({ records }: { records: VinylRecord[] }) {
         disabled={!isFilled}
         aria-pressed={isSelected}
         aria-label={isFilled ? `${letter}: ${artists!.length} ${artists!.length === 1 ? "artist" : "artists"}` : `${letter}: none yet`}
-        onClick={() => setSelected((current) => (current === letter ? null : letter))}
+        onClick={() => { setSelected((current) => (current === letter ? null : letter)); setSelectedArtist(null); setShowAllArtists(false); }}
         className={`relative flex aspect-square flex-col items-center justify-center rounded-xl border font-serif text-2xl font-semibold transition-all duration-150 sm:text-3xl ${
           isSelected
             ? "scale-105 border-gray-950 bg-gray-950 text-white shadow-lg"
@@ -65,7 +69,7 @@ export default function ArtistBingo({ records }: { records: VinylRecord[] }) {
   };
 
   return (
-    <section className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <section id="artist-az" className="scroll-mt-24 overflow-hidden rounded-lg border border-gray-200 bg-white">
       <div className={`p-5 ${complete ? "bg-gradient-to-r from-amber-100 via-orange-100 to-rose-100" : "bg-gradient-to-r from-amber-50 to-white"}`}>
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -131,16 +135,17 @@ export default function ArtistBingo({ records }: { records: VinylRecord[] }) {
               </p>
             </div>
             <ul className="mt-3 flex flex-wrap gap-2">
-              {selectedArtists.slice(0, MAX_CHIPS).map((entry) => (
-                <li key={entry.artist} className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white px-3 py-1 text-sm text-gray-800">
-                  {entry.artist}
-                  {entry.count > 1 ? <span className="rounded-full bg-amber-100 px-1.5 text-[11px] font-semibold text-amber-900">{entry.count}</span> : null}
+              {selectedArtists.slice(0, showAllArtists ? undefined : MAX_CHIPS).map((entry) => (
+                <li key={entry.artist}>
+                  <button type="button" aria-expanded={selectedArtist === entry.artist} onClick={() => setSelectedArtist((current) => current === entry.artist ? null : entry.artist)} className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white px-3 py-1 text-sm text-gray-800 hover:border-amber-500">
+                    {entry.artist}
+                    {entry.count > 1 ? <span className="rounded-full bg-amber-100 px-1.5 text-[11px] font-semibold text-amber-900">{entry.count}</span> : null}
+                  </button>
                 </li>
               ))}
-              {selectedArtists.length > MAX_CHIPS ? (
-                <li className="inline-flex items-center px-1 text-sm text-gray-500">+{selectedArtists.length - MAX_CHIPS} more</li>
-              ) : null}
             </ul>
+            {selectedArtists.length > MAX_CHIPS ? <button type="button" onClick={() => setShowAllArtists((current) => !current)} className="mt-3 text-sm font-medium text-amber-900 underline-offset-4 hover:underline">{showAllArtists ? "Show fewer artists" : `Show ${selectedArtists.length - MAX_CHIPS} more artists`}</button> : null}
+            {selectedArtist ? <div className="mt-4 border-t border-amber-200 pt-3"><p className="text-sm font-semibold text-gray-950">{selectedArtist}</p><ul className="mt-2 grid gap-1 sm:grid-cols-2">{(recordsByArtist.get(selectedArtist) ?? []).map((record) => <li key={record.id}><Link href={`/vinyl/${record.id}`} className="block rounded px-2 py-1 text-sm text-gray-700 hover:bg-white hover:underline">{record.title}</Link></li>)}</ul></div> : null}
           </div>
         ) : null}
       </div>

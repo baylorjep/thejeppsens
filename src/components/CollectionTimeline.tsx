@@ -9,8 +9,9 @@ type Mode = "release" | "pressing";
 type Plotted = { record: VinylRecord; year: number };
 
 const DOT = 12;
-const GAP = 3;
-const COLUMN = 16;
+const GAP = 2;
+const COLUMN = 36;
+const DECADE_PAGE_SIZE = 20;
 
 const decadeColor = (year: number) => `hsl(${(Math.floor(year / 10) * 37) % 360} 62% 46%)`;
 
@@ -18,6 +19,7 @@ export default function CollectionTimeline({ records }: { records: VinylRecord[]
   const [mode, setMode] = useState<Mode>("release");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openDecade, setOpenDecade] = useState<number | null>(null);
+  const [decadePage, setDecadePage] = useState(0);
 
   const owned = useMemo(() => records.filter((record) => record.status !== "wishlist"), [records]);
 
@@ -56,7 +58,7 @@ export default function CollectionTimeline({ records }: { records: VinylRecord[]
   const selected = plotted.find((item) => item.record.id === selectedId) ?? null;
 
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5">
+    <section id="collection-timeline" className="scroll-mt-24 rounded-lg border border-gray-200 bg-white p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Collection timeline</h2>
@@ -105,7 +107,7 @@ export default function CollectionTimeline({ records }: { records: VinylRecord[]
 
           <div className="mt-4 overflow-x-auto pb-2">
             <div style={{ width: years.length * COLUMN }} className="pt-2">
-              <div className="flex items-end border-b border-gray-300" style={{ height: tallest * (DOT + GAP) + 4 }}>
+              <div className="flex items-end border-b border-gray-300" style={{ height: tallest * (COLUMN + GAP) + 4 }}>
                 {years.map((year) => (
                   <div key={year} className="flex flex-col-reverse items-center" style={{ width: COLUMN, gap: GAP, paddingBottom: GAP }}>
                     {(byYear.get(year) ?? []).map(({ record }) => (
@@ -116,11 +118,9 @@ export default function CollectionTimeline({ records }: { records: VinylRecord[]
                         aria-label={`${record.title} by ${record.artist}, ${year}`}
                         aria-pressed={selectedId === record.id}
                         title={`${record.title} (${year})`}
-                        style={{ width: DOT, height: DOT, backgroundColor: decadeColor(year) }}
-                        className={`rounded-full transition-transform hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 ${
-                          selectedId === record.id ? "scale-125 ring-2 ring-gray-950 ring-offset-1" : ""
-                        }`}
-                      />
+                        style={{ width: COLUMN, height: COLUMN }}
+                        className="flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"
+                      ><span aria-hidden="true" style={{ width: DOT, height: DOT, backgroundColor: decadeColor(year) }} className={`rounded-full transition-transform ${selectedId === record.id ? "scale-125 ring-2 ring-gray-950 ring-offset-2" : ""}`} /></button>
                     ))}
                   </div>
                 ))}
@@ -173,7 +173,7 @@ export default function CollectionTimeline({ records }: { records: VinylRecord[]
                   <button
                     type="button"
                     aria-expanded={openDecade === decade}
-                    onClick={() => setOpenDecade((current) => (current === decade ? null : decade))}
+                    onClick={() => { setOpenDecade((current) => (current === decade ? null : decade)); setDecadePage(0); }}
                     className="flex w-full items-center justify-between gap-3 py-3 text-left"
                   >
                     <span className="flex items-center gap-2 text-sm font-medium text-gray-900">
@@ -186,8 +186,8 @@ export default function CollectionTimeline({ records }: { records: VinylRecord[]
                     </span>
                   </button>
                   {openDecade === decade ? (
-                    <ul className="grid grid-cols-4 gap-2 pb-4 sm:grid-cols-6 lg:grid-cols-10">
-                      {items.map(({ record, year }) => (
+                    <div className="pb-4"><ul className="grid grid-cols-3 gap-3 sm:grid-cols-6 lg:grid-cols-10">
+                      {items.slice(decadePage * DECADE_PAGE_SIZE, (decadePage + 1) * DECADE_PAGE_SIZE).map(({ record, year }) => (
                         <li key={record.id}>
                           <Link href={`/vinyl/${record.id}`} title={`${record.title} (${year})`} className="block">
                             <div className="aspect-square overflow-hidden rounded bg-gray-100">
@@ -200,11 +200,12 @@ export default function CollectionTimeline({ records }: { records: VinylRecord[]
                                 </div>
                               )}
                             </div>
-                            <p className="mt-1 text-[10px] text-gray-500">{year}</p>
+                            <p className="mt-1 truncate text-xs font-medium text-gray-800">{record.title}</p>
+                            <p className="text-[10px] text-gray-500">{year}</p>
                           </Link>
                         </li>
                       ))}
-                    </ul>
+                    </ul>{items.length > DECADE_PAGE_SIZE ? <div className="mt-3 flex items-center justify-between text-xs text-gray-500"><button type="button" disabled={decadePage === 0} onClick={() => setDecadePage(decadePage - 1)} className="rounded px-2 py-2 text-gray-700 hover:bg-gray-100 disabled:text-gray-300">Previous</button><span>Page {decadePage + 1} of {Math.ceil(items.length / DECADE_PAGE_SIZE)}</span><button type="button" disabled={decadePage >= Math.ceil(items.length / DECADE_PAGE_SIZE) - 1} onClick={() => setDecadePage(decadePage + 1)} className="rounded px-2 py-2 text-gray-700 hover:bg-gray-100 disabled:text-gray-300">Next</button></div> : null}</div>
                   ) : null}
                 </div>
               ))}

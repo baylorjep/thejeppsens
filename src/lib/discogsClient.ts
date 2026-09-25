@@ -107,6 +107,7 @@ export type CollectionValueSummary = {
   byFormat: { format: string; total: number; count: number }[];
   byDecade: { decade: string; total: number; count: number }[];
   byGenre: { genre: string; total: number; count: number }[];
+  pricedRecords: { record: VinylRecord; value: number }[];
   currentlyListedCount: number;
   originalCount: number;
   reissueCount: number;
@@ -157,10 +158,12 @@ function aggregateCollectionValue(
   const byGenreMap = new Map<string, { total: number; count: number }>();
   const haveEntries: { record: VinylRecord; have: number }[] = [];
   const wantEntries: { record: VinylRecord; want: number }[] = [];
+  const pricedRecords: { record: VinylRecord; value: number }[] = [];
 
   for (const { record, value: recordValue } of results) {
     const priced = recordValue?.estimate;
     if (priced) {
+      pricedRecords.push({ record, value: priced.value });
       total += priced.value;
       currency = priced.currency;
       pricedCount += 1;
@@ -266,6 +269,7 @@ function aggregateCollectionValue(
     byFormat,
     byDecade,
     byGenre,
+    pricedRecords,
     currentlyListedCount,
     originalCount,
     reissueCount,
@@ -297,23 +301,22 @@ export async function fetchDiscogsValueWithReference(record: VinylRecord): Promi
 
 export function useCollectionValue(records: VinylRecord[]) {
   const [value, setValue] = useState<CollectionValueSummary | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(() => records.some((record) => record.status === "owned" && record.discogsReleaseId));
 
   useEffect(() => {
+    let cancelled = false;
     const ownedLinkedRecords = records.filter((record) => record.status === "owned" && record.discogsReleaseId);  // owned only: wishlist never counts toward value
     if (!ownedLinkedRecords.length) {
-      setValue(null);
-      setIsLoading(false);
-      return;
+      queueMicrotask(() => { if (!cancelled) { setValue(null); setIsLoading(false); } });
+      return () => { cancelled = true; };
     }
 
-    let cancelled = false;
-    setIsLoading(true);
+    queueMicrotask(() => { if (!cancelled) { setValue(null); setIsLoading(true); } });
     const collected: { record: VinylRecord; value: DiscogsValueResponse | null }[] = [];
     let remaining = ownedLinkedRecords.length;
 
     ownedLinkedRecords.forEach((record) => {
-      fetchDiscogsValueWithReference(record).then((recordValue) => {
+      fetchDiscogsValueWithReference(record).catch(() => null).then((recordValue) => {
         if (cancelled) return;
         collected.push({ record, value: recordValue });
         setValue(aggregateCollectionValue(collected, ownedLinkedRecords.length));
@@ -325,7 +328,6 @@ export function useCollectionValue(records: VinylRecord[]) {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [records]);
 
   return { value, isLoading };

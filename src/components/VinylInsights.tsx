@@ -3,7 +3,7 @@
 import { VinylRecord } from "@/data/vinyls";
 import DonutChart from "@/components/DonutChart";
 import { formatDiscogsMoney, useCollectionValue } from "@/lib/discogsClient";
-import { getCollectionSnapshot } from "@/lib/vinylAnalytics";
+import { getBreakdown, getCollectionSnapshot, getFormatGroup, getFoundCountry } from "@/lib/vinylAnalytics";
 import { getVinylPersona } from "@/lib/vinylPersona";
 import { getDecade, getPressRun, getRecordingDecade, getReleaseDecade, groupRecordsByArtist, isOriginalPressing } from "@/lib/vinylRecordUtils";
 import { fetchVinylRecords } from "@/lib/vinylApi";
@@ -35,6 +35,16 @@ type VinylInsightsProps = {
 };
 
 const RARITY_PAGE_SIZE = 10;
+const DETAIL_PAGE_SIZE = 12;
+
+function DetailPager({ page, pages, onPageChange }: { page: number; pages: number; onPageChange: (page: number) => void }) {
+  if (pages <= 1) return null;
+  return <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+    <button type="button" disabled={page === 0} onClick={() => onPageChange(page - 1)} className="rounded px-2 py-2 text-gray-700 hover:bg-gray-100 disabled:text-gray-300">Previous</button>
+    <span>Page {page + 1} of {pages}</span>
+    <button type="button" disabled={page >= pages - 1} onClick={() => onPageChange(page + 1)} className="rounded px-2 py-2 text-gray-700 hover:bg-gray-100 disabled:text-gray-300">Next</button>
+  </div>;
+}
 
 // "Columbia", "Columbia Records" and "Columbia Masterworks" are one label family.
 function labelFamily(label: string) {
@@ -113,7 +123,9 @@ function InteractiveDonut({
   formatCount?: (count: number) => string;
 }) {
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [detailPage, setDetailPage] = useState(0);
   const selectedRecords = selectedLabel ? recordsByLabel[selectedLabel] : undefined;
+  const detailPages = Math.max(1, Math.ceil((selectedRecords?.length ?? 0) / DETAIL_PAGE_SIZE));
 
   return (
     <>
@@ -121,7 +133,7 @@ function InteractiveDonut({
         items={items}
         formatCount={formatCount}
         selectedLabel={selectedLabel}
-        onSelectLabel={(label) => setSelectedLabel((current) => (current === label ? null : label))}
+        onSelectLabel={(label) => { setSelectedLabel((current) => (current === label ? null : label)); setDetailPage(0); }}
       />
       {selectedRecords ? (
         <div className="mt-5 border-t border-gray-100 pt-4">
@@ -134,7 +146,7 @@ function InteractiveDonut({
             </button>
           </div>
           <ol className="mt-3 grid gap-1 sm:grid-cols-2">
-            {selectedRecords.map((record) => (
+            {selectedRecords.slice(detailPage * DETAIL_PAGE_SIZE, (detailPage + 1) * DETAIL_PAGE_SIZE).map((record) => (
               <li key={record.id}>
                 <Link href={`/vinyl/${record.id}`} className="block truncate rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950">
                   {record.title}
@@ -142,6 +154,7 @@ function InteractiveDonut({
               </li>
             ))}
           </ol>
+          <DetailPager page={detailPage} pages={detailPages} onPageChange={setDetailPage} />
         </div>
       ) : null}
     </>
@@ -159,6 +172,7 @@ function BreakdownSection({
   formatCount = (count) => String(count),
   detailRecordsByLabel,
   subBreakdown,
+  showPercentage = true,
 }: {
   id?: string;
   title: string;
@@ -171,25 +185,33 @@ function BreakdownSection({
   detailRecordsByLabel?: Record<string, VinylRecord[]>;
   // A smaller second list shown under the main bars, e.g. US states under countries.
   subBreakdown?: { title: string; items: { label: string; count: number }[]; barColor: string };
+  showPercentage?: boolean;
 }) {
   const [page, setPage] = useState(0);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [detailPage, setDetailPage] = useState(0);
+  const [query, setQuery] = useState("");
   // Bars are sized relative to the largest value, not necessarily items[0] -
   // some breakdowns (value by decade) are sorted chronologically rather
   // than by count, so items[0] isn't reliably the max.
   const topCount = Math.max(...items.map((item) => item.count), 1);
   // Paged instead of "show all" so a long list (labels, formats) doesn't run the page down on mobile.
   const pageSize = 8;
-  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const filteredItems = query ? items.filter((item) => item.label.toLowerCase().includes(query.toLowerCase())) : items;
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
   const currentPage = Math.min(page, totalPages - 1);
-  const visible = items.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+  const visible = filteredItems.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
   const selectedRecords = selectedLabel ? detailRecordsByLabel?.[selectedLabel] : undefined;
+  const detailPages = Math.max(1, Math.ceil((selectedRecords?.length ?? 0) / DETAIL_PAGE_SIZE));
 
   return (
     <section id={id} className="scroll-mt-24 rounded-lg border border-gray-200 bg-white p-5">
       <h2 className="text-base font-semibold text-gray-950 sm:text-xl">{title}</h2>
       {narrative ? <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{narrative}</p> : null}
+      {detailRecordsByLabel ? <p className="mt-2 text-xs text-gray-500">Tap a bar to see its albums.</p> : null}
+      {items.length > 8 ? <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); setSelectedLabel(null); }} placeholder={`Find ${title.toLowerCase().replace(/^by /, "")}`} aria-label={`Search ${title.toLowerCase()}`} className="mt-4 w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-500" /> : null}
       <div className="mt-5 space-y-3">
+        {visible.length === 0 ? <p className="text-sm text-gray-500">{query ? "No matching categories." : "No data recorded yet."}</p> : null}
         {visible.map((item) => {
           const pct = totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0;
           const inner = (
@@ -197,7 +219,7 @@ function BreakdownSection({
               <div className="mb-1.5 flex items-center justify-between gap-2 text-xs sm:text-sm">
                 <span className="min-w-0 flex-1 truncate font-medium text-gray-900">{item.label}</span>
                 <span className="shrink-0 tabular-nums text-gray-500">
-                  {formatCount(item.count)} · {pct}%
+                  {formatCount(item.count)}{showPercentage ? ` · ${pct}%` : ""}
                 </span>
               </div>
               <div className="h-2 rounded-full bg-gray-100">
@@ -214,7 +236,8 @@ function BreakdownSection({
               <button
                 key={item.label}
                 type="button"
-                onClick={() => setSelectedLabel((current) => (current === item.label ? null : item.label))}
+                onClick={() => { setSelectedLabel((current) => (current === item.label ? null : item.label)); setDetailPage(0); }}
+                aria-expanded={selectedLabel === item.label}
                 className={`block w-full -mx-2 rounded-md px-2 py-1 text-left transition-colors hover:bg-gray-50 ${selectedLabel === item.label ? "bg-gray-50" : ""}`}
               >
                 {inner}
@@ -241,7 +264,7 @@ function BreakdownSection({
         <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
           <button
             type="button"
-            onClick={() => setPage(Math.max(0, currentPage - 1))}
+            onClick={() => { setPage(Math.max(0, currentPage - 1)); setSelectedLabel(null); }}
             disabled={currentPage === 0}
             className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
           >
@@ -252,7 +275,7 @@ function BreakdownSection({
           </span>
           <button
             type="button"
-            onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))}
+            onClick={() => { setPage(Math.min(totalPages - 1, currentPage + 1)); setSelectedLabel(null); }}
             disabled={currentPage >= totalPages - 1}
             className="rounded-md px-2 py-1 font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent"
           >
@@ -299,7 +322,7 @@ function BreakdownSection({
             </button>
           </div>
           <ol className="mt-3 grid gap-1 sm:grid-cols-2">
-            {selectedRecords.map((record) => (
+            {selectedRecords.slice(detailPage * DETAIL_PAGE_SIZE, (detailPage + 1) * DETAIL_PAGE_SIZE).map((record) => (
               <li key={record.id}>
                 <Link href={`/vinyl/${record.id}`} className="block truncate rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950">
                   {record.title}
@@ -307,6 +330,8 @@ function BreakdownSection({
               </li>
             ))}
           </ol>
+          <DetailPager page={detailPage} pages={detailPages} onPageChange={setDetailPage} />
+          {linkBase ? <Link href={`${linkBase}${encodeURIComponent(selectedLabel ?? "")}`} className="mt-3 inline-block text-xs font-medium text-gray-700 underline-offset-4 hover:underline">View in catalog</Link> : null}
         </div>
       ) : null}
     </section>
@@ -431,7 +456,7 @@ function AnimatedNumber({ value }: { value: number }) {
 
 export default function VinylInsights({ records }: VinylInsightsProps) {
   const [everyRecord, setEveryRecord] = useState(records);
-  // Every chart and count on this page is about what you own, so wishlist records stay out of it.
+  // Collection charts exclude wishlist records; the status chart includes them.
   const allRecords = useMemo(() => everyRecord.filter((record) => record.status !== "wishlist"), [everyRecord]);
   const wishlistCount = everyRecord.length - allRecords.length;
   // The Just for fun cards rotate through a pool on each page load. They start on the default
@@ -468,6 +493,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   }, [records]);
 
   const snapshot = useMemo(() => getCollectionSnapshot(allRecords), [allRecords]);
+  const statusBreakdown = useMemo(() => getBreakdown(everyRecord.map((record) => record.status)), [everyRecord]);
   const persona = useMemo(() => getVinylPersona(allRecords), [allRecords]);
 
   const { value: collectionValue, isLoading: isLoadingValue } = useCollectionValue(allRecords);
@@ -482,9 +508,16 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     [allRecords],
   );
 
-  const genreTotal = snapshot.genreBreakdown.reduce((s, i) => s + i.count, 0);
-  const moodTotal = snapshot.moodBreakdown.reduce((s, i) => s + i.count, 0);
   const countryTotal = snapshot.countryBreakdown.reduce((s, i) => s + i.count, 0);
+  const recordingTotal = snapshot.recordingDecadeBreakdown.reduce((s, i) => s + i.count, 0);
+  const pricedChartRecords = useMemo(() => {
+    const priced = collectionValue?.pricedRecords.map((entry) => entry.record) ?? [];
+    return {
+      decade: groupRecordsByLabel(priced, (record) => [getReleaseDecade(record)]),
+      genre: groupRecordsByLabel(priced, (record) => record.genres),
+    };
+  }, [collectionValue]);
+  const [showAllFacts, setShowAllFacts] = useState(false);
 
   const topRealArtist = artistBreakdown.find(
     (a) => a.label.toLowerCase() !== "various artists",
@@ -502,8 +535,9 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
     const [firstGenre, secondGenre] = snapshot.genreBreakdown;
     if (firstGenre && secondGenre) {
+      const inEitherGenre = allRecords.filter((record) => record.genres.includes(firstGenre.label) || record.genres.includes(secondGenre.label)).length;
       facts.push({
-        stat: `${Math.round(((firstGenre.count + secondGenre.count) / total) * 100)}%`,
+        stat: `${Math.round((inEitherGenre / total) * 100)}%`,
         text: `of what you own is ${firstGenre.label} or ${secondGenre.label}, your top two genres.`,
       });
     }
@@ -641,7 +675,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     const [topGenre, secondGenre] = snapshot.genreBreakdown;
     if (topGenre) {
       lines.genre = secondGenre
-        ? `${topGenre.label} is your most common genre at ${pctOf(topGenre.count, genreTotal)}%, followed by ${secondGenre.label}.`
+        ? `${topGenre.label} is your most common genre at ${pctOf(topGenre.count, allRecords.length)}% of your records, followed by ${secondGenre.label}. Albums can have multiple genres.`
         : `${topGenre.label} is your only genre so far, across ${topGenre.count} records.`;
     }
 
@@ -657,7 +691,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
     const [topRecordingDecade] = snapshot.recordingDecadeBreakdown;
     if (topRecordingDecade) {
-      lines.recordingDecade = `Most of your music was originally recorded in the ${topRecordingDecade.label}.`;
+      lines.recordingDecade = `Among ${recordingTotal} records with known recording years, the ${topRecordingDecade.label} appear most often. Years are unknown for ${allRecords.length - recordingTotal}.`;
     }
 
     // Raw format strings ("1, Vinyl, LP, Album") don't read well in a sentence, so describe disc counts instead.
@@ -675,23 +709,25 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
 
     const [topMoodCount] = snapshot.moodBreakdown;
     if (topMoodCount) {
-      lines.mood = `${topMoodCount.label} is the mood you reach for most, tagged on ${topMoodCount.count} records.`;
+      lines.mood = `${topMoodCount.label} is the most common mood, tagged on ${topMoodCount.count} of ${allRecords.length} records. Albums can have multiple moods.`;
     }
 
     const [topCountry, secondCountry] = snapshot.countryBreakdown;
     if (topCountry) {
       lines.country = secondCountry
-        ? `More of your records were pressed in ${placeName(topCountry.label)} than anywhere else (${topCountry.count} titles), followed by ${placeName(secondCountry.label)}.`
+        ? `Among ${countryTotal} records with a known pressing country, ${placeName(topCountry.label)} leads with ${topCountry.count} titles, followed by ${placeName(secondCountry.label)}.`
         : `Every record with a known pressing country was pressed in ${placeName(topCountry.label)}, ${topCountry.count} titles in all.`;
     }
 
-    const abroad = snapshot.foundCountryBreakdown.filter((item) => item.label !== "United States");
+    const abroad = snapshot.foundCountryBreakdown.filter((item) => item.label !== "United States" && item.label !== "Unknown");
     if (abroad.length) {
       const found = abroad.reduce((sum, item) => sum + item.count, 0);
       const names = abroad.map((item) => item.label);
       const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
       lines.foundCountry = `${found} of your records were found outside the US, in ${list}.`;
     }
+    const unknownFound = snapshot.foundCountryBreakdown.find((item) => item.label === "Unknown")?.count ?? 0;
+    if (unknownFound) lines.foundCountry = `${lines.foundCountry ? `${lines.foundCountry} ` : ""}Where ${unknownFound} records were found is not recorded.`;
 
     const [topPlant, secondPlant] = snapshot.pressingPlantBreakdown;
     if (topPlant) {
@@ -709,7 +745,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     }
 
     return lines;
-  }, [allRecords, snapshot, genreTotal, artistBreakdown, wishlistCount, labelFamilyBreakdown]);
+  }, [allRecords, snapshot, recordingTotal, countryTotal, artistBreakdown, wishlistCount, labelFamilyBreakdown]);
 
   const needsAttention = useMemo(
     () => ({
@@ -740,18 +776,18 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     releaseDecade: groupRecordsByLabel(allRecords, (record) => [getReleaseDecade(record)]),
     recordingDecade: groupRecordsByLabel(allRecords, (record) => [getRecordingDecade(record)]),
     decade: groupRecordsByLabel(allRecords, (record) => [getDecade(record)]),
-    format: groupRecordsByLabel(allRecords, (record) => [record.format ?? "Unknown"]),
+    format: groupRecordsByLabel(allRecords, (record) => [getFormatGroup(record)]),
     label: groupRecordsByLabel(allRecords, (record) => [labelFamily(record.label ?? "") || "Unknown"]),
     country: groupRecordsByLabel(allRecords, (record) => [record.country ?? "Unknown"]),
-    foundCountry: groupRecordsByLabel(allRecords, (record) => [record.foundCountry?.trim() || "United States"]),
+    foundCountry: groupRecordsByLabel(allRecords, (record) => [getFoundCountry(record)]),
     pressingPlant: groupRecordsByLabel(allRecords, (record) => [record.pressingPlant ?? "Unknown"]),
     mood: groupRecordsByLabel(allRecords, (record) => record.moods),
-    status: groupRecordsByLabel(allRecords, (record) => [record.status]),
+    status: groupRecordsByLabel(everyRecord, (record) => [record.status]),
     originalStatus: groupRecordsByLabel(
       allRecords.filter((record) => record.discogsVerified && record.pressingYear && record.originalReleaseYear),
       (record) => [isOriginalPressing(record) ? "Original pressing" : "Reissue / repress"],
     ),
-  }), [allRecords, recordsByArtist]);
+  }), [allRecords, everyRecord, recordsByArtist]);
 
   const foundStories = useMemo(() => {
     const ownedRecords = allRecords.filter((record) => record.status === "owned");
@@ -831,6 +867,12 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         </div>
       </div>
 
+      <nav aria-label="Insights sections" className="flex gap-2 overflow-x-auto pb-1 text-xs sm:text-sm">
+        {[["#collection-value", "Value"], ["#by-genre", "Breakdowns"], ["#collection-timeline", "Timeline"], ["#artist-az", "Artists A–Z"], ["#crate-map", "Crates"]].map(([href, label]) => (
+          <a key={href} href={href} className="shrink-0 rounded-full border border-gray-200 px-3 py-2 text-gray-700 hover:border-gray-500 hover:text-gray-950">{label}</a>
+        ))}
+      </nav>
+
       {persona.length > 0 ? (
         <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-5 sm:p-6">
           <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">The record-store read</p>
@@ -858,13 +900,14 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Collection DNA</h2>
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {narrative.map((fact) => (
+            {narrative.slice(0, showAllFacts ? undefined : 6).map((fact) => (
               <div key={fact.text} className="rounded-lg border border-gray-100 bg-white/80 p-4 shadow-sm">
                 <p className="text-2xl font-semibold tracking-tight text-gray-950 tabular-nums">{fact.stat}</p>
                 <p className="mt-1 text-sm leading-6 text-gray-600">{fact.text}</p>
               </div>
             ))}
           </div>
+          {narrative.length > 6 ? <button type="button" onClick={() => setShowAllFacts((value) => !value)} className="mt-4 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:border-gray-400">{showAllFacts ? "Show fewer facts" : `Show all ${narrative.length} facts`}</button> : null}
         </section>
       )}
 
@@ -916,21 +959,22 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       </div>
 
       {/* Collection value */}
-      {isLoadingValue || collectionValue ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
+      {allRecords.length > 0 ? (
+        <div id="collection-value" className="scroll-mt-24 rounded-lg border border-gray-200 bg-white p-5">
           <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Collection value</h2>
           {!collectionValue ? (
-            <div className="mt-4 h-9 w-32 animate-pulse rounded bg-gray-100" />
+            isLoadingValue ? <div className="mt-4 h-9 w-32 animate-pulse rounded bg-gray-100" /> : <p className="mt-3 text-sm text-gray-500">No records have a Discogs price yet.</p>
           ) : (
             <div className="mt-4 flex flex-wrap items-end gap-8">
               <div>
-                <p className="text-xs text-gray-500">Estimated total</p>
+                <p className="text-xs text-gray-500">Priced subtotal</p>
                 <p className="mt-1 text-3xl font-semibold text-gray-950">
                   {formatDiscogsMoney({ currency: collectionValue.currency, value: collectionValue.total })}
                 </p>
                 <p className="mt-1 text-xs text-gray-400">
-                  {collectionValue.pricedCount} of {collectionValue.linkedCount} Discogs-linked records priced
+                  {collectionValue.pricedCount} of {snapshot.owned} owned records priced ({collectionValue.linkedCount} linked to Discogs)
                 </p>
+                {isLoadingValue ? <p className="mt-1 text-xs text-amber-700" role="status">Still checking prices… subtotal may increase.</p> : null}
                 {collectionValue.unverifiedCount > 0 ? (
                   <p className="mt-1 text-xs text-amber-600">
                     Includes {collectionValue.unverifiedCount} record{collectionValue.unverifiedCount === 1 ? "" : "s"}{" "}
@@ -1120,7 +1164,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           title="By genre"
           narrative={categoryNarratives.genre}
           items={snapshot.genreBreakdown}
-          totalCount={genreTotal}
+          totalCount={allRecords.length}
           barColor="bg-teal-500"
           linkBase="/vinyl?genre="
           detailRecordsByLabel={chartRecords.genre}
@@ -1147,7 +1191,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           title="By recording decade"
           narrative={categoryNarratives.recordingDecade}
           items={snapshot.recordingDecadeBreakdown}
-          totalCount={allRecords.length}
+          totalCount={recordingTotal}
           barColor="bg-orange-400"
           detailRecordsByLabel={chartRecords.recordingDecade}
         />
@@ -1199,7 +1243,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           title="Top moods"
           narrative={categoryNarratives.mood}
           items={snapshot.moodBreakdown}
-          totalCount={moodTotal}
+          totalCount={allRecords.length}
           barColor="bg-violet-500"
           linkBase="/vinyl?mood="
           detailRecordsByLabel={chartRecords.mood}
@@ -1210,7 +1254,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
             <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{categoryNarratives.status}</p>
           ) : null}
           <div className="mt-5">
-            <InteractiveDonut items={snapshot.statusBreakdown} recordsByLabel={chartRecords.status} />
+            <InteractiveDonut items={statusBreakdown} recordsByLabel={chartRecords.status} />
           </div>
         </section>
       </div>
@@ -1218,27 +1262,26 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       {collectionValue?.byDecade && collectionValue.byDecade.length > 1 ? (
         <BreakdownSection
           title="Value by decade"
-          narrative="Where the money in your collection actually sits, by the decade each record was released."
+          narrative="Priced albums by release decade. Albums without an estimated price are excluded."
           items={collectionValue.byDecade.map((entry) => ({ label: entry.decade, count: Math.round(entry.total) }))}
           totalCount={collectionValue.byDecade.reduce((sum, entry) => sum + Math.round(entry.total), 0)}
           barColor="bg-emerald-500"
           formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
-          detailRecordsByLabel={chartRecords.releaseDecade}
+          detailRecordsByLabel={pricedChartRecords.decade}
         />
       ) : null}
 
       {collectionValue?.byGenre && collectionValue.byGenre.length > 1 ? (
-        <section className="rounded-lg border border-gray-200 bg-white p-5">
-          <h2 className="text-base font-semibold text-gray-950 sm:text-xl">Value by genre</h2>
-          <p className="mt-1 text-xs text-gray-400">Which genres carry the most estimated value.</p>
-          <div className="mt-5">
-            <InteractiveDonut
-              items={collectionValue.byGenre.map((entry) => ({ label: entry.genre, count: Math.round(entry.total) }))}
-              formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
-              recordsByLabel={chartRecords.genre}
-            />
-          </div>
-        </section>
+        <BreakdownSection
+          title="Value by genre"
+          narrative="Estimated value of priced albums in each genre. An album with multiple genres counts in each one."
+          items={collectionValue.byGenre.map((entry) => ({ label: entry.genre, count: Math.round(entry.total) }))}
+          totalCount={collectionValue.total}
+          barColor="bg-emerald-500"
+          showPercentage={false}
+          formatCount={(count) => formatDiscogsMoney({ currency: collectionValue.currency, value: count }, { cents: false })}
+          detailRecordsByLabel={pricedChartRecords.genre}
+        />
       ) : null}
 
       {originalPressingStats.known > 1 ? (
