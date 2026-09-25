@@ -29,9 +29,9 @@ function ageGuess(records: VinylRecord[], currentYear: number): PersonaGuess | n
   const guessedAge = Math.max(22, Math.min(70, currentYear - anchor + 18));
   const decade = `${Math.floor(anchor / 10) * 10}s`;
   return {
-    label: "Our age guess",
+    label: "Age guess",
     value: String(guessedAge),
-    reason: `The newer side of your collection centers around ${decade} releases. We guessed you met that music around 18.`,
+    reason: `Your newer picks lean toward the ${decade}.`,
   };
 }
 
@@ -46,9 +46,9 @@ function hometownGuess(records: VinylRecord[]): PersonaGuess | null {
   if (!winner?.score) return null;
 
   return {
-    label: "Our hometown guess",
+    label: "Hometown guess",
     value: winner.city,
-    reason: `${winner.genres.join(" and ")} give your shelves a ${winner.city.split(",")[0]} sound. This is a music-vibe guess, not a location taken from your records.`,
+    reason: `Your ${winner.genres.join(" and ")} records point here.`,
   };
 }
 
@@ -67,9 +67,9 @@ function nightOutGuess(records: VinylRecord[]): PersonaGuess | null {
   if (!top?.matching.length) return null;
   const leadingGenre = [...new Set(top.matching)][0];
   return {
-    label: "Your ideal night out",
+    label: "Night out",
     value: top.value,
-    reason: `${top.matching.length} genre tags point to this scene, led by ${leadingGenre}.`,
+    reason: `Your ${leadingGenre} records made the call.`,
   };
 }
 
@@ -79,14 +79,14 @@ function collectorGuess(records: VinylRecord[]): PersonaGuess | null {
   const share = artists.size / records.length;
   return share >= 0.6
     ? {
-        label: "Your collector type",
+        label: "Collector type",
         value: "The explorer",
-        reason: `${artists.size} artists across ${records.length} records: you keep making room for someone new.`,
+        reason: "Always bringing home someone new.",
       }
     : {
-        label: "Your collector type",
+        label: "Collector type",
         value: "The deep diver",
-        reason: `${records.length} records from ${artists.size} artists: when an artist clicks, you keep digging.`,
+        reason: "When you like an artist, you go all in.",
       };
 }
 

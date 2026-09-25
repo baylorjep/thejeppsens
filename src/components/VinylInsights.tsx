@@ -208,7 +208,7 @@ function BreakdownSection({
     <section id={id} className="scroll-mt-24 rounded-lg border border-gray-200 bg-white p-5">
       <h2 className="text-base font-semibold text-gray-950 sm:text-xl">{title}</h2>
       {narrative ? <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{narrative}</p> : null}
-      {detailRecordsByLabel ? <p className="mt-2 text-xs text-gray-500">Tap a bar to see its albums.</p> : null}
+      {detailRecordsByLabel && items.length > 0 ? <p className="mt-2 text-xs text-gray-500">Tap a bar for albums.</p> : null}
       {items.length > 8 ? <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); setSelectedLabel(null); }} placeholder={`Find ${title.toLowerCase().replace(/^by /, "")}`} aria-label={`Search ${title.toLowerCase()}`} className="mt-4 w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-500" /> : null}
       <div className="mt-5 space-y-3">
         {visible.length === 0 ? <p className="text-sm text-gray-500">{query ? "No matching categories." : "No data recorded yet."}</p> : null}
@@ -531,28 +531,28 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     const total = allRecords.length;
     const plural = (count: number, word: string) => `${count.toLocaleString()} ${word}${count === 1 ? "" : "s"}`;
 
-    facts.push({ stat: `${Math.round((snapshot.topGenre.count / total) * 100)}%`, text: `of your collection is ${snapshot.topGenre.value}, your top genre.` });
+    facts.push({ stat: `${Math.round((snapshot.topGenre.count / total) * 100)}%`, text: `of your records are ${snapshot.topGenre.value}.` });
 
     const [firstGenre, secondGenre] = snapshot.genreBreakdown;
     if (firstGenre && secondGenre) {
       const inEitherGenre = allRecords.filter((record) => record.genres.includes(firstGenre.label) || record.genres.includes(secondGenre.label)).length;
       facts.push({
         stat: `${Math.round((inEitherGenre / total) * 100)}%`,
-        text: `of what you own is ${firstGenre.label} or ${secondGenre.label}, your top two genres.`,
+        text: `are ${firstGenre.label} or ${secondGenre.label}.`,
       });
     }
 
     const leadingArtist = topRealArtist?.label ?? snapshot.topArtist.value;
     const leadingArtistCount = (topRealArtist ?? artistBreakdown[0])?.count ?? 0;
-    if (leadingArtistCount > 1) facts.push({ stat: String(leadingArtistCount), text: `records by ${leadingArtist}, your most collected artist.` });
+    if (leadingArtistCount > 1) facts.push({ stat: String(leadingArtistCount), text: `records by ${leadingArtist}, your top artist.` });
 
     const [firstDecade, secondDecade] = snapshot.releaseDecadeBreakdown;
     if (firstDecade) {
       facts.push({
         stat: firstDecade.label,
         text: secondDecade
-          ? `is the decade most of your records come from. The ${secondDecade.label} are close behind with ${secondDecade.count}.`
-          : "is the decade most of your records come from.",
+          ? `lead your collection. The ${secondDecade.label} follow with ${secondDecade.count}.`
+          : "lead your collection.",
       });
     }
 
@@ -566,23 +566,23 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       if (oldest.id !== newest.id) {
         facts.push({
           stat: `${firstYear(newest)! - firstYear(oldest)!} years`,
-          text: `of music, from ${oldest.title} (${firstYear(oldest)}) to ${newest.title} (${firstYear(newest)}).`,
+          text: `between ${oldest.title} and ${newest.title}.`,
         });
       }
 
       const byYear = new Map<number, number>();
       for (const record of dated) byYear.set(firstYear(record)!, (byYear.get(firstYear(record)!) ?? 0) + 1);
       const [bestYear, bestCount] = [...byYear.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
-      if (bestCount > 1) facts.push({ stat: String(bestYear), text: `is the year the most of your albums came out, ${bestCount} of them.` });
+      if (bestCount > 1) facts.push({ stat: String(bestYear), text: `gave you ${bestCount} albums, more than any other year.` });
 
       const averageYear = Math.round(dated.reduce((sum, record) => sum + firstYear(record)!, 0) / dated.length);
-      facts.push({ stat: `${new Date().getFullYear() - averageYear} years`, text: `old is your average album, first released around ${averageYear}.` });
+      facts.push({ stat: `${new Date().getFullYear() - averageYear} years`, text: `is the average age of your albums.` });
     }
 
     const namedArtists = artistBreakdown.filter((artist) => artist.label.toLowerCase() !== "various artists");
     if (namedArtists.length) {
       const oneTimers = namedArtists.filter((artist) => artist.count === 1).length;
-      facts.push({ stat: namedArtists.length.toLocaleString(), text: `different artists, and ${oneTimers} of them show up just once.` });
+      facts.push({ stat: namedArtists.length.toLocaleString(), text: `artists, including ${oneTimers} with just one album.` });
     }
 
     const families = new Map<string, number>();
@@ -594,7 +594,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     if (topFamily && topFamily[1] > 1) {
       facts.push({
         stat: String(topFamily[1]),
-        text: `records on ${topFamily[0]}, your biggest label${secondFamily ? `, ahead of ${secondFamily[0]} with ${secondFamily[1]}` : ""}.`,
+        text: `records on ${topFamily[0]}, your biggest label${secondFamily ? ` (next: ${secondFamily[0]} with ${secondFamily[1]})` : ""}.`,
       });
     }
 
@@ -604,13 +604,13 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     );
     if (pressed.length) {
       const oldestPressing = pressed.reduce((a, b) => (b.pressingYear < a.pressingYear ? b : a));
-      facts.push({ stat: String(oldestPressing.pressingYear), text: `is when your oldest confirmed pressing was made: ${oldestPressing.title}.` });
+      facts.push({ stat: String(oldestPressing.pressingYear), text: `is your oldest confirmed pressing: ${oldestPressing.title}.` });
     }
 
     const confirmed = allRecords.filter((record) => record.discogsVerified).length;
     if (confirmed) {
       const originals = allRecords.filter(isOriginalPressing).length;
-      facts.push({ stat: String(confirmed), text: `pressings identified down to the exact edition${originals ? `, including ${originals} first pressings` : ""}.` });
+      facts.push({ stat: String(confirmed), text: `exact pressings identified${originals ? `, including ${originals} originals` : ""}.` });
     }
 
     const runs = allRecords
@@ -620,7 +620,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       const smallest = runs.reduce((a, b) => (b.run.size < a.run.size ? b : a));
       facts.push({
         stat: `${smallest.run.size.toLocaleString()} copies`,
-        text: `in your smallest known press run, ${smallest.record.title}.${runs.length > 1 ? ` You own ${runs.length} limited pressings in all.` : ""}`,
+        text: `in the run for ${smallest.record.title}.${runs.length > 1 ? ` You have ${runs.length} limited pressings.` : ""}`,
       });
     }
 
@@ -636,15 +636,15 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     // Format strings are too inconsistent to group, so this uses disc count instead.
     const multiDisc = allRecords.filter((record) => (record.discCount ?? 1) > 1).length;
     if (multiDisc) {
-      facts.push({ stat: `${Math.round(((total - multiDisc) / total) * 100)}%`, text: `of your records are single discs, and ${multiDisc} are sets of two or more.` });
+      facts.push({ stat: `${Math.round(((total - multiDisc) / total) * 100)}%`, text: `of your records are single discs.` });
     }
 
     const songs = allRecords.reduce((sum, record) => sum + (record.trackList?.length ?? 0), 0);
     const discs = allRecords.reduce((sum, record) => sum + Math.max(1, record.discCount ?? 1), 0);
-    if (songs) facts.push({ stat: songs.toLocaleString(), text: `songs across the track lists of your records, spread over ${discs.toLocaleString()} discs.` });
+    if (songs) facts.push({ stat: songs.toLocaleString(), text: `songs across ${discs.toLocaleString()} discs.` });
 
     if (snapshot.favorites > 0) {
-      facts.push({ stat: String(snapshot.favorites), text: `favorites, about 1 in every ${Math.round(total / snapshot.favorites)} records you own.` });
+      facts.push({ stat: String(snapshot.favorites), text: `favorites, about 1 in ${Math.round(total / snapshot.favorites)} records.` });
     }
 
     return facts;
@@ -669,54 +669,53 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
   }, [allRecords]);
 
   const categoryNarratives = useMemo(() => {
-    const pctOf = (count: number, total: number) => (total > 0 ? Math.round((count / total) * 100) : 0);
     const lines: Record<string, string | undefined> = {};
 
     const [topGenre, secondGenre] = snapshot.genreBreakdown;
     if (topGenre) {
       lines.genre = secondGenre
-        ? `${topGenre.label} is your most common genre at ${pctOf(topGenre.count, allRecords.length)}% of your records, followed by ${secondGenre.label}. Albums can have multiple genres.`
-        : `${topGenre.label} is your only genre so far, across ${topGenre.count} records.`;
+        ? `${topGenre.label} leads, then ${secondGenre.label}. Albums can have more than one genre.`
+        : `${topGenre.label} is your only genre so far.`;
     }
 
     const [topArtist] = artistBreakdown;
     if (topArtist) {
-      lines.artist = `${topArtist.label} tops your artist list with ${topArtist.count} record${topArtist.count === 1 ? "" : "s"}, out of ${snapshot.artists} artists in all.`;
+      lines.artist = `${topArtist.label} shows up most across ${snapshot.artists} artists.`;
     }
 
     const [topReleaseDecade] = snapshot.releaseDecadeBreakdown;
     if (topReleaseDecade) {
-      lines.releaseDecade = `The ${topReleaseDecade.label} are your best-represented decade, with ${topReleaseDecade.count} records (${pctOf(topReleaseDecade.count, allRecords.length)}%).`;
+      lines.releaseDecade = `The ${topReleaseDecade.label} lead with ${topReleaseDecade.count} records.`;
     }
 
     const [topRecordingDecade] = snapshot.recordingDecadeBreakdown;
     if (topRecordingDecade) {
-      lines.recordingDecade = `Among ${recordingTotal} records with known recording years, the ${topRecordingDecade.label} appear most often. Years are unknown for ${allRecords.length - recordingTotal}.`;
+      lines.recordingDecade = `Of ${recordingTotal} records with known recording years, the ${topRecordingDecade.label} lead.`;
     }
 
     // Raw format strings ("1, Vinyl, LP, Album") don't read well in a sentence, so describe disc counts instead.
     const multiDiscCount = allRecords.filter((record) => (record.discCount ?? 1) > 1).length;
     if (allRecords.length) {
       lines.format = multiDiscCount
-        ? `Most of your records are single discs, and ${multiDiscCount} are sets of two or more.`
-        : "Every record you own is a single disc.";
+        ? `Mostly single discs, plus ${multiDiscCount} multi-disc sets.`
+        : "All single discs so far.";
     }
 
     const [topLabelCount] = labelFamilyBreakdown;
     if (topLabelCount) {
-      lines.label = `${topLabelCount.label} released more of your records than any other label, with ${topLabelCount.count} titles.`;
+      lines.label = `${topLabelCount.label} shows up most with ${topLabelCount.count} titles.`;
     }
 
     const [topMoodCount] = snapshot.moodBreakdown;
     if (topMoodCount) {
-      lines.mood = `${topMoodCount.label} is the most common mood, tagged on ${topMoodCount.count} of ${allRecords.length} records. Albums can have multiple moods.`;
+      lines.mood = `${topMoodCount.label} leads. Albums can have more than one mood.`;
     }
 
     const [topCountry, secondCountry] = snapshot.countryBreakdown;
     if (topCountry) {
       lines.country = secondCountry
-        ? `Among ${countryTotal} records with a known pressing country, ${placeName(topCountry.label)} leads with ${topCountry.count} titles, followed by ${placeName(secondCountry.label)}.`
-        : `Every record with a known pressing country was pressed in ${placeName(topCountry.label)}, ${topCountry.count} titles in all.`;
+        ? `Of ${countryTotal} known, ${placeName(topCountry.label)} leads, then ${placeName(secondCountry.label)}.`
+        : `All ${countryTotal} known pressings came from ${placeName(topCountry.label)}.`;
     }
 
     const abroad = snapshot.foundCountryBreakdown.filter((item) => item.label !== "United States" && item.label !== "Unknown");
@@ -724,17 +723,17 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       const found = abroad.reduce((sum, item) => sum + item.count, 0);
       const names = abroad.map((item) => item.label);
       const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
-      lines.foundCountry = `${found} of your records were found outside the US, in ${list}.`;
+      lines.foundCountry = `${found} found outside the US: ${list}.`;
     }
     const unknownFound = snapshot.foundCountryBreakdown.find((item) => item.label === "Unknown")?.count ?? 0;
-    if (unknownFound) lines.foundCountry = `${lines.foundCountry ? `${lines.foundCountry} ` : ""}Where ${unknownFound} records were found is not recorded.`;
+    if (unknownFound) lines.foundCountry = `${lines.foundCountry ? `${lines.foundCountry} ` : ""}No location on file for ${unknownFound}.`;
 
     const [topPlant, secondPlant] = snapshot.pressingPlantBreakdown;
     if (topPlant) {
       const known = snapshot.pressingPlantBreakdown.reduce((sum, item) => sum + item.count, 0);
       lines.pressingPlant = secondPlant
-        ? `${topPlant.label} pressed more of your records than anywhere else, out of ${known} records with a known plant.`
-        : `${topPlant.label} is the only pressing plant identified so far, across ${topPlant.count} records.`;
+        ? `${topPlant.label} leads among ${known} known pressings.`
+        : `${topPlant.label} is the only known plant so far.`;
     }
 
     if (allRecords.length > 0) {
@@ -846,10 +845,7 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">
             Vinyl insights
           </h1>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-gray-600 sm:text-lg">
-            A deeper look at the shape of your collection, from decades and genres to the
-            artists and moods that show up the most.
-          </p>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-gray-600 sm:text-lg">The stories in your record collection.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Link
@@ -873,41 +869,29 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
         ))}
       </nav>
 
-      {persona.length > 0 ? (
-        <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">The record-store read</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-gray-950 sm:text-2xl">If we only knew your records…</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
-            Here&apos;s our playful read on you. These are guesses from the music on your shelves, not personal facts.
-          </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {persona.map((guess) => (
-              <div key={guess.label} className="rounded-lg border border-amber-100 bg-white p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-amber-700">{guess.label}</p>
-                <p className="mt-2 text-xl font-semibold tracking-tight text-gray-950">{guess.value}</p>
-                <p className="mt-2 text-sm leading-6 text-gray-600">{guess.reason}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
       {/* Collection DNA */}
-      {narrative.length > 0 && (
+      {(persona.length > 0 || narrative.length > 0) && (
         <section className="rounded-xl border border-gray-200 bg-gradient-to-br from-stone-50 via-white to-indigo-50/60 p-5 sm:p-6">
           <div className="flex items-center gap-2">
             <Dna className="h-4 w-4 text-indigo-500" />
             <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Collection DNA</h2>
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {narrative.slice(0, showAllFacts ? undefined : 6).map((fact) => (
+            {persona.map((guess) => (
+              <div key={guess.label} className="rounded-lg border border-amber-200 bg-amber-50/70 p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-amber-700">{guess.label}</p>
+                <p className="mt-2 text-xl font-semibold tracking-tight text-gray-950">{guess.value}</p>
+                <p className="mt-1 text-sm leading-6 text-gray-600">{guess.reason}</p>
+              </div>
+            ))}
+            {narrative.slice(0, showAllFacts ? undefined : Math.max(0, 6 - persona.length)).map((fact) => (
               <div key={fact.text} className="rounded-lg border border-gray-100 bg-white/80 p-4 shadow-sm">
                 <p className="text-2xl font-semibold tracking-tight text-gray-950 tabular-nums">{fact.stat}</p>
                 <p className="mt-1 text-sm leading-6 text-gray-600">{fact.text}</p>
               </div>
             ))}
           </div>
-          {narrative.length > 6 ? <button type="button" onClick={() => setShowAllFacts((value) => !value)} className="mt-4 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:border-gray-400">{showAllFacts ? "Show fewer facts" : `Show all ${narrative.length} facts`}</button> : null}
+          {narrative.length > Math.max(0, 6 - persona.length) ? <button type="button" onClick={() => setShowAllFacts((value) => !value)} className="mt-4 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:border-gray-400">{showAllFacts ? "Show fewer" : "Show more"}</button> : null}
         </section>
       )}
 
