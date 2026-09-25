@@ -27,11 +27,10 @@ function ageGuess(records: VinylRecord[], currentYear: number): PersonaGuess | n
   // handful of classic albums. Keep the result playful, but make one clear guess.
   const anchor = years[Math.floor(years.length * 0.7)];
   const guessedAge = Math.max(22, Math.min(70, currentYear - anchor + 18));
-  const decade = `${Math.floor(anchor / 10) * 10}s`;
   return {
-    label: "Age guess",
+    label: "Your music age",
     value: String(guessedAge),
-    reason: `Your newer picks lean toward the ${decade}.`,
+    reason: "From the years your albums came out.",
   };
 }
 
@@ -39,16 +38,15 @@ function hometownGuess(records: VinylRecord[]): PersonaGuess | null {
   const scored = CITY_SOUNDS.map(({ city, signature, broad }) => {
     const matching = records.flatMap((record) => record.genres.filter((genre) => signature.test(genre) || broad.test(genre)));
     const score = matching.reduce((sum, genre) => sum + (signature.test(genre) ? 2 : 0.25), 0);
-    const genres = [...new Set(matching)].sort((a, b) => Number(signature.test(b)) - Number(signature.test(a)));
-    return { city, score, genres: genres.slice(0, 2) };
+    return { city, score };
   }).sort((a, b) => b.score - a.score);
   const winner = scored[0];
   if (!winner?.score) return null;
 
   return {
-    label: "Hometown guess",
+    label: "Your music hometown",
     value: winner.city,
-    reason: `Your ${winner.genres.join(" and ")} records point here.`,
+    reason: "From the genres you collect most.",
   };
 }
 
@@ -65,11 +63,10 @@ function nightOutGuess(records: VinylRecord[]): PersonaGuess | null {
   })).sort((a, b) => b.matching.length - a.matching.length);
   const top = ranked[0];
   if (!top?.matching.length) return null;
-  const leadingGenre = [...new Set(top.matching)][0];
   return {
-    label: "Night out",
+    label: "Your kind of night",
     value: top.value,
-    reason: `Your ${leadingGenre} records made the call.`,
+    reason: "Where your records would take you.",
   };
 }
 
@@ -79,14 +76,14 @@ function collectorGuess(records: VinylRecord[]): PersonaGuess | null {
   const share = artists.size / records.length;
   return share >= 0.6
     ? {
-        label: "Collector type",
+        label: "Your collecting style",
         value: "The explorer",
-        reason: "Always bringing home someone new.",
+        reason: "You make room for new artists.",
       }
     : {
-        label: "Collector type",
+        label: "Your collecting style",
         value: "The deep diver",
-        reason: "When you like an artist, you go all in.",
+        reason: "You keep coming back to favorites.",
       };
 }
 

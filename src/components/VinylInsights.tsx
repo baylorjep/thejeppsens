@@ -517,8 +517,6 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
       genre: groupRecordsByLabel(priced, (record) => record.genres),
     };
   }, [collectionValue]);
-  const [showAllFacts, setShowAllFacts] = useState(false);
-
   const topRealArtist = artistBreakdown.find(
     (a) => a.label.toLowerCase() !== "various artists",
   );
@@ -530,8 +528,6 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
     const facts: { stat: string; text: string }[] = [];
     const total = allRecords.length;
     const plural = (count: number, word: string) => `${count.toLocaleString()} ${word}${count === 1 ? "" : "s"}`;
-
-    facts.push({ stat: `${Math.round((snapshot.topGenre.count / total) * 100)}%`, text: `of your records are ${snapshot.topGenre.value}.` });
 
     const [firstGenre, secondGenre] = snapshot.genreBreakdown;
     if (firstGenre && secondGenre) {
@@ -884,14 +880,13 @@ export default function VinylInsights({ records }: VinylInsightsProps) {
                 <p className="mt-1 text-sm leading-6 text-gray-600">{guess.reason}</p>
               </div>
             ))}
-            {narrative.slice(0, showAllFacts ? undefined : Math.max(0, 6 - persona.length)).map((fact) => (
+            {narrative.map((fact) => (
               <div key={fact.text} className="rounded-lg border border-gray-100 bg-white/80 p-4 shadow-sm">
                 <p className="text-2xl font-semibold tracking-tight text-gray-950 tabular-nums">{fact.stat}</p>
                 <p className="mt-1 text-sm leading-6 text-gray-600">{fact.text}</p>
               </div>
             ))}
           </div>
-          {narrative.length > Math.max(0, 6 - persona.length) ? <button type="button" onClick={() => setShowAllFacts((value) => !value)} className="mt-4 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:border-gray-400">{showAllFacts ? "Show fewer" : "Show more"}</button> : null}
         </section>
       )}
 
